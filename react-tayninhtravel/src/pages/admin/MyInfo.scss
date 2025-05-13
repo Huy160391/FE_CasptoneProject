@@ -1,0 +1,67 @@
+.my-info-page {
+  .info-tabs {
+    margin-top: 20px;
+  }
+  
+  .profile-card, .password-card, .activity-card {
+    margin-bottom: 20px;
+  }
+  
+  .avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    
+    .user-avatar {
+      margin-bottom: 10px;
+    }
+    
+    .avatar-upload {
+      width: 100%;
+      
+      .ant-upload-list {
+        margin-top: 10px;
+      }
+      
+      .ant-btn {
+        width: 100%;
+      }
+    }
+    
+    .user-role {
+      margin-top: 10px;
+      text-align: center;
+    }
+  }
+  
+  .save-button {
+    min-width: 120px;
+  }
+  
+  .activity-list {
+    .activity-item {
+      padding: 10px 0;
+      
+      .activity-time {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+      
+      .activity-content {
+        font-size: 16px;
+      }
+    }
+    
+    .ant-divider {
+      margin: 10px 0;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .avatar-section {
+      margin-bottom: 20px;
+    }
+  }
+}

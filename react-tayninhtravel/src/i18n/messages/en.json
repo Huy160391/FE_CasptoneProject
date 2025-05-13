@@ -1,0 +1,57 @@
+{
+    "navigation": {
+        "home": "Home",
+        "tours": "Tours",
+        "about": "About",
+        "services": "Services",
+        "contact": "Contact",
+        "login": "Login",
+        "register": "Register",
+        "bookings": "Book Tour"
+    },
+    "tours": {
+        "bookNow": "Book Now"
+    },
+    "home": {
+        "welcome": "Welcome to Tay Ninh Tour",
+        "explore": "Explore Vietnam's beauty in one day",
+        "discover": "Discover Now",
+        "featuredToursTitle": "Featured Tours",
+        "whyChooseUs": "Why Choose Tay Ninh Tour?",
+        "tourInfo": {
+            "duration": "Duration",
+            "price": "Price",
+            "rating": "Rating"
+        },
+        "features": {
+            "diverseDestinations": {
+                "title": "Diverse Destinations",
+                "description": "Explore various exciting destinations around Hanoi"
+            },
+            "timeSaving": {
+                "title": "Time Saving",
+                "description": "One-day tours, suitable for any schedule"
+            },
+            "qualityService": {
+                "title": "Quality Service",
+                "description": "Professional guides, modern vehicles"
+            }
+        },
+        "hero": {
+            "title": "Tay Ninh Tour",
+            "subtitle": "Explore Vietnam's beauty in one day",
+            "cta": "Explore Now"
+        }
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "success": "Success",
+        "search": "Search",
+        "logout": "Logout",
+        "login": "Login",
+        "register": "Register",
+        "dark_mode": "Dark Mode",
+        "light_mode": "Light Mode"
+    }
+}

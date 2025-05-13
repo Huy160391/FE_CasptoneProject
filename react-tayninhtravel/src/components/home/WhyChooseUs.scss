@@ -1,0 +1,36 @@
+.why-choose-us {
+  padding: 60px 0;
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 32px;
+    font-weight: 600;
+  }
+  
+  .feature-card {
+    height: 100%;
+    text-align: center;
+    transition: transform 0.3s;
+    
+    &:hover {
+      transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+      font-size: 48px;
+      color: #1677ff;
+      margin-bottom: 16px;
+    }
+    
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    p {
+      color: rgba(0, 0, 0, 0.65);
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+    "navigation": {
+        "home": "Trang chủ",
+        "tours": "Tour du lịch",
+        "about": "Giới thiệu",
+        "services": "Dịch vụ",
+        "contact": "Liên hệ",
+        "login": "Đăng nhập",
+        "register": "Đăng ký",
+        "bookings": "Đặt tour"
+    },
+    "tours": {
+        "bookNow": "Đặt ngay"
+    },
+    "home": {
+        "welcome": "Chào mừng đến với Tay Ninh Tour",
+        "explore": "Khám phá vẻ đẹp Việt Nam trong một ngày",
+        "discover": "Khám phá ngay",
+        "featuredToursTitle": "Tour Nổi Bật",
+        "whyChooseUs": "Tại sao chọn Tây Ninh Tour?",
+        "tourInfo": {
+            "duration": "Thời gian",
+            "price": "Giá",
+            "rating": "Đánh giá"
+        },
+        "features": {
+            "diverseDestinations": {
+                "title": "Điểm đến đa dạng",
+                "description": "Khám phá nhiều điểm đến hấp dẫn quanh Hà Nội"
+            },
+            "timeSaving": {
+                "title": "Tiết kiệm thời gian",
+                "description": "Tour một ngày, phù hợp với mọi lịch trình"
+            },
+            "qualityService": {
+                "title": "Dịch vụ chất lượng",
+                "description": "Hướng dẫn viên chuyên nghiệp, phương tiện hiện đại"
+            }
+        },
+        "hero": {
+            "title": "Tay Ninh Tour",
+            "subtitle": "Khám phá vẻ đẹp Việt Nam trong một ngày",
+            "cta": "Khám phá ngay"
+        }
+    },
+    "common": {
+        "loading": "Đang tải...",
+        "error": "Đã xảy ra lỗi",
+        "success": "Thành công",
+        "search": "Tìm kiếm",
+        "logout": "Đăng xuất",
+        "login": "Đăng nhập",
+        "register": "Đăng ký",
+        "dark_mode": "Chế độ tối",
+        "light_mode": "Chế độ sáng"
+    }
+}

@@ -1,0 +1,325 @@
+.tour-detail-page {
+  padding: 40px 0;
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  
+  .not-found {
+    text-align: center;
+    padding: 50px 0;
+    
+    h3 {
+      margin-bottom: 10px;
+    }
+    
+    button {
+      margin-top: 20px;
+    }
+  }
+  
+  .skeleton-image {
+    width: 100%;
+    height: 400px;
+    margin: 20px 0;
+  }
+  
+  .tour-header {
+    margin-bottom: 30px;
+    position: relative;
+    
+    .breadcrumb {
+      margin-bottom: 15px;
+    }
+    
+    .back-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    
+    .tour-title {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      line-height: 1.3;
+    }
+    
+    .tour-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+      
+      .meta-item {
+        color: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      
+      .meta-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        
+        .review-count {
+          color: rgba(0, 0, 0, 0.65);
+        }
+      }
+    }
+  }
+  
+  .tour-gallery {
+    margin-bottom: 30px;
+    
+    .main-image {
+      width: 100%;
+      height: 500px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    
+    .thumbnails {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      
+      .thumbnail {
+        width: 100px;
+        height: 70px;
+        border-radius: 4px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        flex-shrink: 0;
+        
+        &.active {
+          border-color: #1677ff;
+        }
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+  
+  .tour-content {
+    margin-bottom: 40px;
+  }
+  
+  .tour-details {
+    .tour-description {
+      margin-bottom: 20px;
+      
+      .tour-highlights {
+        margin-top: 20px;
+        
+        .highlights-list {
+          list-style: none;
+          padding: 0;
+          
+          li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            
+            .highlight-icon {
+              color: #52c41a;
+              margin-top: 4px;
+            }
+          }
+        }
+      }
+    }
+    
+    .tour-tabs {
+      .included-excluded {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        
+        .included, .excluded {
+          flex: 1;
+          min-width: 250px;
+          
+          ul {
+            list-style: none;
+            padding: 0;
+            
+            li {
+              margin-bottom: 10px;
+              display: flex;
+              align-items: flex-start;
+              gap: 10px;
+              
+              .included-icon {
+                color: #52c41a;
+                margin-top: 4px;
+              }
+              
+              .excluded-icon {
+                color: #ff4d4f;
+                margin-top: 4px;
+              }
+            }
+          }
+        }
+      }
+      
+      .reviews-section {
+        .reviews-summary {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          
+          .rating-summary {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+            h2 {
+              margin-bottom: 5px;
+              color: #ff4d4f;
+            }
+          }
+        }
+        
+        .review-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          
+          .ant-rate {
+            font-size: 14px;
+          }
+        }
+        
+        .review-content {
+          margin-top: 5px;
+          
+          .ant-typography {
+            margin-top: 5px;
+          }
+        }
+      }
+    }
+  }
+  
+  .tour-sidebar {
+    .booking-card {
+      margin-bottom: 20px;
+      
+      .price-section {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+        
+        .current-price {
+          font-size: 24px;
+          font-weight: 600;
+          color: #ff4d4f;
+        }
+        
+        .original-price {
+          font-size: 16px;
+          text-decoration: line-through;
+          color: #999;
+        }
+        
+        .price-per {
+          color: rgba(0, 0, 0, 0.45);
+        }
+      }
+      
+      .date-picker, .participants-input {
+        width: 100%;
+      }
+      
+      .book-button {
+        height: 40px;
+        font-size: 16px;
+      }
+      
+      .booking-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+      
+      .booking-info {
+        .info-item {
+          margin-bottom: 10px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+      }
+    }
+    
+    .need-help-card {
+      h5 {
+        margin-bottom: 10px;
+      }
+      
+      p {
+        margin-bottom: 15px;
+      }
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .tour-header {
+      .back-button {
+        position: static;
+        margin-bottom: 15px;
+      }
+      
+      .tour-title {
+        font-size: 24px;
+      }
+    }
+    
+    .tour-gallery {
+      .main-image {
+        height: 300px;
+      }
+    }
+    
+    .tour-details {
+      .tour-tabs {
+        .included-excluded {
+          flex-direction: column;
+          gap: 20px;
+        }
+        
+        .reviews-section {
+          .reviews-summary {
+            flex-direction: column;
+            gap: 20px;
+            
+            .rating-summary {
+              margin-bottom: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

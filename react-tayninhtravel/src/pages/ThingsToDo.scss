@@ -1,0 +1,131 @@
+.things-to-do-page {
+  padding: 40px 0;
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  
+  .page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    
+    h1 {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    p {
+      font-size: 16px;
+      color: rgba(0, 0, 0, 0.65);
+    }
+  }
+  
+  .search-filter-bar {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    margin-bottom: 24px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+    
+    .destination-section, .keyword-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8px 16px;
+      position: relative;
+      
+      @media (max-width: 768px) {
+        width: 100%;
+      }
+      
+      .label {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.45);
+      }
+    }
+    
+    .destination-section {
+      width: 200px;
+      border-right: 1px solid #d9d9d9;
+      
+      @media (max-width: 768px) {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #d9d9d9;
+      }
+    }
+    
+    .keyword-section {
+      flex: 1;
+    }
+    
+    .search-button {
+      border-radius: 0;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #1677ff;
+      border: none;
+      
+      @media (max-width: 768px) {
+        border-radius: 0 0 8px 8px;
+      }
+      
+      .anticon {
+        font-size: 20px;
+        color: #fff;
+      }
+    }
+  }
+  
+  .activities-grid {
+    .activity-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      
+      .ant-card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .ant-card-meta {
+        margin-bottom: 12px;
+      }
+      
+      .activity-description {
+        color: rgba(0, 0, 0, 0.65);
+        margin-bottom: 16px;
+      }
+      
+      .activity-details {
+        flex: 1;
+        margin-bottom: 16px;
+        
+        .detail-item {
+          margin-bottom: 8px;
+          
+          .label {
+            font-weight: 500;
+            margin-right: 8px;
+          }
+        }
+      }
+      
+      .activity-tags {
+        margin-bottom: 16px;
+      }
+    }
+  }
+}

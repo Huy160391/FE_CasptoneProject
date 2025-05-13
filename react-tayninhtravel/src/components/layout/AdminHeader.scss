@@ -1,0 +1,35 @@
+.admin-header {
+  background-color: #fff;
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 24px;
+  }
+  
+  .page-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .user-dropdown {
+    cursor: pointer;
+    
+    .username {
+      margin-left: 8px;
+      
+      @media (max-width: 576px) {
+        display: none;
+      }
+    }
+  }
+}

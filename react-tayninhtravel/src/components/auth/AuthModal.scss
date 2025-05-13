@@ -1,0 +1,58 @@
+.auth-modal {
+  .ant-modal-body {
+    padding: 24px;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .forgot-password {
+      color: #1677ff;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .login-button,
+  .register-button {
+    height: 40px;
+    font-weight: 500;
+  }
+  
+  .social-login {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    
+    .ant-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .anticon {
+        margin-right: 8px;
+      }
+    }
+  }
+  
+  .register-link,
+  .login-link {
+    text-align: center;
+    margin-top: 16px;
+    
+    a {
+      color: #1677ff;
+      cursor: pointer;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
