@@ -1,18 +1,39 @@
 import { useState } from 'react'
 import { Table, Button, Input, Space, Tag, Modal, Select, DatePicker } from 'antd'
 import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
+import type { Key } from 'react'
 import './Orders.scss'
 
 const { Option } = Select
+
+interface OrderItem {
+  id: number
+  name: string
+  price: number
+  quantity: number
+}
+
+interface Order {
+  key: string
+  id: string
+  customer: string
+  email: string
+  phone: string
+  date: string
+  total: number
+  status: 'completed' | 'processing' | 'cancelled'
+  items: OrderItem[]
+}
 
 const Orders = () => {
   const [searchText, setSearchText] = useState('')
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<any>(null)
-  
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+
   // Mock data for orders
-  const orders = [
+  const orders: Order[] = [
     {
       key: '1',
       id: 'ORD-001',
@@ -87,8 +108,8 @@ const Orders = () => {
       ],
     },
   ]
-  
-  const columns = [
+
+  const columns: ColumnsType<Order> = [
     {
       title: 'Mã đơn hàng',
       dataIndex: 'id',
@@ -99,33 +120,37 @@ const Orders = () => {
       dataIndex: 'customer',
       key: 'customer',
       filteredValue: searchText ? [searchText] : null,
-      onFilter: (value: string, record: any) => 
-        record.customer.toLowerCase().includes(value.toLowerCase()) ||
-        record.id.toLowerCase().includes(value.toLowerCase()) ||
-        record.email.toLowerCase().includes(value.toLowerCase()) ||
-        record.phone.includes(value),
+      onFilter: (value: boolean | Key, record: Order) => {
+        const searchValue = value.toString().toLowerCase()
+        return (
+          record.customer.toLowerCase().includes(searchValue) ||
+          record.id.toLowerCase().includes(searchValue) ||
+          record.email.toLowerCase().includes(searchValue) ||
+          record.phone.includes(searchValue)
+        )
+      },
     },
     {
       title: 'Ngày đặt',
       dataIndex: 'date',
       key: 'date',
-      sorter: (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      sorter: (a: Order, b: Order) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     },
     {
       title: 'Tổng tiền',
       dataIndex: 'total',
       key: 'total',
       render: (total: number) => `${total.toLocaleString()} ₫`,
-      sorter: (a: any, b: any) => a.total - b.total,
+      sorter: (a: Order, b: Order) => a.total - b.total,
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => {
+      render: (status: Order['status']) => {
         let color = ''
         let text = ''
-        
+
         switch (status) {
           case 'completed':
             color = 'success'
@@ -143,7 +168,7 @@ const Orders = () => {
             color = 'default'
             text = status
         }
-        
+
         return <Tag className={`status-tag ${color}`}>{text}</Tag>
       },
       filters: [
@@ -151,32 +176,32 @@ const Orders = () => {
         { text: 'Đang xử lý', value: 'processing' },
         { text: 'Đã hủy', value: 'cancelled' },
       ],
-      onFilter: (value: string, record: any) => record.status === value,
+      onFilter: (value: boolean | Key, record: Order) => record.status === value,
     },
     {
       title: 'Thao tác',
       key: 'action',
-      render: (text: string, record: any) => (
+      render: (_: unknown, record: Order) => (
         <Space size="middle">
-          <Button 
-            type="primary" 
-            icon={<EyeOutlined />} 
+          <Button
+            type="primary"
+            icon={<EyeOutlined />}
             size="small"
             onClick={() => handleView(record)}
           >
             Xem
           </Button>
-          <Button 
-            type="primary" 
-            icon={<EditOutlined />} 
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
             size="small"
             onClick={() => handleEdit(record)}
           >
             Sửa
           </Button>
-          <Button 
-            danger 
-            icon={<DeleteOutlined />} 
+          <Button
+            danger
+            icon={<DeleteOutlined />}
             size="small"
             onClick={() => handleDelete(record)}
           >
@@ -186,22 +211,22 @@ const Orders = () => {
       ),
     },
   ]
-  
+
   const handleSearch = (value: string) => {
     setSearchText(value)
   }
-  
-  const handleView = (order: any) => {
+
+  const handleView = (order: Order) => {
     setSelectedOrder(order)
     setIsViewModalVisible(true)
   }
-  
-  const handleEdit = (order: any) => {
+
+  const handleEdit = (order: Order) => {
     setSelectedOrder(order)
     setIsEditModalVisible(true)
   }
-  
-  const handleDelete = (order: any) => {
+
+  const handleDelete = (order: Order) => {
     Modal.confirm({
       title: 'Xác nhận xóa',
       content: `Bạn có chắc chắn muốn xóa đơn hàng "${order.id}" không?`,
@@ -214,19 +239,19 @@ const Orders = () => {
       },
     })
   }
-  
+
   const handleViewModalClose = () => {
     setIsViewModalVisible(false)
   }
-  
+
   const handleEditModalClose = () => {
     setIsEditModalVisible(false)
   }
-  
+
   const handleStatusChange = (value: string) => {
     console.log('Status changed to:', value)
   }
-  
+
   return (
     <div className="orders-page">
       <div className="page-header">
@@ -241,7 +266,7 @@ const Orders = () => {
           />
         </div>
       </div>
-      
+
       <Table
         dataSource={orders}
         columns={columns}
@@ -249,7 +274,7 @@ const Orders = () => {
         pagination={{ pageSize: 10 }}
         className="orders-table"
       />
-      
+
       {/* View Order Modal */}
       <Modal
         title={`Chi tiết đơn hàng ${selectedOrder?.id}`}
@@ -271,19 +296,19 @@ const Orders = () => {
                 <p><strong>Email:</strong> {selectedOrder.email}</p>
                 <p><strong>Số điện thoại:</strong> {selectedOrder.phone}</p>
               </div>
-              
+
               <div className="info-section">
                 <h3>Thông tin đơn hàng</h3>
                 <p><strong>Mã đơn hàng:</strong> {selectedOrder.id}</p>
                 <p><strong>Ngày đặt:</strong> {selectedOrder.date}</p>
                 <p><strong>Trạng thái:</strong> {
                   selectedOrder.status === 'completed' ? 'Hoàn thành' :
-                  selectedOrder.status === 'processing' ? 'Đang xử lý' :
-                  selectedOrder.status === 'cancelled' ? 'Đã hủy' : selectedOrder.status
+                    selectedOrder.status === 'processing' ? 'Đang xử lý' :
+                      selectedOrder.status === 'cancelled' ? 'Đã hủy' : selectedOrder.status
                 }</p>
               </div>
             </div>
-            
+
             <div className="order-items">
               <h3>Sản phẩm</h3>
               <table>
@@ -316,7 +341,7 @@ const Orders = () => {
           </div>
         )}
       </Modal>
-      
+
       {/* Edit Order Modal */}
       <Modal
         title={`Cập nhật đơn hàng ${selectedOrder?.id}`}
@@ -340,7 +365,7 @@ const Orders = () => {
                 <Option value="cancelled">Đã hủy</Option>
               </Select>
             </div>
-            
+
             <div className="form-item">
               <label>Ngày đặt:</label>
               <DatePicker
@@ -348,7 +373,7 @@ const Orders = () => {
                 style={{ width: '100%' }}
               />
             </div>
-            
+
             <div className="form-item">
               <label>Ghi chú:</label>
               <Input.TextArea rows={4} />

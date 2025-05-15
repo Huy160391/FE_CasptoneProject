@@ -1,19 +1,34 @@
 import { useState } from 'react'
 import { Table, Button, Input, Space, Tag, Rate, Modal, Select } from 'antd'
 import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
+import type { Key } from 'react'
 import './Reviews.scss'
 
 const { Option } = Select
 const { TextArea } = Input
 
+interface Review {
+  key: string
+  id: number
+  user: string
+  email: string
+  itemType: 'tour' | 'product'
+  itemName: string
+  rating: number
+  comment: string
+  date: string
+  status: 'approved' | 'pending' | 'rejected'
+}
+
 const Reviews = () => {
   const [searchText, setSearchText] = useState('')
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
-  const [selectedReview, setSelectedReview] = useState<any>(null)
-  
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null)
+
   // Mock data for reviews
-  const reviews = [
+  const reviews: Review[] = [
     {
       key: '1',
       id: 1,
@@ -75,30 +90,34 @@ const Reviews = () => {
       status: 'rejected',
     },
   ]
-  
-  const columns = [
+
+  const columns: ColumnsType<Review> = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      sorter: (a: any, b: any) => a.id - b.id,
+      sorter: (a: Review, b: Review) => a.id - b.id,
     },
     {
       title: 'Người dùng',
       dataIndex: 'user',
       key: 'user',
       filteredValue: searchText ? [searchText] : null,
-      onFilter: (value: string, record: any) => 
-        record.user.toLowerCase().includes(value.toLowerCase()) ||
-        record.email.toLowerCase().includes(value.toLowerCase()) ||
-        record.itemName.toLowerCase().includes(value.toLowerCase()) ||
-        record.comment.toLowerCase().includes(value.toLowerCase()),
+      onFilter: (value: boolean | Key, record: Review) => {
+        const searchValue = value.toString().toLowerCase()
+        return (
+          record.user.toLowerCase().includes(searchValue) ||
+          record.email.toLowerCase().includes(searchValue) ||
+          record.itemName.toLowerCase().includes(searchValue) ||
+          record.comment.toLowerCase().includes(searchValue)
+        )
+      },
     },
     {
       title: 'Loại',
       dataIndex: 'itemType',
       key: 'itemType',
-      render: (type: string) => (
+      render: (type: Review['itemType']) => (
         <Tag color={type === 'tour' ? 'blue' : 'green'}>
           {type === 'tour' ? 'Tour' : 'Sản phẩm'}
         </Tag>
@@ -107,7 +126,7 @@ const Reviews = () => {
         { text: 'Tour', value: 'tour' },
         { text: 'Sản phẩm', value: 'product' },
       ],
-      onFilter: (value: string, record: any) => record.itemType === value,
+      onFilter: (value: boolean | Key, record: Review) => record.itemType === value.toString(),
     },
     {
       title: 'Tên',
@@ -119,22 +138,22 @@ const Reviews = () => {
       dataIndex: 'rating',
       key: 'rating',
       render: (rating: number) => <Rate disabled defaultValue={rating} />,
-      sorter: (a: any, b: any) => a.rating - b.rating,
+      sorter: (a: Review, b: Review) => a.rating - b.rating,
     },
     {
       title: 'Ngày',
       dataIndex: 'date',
       key: 'date',
-      sorter: (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      sorter: (a: Review, b: Review) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => {
+      render: (status: Review['status']) => {
         let color = ''
         let text = ''
-        
+
         switch (status) {
           case 'approved':
             color = 'success'
@@ -152,7 +171,7 @@ const Reviews = () => {
             color = 'default'
             text = status
         }
-        
+
         return <Tag className={`status-tag ${color}`}>{text}</Tag>
       },
       filters: [
@@ -160,32 +179,32 @@ const Reviews = () => {
         { text: 'Chờ duyệt', value: 'pending' },
         { text: 'Từ chối', value: 'rejected' },
       ],
-      onFilter: (value: string, record: any) => record.status === value,
+      onFilter: (value: boolean | Key, record: Review) => record.status === value.toString(),
     },
     {
       title: 'Thao tác',
       key: 'action',
-      render: (text: string, record: any) => (
+      render: (_: unknown, record: Review) => (
         <Space size="middle">
-          <Button 
-            type="primary" 
-            icon={<EyeOutlined />} 
+          <Button
+            type="primary"
+            icon={<EyeOutlined />}
             size="small"
             onClick={() => handleView(record)}
           >
             Xem
           </Button>
-          <Button 
-            type="primary" 
-            icon={<EditOutlined />} 
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
             size="small"
             onClick={() => handleEdit(record)}
           >
             Sửa
           </Button>
-          <Button 
-            danger 
-            icon={<DeleteOutlined />} 
+          <Button
+            danger
+            icon={<DeleteOutlined />}
             size="small"
             onClick={() => handleDelete(record)}
           >
@@ -195,22 +214,22 @@ const Reviews = () => {
       ),
     },
   ]
-  
+
   const handleSearch = (value: string) => {
     setSearchText(value)
   }
-  
-  const handleView = (review: any) => {
+
+  const handleView = (review: Review) => {
     setSelectedReview(review)
     setIsViewModalVisible(true)
   }
-  
-  const handleEdit = (review: any) => {
+
+  const handleEdit = (review: Review) => {
     setSelectedReview(review)
     setIsEditModalVisible(true)
   }
-  
-  const handleDelete = (review: any) => {
+
+  const handleDelete = (review: Review) => {
     Modal.confirm({
       title: 'Xác nhận xóa',
       content: `Bạn có chắc chắn muốn xóa đánh giá này không?`,
@@ -223,19 +242,19 @@ const Reviews = () => {
       },
     })
   }
-  
+
   const handleViewModalClose = () => {
     setIsViewModalVisible(false)
   }
-  
+
   const handleEditModalClose = () => {
     setIsEditModalVisible(false)
   }
-  
-  const handleStatusChange = (value: string) => {
+
+  const handleStatusChange = (value: Review['status']) => {
     console.log('Status changed to:', value)
   }
-  
+
   return (
     <div className="reviews-page">
       <div className="page-header">
@@ -250,7 +269,7 @@ const Reviews = () => {
           />
         </div>
       </div>
-      
+
       <Table
         dataSource={reviews}
         columns={columns}
@@ -258,7 +277,7 @@ const Reviews = () => {
         pagination={{ pageSize: 10 }}
         className="reviews-table"
       />
-      
+
       {/* View Review Modal */}
       <Modal
         title="Chi tiết đánh giá"
@@ -281,11 +300,11 @@ const Reviews = () => {
               <p><strong>Ngày:</strong> {selectedReview.date}</p>
               <p><strong>Trạng thái:</strong> {
                 selectedReview.status === 'approved' ? 'Đã duyệt' :
-                selectedReview.status === 'pending' ? 'Chờ duyệt' :
-                selectedReview.status === 'rejected' ? 'Từ chối' : selectedReview.status
+                  selectedReview.status === 'pending' ? 'Chờ duyệt' :
+                    selectedReview.status === 'rejected' ? 'Từ chối' : selectedReview.status
               }</p>
             </div>
-            
+
             <div className="review-comment">
               <h3>Nội dung đánh giá</h3>
               <p>{selectedReview.comment}</p>
@@ -293,7 +312,7 @@ const Reviews = () => {
           </div>
         )}
       </Modal>
-      
+
       {/* Edit Review Modal */}
       <Modal
         title="Cập nhật đánh giá"
@@ -317,12 +336,12 @@ const Reviews = () => {
                 <Option value="rejected">Từ chối</Option>
               </Select>
             </div>
-            
+
             <div className="form-item">
               <label>Nội dung đánh giá:</label>
               <TextArea rows={4} defaultValue={selectedReview.comment} />
             </div>
-            
+
             <div className="form-item">
               <label>Phản hồi của admin:</label>
               <TextArea rows={4} placeholder="Nhập phản hồi của admin (nếu có)" />

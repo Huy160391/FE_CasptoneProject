@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Row, Col, Breadcrumb, Tag, Divider, Avatar, Card, Typography, Button, Skeleton } from 'antd'
-import { 
-  CalendarOutlined, 
-  EyeOutlined, 
-  UserOutlined, 
-  TagOutlined, 
+import {
+  CalendarOutlined,
+  EyeOutlined,
+  UserOutlined,
+  TagOutlined,
   ShareAltOutlined,
   FacebookOutlined,
   TwitterOutlined,
@@ -14,8 +14,8 @@ import {
 } from '@ant-design/icons'
 import './BlogPost.scss'
 
-const { Title, Paragraph, Text } = Typography
-
+const { Title, Text } = Typography
+// Paragraph,
 // Mock blog data (same as in Blog.tsx)
 const blogs = [
   {
@@ -193,20 +193,20 @@ const BlogPost = () => {
               { title: post.title }
             ]}
           />
-          
-          <Button 
-            type="text" 
-            icon={<ArrowLeftOutlined />} 
+
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
             onClick={handleGoBack}
             className="back-button"
           >
             Quay lại
           </Button>
-          
+
           <Title level={1} className="post-title">
             {post.title}
           </Title>
-          
+
           <div className="post-meta">
             <div className="meta-item">
               <CalendarOutlined /> {post.date}
@@ -218,7 +218,7 @@ const BlogPost = () => {
               <TagOutlined /> {post.category}
             </div>
           </div>
-          
+
           <div className="post-tags">
             {post.tags.map((tag: string, index: number) => (
               <Tag key={index} className="post-tag">
@@ -227,17 +227,17 @@ const BlogPost = () => {
             ))}
           </div>
         </div>
-        
+
         <div className="post-featured-image">
           <img src={post.thumbnail} alt={post.title} />
         </div>
-        
+
         <Row gutter={[32, 32]} className="post-content-wrapper">
           <Col xs={24} lg={16} className="post-content">
             <div dangerouslySetInnerHTML={{ __html: post.content }} />
-            
+
             <Divider />
-            
+
             <div className="post-share">
               <Text strong>Chia sẻ bài viết:</Text>
               <div className="share-buttons">
@@ -247,12 +247,12 @@ const BlogPost = () => {
                 <Button type="text" icon={<ShareAltOutlined />} />
               </div>
             </div>
-            
+
             <div className="post-author">
-              <Avatar 
-                size={64} 
-                src={post.authorAvatar} 
-                icon={<UserOutlined />} 
+              <Avatar
+                size={64}
+                src={post.authorAvatar}
+                icon={<UserOutlined />}
               />
               <div className="author-info">
                 <Title level={5}>Tác giả: {post.author}</Title>
@@ -260,18 +260,18 @@ const BlogPost = () => {
               </div>
             </div>
           </Col>
-          
+
           <Col xs={24} lg={8} className="post-sidebar">
             <div className="sidebar-section">
               <Title level={4} className="section-title">
                 Bài viết liên quan
               </Title>
-              
+
               {relatedPosts.length > 0 ? (
                 <div className="related-posts">
                   {relatedPosts.map((relatedPost) => (
-                    <Link 
-                      to={`/blog/post/${relatedPost.id}`} 
+                    <Link
+                      to={`/blog/post/${relatedPost.id}`}
                       key={relatedPost.id}
                       className="related-post-link"
                     >
@@ -293,12 +293,12 @@ const BlogPost = () => {
                 <Text>Không có bài viết liên quan</Text>
               )}
             </div>
-            
+
             <div className="sidebar-section">
               <Title level={4} className="section-title">
                 Danh mục
               </Title>
-              
+
               <div className="categories-list">
                 <Link to="/blog?category=Du lịch" className="category-link">
                   Du lịch
@@ -317,12 +317,12 @@ const BlogPost = () => {
                 </Link>
               </div>
             </div>
-            
+
             <div className="sidebar-section">
               <Title level={4} className="section-title">
                 Tags phổ biến
               </Title>
-              
+
               <div className="tags-cloud">
                 <Tag className="tag-item">Tây Ninh</Tag>
                 <Tag className="tag-item">Du lịch</Tag>

@@ -1,4 +1,4 @@
-import { Layout, Button, Dropdown, Avatar, Space } from 'antd'
+import { Layout, Dropdown, Avatar, Space } from 'antd'
 import { UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import './AdminHeader.scss'
@@ -7,12 +7,11 @@ const { Header } = Layout
 
 const AdminHeader = () => {
   const navigate = useNavigate()
-  
+
   const handleLogout = () => {
-    // Implement logout logic here
     navigate('/')
   }
-  
+
   const items = [
     {
       key: 'profile',
@@ -27,7 +26,7 @@ const AdminHeader = () => {
       onClick: () => navigate('/admin/settings'),
     },
     {
-      type: 'divider',
+      type: 'divider' as const,
     },
     {
       key: 'logout',
@@ -36,16 +35,13 @@ const AdminHeader = () => {
       onClick: handleLogout,
     },
   ]
-  
+
   return (
     <Header className="admin-header">
       <div className="header-content">
-        <div className="page-title">
-          Dashboard
-        </div>
-        
+        <div className="page-title">Dashboard</div>
         <div className="header-right">
-          <Dropdown menu={{ items }} placement="bottomRight">
+          <Dropdown menu={{ items }} placement="bottomRight" trigger={['click']}>
             <Space className="user-dropdown">
               <Avatar icon={<UserOutlined />} />
               <span className="username">Admin</span>

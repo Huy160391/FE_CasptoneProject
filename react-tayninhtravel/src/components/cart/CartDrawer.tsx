@@ -1,11 +1,13 @@
 import { Drawer, List, Button, InputNumber, Empty, Typography, Divider } from 'antd'
 import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons'
 import { useCartStore } from '@/store/useCartStore'
-import { useTranslation } from 'react-i18next'
+// import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import './CartDrawer.scss'
 
-const { Title, Text } = Typography
+const { Text } = Typography
+// const { Title } = Typography
+
 
 interface CartDrawerProps {
   visible: boolean
@@ -13,21 +15,21 @@ interface CartDrawerProps {
 }
 
 const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
-  const { t } = useTranslation()
+  // const { t } = useTranslation()
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore()
-  
+
   const handleQuantityChange = (id: number, type: 'product' | 'tour', quantity: number) => {
     updateQuantity(id, type, quantity)
   }
-  
+
   const handleRemoveItem = (id: number, type: 'product' | 'tour') => {
     removeItem(id, type)
   }
-  
+
   const formatPrice = (price: number) => {
-    return `${price.toLocaleString()} ₫`
+    return `${price.toLocaleString()}VND`
   }
-  
+
   return (
     <Drawer
       title={
@@ -104,7 +106,7 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
           </Button>
         </div>
       )}
-      
+
       {items.length > 0 && (
         <div className="cart-actions">
           <Divider />

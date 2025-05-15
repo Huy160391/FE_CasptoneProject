@@ -1,25 +1,39 @@
 import { useState } from 'react'
 import { Table, Button, Input, Space, Tag, Modal, Form, Select, InputNumber, Upload } from 'antd'
-import { 
-  SearchOutlined, 
-  PlusOutlined, 
-  EditOutlined, 
+import {
+  SearchOutlined,
+  PlusOutlined,
+  EditOutlined,
   DeleteOutlined,
-  UploadOutlined 
+  UploadOutlined
 } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
+import type { Key } from 'react'
 import './Products.scss'
 
 const { Option } = Select
 const { TextArea } = Input
 
+interface Product {
+  key: string
+  id: number
+  name: string
+  image: string
+  price: number
+  category: string
+  stock: number
+  status: 'active' | 'inactive'
+  description?: string
+}
+
 const Products = () => {
   const [searchText, setSearchText] = useState('')
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [form] = Form.useForm()
-  const [editingProduct, setEditingProduct] = useState<any>(null)
-  
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
   // Mock data for products
-  const products = [
+  const products: Product[] = [
     {
       key: '1',
       id: 1,
@@ -81,36 +95,40 @@ const Products = () => {
       status: 'inactive',
     },
   ]
-  
-  const columns = [
+
+  const columns: ColumnsType<Product> = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      sorter: (a: any, b: any) => a.id - b.id,
+      sorter: (a: Product, b: Product) => a.id - b.id,
     },
     {
       title: 'Sản phẩm',
       dataIndex: 'name',
       key: 'name',
-      render: (text: string, record: any) => (
+      render: (text: string, record: Product) => (
         <div className="product-cell">
           <img src={record.image} alt={text} className="product-image" />
           <span>{text}</span>
         </div>
       ),
-      sorter: (a: any, b: any) => a.name.localeCompare(b.name),
+      sorter: (a: Product, b: Product) => a.name.localeCompare(b.name),
       filteredValue: searchText ? [searchText] : null,
-      onFilter: (value: string, record: any) => 
-        record.name.toLowerCase().includes(value.toLowerCase()) ||
-        record.category.toLowerCase().includes(value.toLowerCase()),
+      onFilter: (value: boolean | Key, record: Product) => {
+        const searchValue = value.toString().toLowerCase()
+        return (
+          record.name.toLowerCase().includes(searchValue) ||
+          record.category.toLowerCase().includes(searchValue)
+        )
+      },
     },
     {
       title: 'Giá',
       dataIndex: 'price',
       key: 'price',
       render: (price: number) => `${price.toLocaleString()} ₫`,
-      sorter: (a: any, b: any) => a.price - b.price,
+      sorter: (a: Product, b: Product) => a.price - b.price,
     },
     {
       title: 'Danh mục',
@@ -122,18 +140,18 @@ const Products = () => {
         { text: 'Phụ kiện', value: 'Phụ kiện' },
         { text: 'Đặc sản', value: 'Đặc sản' },
       ],
-      onFilter: (value: string, record: any) => record.category === value,
+      onFilter: (value: boolean | Key, record: Product) => record.category === value,
     },
     {
       title: 'Tồn kho',
       dataIndex: 'stock',
       key: 'stock',
-      sorter: (a: any, b: any) => a.stock - b.stock,
+      sorter: (a: Product, b: Product) => a.stock - b.stock,
       render: (stock: number) => {
         let color = 'green'
         if (stock === 0) color = 'red'
         else if (stock < 10) color = 'orange'
-        
+
         return <span style={{ color }}>{stock}</span>
       },
     },
@@ -141,34 +159,34 @@ const Products = () => {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => {
+      render: (status: Product['status']) => {
         const color = status === 'active' ? 'success' : 'error'
         const text = status === 'active' ? 'Đang bán' : 'Ngừng bán'
-        
+
         return <Tag className={`status-tag ${color}`}>{text}</Tag>
       },
       filters: [
         { text: 'Đang bán', value: 'active' },
         { text: 'Ngừng bán', value: 'inactive' },
       ],
-      onFilter: (value: string, record: any) => record.status === value,
+      onFilter: (value: boolean | Key, record: Product) => record.status === value,
     },
     {
       title: 'Thao tác',
       key: 'action',
-      render: (text: string, record: any) => (
+      render: (_: unknown, record: Product) => (
         <Space size="middle">
-          <Button 
-            type="primary" 
-            icon={<EditOutlined />} 
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
             size="small"
             onClick={() => handleEdit(record)}
           >
             Sửa
           </Button>
-          <Button 
-            danger 
-            icon={<DeleteOutlined />} 
+          <Button
+            danger
+            icon={<DeleteOutlined />}
             size="small"
             onClick={() => handleDelete(record)}
           >
@@ -178,18 +196,18 @@ const Products = () => {
       ),
     },
   ]
-  
+
   const handleSearch = (value: string) => {
     setSearchText(value)
   }
-  
+
   const handleAdd = () => {
     setEditingProduct(null)
     form.resetFields()
     setIsModalVisible(true)
   }
-  
-  const handleEdit = (product: any) => {
+
+  const handleEdit = (product: Product) => {
     setEditingProduct(product)
     form.setFieldsValue({
       name: product.name,
@@ -201,8 +219,8 @@ const Products = () => {
     })
     setIsModalVisible(true)
   }
-  
-  const handleDelete = (product: any) => {
+
+  const handleDelete = (product: Product) => {
     Modal.confirm({
       title: 'Xác nhận xóa',
       content: `Bạn có chắc chắn muốn xóa sản phẩm "${product.name}" không?`,
@@ -215,12 +233,12 @@ const Products = () => {
       },
     })
   }
-  
+
   const handleModalOk = () => {
     form.validateFields().then(values => {
       // Handle form submission
       console.log('Form values:', values)
-      
+
       if (editingProduct) {
         // Update existing product
         console.log('Updating product:', editingProduct.id, values)
@@ -228,22 +246,22 @@ const Products = () => {
         // Add new product
         console.log('Adding new product:', values)
       }
-      
+
       setIsModalVisible(false)
     })
   }
-  
+
   const handleModalCancel = () => {
     setIsModalVisible(false)
   }
-  
+
   const normFile = (e: any) => {
     if (Array.isArray(e)) {
       return e
     }
     return e?.fileList
   }
-  
+
   return (
     <div className="products-page">
       <div className="page-header">
@@ -265,7 +283,7 @@ const Products = () => {
           </Button>
         </div>
       </div>
-      
+
       <Table
         dataSource={products}
         columns={columns}
@@ -273,7 +291,7 @@ const Products = () => {
         pagination={{ pageSize: 10 }}
         className="products-table"
       />
-      
+
       <Modal
         title={editingProduct ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}
         open={isModalVisible}
@@ -294,7 +312,7 @@ const Products = () => {
           >
             <Input />
           </Form.Item>
-          
+
           <Form.Item
             name="price"
             label="Giá"
@@ -303,11 +321,11 @@ const Products = () => {
             <InputNumber
               min={0}
               formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={value => value!.replace(/\$\s?|(,*)/g, '')}
+              parser={() => 0}
               style={{ width: '100%' }}
             />
           </Form.Item>
-          
+
           <Form.Item
             name="category"
             label="Danh mục"
@@ -320,7 +338,7 @@ const Products = () => {
               <Option value="Đặc sản">Đặc sản</Option>
             </Select>
           </Form.Item>
-          
+
           <Form.Item
             name="stock"
             label="Tồn kho"
@@ -328,7 +346,7 @@ const Products = () => {
           >
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
-          
+
           <Form.Item
             name="status"
             label="Trạng thái"
@@ -339,14 +357,14 @@ const Products = () => {
               <Option value="inactive">Ngừng bán</Option>
             </Select>
           </Form.Item>
-          
+
           <Form.Item
             name="description"
             label="Mô tả"
           >
             <TextArea rows={4} />
           </Form.Item>
-          
+
           <Form.Item
             name="image"
             label="Hình ảnh"

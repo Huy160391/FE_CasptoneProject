@@ -1,12 +1,12 @@
-import { Row, Col, Card, Avatar, Typography, Divider } from 'antd'
-import { useTranslation } from 'react-i18next'
+import { Row, Col, Card, Avatar, Typography } from 'antd'
+// import { useTranslation } from 'react-i18next'
 import './About.scss'
 
 const { Title, Paragraph } = Typography
 
 const About = () => {
-  const { t } = useTranslation()
-  
+  // const { t } = useTranslation()
+
   const teamMembers = [
     {
       id: 1,
@@ -37,7 +37,7 @@ const About = () => {
       description: 'Chị D và đội ngũ của mình luôn đảm bảo mọi khách hàng đều nhận được dịch vụ tốt nhất. Sự tận tâm của chị đã giúp công ty nhận được nhiều đánh giá tích cực.',
     },
   ]
-  
+
   const milestones = [
     {
       year: '2010',
@@ -65,7 +65,7 @@ const About = () => {
       description: 'Tây Ninh Travel bắt đầu đón khách quốc tế và mở rộng thị trường ra các nước trong khu vực Đông Nam Á.',
     },
   ]
-  
+
   return (
     <div className="about-page">
       <div className="hero-section">
@@ -74,7 +74,7 @@ const About = () => {
           <Paragraph>Khám phá câu chuyện, sứ mệnh và đội ngũ đằng sau Tây Ninh Travel</Paragraph>
         </div>
       </div>
-      
+
       <div className="container">
         <section className="about-section">
           <Row gutter={[48, 48]} align="middle">
@@ -96,7 +96,7 @@ const About = () => {
             </Col>
           </Row>
         </section>
-        
+
         <section className="mission-section">
           <Title level={2} className="section-title">Sứ mệnh & Tầm nhìn</Title>
           <Row gutter={[32, 32]}>
@@ -118,7 +118,7 @@ const About = () => {
             </Col>
           </Row>
         </section>
-        
+
         <section className="team-section">
           <Title level={2} className="section-title">Đội ngũ của chúng tôi</Title>
           <Row gutter={[32, 32]}>
@@ -134,7 +134,7 @@ const About = () => {
             ))}
           </Row>
         </section>
-        
+
         <section className="milestone-section">
           <Title level={2} className="section-title">Hành trình phát triển</Title>
           <div className="timeline">

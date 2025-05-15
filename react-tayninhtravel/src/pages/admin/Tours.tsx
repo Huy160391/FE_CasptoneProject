@@ -1,26 +1,42 @@
 import { useState } from 'react'
 import { Table, Button, Input, Space, Tag, Modal, Form, Select, InputNumber, Upload, DatePicker } from 'antd'
-import { 
-  SearchOutlined, 
-  PlusOutlined, 
-  EditOutlined, 
+import {
+  SearchOutlined,
+  PlusOutlined,
+  EditOutlined,
   DeleteOutlined,
-  UploadOutlined 
+  UploadOutlined
 } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
+import type { Key } from 'react'
 import './Tours.scss'
 
 const { Option } = Select
 const { TextArea } = Input
 const { RangePicker } = DatePicker
 
+interface Tour {
+  key: string
+  id: number
+  name: string
+  image: string
+  price: number
+  duration: string
+  maxGroupSize: number
+  startLocation: string
+  status: 'active' | 'inactive'
+  featured: boolean
+  description?: string
+}
+
 const Tours = () => {
   const [searchText, setSearchText] = useState('')
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [form] = Form.useForm()
-  const [editingTour, setEditingTour] = useState<any>(null)
-  
+  const [editingTour, setEditingTour] = useState<Tour | null>(null)
+
   // Mock data for tours
-  const tours = [
+  const tours: Tour[] = [
     {
       key: '1',
       id: 1,
@@ -82,36 +98,40 @@ const Tours = () => {
       featured: true,
     },
   ]
-  
-  const columns = [
+
+  const columns: ColumnsType<Tour> = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      sorter: (a: any, b: any) => a.id - b.id,
+      sorter: (a: Tour, b: Tour) => a.id - b.id,
     },
     {
       title: 'Tour',
       dataIndex: 'name',
       key: 'name',
-      render: (text: string, record: any) => (
+      render: (text: string, record: Tour) => (
         <div className="tour-cell">
           <img src={record.image} alt={text} className="tour-image" />
           <span>{text}</span>
         </div>
       ),
-      sorter: (a: any, b: any) => a.name.localeCompare(b.name),
+      sorter: (a: Tour, b: Tour) => a.name.localeCompare(b.name),
       filteredValue: searchText ? [searchText] : null,
-      onFilter: (value: string, record: any) => 
-        record.name.toLowerCase().includes(value.toLowerCase()) ||
-        record.startLocation.toLowerCase().includes(value.toLowerCase()),
+      onFilter: (value: boolean | Key, record: Tour) => {
+        const searchValue = value.toString().toLowerCase()
+        return (
+          record.name.toLowerCase().includes(searchValue) ||
+          record.startLocation.toLowerCase().includes(searchValue)
+        )
+      },
     },
     {
       title: 'Giá',
       dataIndex: 'price',
       key: 'price',
       render: (price: number) => `${price.toLocaleString()} ₫`,
-      sorter: (a: any, b: any) => a.price - b.price,
+      sorter: (a: Tour, b: Tour) => a.price - b.price,
     },
     {
       title: 'Thời gian',
@@ -126,7 +146,7 @@ const Tours = () => {
         { text: 'TP. Tây Ninh', value: 'TP. Tây Ninh' },
         { text: 'TP. Hồ Chí Minh', value: 'TP. Hồ Chí Minh' },
       ],
-      onFilter: (value: string, record: any) => record.startLocation === value,
+      onFilter: (value: boolean | Key, record: Tour) => record.startLocation === value.toString(),
     },
     {
       title: 'Nổi bật',
@@ -139,40 +159,40 @@ const Tours = () => {
         { text: 'Nổi bật', value: true },
         { text: 'Thường', value: false },
       ],
-      onFilter: (value: boolean, record: any) => record.featured === value,
+      onFilter: (value: boolean | Key, record: Tour) => record.featured === value,
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => {
+      render: (status: Tour['status']) => {
         const color = status === 'active' ? 'success' : 'error'
         const text = status === 'active' ? 'Đang mở' : 'Tạm ngưng'
-        
+
         return <Tag className={`status-tag ${color}`}>{text}</Tag>
       },
       filters: [
         { text: 'Đang mở', value: 'active' },
         { text: 'Tạm ngưng', value: 'inactive' },
       ],
-      onFilter: (value: string, record: any) => record.status === value,
+      onFilter: (value: boolean | Key, record: Tour) => record.status === value.toString(),
     },
     {
       title: 'Thao tác',
       key: 'action',
-      render: (text: string, record: any) => (
+      render: (_: unknown, record: Tour) => (
         <Space size="middle">
-          <Button 
-            type="primary" 
-            icon={<EditOutlined />} 
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
             size="small"
             onClick={() => handleEdit(record)}
           >
             Sửa
           </Button>
-          <Button 
-            danger 
-            icon={<DeleteOutlined />} 
+          <Button
+            danger
+            icon={<DeleteOutlined />}
             size="small"
             onClick={() => handleDelete(record)}
           >
@@ -182,18 +202,18 @@ const Tours = () => {
       ),
     },
   ]
-  
+
   const handleSearch = (value: string) => {
     setSearchText(value)
   }
-  
+
   const handleAdd = () => {
     setEditingTour(null)
     form.resetFields()
     setIsModalVisible(true)
   }
-  
-  const handleEdit = (tour: any) => {
+
+  const handleEdit = (tour: Tour) => {
     setEditingTour(tour)
     form.setFieldsValue({
       name: tour.name,
@@ -207,8 +227,8 @@ const Tours = () => {
     })
     setIsModalVisible(true)
   }
-  
-  const handleDelete = (tour: any) => {
+
+  const handleDelete = (tour: Tour) => {
     Modal.confirm({
       title: 'Xác nhận xóa',
       content: `Bạn có chắc chắn muốn xóa tour "${tour.name}" không?`,
@@ -221,12 +241,12 @@ const Tours = () => {
       },
     })
   }
-  
+
   const handleModalOk = () => {
     form.validateFields().then(values => {
       // Handle form submission
       console.log('Form values:', values)
-      
+
       if (editingTour) {
         // Update existing tour
         console.log('Updating tour:', editingTour.id, values)
@@ -234,22 +254,22 @@ const Tours = () => {
         // Add new tour
         console.log('Adding new tour:', values)
       }
-      
+
       setIsModalVisible(false)
     })
   }
-  
+
   const handleModalCancel = () => {
     setIsModalVisible(false)
   }
-  
+
   const normFile = (e: any) => {
     if (Array.isArray(e)) {
       return e
     }
     return e?.fileList
   }
-  
+
   return (
     <div className="tours-page">
       <div className="page-header">
@@ -271,7 +291,7 @@ const Tours = () => {
           </Button>
         </div>
       </div>
-      
+
       <Table
         dataSource={tours}
         columns={columns}
@@ -279,7 +299,7 @@ const Tours = () => {
         pagination={{ pageSize: 10 }}
         className="tours-table"
       />
-      
+
       <Modal
         title={editingTour ? 'Sửa tour' : 'Thêm tour mới'}
         open={isModalVisible}
@@ -300,7 +320,7 @@ const Tours = () => {
           >
             <Input />
           </Form.Item>
-          
+
           <Form.Item
             name="price"
             label="Giá"
@@ -309,11 +329,11 @@ const Tours = () => {
             <InputNumber
               min={0}
               formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={value => value!.replace(/\$\s?|(,*)/g, '')}
+              parser={() => 0}
               style={{ width: '100%' }}
             />
           </Form.Item>
-          
+
           <Form.Item
             name="duration"
             label="Thời gian"
@@ -321,7 +341,7 @@ const Tours = () => {
           >
             <Input placeholder="Ví dụ: 1 ngày, 2 ngày 1 đêm" />
           </Form.Item>
-          
+
           <Form.Item
             name="maxGroupSize"
             label="Số người tối đa"
@@ -329,7 +349,7 @@ const Tours = () => {
           >
             <InputNumber min={1} style={{ width: '100%' }} />
           </Form.Item>
-          
+
           <Form.Item
             name="startLocation"
             label="Điểm khởi hành"
@@ -340,7 +360,7 @@ const Tours = () => {
               <Option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</Option>
             </Select>
           </Form.Item>
-          
+
           <Form.Item
             name="status"
             label="Trạng thái"
@@ -351,7 +371,7 @@ const Tours = () => {
               <Option value="inactive">Tạm ngưng</Option>
             </Select>
           </Form.Item>
-          
+
           <Form.Item
             name="featured"
             label="Nổi bật"
@@ -362,14 +382,14 @@ const Tours = () => {
               <Option value={false}>Không</Option>
             </Select>
           </Form.Item>
-          
+
           <Form.Item
             name="description"
             label="Mô tả"
           >
             <TextArea rows={4} />
           </Form.Item>
-          
+
           <Form.Item
             name="image"
             label="Hình ảnh"
@@ -384,7 +404,7 @@ const Tours = () => {
               <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
             </Upload>
           </Form.Item>
-          
+
           <Form.Item
             name="dates"
             label="Ngày khởi hành"

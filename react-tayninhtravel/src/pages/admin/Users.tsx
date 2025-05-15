@@ -1,18 +1,30 @@
 import { useState } from 'react'
 import { Table, Button, Input, Space, Tag, Modal, Form, Select } from 'antd'
 import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
+import type { Key } from 'react'
 import './Users.scss'
 
 const { Option } = Select
+
+interface User {
+  key: string
+  id: number
+  name: string
+  email: string
+  phone: string
+  role: 'admin' | 'editor' | 'user'
+  status: 'active' | 'inactive'
+}
 
 const Users = () => {
   const [searchText, setSearchText] = useState('')
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [form] = Form.useForm()
-  const [editingUser, setEditingUser] = useState<any>(null)
-  
+  const [editingUser, setEditingUser] = useState<User | null>(null)
+
   // Mock data for users
-  const users = [
+  const users: User[] = [
     {
       key: '1',
       id: 1,
@@ -59,24 +71,28 @@ const Users = () => {
       status: 'active',
     },
   ]
-  
-  const columns = [
+
+  const columns: ColumnsType<User> = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      sorter: (a: any, b: any) => a.id - b.id,
+      sorter: (a: User, b: User) => a.id - b.id,
     },
     {
       title: 'Tên',
       dataIndex: 'name',
       key: 'name',
-      sorter: (a: any, b: any) => a.name.localeCompare(b.name),
+      sorter: (a: User, b: User) => a.name.localeCompare(b.name),
       filteredValue: searchText ? [searchText] : null,
-      onFilter: (value: string, record: any) => 
-        record.name.toLowerCase().includes(value.toLowerCase()) ||
-        record.email.toLowerCase().includes(value.toLowerCase()) ||
-        record.phone.includes(value),
+      onFilter: (value: boolean | Key, record: User) => {
+        const searchValue = value.toString().toLowerCase()
+        return (
+          record.name.toLowerCase().includes(searchValue) ||
+          record.email.toLowerCase().includes(searchValue) ||
+          record.phone.includes(searchValue)
+        )
+      },
     },
     {
       title: 'Email',
@@ -92,12 +108,12 @@ const Users = () => {
       title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
-      render: (role: string) => {
+      render: (role: User['role']) => {
         let color = ''
         if (role === 'admin') color = 'red'
         else if (role === 'editor') color = 'blue'
         else color = 'green'
-        
+
         return <Tag color={color}>{role.toUpperCase()}</Tag>
       },
       filters: [
@@ -105,40 +121,40 @@ const Users = () => {
         { text: 'Editor', value: 'editor' },
         { text: 'User', value: 'user' },
       ],
-      onFilter: (value: string, record: any) => record.role === value,
+      onFilter: (value: boolean | Key, record: User) => record.role === value.toString(),
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => {
+      render: (status: User['status']) => {
         const color = status === 'active' ? 'success' : 'error'
         const text = status === 'active' ? 'Hoạt động' : 'Không hoạt động'
-        
+
         return <Tag className={`status-tag ${color}`}>{text}</Tag>
       },
       filters: [
         { text: 'Hoạt động', value: 'active' },
         { text: 'Không hoạt động', value: 'inactive' },
       ],
-      onFilter: (value: string, record: any) => record.status === value,
+      onFilter: (value: boolean | Key, record: User) => record.status === value.toString(),
     },
     {
       title: 'Thao tác',
       key: 'action',
-      render: (text: string, record: any) => (
+      render: (_: unknown, record: User) => (
         <Space size="middle">
-          <Button 
-            type="primary" 
-            icon={<EditOutlined />} 
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
             size="small"
             onClick={() => handleEdit(record)}
           >
             Sửa
           </Button>
-          <Button 
-            danger 
-            icon={<DeleteOutlined />} 
+          <Button
+            danger
+            icon={<DeleteOutlined />}
             size="small"
             onClick={() => handleDelete(record)}
           >
@@ -148,18 +164,18 @@ const Users = () => {
       ),
     },
   ]
-  
+
   const handleSearch = (value: string) => {
     setSearchText(value)
   }
-  
+
   const handleAdd = () => {
     setEditingUser(null)
     form.resetFields()
     setIsModalVisible(true)
   }
-  
-  const handleEdit = (user: any) => {
+
+  const handleEdit = (user: User) => {
     setEditingUser(user)
     form.setFieldsValue({
       name: user.name,
@@ -170,8 +186,8 @@ const Users = () => {
     })
     setIsModalVisible(true)
   }
-  
-  const handleDelete = (user: any) => {
+
+  const handleDelete = (user: User) => {
     Modal.confirm({
       title: 'Xác nhận xóa',
       content: `Bạn có chắc chắn muốn xóa người dùng "${user.name}" không?`,
@@ -184,12 +200,12 @@ const Users = () => {
       },
     })
   }
-  
+
   const handleModalOk = () => {
     form.validateFields().then(values => {
       // Handle form submission
       console.log('Form values:', values)
-      
+
       if (editingUser) {
         // Update existing user
         console.log('Updating user:', editingUser.id, values)
@@ -197,15 +213,15 @@ const Users = () => {
         // Add new user
         console.log('Adding new user:', values)
       }
-      
+
       setIsModalVisible(false)
     })
   }
-  
+
   const handleModalCancel = () => {
     setIsModalVisible(false)
   }
-  
+
   return (
     <div className="users-page">
       <div className="page-header">
@@ -227,7 +243,7 @@ const Users = () => {
           </Button>
         </div>
       </div>
-      
+
       <Table
         dataSource={users}
         columns={columns}
@@ -235,7 +251,7 @@ const Users = () => {
         pagination={{ pageSize: 10 }}
         className="users-table"
       />
-      
+
       <Modal
         title={editingUser ? 'Sửa người dùng' : 'Thêm người dùng mới'}
         open={isModalVisible}
@@ -255,7 +271,7 @@ const Users = () => {
           >
             <Input />
           </Form.Item>
-          
+
           <Form.Item
             name="email"
             label="Email"
@@ -266,7 +282,7 @@ const Users = () => {
           >
             <Input />
           </Form.Item>
-          
+
           <Form.Item
             name="phone"
             label="Số điện thoại"
@@ -277,7 +293,7 @@ const Users = () => {
           >
             <Input />
           </Form.Item>
-          
+
           <Form.Item
             name="role"
             label="Vai trò"
@@ -289,7 +305,7 @@ const Users = () => {
               <Option value="user">User</Option>
             </Select>
           </Form.Item>
-          
+
           <Form.Item
             name="status"
             label="Trạng thái"
@@ -300,7 +316,7 @@ const Users = () => {
               <Option value="inactive">Không hoạt động</Option>
             </Select>
           </Form.Item>
-          
+
           {!editingUser && (
             <>
               <Form.Item
@@ -313,7 +329,7 @@ const Users = () => {
               >
                 <Input.Password />
               </Form.Item>
-              
+
               <Form.Item
                 name="confirmPassword"
                 label="Xác nhận mật khẩu"

@@ -1,15 +1,14 @@
 import { Row, Col, Form, Input, Button, Typography, Card, message } from 'antd'
 import { EnvironmentOutlined, PhoneOutlined, MailOutlined, ClockCircleOutlined } from '@ant-design/icons'
-import { useTranslation } from 'react-i18next'
+// import { useTranslation } from 'react-i18next'
 import './Contact.scss'
 
 const { Title, Paragraph, Text } = Typography
 const { TextArea } = Input
-
+// const { t } = useTranslation()
 const Contact = () => {
-  const { t } = useTranslation()
   const [form] = Form.useForm()
-  
+
   const contactInfo = [
     {
       icon: <EnvironmentOutlined />,
@@ -32,13 +31,13 @@ const Contact = () => {
       content: 'Thứ Hai - Thứ Bảy: 8:00 - 17:30',
     },
   ]
-  
+
   const handleSubmit = (values: any) => {
     console.log('Form values:', values)
     message.success('Cảm ơn bạn đã liên hệ với chúng tôi! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.')
     form.resetFields()
   }
-  
+
   return (
     <div className="contact-page">
       <div className="hero-section">
@@ -47,17 +46,17 @@ const Contact = () => {
           <Paragraph>Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn</Paragraph>
         </div>
       </div>
-      
+
       <div className="container">
         <Row gutter={[48, 48]}>
           <Col xs={24} lg={10}>
             <div className="contact-info">
               <Title level={2}>Thông tin liên hệ</Title>
               <Paragraph>
-                Nếu bạn có bất kỳ câu hỏi hoặc yêu cầu nào, đừng ngần ngại liên hệ với chúng tôi. 
+                Nếu bạn có bất kỳ câu hỏi hoặc yêu cầu nào, đừng ngần ngại liên hệ với chúng tôi.
                 Đội ngũ chăm sóc khách hàng của chúng tôi luôn sẵn sàng hỗ trợ bạn.
               </Paragraph>
-              
+
               <div className="info-cards">
                 {contactInfo.map((info, index) => (
                   <Card className="info-card" key={index}>
@@ -69,7 +68,7 @@ const Contact = () => {
                   </Card>
                 ))}
               </div>
-              
+
               <div className="social-links">
                 <Title level={4}>Kết nối với chúng tôi</Title>
                 <div className="social-icons">
@@ -89,14 +88,14 @@ const Contact = () => {
               </div>
             </div>
           </Col>
-          
+
           <Col xs={24} lg={14}>
             <div className="contact-form">
               <Title level={2}>Gửi tin nhắn cho chúng tôi</Title>
               <Paragraph>
                 Hãy điền thông tin vào mẫu dưới đây, chúng tôi sẽ liên hệ lại với bạn trong thời gian sớm nhất.
               </Paragraph>
-              
+
               <Form
                 form={form}
                 layout="vertical"
@@ -113,7 +112,7 @@ const Contact = () => {
                       <Input size="large" placeholder="Nhập họ tên của bạn" />
                     </Form.Item>
                   </Col>
-                  
+
                   <Col xs={24} md={12}>
                     <Form.Item
                       name="email"
@@ -127,7 +126,7 @@ const Contact = () => {
                     </Form.Item>
                   </Col>
                 </Row>
-                
+
                 <Row gutter={16}>
                   <Col xs={24} md={12}>
                     <Form.Item
@@ -141,7 +140,7 @@ const Contact = () => {
                       <Input size="large" placeholder="Nhập số điện thoại của bạn" />
                     </Form.Item>
                   </Col>
-                  
+
                   <Col xs={24} md={12}>
                     <Form.Item
                       name="subject"
@@ -152,7 +151,7 @@ const Contact = () => {
                     </Form.Item>
                   </Col>
                 </Row>
-                
+
                 <Form.Item
                   name="message"
                   label="Nội dung"
@@ -163,7 +162,7 @@ const Contact = () => {
                     placeholder="Nhập nội dung tin nhắn của bạn"
                   />
                 </Form.Item>
-                
+
                 <Form.Item>
                   <Button type="primary" htmlType="submit" size="large">
                     Gửi tin nhắn
@@ -173,7 +172,7 @@ const Contact = () => {
             </div>
           </Col>
         </Row>
-        
+
         <div className="map-section">
           <Title level={2}>Bản đồ</Title>
           <div className="map-container">

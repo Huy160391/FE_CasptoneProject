@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { 
-  Row, 
-  Col, 
-  Breadcrumb, 
-  Typography, 
-  Button, 
-  Tabs, 
-  Rate, 
-  Tag, 
-  Divider, 
-  Form, 
-  DatePicker, 
-  InputNumber, 
-  Card, 
-  List, 
-  Avatar, 
+import {
+  Row,
+  Col,
+  Breadcrumb,
+  Typography,
+  Button,
+  Tabs,
+  Rate,
+  Tag,
+  Divider,
+  Form,
+  DatePicker,
+  InputNumber,
+  Card,
+  List,
+  Avatar,
   Skeleton,
   notification
 } from 'antd'
@@ -203,7 +203,7 @@ const ThingsToDoDetail = () => {
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState(0)
   const [form] = Form.useForm()
-  
+
   const addToCart = useCartStore(state => state.addItem)
 
   useEffect(() => {
@@ -225,13 +225,13 @@ const ThingsToDoDetail = () => {
   const handleThumbnailClick = (index: number) => {
     setCurrentImage(index)
   }
-
+  // date
+  // Add to cart
   const handleBookNow = (values: any) => {
     if (!tour) return
-    
-    const { date, participants } = values
-    
-    // Add to cart
+
+    const { participants } = values
+
     addToCart({
       id: tour.id,
       name: tour.title,
@@ -240,7 +240,7 @@ const ThingsToDoDetail = () => {
       type: 'tour',
       quantity: participants
     })
-    
+
     notification.success({
       message: 'Đặt tour thành công',
       description: `Đã thêm ${participants} vé tour "${tour.title}" vào giỏ hàng.`,
@@ -295,20 +295,20 @@ const ThingsToDoDetail = () => {
               { title: tour.title }
             ]}
           />
-          
-          <Button 
-            type="text" 
-            icon={<ArrowLeftOutlined />} 
+
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
             onClick={handleGoBack}
             className="back-button"
           >
             Quay lại
           </Button>
-          
+
           <Title level={1} className="tour-title">
             {tour.title}
           </Title>
-          
+
           <div className="tour-meta">
             <div className="meta-item">
               <EnvironmentOutlined /> {tour.location}
@@ -322,15 +322,15 @@ const ThingsToDoDetail = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="tour-gallery">
           <div className="main-image">
             <img src={tour.images[currentImage]} alt={tour.title} />
           </div>
           <div className="thumbnails">
             {tour.images.map((image: string, index: number) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`thumbnail ${currentImage === index ? 'active' : ''}`}
                 onClick={() => handleThumbnailClick(index)}
               >
@@ -339,13 +339,13 @@ const ThingsToDoDetail = () => {
             ))}
           </div>
         </div>
-        
+
         <Row gutter={[32, 32]} className="tour-content">
           <Col xs={24} lg={16} className="tour-details">
             <Card className="tour-description">
               <Title level={4}>Mô tả tour</Title>
               <Paragraph>{tour.description}</Paragraph>
-              
+
               <div className="tour-highlights">
                 <Title level={5}>Điểm nổi bật</Title>
                 <ul className="highlights-list">
@@ -357,7 +357,7 @@ const ThingsToDoDetail = () => {
                 </ul>
               </div>
             </Card>
-            
+
             <Tabs defaultActiveKey="1" className="tour-tabs">
               <TabPane tab="Chi tiết tour" key="1">
                 <div dangerouslySetInnerHTML={{ __html: tour.longDescription }} />
@@ -374,7 +374,7 @@ const ThingsToDoDetail = () => {
                       ))}
                     </ul>
                   </div>
-                  
+
                   <div className="excluded">
                     <Title level={5}>Dịch vụ không bao gồm</Title>
                     <ul>
@@ -399,9 +399,9 @@ const ThingsToDoDetail = () => {
                       Viết đánh giá
                     </Button>
                   </div>
-                  
+
                   <Divider />
-                  
+
                   <List
                     itemLayout="horizontal"
                     dataSource={tour.reviewsData}
@@ -429,7 +429,7 @@ const ThingsToDoDetail = () => {
               </TabPane>
             </Tabs>
           </Col>
-          
+
           <Col xs={24} lg={8} className="tour-sidebar">
             <Card className="booking-card">
               <div className="price-section">
@@ -456,7 +456,7 @@ const ThingsToDoDetail = () => {
                 )}
                 <Text className="price-per">/ người</Text>
               </div>
-              
+
               <Form
                 form={form}
                 layout="vertical"
@@ -468,29 +468,29 @@ const ThingsToDoDetail = () => {
                   label="Ngày tham gia"
                   rules={[{ required: true, message: 'Vui lòng chọn ngày' }]}
                 >
-                  <DatePicker 
-                    className="date-picker" 
+                  <DatePicker
+                    className="date-picker"
                     format="DD/MM/YYYY"
                     placeholder="Chọn ngày"
                   />
                 </Form.Item>
-                
+
                 <Form.Item
                   name="participants"
                   label="Số người tham gia"
                   rules={[{ required: true, message: 'Vui lòng nhập số người' }]}
                 >
-                  <InputNumber 
-                    min={1} 
-                    max={10} 
-                    className="participants-input" 
+                  <InputNumber
+                    min={1}
+                    max={10}
+                    className="participants-input"
                   />
                 </Form.Item>
-                
+
                 <Form.Item>
-                  <Button 
-                    type="primary" 
-                    htmlType="submit" 
+                  <Button
+                    type="primary"
+                    htmlType="submit"
                     className="book-button"
                     block
                   >
@@ -498,7 +498,7 @@ const ThingsToDoDetail = () => {
                   </Button>
                 </Form.Item>
               </Form>
-              
+
               <div className="booking-actions">
                 <Button type="text" icon={<HeartOutlined />}>
                   Yêu thích
@@ -507,9 +507,9 @@ const ThingsToDoDetail = () => {
                   Chia sẻ
                 </Button>
               </div>
-              
+
               <Divider />
-              
+
               <div className="booking-info">
                 <div className="info-item">
                   <CalendarOutlined /> <Text strong>Thời gian:</Text> {tour.duration}
@@ -522,7 +522,7 @@ const ThingsToDoDetail = () => {
                 </div>
               </div>
             </Card>
-            
+
             <Card className="need-help-card">
               <Title level={5}>Cần hỗ trợ?</Title>
               <Paragraph>

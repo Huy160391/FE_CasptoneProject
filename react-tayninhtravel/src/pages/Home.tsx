@@ -1,13 +1,13 @@
-import { useTranslation } from 'react-i18next'
+// import { useTranslation } from 'react-i18next'
 import HeroSection from '../components/home/HeroSection'
 import FeaturedTours from '../components/home/FeaturedTours'
 import WhyChooseUs from '../components/home/WhyChooseUs'
 import FeaturedGuides from '../components/home/FeaturedGuides'
 import './Home.scss'
 
-const Home = () => {
-  const { t } = useTranslation()
+// const { t } = useTranslation()
 
+const Home = () => {
   return (
     <div className="home-page">
       <HeroSection />

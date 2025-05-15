@@ -14,7 +14,7 @@ import {
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from '../common/ThemeToggle'
-import LanguageSwitcher from '../common/LanguageSwitcher'
+// import LanguageSwitcher from '../common/LanguageSwitcher'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import CartDrawer from '../cart/CartDrawer'
@@ -134,7 +134,7 @@ const Navbar = () => {
           <div className="navbar-right">
             <Space>
               <ThemeToggle />
-              <LanguageSwitcher />
+              {/* <LanguageSwitcher /> */}
 
               <Badge count={getTotalItems()} showZero={false} size="small">
                 <Button

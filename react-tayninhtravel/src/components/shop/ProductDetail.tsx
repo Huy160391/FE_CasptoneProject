@@ -1,26 +1,25 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { 
-  Breadcrumb, 
-  Row, 
-  Col, 
-  Typography, 
-  Button, 
-  Tabs, 
-  Rate, 
-  InputNumber, 
-  Divider, 
-  Tag, 
-  Space, 
-  notification, 
-  Skeleton, 
-  Modal 
+import {
+  Breadcrumb,
+  Row,
+  Col,
+  Typography,
+  Button,
+  Tabs,
+  Rate,
+  InputNumber,
+  Divider,
+  Tag,
+  Space,
+  notification,
+  Skeleton,
+  Modal
 } from 'antd'
 import {
   ShoppingCartOutlined,
   HeartOutlined,
   ShareAltOutlined,
-  CheckCircleOutlined,
   StarOutlined,
   InfoCircleOutlined,
   EnvironmentOutlined,
@@ -31,7 +30,7 @@ import {
 } from '@ant-design/icons'
 import './ProductDetail.scss'
 import { useCartStore } from '@/store/useCartStore'
-
+// CheckCircleOutlined, of import ant-design/icons
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
 
@@ -133,16 +132,16 @@ interface EnhancedProduct {
 const ProductDetail = () => {
   const { id } = useParams()
   const productId = parseInt(id || '1')
-  
+
   const [product, setProduct] = useState<EnhancedProduct | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [mainImage, setMainImage] = useState<string>('')
   const [quantity, setQuantity] = useState<number>(1)
   const [isFavorite, setIsFavorite] = useState<boolean>(false)
-  const [activeTab, setActiveTab] = useState<string>('description')
+  // const [activeTab, setActiveTab] = useState<string>('description')
   const [imageModalVisible, setImageModalVisible] = useState<boolean>(false)
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
-  
+
   const addToCart = useCartStore(state => state.addItem)
 
   // Fetch product data
@@ -290,11 +289,11 @@ const ProductDetail = () => {
   }
 
   // Related products component
-  const RelatedProductsSection = ({ 
-    currentProductId, 
-    category, 
-    tags 
-  }: { 
+  const RelatedProductsSection = ({
+    currentProductId,
+    category,
+    tags
+  }: {
     currentProductId: number
     category: string
     tags: string[]
@@ -318,8 +317,8 @@ const ProductDetail = () => {
                       {product.isNew
                         ? 'Mới'
                         : `Giảm ${Math.round(
-                            ((product.price - (product.discountPrice || 0)) / product.price) * 100
-                          )}%`}
+                          ((product.price - (product.discountPrice || 0)) / product.price) * 100
+                        )}%`}
                     </div>
                   )}
                 </div>
@@ -413,15 +412,14 @@ const ProductDetail = () => {
               />
               {(product.isNew || product.isSale) && (
                 <div
-                  className={`product-badge ${
-                    product.isNew ? 'new-badge' : 'sale-badge'
-                  }`}
+                  className={`product-badge ${product.isNew ? 'new-badge' : 'sale-badge'
+                    }`}
                 >
                   {product.isNew
                     ? 'Mới'
                     : `Giảm ${Math.round(
-                        ((product.price - (product.discountPrice || 0)) / product.price) * 100
-                      )}%`}
+                      ((product.price - (product.discountPrice || 0)) / product.price) * 100
+                    )}%`}
                 </div>
               )}
               <div className="image-hint">Nhấp để xem ảnh lớn</div>
@@ -542,8 +540,9 @@ const ProductDetail = () => {
       </Row>
 
       {/* Product Details Tabs */}
+      {/* onChange={key => setActiveTab(key)} */}
       <div className="product-details-tabs">
-        <Tabs defaultActiveKey="description" onChange={key => setActiveTab(key)}>
+        <Tabs defaultActiveKey="description">
           <TabPane tab="Mô tả sản phẩm" key="description">
             <div className="tab-content">
               <Paragraph>{product.description}</Paragraph>
@@ -589,12 +588,11 @@ const ProductDetail = () => {
                           <div
                             className="rating-bar-fill"
                             style={{
-                              width: `${
-                                (product.reviewsData.filter(r => Math.round(r.rating) === star)
-                                  .length /
-                                  product.reviewsData.length) *
+                              width: `${(product.reviewsData.filter(r => Math.round(r.rating) === star)
+                                .length /
+                                product.reviewsData.length) *
                                 100
-                              }%`,
+                                }%`,
                             }}
                           ></div>
                         </div>
@@ -686,9 +684,8 @@ const ProductDetail = () => {
               product.additionalImages.map((image, index) => (
                 <div
                   key={index}
-                  className={`modal-thumbnail ${
-                    currentImageIndex === index ? 'active-thumbnail' : ''
-                  }`}
+                  className={`modal-thumbnail ${currentImageIndex === index ? 'active-thumbnail' : ''
+                    }`}
                   onClick={() => setCurrentImageIndex(index)}
                 >
                   <img src={image} alt={`Thumbnail ${index + 1}`} />

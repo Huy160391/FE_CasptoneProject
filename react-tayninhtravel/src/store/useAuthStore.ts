@@ -7,6 +7,9 @@ interface User {
   email: string
   role: 'user' | 'admin'
   avatar?: string
+  phone?: string
+  address?: string
+  bio?: string
 }
 
 interface AuthState {
@@ -26,7 +29,7 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       login: (user, token) => set({ user, isAuthenticated: true, token }),
       logout: () => set({ user: null, isAuthenticated: false, token: null }),
-      updateUser: (userData) => 
+      updateUser: (userData) =>
         set((state) => ({
           user: state.user ? { ...state.user, ...userData } : null,
         })),

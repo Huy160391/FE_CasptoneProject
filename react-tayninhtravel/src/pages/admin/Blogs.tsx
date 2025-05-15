@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   Card,
-  Button,
+  Button, Col, Row,
   Table,
   Tag,
   Space,
@@ -103,18 +103,18 @@ const Blogs = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [form] = Form.useForm()
   const [fileList, setFileList] = useState<UploadFile[]>([])
-  
-  const filteredBlogs = blogs.filter(blog => 
+
+  const filteredBlogs = blogs.filter(blog =>
     blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
     blog.author.toLowerCase().includes(searchText.toLowerCase()) ||
     blog.category.toLowerCase().includes(searchText.toLowerCase()) ||
     blog.tags.some(tag => tag.toLowerCase().includes(searchText.toLowerCase()))
   )
-  
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value)
   }
-  
+
   const showCreateModal = () => {
     setModalMode('create')
     setCurrentBlog(null)
@@ -122,11 +122,11 @@ const Blogs = () => {
     form.resetFields()
     setIsModalVisible(true)
   }
-  
+
   const showEditModal = (blog: any) => {
     setModalMode('edit')
     setCurrentBlog(blog)
-    
+
     // Set file list for the thumbnail
     if (blog.thumbnail) {
       setFileList([
@@ -140,27 +140,27 @@ const Blogs = () => {
     } else {
       setFileList([])
     }
-    
+
     // Set form values
     form.setFieldsValue({
       ...blog,
       date: blog.date ? dayjs(blog.date, 'DD/MM/YYYY') : undefined,
       tags: blog.tags.join(', ')
     })
-    
+
     setIsModalVisible(true)
   }
-  
+
   const showViewModal = (blog: any) => {
     setCurrentBlog(blog)
     setIsViewModalVisible(true)
   }
-  
+
   const handleCancel = () => {
     setIsModalVisible(false)
     setIsViewModalVisible(false)
   }
-  
+
   const handleFormSubmit = (values: any) => {
     const formattedValues = {
       ...values,
@@ -169,39 +169,39 @@ const Blogs = () => {
       tags: values.tags.split(',').map((tag: string) => tag.trim()),
       views: currentBlog?.views || 0
     }
-    
+
     if (modalMode === 'create') {
       // Create new blog
       const newBlog = {
         id: blogs.length > 0 ? Math.max(...blogs.map(b => b.id)) + 1 : 1,
         ...formattedValues
       }
-      
+
       setBlogs([...blogs, newBlog])
       message.success('Bài viết đã được tạo thành công')
     } else {
       // Update existing blog
-      const updatedBlogs = blogs.map(blog => 
+      const updatedBlogs = blogs.map(blog =>
         blog.id === currentBlog.id ? { ...blog, ...formattedValues } : blog
       )
-      
+
       setBlogs(updatedBlogs)
       message.success('Bài viết đã được cập nhật thành công')
     }
-    
+
     setIsModalVisible(false)
   }
-  
+
   const handleDelete = (id: number) => {
     const updatedBlogs = blogs.filter(blog => blog.id !== id)
     setBlogs(updatedBlogs)
     message.success('Bài viết đã được xóa thành công')
   }
-  
+
   const handleUploadChange = ({ fileList }: any) => {
     setFileList(fileList)
   }
-  
+
   const columns = [
     {
       title: 'Tiêu đề',
@@ -248,14 +248,14 @@ const Blogs = () => {
       key: 'action',
       render: (_: any, record: any) => (
         <Space size="middle">
-          <Button 
-            type="text" 
-            icon={<EyeOutlined />} 
+          <Button
+            type="text"
+            icon={<EyeOutlined />}
             onClick={() => showViewModal(record)}
           />
-          <Button 
-            type="text" 
-            icon={<EditOutlined />} 
+          <Button
+            type="text"
+            icon={<EditOutlined />}
             onClick={() => showEditModal(record)}
           />
           <Popconfirm
@@ -265,30 +265,30 @@ const Blogs = () => {
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button 
-              type="text" 
-              danger 
-              icon={<DeleteOutlined />} 
+            <Button
+              type="text"
+              danger
+              icon={<DeleteOutlined />}
             />
           </Popconfirm>
         </Space>
       ),
     },
   ]
-  
+
   return (
     <div className="blogs-page">
       <div className="page-header">
         <Title level={2}>Quản lý bài viết</Title>
-        <Button 
-          type="primary" 
+        <Button
+          type="primary"
           icon={<PlusOutlined />}
           onClick={showCreateModal}
         >
           Thêm bài viết
         </Button>
       </div>
-      
+
       <Card className="blogs-card">
         <div className="table-toolbar">
           <Input
@@ -298,15 +298,15 @@ const Blogs = () => {
             className="search-input"
           />
         </div>
-        
-        <Table 
-          columns={columns} 
-          dataSource={filteredBlogs} 
+
+        <Table
+          columns={columns}
+          dataSource={filteredBlogs}
           rowKey="id"
           pagination={{ pageSize: 10 }}
         />
       </Card>
-      
+
       {/* Create/Edit Modal */}
       <Modal
         title={modalMode === 'create' ? 'Thêm bài viết mới' : 'Chỉnh sửa bài viết'}
@@ -328,7 +328,7 @@ const Blogs = () => {
           >
             <Input />
           </Form.Item>
-          
+
           <Form.Item
             name="summary"
             label="Tóm tắt"
@@ -336,7 +336,7 @@ const Blogs = () => {
           >
             <TextArea rows={3} />
           </Form.Item>
-          
+
           <Form.Item
             name="content"
             label="Nội dung"
@@ -344,7 +344,7 @@ const Blogs = () => {
           >
             <TextArea rows={10} />
           </Form.Item>
-          
+
           <Form.Item
             name="thumbnail"
             label="Ảnh đại diện"
@@ -359,7 +359,7 @@ const Blogs = () => {
               <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
             </Upload>
           </Form.Item>
-          
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -374,7 +374,7 @@ const Blogs = () => {
                 </Select>
               </Form.Item>
             </Col>
-            
+
             <Col span={12}>
               <Form.Item
                 name="status"
@@ -389,7 +389,7 @@ const Blogs = () => {
               </Form.Item>
             </Col>
           </Row>
-          
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -400,7 +400,7 @@ const Blogs = () => {
                 <Input />
               </Form.Item>
             </Col>
-            
+
             <Col span={12}>
               <Form.Item
                 name="date"
@@ -410,14 +410,14 @@ const Blogs = () => {
               </Form.Item>
             </Col>
           </Row>
-          
+
           <Form.Item
             name="tags"
             label="Thẻ (phân cách bằng dấu phẩy)"
           >
             <Input placeholder="Ví dụ: Tây Ninh, Du lịch, Văn hóa" />
           </Form.Item>
-          
+
           <Form.Item className="form-actions">
             <Button onClick={handleCancel} style={{ marginRight: 8 }}>
               Hủy
@@ -428,7 +428,7 @@ const Blogs = () => {
           </Form.Item>
         </Form>
       </Modal>
-      
+
       {/* View Modal */}
       <Modal
         title="Chi tiết bài viết"
@@ -438,9 +438,9 @@ const Blogs = () => {
           <Button key="back" onClick={handleCancel}>
             Đóng
           </Button>,
-          <Button 
-            key="edit" 
-            type="primary" 
+          <Button
+            key="edit"
+            type="primary"
             onClick={() => {
               setIsViewModalVisible(false)
               showEditModal(currentBlog)
@@ -464,18 +464,18 @@ const Blogs = () => {
                 </Tag>
               </div>
             </div>
-            
+
             <div className="blog-thumbnail-container">
               <img src={currentBlog.thumbnail} alt={currentBlog.title} />
             </div>
-            
+
             <div className="blog-content">
               <Title level={5}>Tóm tắt:</Title>
               <Text>{currentBlog.summary}</Text>
-              
+
               <Title level={5} style={{ marginTop: 20 }}>Nội dung:</Title>
               <Text>{currentBlog.content}</Text>
-              
+
               <div className="blog-tags">
                 <Title level={5}>Thẻ:</Title>
                 <div>
