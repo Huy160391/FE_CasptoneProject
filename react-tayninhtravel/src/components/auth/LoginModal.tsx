@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Modal, Form, Input, Button, Checkbox, Divider, message } from 'antd'
 import { UserOutlined, LockOutlined, GoogleOutlined, FacebookOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { useAuthStore } from '@/store/useAuthStore'
+import { authService } from '@/services/authService'
 import './AuthModal.scss'
 
 interface LoginModalProps {
@@ -14,19 +16,23 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const login = useAuthStore(state => state.login)
 
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true)
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log('Login values:', values)
+      const response = await authService.login({
+        email: values.email,
+        password: values.password
+      })
+
+      login(response.user, response.token)
       message.success('Đăng nhập thành công!')
       form.resetFields()
       onClose()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error)
-      message.error('Đăng nhập thất bại. Vui lòng thử lại!')
+      message.error(error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại!')
     } finally {
       setLoading(false)
     }
@@ -65,10 +71,10 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
             { type: 'email', message: 'Email không hợp lệ!' }
           ]}
         >
-          <Input 
-            prefix={<UserOutlined />} 
-            placeholder="Email" 
-            size="large" 
+          <Input
+            prefix={<UserOutlined />}
+            placeholder="Email"
+            size="large"
           />
         </Form.Item>
 
@@ -76,10 +82,10 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
           name="password"
           rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
         >
-          <Input.Password 
-            prefix={<LockOutlined />} 
-            placeholder="Mật khẩu" 
-            size="large" 
+          <Input.Password
+            prefix={<LockOutlined />}
+            placeholder="Mật khẩu"
+            size="large"
           />
         </Form.Item>
 
@@ -93,11 +99,11 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
         </Form.Item>
 
         <Form.Item>
-          <Button 
-            type="primary" 
-            htmlType="submit" 
-            className="login-button" 
-            block 
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="login-button"
+            block
             size="large"
             loading={loading}
           >
@@ -108,15 +114,15 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
         <Divider plain>Hoặc đăng nhập với</Divider>
 
         <div className="social-login">
-          <Button 
-            icon={<GoogleOutlined />} 
+          <Button
+            icon={<GoogleOutlined />}
             onClick={() => handleSocialLogin('Google')}
             size="large"
           >
             Google
           </Button>
-          <Button 
-            icon={<FacebookOutlined />} 
+          <Button
+            icon={<FacebookOutlined />}
             onClick={() => handleSocialLogin('Facebook')}
             size="large"
           >

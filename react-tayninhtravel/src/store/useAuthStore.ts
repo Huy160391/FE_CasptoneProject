@@ -9,7 +9,6 @@ interface User {
   avatar?: string
   phone?: string
   address?: string
-  bio?: string
 }
 
 interface AuthState {
@@ -21,21 +20,58 @@ interface AuthState {
   updateUser: (user: Partial<User>) => void
 }
 
+// Lấy thông tin user từ localStorage nếu có
+const getStoredUser = (): User | null => {
+  const userStr = localStorage.getItem('user')
+  if (userStr) {
+    try {
+      return JSON.parse(userStr)
+    } catch (e) {
+      console.error('Error parsing stored user:', e)
+      return null
+    }
+  }
+  return null
+}
+
+// Lấy token từ localStorage nếu có
+const getStoredToken = (): string | null => {
+  return localStorage.getItem('token')
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user: null,
-      isAuthenticated: false,
-      token: null,
-      login: (user, token) => set({ user, isAuthenticated: true, token }),
-      logout: () => set({ user: null, isAuthenticated: false, token: null }),
+      user: getStoredUser(),
+      isAuthenticated: !!getStoredToken(),
+      token: getStoredToken(),
+      login: (user, token) => {
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+        set({ user, isAuthenticated: true, token })
+      },
+      logout: () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        set({ user: null, isAuthenticated: false, token: null })
+      },
       updateUser: (userData) =>
-        set((state) => ({
-          user: state.user ? { ...state.user, ...userData } : null,
-        })),
+        set((state) => {
+          if (state.user) {
+            const updatedUser = { ...state.user, ...userData }
+            localStorage.setItem('user', JSON.stringify(updatedUser))
+            return { user: updatedUser }
+          }
+          return state
+        }),
     }),
     {
       name: 'auth-storage',
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 )

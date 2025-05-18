@@ -1,4 +1,4 @@
-import { Layout, Dropdown, Avatar, Space } from 'antd'
+import { Layout, Dropdown, Space } from 'antd'
 import { UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import './AdminHeader.scss'

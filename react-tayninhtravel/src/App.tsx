@@ -1,15 +1,21 @@
-import { BrowserRouter } from 'react-router-dom'
-import AppRoutes from './routes'
-import Chatbot from './components/common/Chatbot'
-import './styles/global.scss'
+import React from 'react';
+import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
+import routes from './routes';
+import Chatbot from './components/common/Chatbot';
+import './styles/global.scss';
 
-function App() {
+const AppRoutes = () => {
+  const element = useRoutes(routes);
+  return element;
+};
+
+const App = () => {
   return (
-    <BrowserRouter>
+    <Router>
       <AppRoutes />
       <Chatbot />
-    </BrowserRouter>
-  )
-}
+    </Router>
+  );
+};
 
-export default App
+export default App;
