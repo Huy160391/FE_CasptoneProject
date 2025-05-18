@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Layout, Menu, Button, Drawer, Space, Badge } from 'antd'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Layout, Menu, Button, Drawer, Space, Badge, message, Dropdown } from 'antd'
+import type { MenuProps } from 'antd'
 import {
   MenuOutlined,
   HomeOutlined,
@@ -11,15 +12,18 @@ import {
   ShoppingCartOutlined,
   UserOutlined,
   ReadOutlined,
+  LogoutOutlined,
+  SettingOutlined
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from '../common/ThemeToggle'
-// import LanguageSwitcher from '../common/LanguageSwitcher'
+import LanguageSwitcher from '../common/LanguageSwitcher'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import CartDrawer from '../cart/CartDrawer'
 import { useCartStore } from '@/store/useCartStore'
 import { useAuthStore } from '@/store/useAuthStore'
+// import { authService } from '@/services/authService'
 import logoImage from '@/assets/TNDT_Logo.png'
 import './Navbar.scss'
 
@@ -34,6 +38,7 @@ const Navbar = () => {
   const location = useLocation()
   const { getTotalItems } = useCartStore()
   const { isAuthenticated, user, logout } = useAuthStore()
+  const navigate = useNavigate()
 
   const showDrawer = () => {
     setIsDrawerVisible(true)
@@ -68,7 +73,14 @@ const Navbar = () => {
   }
 
   const handleLogout = () => {
-    logout()
+    // Xóa thông tin từ localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    // Cập nhật state trong useAuthStore
+    logout();
+
+    message.success('Đăng xuất thành công!');
   }
 
   const menuItems = [
@@ -104,6 +116,30 @@ const Navbar = () => {
     },
   ]
 
+  const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'profile',
+      label: t('common.profile'),
+      icon: <UserOutlined />,
+      onClick: () => navigate('/profile'),
+    },
+    {
+      key: 'settings',
+      label: t('common.settings'),
+      icon: <SettingOutlined />,
+      onClick: () => navigate('/settings'),
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      label: t('common.logout'),
+      icon: <LogoutOutlined />,
+      onClick: handleLogout,
+    },
+  ]
+
   return (
     <>
       <Header className="navbar">
@@ -134,7 +170,7 @@ const Navbar = () => {
           <div className="navbar-right">
             <Space>
               <ThemeToggle />
-              {/* <LanguageSwitcher /> */}
+              <LanguageSwitcher />
 
               <Badge count={getTotalItems()} showZero={false} size="small">
                 <Button
@@ -147,20 +183,17 @@ const Navbar = () => {
 
               {isAuthenticated ? (
                 <Space>
-                  <Button
-                    type="text"
-                    icon={<UserOutlined />}
-                    className="user-button"
-                  >
-                    {user?.name}
-                  </Button>
-                  <Button
-                    type="primary"
-                    ghost
-                    onClick={handleLogout}
-                  >
-                    {t('common.logout')}
-                  </Button>
+                  <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+                    <Space className="user-dropdown">
+                      <div className="user-avatar">
+                        <img
+                          src={user?.avatar || 'https://i.imgur.com/4AiXzf8.jpg'}
+                          alt="avatar"
+                          style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: '50%' }}
+                        />
+                      </div>
+                    </Space>
+                  </Dropdown>
                 </Space>
               ) : (
                 <Space>

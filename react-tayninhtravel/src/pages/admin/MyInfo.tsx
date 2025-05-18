@@ -1,26 +1,25 @@
 import { useState } from 'react'
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Upload, 
-  Avatar, 
-  Tabs, 
-  Row, 
-  Col, 
-  Divider, 
-  Typography, 
-  notification 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Upload,
+  Tabs,
+  Row,
+  Col,
+  Divider,
+  Typography,
+  notification
 } from 'antd'
-import { 
-  UserOutlined, 
-  MailOutlined, 
-  PhoneOutlined, 
-  LockOutlined, 
-  UploadOutlined, 
-  SaveOutlined, 
-  CheckCircleOutlined 
+import {
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  LockOutlined,
+  UploadOutlined,
+  SaveOutlined,
+  CheckCircleOutlined
 } from '@ant-design/icons'
 import type { UploadFile } from 'antd/es/upload/interface'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -33,10 +32,10 @@ const MyInfo = () => {
   const [profileForm] = Form.useForm()
   const [passwordForm] = Form.useForm()
   const [fileList, setFileList] = useState<UploadFile[]>([])
-  
+
   const user = useAuthStore(state => state.user)
   const updateUser = useAuthStore(state => state.updateUser)
-  
+
   // Mock user data if not available in store
   const userData = user || {
     id: 1,
@@ -48,55 +47,56 @@ const MyInfo = () => {
     address: '123 Đường ABC, Quận XYZ, TP. Tây Ninh',
     bio: 'Quản trị viên hệ thống Tây Ninh Travel'
   }
-  
+
   const handleProfileSubmit = (values: any) => {
     // Update user profile
     updateUser({
       ...values,
       avatar: fileList.length > 0 ? fileList[0].url || fileList[0].thumbUrl : userData.avatar
     })
-    
+
     notification.success({
       message: 'Cập nhật thành công',
       description: 'Thông tin cá nhân đã được cập nhật',
       icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />
     })
   }
-  
+
   const handlePasswordSubmit = (values: any) => {
     // Update password logic would go here
     console.log('Password update values:', values)
-    
+
     notification.success({
       message: 'Cập nhật thành công',
       description: 'Mật khẩu đã được thay đổi',
       icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />
     })
-    
+
     passwordForm.resetFields()
   }
-  
+
   const handleUploadChange = ({ fileList }: any) => {
     setFileList(fileList)
   }
-  
+
   return (
     <div className="my-info-page">
       <Title level={2}>Thông tin cá nhân</Title>
-      
+
       <Tabs defaultActiveKey="profile" className="info-tabs">
         <TabPane tab="Hồ sơ" key="profile">
           <Card className="profile-card">
             <Row gutter={[32, 32]}>
               <Col xs={24} md={8}>
                 <div className="avatar-section">
-                  <Avatar 
-                    size={120} 
-                    src={userData.avatar} 
-                    icon={<UserOutlined />} 
-                    className="user-avatar"
-                  />
-                  
+                  <div className="user-avatar">
+                    <img
+                      src={userData.avatar}
+                      alt="avatar"
+                      style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: '50%' }}
+                    />
+                  </div>
+
                   <Upload
                     listType="picture"
                     maxCount={1}
@@ -107,13 +107,13 @@ const MyInfo = () => {
                   >
                     <Button icon={<UploadOutlined />}>Thay đổi ảnh đại diện</Button>
                   </Upload>
-                  
+
                   <div className="user-role">
                     <Text strong>Vai trò:</Text> {userData.role === 'admin' ? 'Quản trị viên' : 'Người dùng'}
                   </div>
                 </div>
               </Col>
-              
+
               <Col xs={24} md={16}>
                 <Form
                   form={profileForm}
@@ -122,8 +122,7 @@ const MyInfo = () => {
                     name: userData.name,
                     email: userData.email,
                     phone: userData.phone,
-                    address: userData.address,
-                    bio: userData.bio
+                    address: userData.address
                   }}
                   onFinish={handleProfileSubmit}
                 >
@@ -134,7 +133,7 @@ const MyInfo = () => {
                   >
                     <Input prefix={<UserOutlined />} placeholder="Họ và tên" />
                   </Form.Item>
-                  
+
                   <Form.Item
                     name="email"
                     label="Email"
@@ -145,7 +144,7 @@ const MyInfo = () => {
                   >
                     <Input prefix={<MailOutlined />} placeholder="Email" />
                   </Form.Item>
-                  
+
                   <Form.Item
                     name="phone"
                     label="Số điện thoại"
@@ -153,25 +152,25 @@ const MyInfo = () => {
                   >
                     <Input prefix={<PhoneOutlined />} placeholder="Số điện thoại" />
                   </Form.Item>
-                  
+
                   <Form.Item
                     name="address"
                     label="Địa chỉ"
                   >
                     <Input placeholder="Địa chỉ" />
                   </Form.Item>
-                  
+
                   <Form.Item
                     name="bio"
                     label="Giới thiệu"
                   >
                     <Input.TextArea rows={4} placeholder="Giới thiệu bản thân" />
                   </Form.Item>
-                  
+
                   <Form.Item>
-                    <Button 
-                      type="primary" 
-                      htmlType="submit" 
+                    <Button
+                      type="primary"
+                      htmlType="submit"
                       icon={<SaveOutlined />}
                       className="save-button"
                     >
@@ -183,7 +182,7 @@ const MyInfo = () => {
             </Row>
           </Card>
         </TabPane>
-        
+
         <TabPane tab="Đổi mật khẩu" key="password">
           <Card className="password-card">
             <Form
@@ -198,7 +197,7 @@ const MyInfo = () => {
               >
                 <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu hiện tại" />
               </Form.Item>
-              
+
               <Form.Item
                 name="newPassword"
                 label="Mật khẩu mới"
@@ -209,7 +208,7 @@ const MyInfo = () => {
               >
                 <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu mới" />
               </Form.Item>
-              
+
               <Form.Item
                 name="confirmPassword"
                 label="Xác nhận mật khẩu mới"
@@ -228,11 +227,11 @@ const MyInfo = () => {
               >
                 <Input.Password prefix={<LockOutlined />} placeholder="Xác nhận mật khẩu mới" />
               </Form.Item>
-              
+
               <Form.Item>
-                <Button 
-                  type="primary" 
-                  htmlType="submit" 
+                <Button
+                  type="primary"
+                  htmlType="submit"
                   icon={<SaveOutlined />}
                   className="save-button"
                 >
@@ -242,7 +241,7 @@ const MyInfo = () => {
             </Form>
           </Card>
         </TabPane>
-        
+
         <TabPane tab="Hoạt động gần đây" key="activity">
           <Card className="activity-card">
             <div className="activity-list">
@@ -250,30 +249,30 @@ const MyInfo = () => {
                 <div className="activity-time">15/03/2024 - 10:30</div>
                 <div className="activity-content">Đăng nhập vào hệ thống</div>
               </div>
-              
+
               <Divider />
-              
+
               <div className="activity-item">
                 <div className="activity-time">14/03/2024 - 15:45</div>
                 <div className="activity-content">Cập nhật thông tin sản phẩm #1234</div>
               </div>
-              
+
               <Divider />
-              
+
               <div className="activity-item">
                 <div className="activity-time">14/03/2024 - 11:20</div>
                 <div className="activity-content">Thêm sản phẩm mới</div>
               </div>
-              
+
               <Divider />
-              
+
               <div className="activity-item">
                 <div className="activity-time">13/03/2024 - 16:10</div>
                 <div className="activity-content">Xử lý đơn hàng #5678</div>
               </div>
-              
+
               <Divider />
-              
+
               <div className="activity-item">
                 <div className="activity-time">12/03/2024 - 09:15</div>
                 <div className="activity-content">Đăng nhập vào hệ thống</div>

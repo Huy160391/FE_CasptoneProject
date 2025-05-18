@@ -7,6 +7,7 @@ const { Title, Paragraph, Text } = Typography
 const { TextArea } = Input
 // const { t } = useTranslation()
 const Contact = () => {
+
   const [form] = Form.useForm()
 
   const contactInfo = [

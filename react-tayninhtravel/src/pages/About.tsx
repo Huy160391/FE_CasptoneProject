@@ -1,4 +1,4 @@
-import { Row, Col, Card, Avatar, Typography } from 'antd'
+import { Row, Col, Card, Typography } from 'antd'
 // import { useTranslation } from 'react-i18next'
 import './About.scss'
 
@@ -125,7 +125,11 @@ const About = () => {
             {teamMembers.map(member => (
               <Col xs={24} sm={12} md={6} key={member.id}>
                 <Card className="team-card" hoverable>
-                  <Avatar size={120} src={member.avatar} />
+                  <img
+                    src={member.avatar}
+                    alt={member.name}
+                    style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: '50%', display: 'block', margin: '0 auto 16px' }}
+                  />
                   <Title level={4}>{member.name}</Title>
                   <p className="position">{member.position}</p>
                   <Paragraph className="description">{member.description}</Paragraph>
