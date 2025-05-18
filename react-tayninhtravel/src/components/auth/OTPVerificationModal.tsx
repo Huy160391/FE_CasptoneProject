@@ -1,4 +1,3 @@
-/// <reference types="node" />
 
 import { useState, useEffect } from 'react';
 import { Modal, Input, Button, message } from 'antd';
