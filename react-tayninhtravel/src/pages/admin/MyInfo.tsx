@@ -5,7 +5,6 @@ import {
   Input,
   Button,
   Upload,
-  Avatar,
   Tabs,
   Row,
   Col,
@@ -90,12 +89,13 @@ const MyInfo = () => {
             <Row gutter={[32, 32]}>
               <Col xs={24} md={8}>
                 <div className="avatar-section">
-                  <Avatar
-                    size={120}
-                    src={userData.avatar}
-                    icon={<UserOutlined />}
-                    className="user-avatar"
-                  />
+                  <div className="user-avatar">
+                    <img
+                      src={userData.avatar}
+                      alt="avatar"
+                      style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: '50%' }}
+                    />
+                  </div>
 
                   <Upload
                     listType="picture"
