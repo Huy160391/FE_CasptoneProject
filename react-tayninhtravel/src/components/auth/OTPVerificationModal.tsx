@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { useState, useEffect } from 'react';
 import { Modal, Input, Button, message } from 'antd';
 import { authService } from '@/services/authService';
@@ -15,7 +17,7 @@ const OTPVerificationModal = ({ isVisible, onClose, email, onVerificationSuccess
     const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
 
     useEffect(() => {
-        let timer: NodeJS.Timeout;
+        let timer: ReturnType<typeof setTimeout>;
         if (isVisible && timeLeft > 0) {
             timer = setInterval(() => {
                 setTimeLeft((prev) => prev - 1);
