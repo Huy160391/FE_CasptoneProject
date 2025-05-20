@@ -1,5 +1,5 @@
 // API URLs
-export const API_BASE_URL = 'http://103.216.119.189/api'
+export const API_BASE_URL = 'https://tayninhtour.card-diversevercel.io.vn/api'
 
 // Social Media URLs
 export const FACEBOOK_URL = 'https://facebook.com/your-page'

@@ -27,7 +27,7 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
         name: values.fullName,
         password: values.password,
         phoneNumber: values.phone,
-        avatar: ''
+        avatar: 'https://i.imgur.com/4AiXzf8.jpg'
       })
 
       setRegisteredEmail(values.email)

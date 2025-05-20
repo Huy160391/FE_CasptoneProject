@@ -55,7 +55,7 @@ export const authService = {
                         name: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
                         role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
                         phone: decoded['Phone'] || undefined,
-                        avatar: undefined,
+                        avatar: decoded['Avatar'] || 'https://i.imgur.com/4AiXzf8.jpg',
                         address: undefined
                     };
                     localStorage.setItem('user', JSON.stringify(userInfo));
