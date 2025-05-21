@@ -103,4 +103,44 @@
             }
         }
     }
+
+    .view-more {
+        text-align: center;
+        margin-top: 40px;
+
+        .ant-btn,
+        .custom-view-more-btn {
+            background: #faf9f6;
+            color: #181828;
+            border: none;
+            border-radius: 999px;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 12px 32px;
+            box-shadow: none;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+
+            &:hover,
+            &:focus {
+                background: #f0efeb;
+                color: #181828;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .best-sellers {
+        padding: 40px 0;
+
+        .section-title {
+            font-size: 28px;
+        }
+
+        .section-subtitle {
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+    }
 }

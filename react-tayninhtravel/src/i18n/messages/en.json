@@ -49,7 +49,13 @@
         "bestSellers": {
             "title": "Best Selling Products",
             "subtitle": "Discover our most popular items that customers love",
-            "addToCart": "Add to Cart"
+            "addToCart": "Add to Cart",
+            "viewMore": "View More Products"
+        },
+        "blogPosts": {
+            "title": "Latest News & Stories",
+            "subtitle": "Discover the latest news, travel tips, and stories about Tay Ninh",
+            "viewMore": "View All Posts"
         }
     },
     "common": {
@@ -92,7 +98,14 @@
         "open": "Open",
         "yes": "Yes",
         "no": "No",
-        "ok": "OK"
+        "ok": "OK",
+        "logoutSuccess": "Logout successful",
+        "addToCartSuccess": "Added to cart successfully",
+        "addToCartDescription": "Added {{quantity}} {{name}} to cart",
+        "removeFromFavorites": "Removed from favorites",
+        "addToFavorites": "Added to favorites",
+        "bookTourSuccess": "Tour booked successfully",
+        "bookTourDescription": "Added {{participants}} tickets for {{name}} to cart"
     },
     "auth": {
         "email": "Email",
@@ -109,18 +122,42 @@
         "noAccount": "Don't have an account?",
         "haveAccount": "Already have an account?",
         "signUp": "Sign Up",
-        "signIn": "Sign In"
+        "signIn": "Sign In",
+        "fullName": "Full Name",
+        "nameRequired": "Please enter your full name",
+        "nameInvalid": "Name must contain only letters and spaces",
+        "phone": "Phone Number",
+        "phoneRequired": "Please enter your phone number",
+        "phoneInvalid": "Please enter a valid phone number",
+        "agreement": "I agree to the",
+        "termsOfService": "Terms of Service",
+        "and": "and",
+        "privacyPolicy": "Privacy Policy",
+        "agreementRequired": "Please agree to the terms and conditions",
+        "orLoginWith": "Or login with",
+        "orRegisterWith": "Or register with",
+        "emailVerification": "Email Verification",
+        "otpInstructions": "Please enter the OTP sent to your email {email}",
+        "timeRemaining": "Time remaining",
+        "enterOTP": "Enter 6-digit OTP",
+        "verify": "Verify",
+        "otpInvalid": "OTP must be 6 digits",
+        "verificationSuccess": "Email verification successful",
+        "verificationFailed": "Verification failed. Please try again"
     },
     "profile": {
         "personalInfo": "Personal Information",
         "changeAvatar": "Change Avatar",
         "name": "Full Name",
         "nameRequired": "Please enter your name",
+        "nameInvalid": "Name must contain only letters and spaces",
         "email": "Email",
         "emailRequired": "Please enter your email",
         "emailInvalid": "Please enter a valid email",
         "phone": "Phone Number",
         "phoneRequired": "Please enter your phone number",
+        "address": "Address",
+        "bio": "Bio",
         "saveChanges": "Save Changes",
         "changePassword": "Change Password",
         "currentPassword": "Current Password",
@@ -132,6 +169,7 @@
         "passwordMismatch": "The two passwords do not match",
         "updateSuccess": "Profile updated successfully",
         "passwordChangeSuccess": "Password changed successfully",
+        "passwordChangeFailed": "Failed to change password",
         "bookingHistory": "Booking History",
         "bookingDate": "Booking Date",
         "price": "Price",
@@ -140,6 +178,34 @@
         "transactionHistory": "Transaction History",
         "transactionDate": "Transaction Date",
         "amount": "Amount",
-        "commentHistory": "Comment History"
+        "commentHistory": "Comment History",
+        "personalInfoUpdateSuccess": "Personal information has been updated",
+        "passwordUpdateSuccess": "Password has been changed"
+    },
+    "footer": {
+        "companyName": "Tay Ninh Tour",
+        "description": "Explore Vietnam's beauty in one day with high-quality tours, professional guides, and memorable experiences.",
+        "tours": {
+            "hanoi": "Hanoi",
+            "hoChiMinh": "Ho Chi Minh City",
+            "daNang": "Da Nang",
+            "nhaTrang": "Nha Trang",
+            "phuQuoc": "Phu Quoc"
+        },
+        "services": {
+            "dayTours": "Day Tours",
+            "multiDayTours": "Multi-day Tours",
+            "privateTours": "Private Tours",
+            "groupTours": "Group Tours",
+            "customTours": "Custom Tours"
+        },
+        "contact": {
+            "address": "123 ABC Street, XYZ District, Tay Ninh City",
+            "phone": "+84 123 456 789",
+            "email": "info@tayninhtravel.com"
+        }
+    },
+    "contact": {
+        "submitSuccess": "Thank you for contacting us! We will respond as soon as possible."
     }
 }

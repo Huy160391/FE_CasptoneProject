@@ -80,7 +80,7 @@ const Navbar = () => {
     // Cập nhật state trong useAuthStore
     logout();
 
-    message.success('Đăng xuất thành công!');
+    message.success(t('common.logoutSuccess'));
   }
 
   const menuItems = [
