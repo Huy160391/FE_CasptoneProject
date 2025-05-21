@@ -30,6 +30,7 @@ import {
 } from '@ant-design/icons'
 import './ProductDetail.scss'
 import { useCartStore } from '@/store/useCartStore'
+import { useTranslation } from 'react-i18next'
 // CheckCircleOutlined, of import ant-design/icons
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
@@ -143,6 +144,7 @@ const ProductDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
 
   const addToCart = useCartStore(state => state.addItem)
+  const { t } = useTranslation()
 
   // Fetch product data
   useEffect(() => {
@@ -226,8 +228,8 @@ const ProductDetail = () => {
     })
 
     notification.success({
-      message: 'Thêm vào giỏ hàng thành công',
-      description: `Đã thêm ${quantity} sản phẩm "${product.name}" vào giỏ hàng.`,
+      message: t('common.addToCartSuccess'),
+      description: t('common.addToCartDescription', { quantity, name: product.name }),
       icon: <ShoppingCartOutlined style={{ color: '#52c41a' }} />,
     })
   }
@@ -241,7 +243,7 @@ const ProductDetail = () => {
   const handleToggleFavorite = () => {
     setIsFavorite(!isFavorite)
     notification.info({
-      message: isFavorite ? 'Đã xóa khỏi danh sách yêu thích' : 'Đã thêm vào danh sách yêu thích',
+      message: isFavorite ? t('common.removeFromFavorites') : t('common.addToFavorites'),
       icon: isFavorite ? <HeartOutlined /> : <HeartFilled style={{ color: '#ff4d4f' }} />,
     })
   }

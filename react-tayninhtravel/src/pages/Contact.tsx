@@ -1,13 +1,13 @@
 import { Row, Col, Form, Input, Button, Typography, Card, message } from 'antd'
 import { EnvironmentOutlined, PhoneOutlined, MailOutlined, ClockCircleOutlined } from '@ant-design/icons'
-// import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import './Contact.scss'
 
 const { Title, Paragraph, Text } = Typography
 const { TextArea } = Input
-// const { t } = useTranslation()
-const Contact = () => {
 
+const Contact = () => {
+  const { t } = useTranslation()
   const [form] = Form.useForm()
 
   const contactInfo = [
@@ -35,7 +35,7 @@ const Contact = () => {
 
   const handleSubmit = (values: any) => {
     console.log('Form values:', values)
-    message.success('Cảm ơn bạn đã liên hệ với chúng tôi! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.')
+    message.success(t('contact.submitSuccess'))
     form.resetFields()
   }
 

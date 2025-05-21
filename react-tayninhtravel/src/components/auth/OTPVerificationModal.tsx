@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Modal, Input, Button, message } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { authService } from '@/services/authService';
 
 interface OTPVerificationModalProps {
@@ -10,6 +11,7 @@ interface OTPVerificationModalProps {
 }
 
 const OTPVerificationModal = ({ isVisible, onClose, email, onVerificationSuccess }: OTPVerificationModalProps) => {
+    const { t } = useTranslation();
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
@@ -28,18 +30,18 @@ const OTPVerificationModal = ({ isVisible, onClose, email, onVerificationSuccess
 
     const handleVerify = async () => {
         if (otp.length !== 6) {
-            message.error('Mã OTP phải gồm 6 chữ số!');
+            message.error(t('auth.otpInvalid'));
             return;
         }
 
         try {
             setLoading(true);
             await authService.verifyOTP(email, otp);
-            message.success('Xác thực email thành công!');
+            message.success(t('auth.verificationSuccess'));
             onVerificationSuccess();
             onClose();
         } catch (error: any) {
-            message.error(error.response?.data?.message || 'Xác thực thất bại. Vui lòng thử lại!');
+            message.error(error.response?.data?.message || t('auth.verificationFailed'));
         } finally {
             setLoading(false);
         }
@@ -53,20 +55,20 @@ const OTPVerificationModal = ({ isVisible, onClose, email, onVerificationSuccess
 
     return (
         <Modal
-            title="Xác thực Email"
+            title={t('auth.emailVerification')}
             open={isVisible}
             onCancel={onClose}
             footer={null}
             destroyOnClose
         >
             <div style={{ textAlign: 'center' }}>
-                <p>Vui lòng nhập mã OTP đã được gửi đến email {email}</p>
-                <p>Thời gian còn lại: {formatTime(timeLeft)}</p>
+                <p>{t('auth.otpInstructions', { email })}</p>
+                <p>{t('auth.timeRemaining')}: {formatTime(timeLeft)}</p>
                 <Input
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    placeholder="Nhập mã OTP 6 chữ số"
+                    placeholder={t('auth.enterOTP')}
                     style={{ marginBottom: 16 }}
                 />
                 <Button
@@ -75,7 +77,7 @@ const OTPVerificationModal = ({ isVisible, onClose, email, onVerificationSuccess
                     loading={loading}
                     block
                 >
-                    Xác thực
+                    {t('auth.verify')}
                 </Button>
             </div>
         </Modal>

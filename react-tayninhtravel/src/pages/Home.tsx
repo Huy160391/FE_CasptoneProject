@@ -4,6 +4,7 @@ import FeaturedTours from '../components/home/FeaturedTours'
 import WhyChooseUs from '../components/home/WhyChooseUs'
 import FeaturedGuides from '../components/home/FeaturedGuides'
 import BestSellers from '../components/home/BestSellers'
+import BlogPosts from '../components/home/BlogPosts'
 import './Home.scss'
 
 // const { t } = useTranslation()
@@ -14,6 +15,7 @@ const Home = () => {
       <HeroSection />
       <div className="container">
         <FeaturedTours />
+        <BlogPosts />
         <BestSellers />
         <FeaturedGuides />
         <WhyChooseUs />

@@ -14,6 +14,11 @@ interface RegisterCredentials {
     avatar?: string;
 }
 
+interface ChangePasswordRequest {
+    oldPassword: string;
+    newPassword: string;
+}
+
 interface LoginResponse {
     user: {
         id: number;
@@ -82,6 +87,22 @@ export const authService = {
     verifyOTP: async (email: string, otp: string): Promise<void> => {
         try {
             await axiosInstance.post('/Authentication/verify-otp', { email, otp });
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    changePassword: async (request: ChangePasswordRequest): Promise<void> => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+            await axiosInstance.put('/Account/change-password', request, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
         } catch (error) {
             throw error;
         }

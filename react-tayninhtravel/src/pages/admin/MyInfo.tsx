@@ -24,6 +24,7 @@ import {
 import type { UploadFile } from 'antd/es/upload/interface'
 import { useAuthStore } from '@/store/useAuthStore'
 import './MyInfo.scss'
+import { useTranslation } from 'react-i18next'
 
 const { Title, Text } = Typography
 const { TabPane } = Tabs
@@ -35,6 +36,7 @@ const MyInfo = () => {
 
   const user = useAuthStore(state => state.user)
   const updateUser = useAuthStore(state => state.updateUser)
+  const { t } = useTranslation()
 
   // Mock user data if not available in store
   const userData = user || {
@@ -56,8 +58,8 @@ const MyInfo = () => {
     })
 
     notification.success({
-      message: 'Cập nhật thành công',
-      description: 'Thông tin cá nhân đã được cập nhật',
+      message: t('common.updateSuccess'),
+      description: t('profile.personalInfoUpdateSuccess'),
       icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />
     })
   }
@@ -67,8 +69,8 @@ const MyInfo = () => {
     console.log('Password update values:', values)
 
     notification.success({
-      message: 'Cập nhật thành công',
-      description: 'Mật khẩu đã được thay đổi',
+      message: t('common.updateSuccess'),
+      description: t('profile.passwordUpdateSuccess'),
       icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />
     })
 
@@ -128,43 +130,49 @@ const MyInfo = () => {
                 >
                   <Form.Item
                     name="name"
-                    label="Họ và tên"
-                    rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+                    label={t('profile.name')}
+                    rules={[
+                      { required: true, message: t('profile.nameRequired') },
+                      { pattern: /^[a-zA-Z\s]*$/, message: t('profile.nameInvalid') }
+                    ]}
                   >
-                    <Input prefix={<UserOutlined />} placeholder="Họ và tên" />
+                    <Input prefix={<UserOutlined />} placeholder={t('profile.name')} />
                   </Form.Item>
 
                   <Form.Item
                     name="email"
-                    label="Email"
+                    label={t('profile.email')}
                     rules={[
-                      { required: true, message: 'Vui lòng nhập email' },
-                      { type: 'email', message: 'Email không hợp lệ' }
+                      { required: true, message: t('profile.emailRequired') },
+                      { type: 'email', message: t('profile.emailInvalid') }
                     ]}
                   >
-                    <Input prefix={<MailOutlined />} placeholder="Email" />
+                    <Input prefix={<MailOutlined />} placeholder={t('profile.email')} />
                   </Form.Item>
 
                   <Form.Item
                     name="phone"
-                    label="Số điện thoại"
-                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                    label={t('profile.phone')}
+                    rules={[
+                      { required: true, message: t('profile.phoneRequired') },
+                      { pattern: /^[0-9]{10}$/, message: t('auth.phoneInvalid') }
+                    ]}
                   >
-                    <Input prefix={<PhoneOutlined />} placeholder="Số điện thoại" />
+                    <Input prefix={<PhoneOutlined />} placeholder={t('profile.phone')} />
                   </Form.Item>
 
                   <Form.Item
                     name="address"
-                    label="Địa chỉ"
+                    label={t('profile.address')}
                   >
-                    <Input placeholder="Địa chỉ" />
+                    <Input placeholder={t('profile.address')} />
                   </Form.Item>
 
                   <Form.Item
                     name="bio"
-                    label="Giới thiệu"
+                    label={t('profile.bio')}
                   >
-                    <Input.TextArea rows={4} placeholder="Giới thiệu bản thân" />
+                    <Input.TextArea rows={4} placeholder={t('profile.bio')} />
                   </Form.Item>
 
                   <Form.Item>
@@ -174,7 +182,7 @@ const MyInfo = () => {
                       icon={<SaveOutlined />}
                       className="save-button"
                     >
-                      Lưu thay đổi
+                      {t('profile.saveChanges')}
                     </Button>
                   </Form.Item>
                 </Form>
@@ -192,40 +200,40 @@ const MyInfo = () => {
             >
               <Form.Item
                 name="currentPassword"
-                label="Mật khẩu hiện tại"
-                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại' }]}
+                label={t('profile.currentPassword')}
+                rules={[{ required: true, message: t('profile.currentPasswordRequired') }]}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu hiện tại" />
+                <Input.Password prefix={<LockOutlined />} placeholder={t('profile.currentPassword')} />
               </Form.Item>
 
               <Form.Item
                 name="newPassword"
-                label="Mật khẩu mới"
+                label={t('profile.newPassword')}
                 rules={[
-                  { required: true, message: 'Vui lòng nhập mật khẩu mới' },
-                  { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự' }
+                  { required: true, message: t('profile.newPasswordRequired') },
+                  { min: 8, message: t('auth.passwordInvalid') }
                 ]}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu mới" />
+                <Input.Password prefix={<LockOutlined />} placeholder={t('profile.newPassword')} />
               </Form.Item>
 
               <Form.Item
                 name="confirmPassword"
-                label="Xác nhận mật khẩu mới"
+                label={t('profile.confirmPassword')}
                 dependencies={['newPassword']}
                 rules={[
-                  { required: true, message: 'Vui lòng xác nhận mật khẩu mới' },
+                  { required: true, message: t('profile.confirmPasswordRequired') },
                   ({ getFieldValue }) => ({
                     validator(_, value) {
                       if (!value || getFieldValue('newPassword') === value) {
                         return Promise.resolve()
                       }
-                      return Promise.reject(new Error('Mật khẩu xác nhận không khớp'))
+                      return Promise.reject(new Error(t('profile.passwordMismatch')))
                     },
                   }),
                 ]}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder="Xác nhận mật khẩu mới" />
+                <Input.Password prefix={<LockOutlined />} placeholder={t('profile.confirmPassword')} />
               </Form.Item>
 
               <Form.Item>
@@ -235,7 +243,7 @@ const MyInfo = () => {
                   icon={<SaveOutlined />}
                   className="save-button"
                 >
-                  Cập nhật mật khẩu
+                  {t('profile.changePassword')}
                 </Button>
               </Form.Item>
             </Form>

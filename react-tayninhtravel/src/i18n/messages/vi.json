@@ -49,7 +49,13 @@
         "bestSellers": {
             "title": "Sản Phẩm Bán Chạy",
             "subtitle": "Khám phá những sản phẩm được yêu thích nhất của chúng tôi",
-            "addToCart": "Thêm vào giỏ"
+            "addToCart": "Thêm vào giỏ",
+            "viewMore": "Xem thêm sản phẩm"
+        },
+        "blogPosts": {
+            "title": "Tin Tức & Câu Chuyện",
+            "subtitle": "Khám phá tin tức mới nhất, mẹo du lịch và những câu chuyện về Tây Ninh",
+            "viewMore": "Xem tất cả bài viết"
         }
     },
     "common": {
@@ -92,7 +98,14 @@
         "open": "Mở",
         "yes": "Có",
         "no": "Không",
-        "ok": "OK"
+        "ok": "OK",
+        "logoutSuccess": "Đăng xuất thành công",
+        "addToCartSuccess": "Thêm vào giỏ hàng thành công",
+        "addToCartDescription": "Đã thêm {{quantity}} {{name}} vào giỏ hàng",
+        "removeFromFavorites": "Đã xóa khỏi danh sách yêu thích",
+        "addToFavorites": "Đã thêm vào danh sách yêu thích",
+        "bookTourSuccess": "Đặt tour thành công",
+        "bookTourDescription": "Đã thêm {{participants}} vé tour {{name}} vào giỏ hàng"
     },
     "auth": {
         "email": "Email",
@@ -109,18 +122,65 @@
         "noAccount": "Chưa có tài khoản?",
         "haveAccount": "Đã có tài khoản?",
         "signUp": "Đăng ký",
-        "signIn": "Đăng nhập"
+        "signIn": "Đăng nhập",
+        "fullName": "Họ và tên",
+        "nameRequired": "Vui lòng nhập họ và tên",
+        "nameInvalid": "Tên chỉ được chứa chữ cái và khoảng trắng",
+        "phone": "Số điện thoại",
+        "phoneRequired": "Vui lòng nhập số điện thoại",
+        "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ",
+        "agreement": "Tôi đồng ý với",
+        "termsOfService": "Điều khoản dịch vụ",
+        "and": "và",
+        "privacyPolicy": "Chính sách bảo mật",
+        "agreementRequired": "Vui lòng đồng ý với điều khoản dịch vụ",
+        "orLoginWith": "Hoặc đăng nhập với",
+        "orRegisterWith": "Hoặc đăng ký với",
+        "emailVerification": "Xác thực Email",
+        "otpInstructions": "Vui lòng nhập mã OTP đã được gửi đến email {email}",
+        "timeRemaining": "Thời gian còn lại",
+        "enterOTP": "Nhập mã OTP 6 chữ số",
+        "verify": "Xác thực",
+        "otpInvalid": "Mã OTP phải gồm 6 chữ số",
+        "verificationSuccess": "Xác thực email thành công",
+        "verificationFailed": "Xác thực thất bại. Vui lòng thử lại"
+    },
+    "footer": {
+        "companyName": "Tay Ninh Tour",
+        "description": "Khám phá vẻ đẹp Việt Nam trong một ngày với các tour du lịch chất lượng cao, hướng dẫn viên chuyên nghiệp và trải nghiệm đáng nhớ.",
+        "tours": {
+            "hanoi": "Hà Nội",
+            "hoChiMinh": "Hồ Chí Minh",
+            "daNang": "Đà Nẵng",
+            "nhaTrang": "Nha Trang",
+            "phuQuoc": "Phú Quốc"
+        },
+        "services": {
+            "dayTours": "Tour Ngày",
+            "multiDayTours": "Tour Nhiều Ngày",
+            "privateTours": "Tour Riêng",
+            "groupTours": "Tour Nhóm",
+            "customTours": "Tour Tùy Chỉnh"
+        },
+        "contact": {
+            "address": "123 Đường ABC, Quận XYZ, TP. Tây Ninh",
+            "phone": "+84 123 456 789",
+            "email": "info@tayninhtravel.com"
+        }
     },
     "profile": {
         "personalInfo": "Thông tin cá nhân",
         "changeAvatar": "Thay đổi ảnh đại diện",
         "name": "Họ và tên",
         "nameRequired": "Vui lòng nhập họ tên",
+        "nameInvalid": "Tên chỉ được chứa chữ cái và khoảng trắng",
         "email": "Email",
         "emailRequired": "Vui lòng nhập email",
         "emailInvalid": "Vui lòng nhập email hợp lệ",
         "phone": "Số điện thoại",
         "phoneRequired": "Vui lòng nhập số điện thoại",
+        "address": "Địa chỉ",
+        "bio": "Giới thiệu",
         "saveChanges": "Lưu thay đổi",
         "changePassword": "Đổi mật khẩu",
         "currentPassword": "Mật khẩu hiện tại",
@@ -132,6 +192,7 @@
         "passwordMismatch": "Mật khẩu không khớp",
         "updateSuccess": "Cập nhật thông tin thành công",
         "passwordChangeSuccess": "Đổi mật khẩu thành công",
+        "passwordChangeFailed": "Đổi mật khẩu thất bại",
         "bookingHistory": "Lịch sử đặt tour",
         "bookingDate": "Ngày đặt",
         "price": "Giá",
@@ -140,6 +201,11 @@
         "transactionHistory": "Lịch sử giao dịch",
         "transactionDate": "Ngày giao dịch",
         "amount": "Số tiền",
-        "commentHistory": "Lịch sử đánh giá"
+        "commentHistory": "Lịch sử đánh giá",
+        "personalInfoUpdateSuccess": "Thông tin cá nhân đã được cập nhật",
+        "passwordUpdateSuccess": "Mật khẩu đã được thay đổi"
+    },
+    "contact": {
+        "submitSuccess": "Cảm ơn bạn đã liên hệ với chúng tôi! Chúng tôi sẽ phản hồi trong thời gian sớm nhất."
     }
 }

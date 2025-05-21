@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { UploadFile } from 'antd/es/upload/interface';
 import axiosInstance from '@/config/axios';
+import { authService } from '@/services/authService';
 import './Profile.scss';
 
 const { TabPane } = Tabs;
@@ -97,9 +98,21 @@ const Profile = () => {
         }
     };
 
-    const handlePasswordChange = () => {
-        // TODO: Implement password change logic
-        message.success(t('profile.passwordChangeSuccess'));
+    const handlePasswordChange = async (values: any) => {
+        try {
+            setLoading(true);
+            await authService.changePassword({
+                oldPassword: values.currentPassword,
+                newPassword: values.newPassword
+            });
+            message.success(t('profile.passwordChangeSuccess'));
+            form.resetFields();
+        } catch (error: any) {
+            console.error('Change password error:', error);
+            message.error(error.response?.data?.message || t('profile.passwordChangeFailed'));
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!user) {
@@ -155,7 +168,10 @@ const Profile = () => {
                                         <Form.Item
                                             name="name"
                                             label={t('profile.name')}
-                                            rules={[{ required: true, message: t('profile.nameRequired') }]}
+                                            rules={[
+                                                { required: true, message: t('profile.nameRequired') },
+                                                { pattern: /^[a-zA-Z\s]*$/, message: t('profile.nameInvalid') }
+                                            ]}
                                         >
                                             <Input prefix={<UserOutlined />} />
                                         </Form.Item>

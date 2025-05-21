@@ -2,6 +2,7 @@ import React from 'react'
 import { Row, Col, Card, Button, Rate, Tag } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { ShoppingCartOutlined } from '@ant-design/icons'
+import { Link } from 'react-router-dom'
 import './BestSellers.scss'
 
 const { Meta } = Card
@@ -108,6 +109,14 @@ const BestSellers: React.FC = () => {
                         </Col>
                     ))}
                 </Row>
+
+                <div className="view-more">
+                    <Link to="/shop">
+                        <Button type="primary" size="large">
+                            {t('home.bestSellers.viewMore')}
+                        </Button>
+                    </Link>
+                </div>
             </div>
         </section>
     )

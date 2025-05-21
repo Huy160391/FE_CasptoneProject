@@ -27,12 +27,12 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
       })
 
       login(response.user, response.token)
-      message.success('Đăng nhập thành công!')
+      message.success(t('common.loginSuccess'))
       form.resetFields()
       onClose()
     } catch (error: any) {
       console.error('Login error:', error)
-      message.error(error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại!')
+      message.error(error.response?.data?.message || t('common.loginFailed'))
     } finally {
       setLoading(false)
     }
@@ -67,24 +67,24 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
         <Form.Item
           name="email"
           rules={[
-            { required: true, message: 'Vui lòng nhập email!' },
-            { type: 'email', message: 'Email không hợp lệ!' }
+            { required: true, message: t('auth.emailRequired') },
+            { type: 'email', message: t('auth.emailInvalid') }
           ]}
         >
           <Input
             prefix={<UserOutlined />}
-            placeholder="Email"
+            placeholder={t('auth.email')}
             size="large"
           />
         </Form.Item>
 
         <Form.Item
           name="password"
-          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+          rules={[{ required: true, message: t('auth.passwordRequired') }]}
         >
           <Input.Password
             prefix={<LockOutlined />}
-            placeholder="Mật khẩu"
+            placeholder={t('auth.password')}
             size="large"
           />
         </Form.Item>
@@ -92,9 +92,9 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
         <Form.Item>
           <div className="form-actions">
             <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox>Ghi nhớ đăng nhập</Checkbox>
+              <Checkbox>{t('auth.rememberMe')}</Checkbox>
             </Form.Item>
-            <a className="forgot-password" href="#">Quên mật khẩu?</a>
+            <a className="forgot-password" href="#">{t('auth.forgotPassword')}</a>
           </div>
         </Form.Item>
 
@@ -111,7 +111,7 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
           </Button>
         </Form.Item>
 
-        <Divider plain>Hoặc đăng nhập với</Divider>
+        <Divider plain>{t('auth.orLoginWith')}</Divider>
 
         <div className="social-login">
           <Button
@@ -131,7 +131,7 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
         </div>
 
         <div className="register-link">
-          Chưa có tài khoản? <a onClick={handleRegisterClick}>Đăng ký ngay</a>
+          {t('auth.noAccount')} <a onClick={handleRegisterClick}>{t('auth.signUp')}</a>
         </div>
       </Form>
     </Modal>

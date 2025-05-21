@@ -34,6 +34,7 @@ import {
 } from '@ant-design/icons'
 import './ThingsToDoDetail.scss'
 import { useCartStore } from '@/store/useCartStore'
+import { useTranslation } from 'react-i18next'
 
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
@@ -205,6 +206,7 @@ const ThingsToDoDetail = () => {
   const [form] = Form.useForm()
 
   const addToCart = useCartStore(state => state.addItem)
+  const { t } = useTranslation()
 
   useEffect(() => {
     // Simulate API fetch
@@ -242,8 +244,8 @@ const ThingsToDoDetail = () => {
     })
 
     notification.success({
-      message: 'Đặt tour thành công',
-      description: `Đã thêm ${participants} vé tour "${tour.title}" vào giỏ hàng.`,
+      message: t('common.bookTourSuccess'),
+      description: t('common.bookTourDescription', { participants, name: tour.title }),
       icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
     })
   }

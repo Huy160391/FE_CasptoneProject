@@ -39,7 +39,7 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
         setRegisteredEmail(values.email)
         setShowOTPModal(true)
       } else {
-        message.error(error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại!')
+        message.error(error.response?.data?.message || t('common.registerFailed'))
       }
     } finally {
       setLoading(false)
@@ -80,11 +80,14 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
         >
           <Form.Item
             name="fullName"
-            rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
+            rules={[
+              { required: true, message: t('auth.nameRequired') },
+              { pattern: /^[a-zA-Z\s]*$/, message: t('auth.nameInvalid') }
+            ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="Họ tên"
+              placeholder={t('auth.fullName')}
               size="large"
             />
           </Form.Item>
@@ -92,44 +95,37 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
+              { required: true, message: t('auth.emailRequired') },
               {
                 validator: (_, value) => {
-                  console.log('Validating email:', value);
-                  // Pattern đơn giản hơn: cho phép chữ cái, số, dấu chấm, dấu gạch dưới trước @
-                  // và domain phải có ít nhất 1 dấu chấm
                   const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                   const isValid = emailPattern.test(value);
-                  console.log('Email validation result:', isValid);
 
                   if (!value || isValid) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('Email không hợp lệ!'));
+                  return Promise.reject(new Error(t('auth.emailInvalid')));
                 }
               }
             ]}
           >
             <Input
               prefix={<MailOutlined />}
-              placeholder="Email"
+              placeholder={t('auth.email')}
               size="large"
-              onChange={(e) => {
-                console.log('Email input changed:', e.target.value);
-              }}
             />
           </Form.Item>
 
           <Form.Item
             name="phone"
             rules={[
-              { required: true, message: 'Vui lòng nhập số điện thoại!' },
-              { pattern: /^[0-9]{10}$/, message: 'Số điện thoại không hợp lệ!' }
+              { required: true, message: t('auth.phoneRequired') },
+              { pattern: /^[0-9]{10}$/, message: t('auth.phoneInvalid') }
             ]}
           >
             <Input
               prefix={<PhoneOutlined />}
-              placeholder="Số điện thoại"
+              placeholder={t('auth.phone')}
               size="large"
             />
           </Form.Item>
@@ -137,13 +133,13 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu!' },
-              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
+              { required: true, message: t('auth.passwordRequired') },
+              { min: 6, message: t('auth.passwordInvalid') }
             ]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Mật khẩu"
+              placeholder={t('auth.password')}
               size="large"
             />
           </Form.Item>
@@ -152,20 +148,20 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
             name="confirmPassword"
             dependencies={['password']}
             rules={[
-              { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+              { required: true, message: t('auth.confirmPasswordRequired') },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve()
                   }
-                  return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'))
+                  return Promise.reject(new Error(t('auth.passwordMismatch')))
                 },
               }),
             ]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Xác nhận mật khẩu"
+              placeholder={t('auth.confirmPassword')}
               size="large"
             />
           </Form.Item>
@@ -176,12 +172,12 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
             rules={[
               {
                 validator: (_, value) =>
-                  value ? Promise.resolve() : Promise.reject(new Error('Vui lòng đồng ý với điều khoản dịch vụ!')),
+                  value ? Promise.resolve() : Promise.reject(new Error(t('auth.agreementRequired'))),
               },
             ]}
           >
             <Checkbox>
-              Tôi đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a>
+              {t('auth.agreement')} <a href="#">{t('auth.termsOfService')}</a> {t('auth.and')} <a href="#">{t('auth.privacyPolicy')}</a>
             </Checkbox>
           </Form.Item>
 
@@ -198,7 +194,7 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
             </Button>
           </Form.Item>
 
-          <Divider plain>Hoặc đăng ký với</Divider>
+          <Divider plain>{t('auth.orRegisterWith')}</Divider>
 
           <div className="social-login">
             <Button
@@ -218,7 +214,7 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
           </div>
 
           <div className="login-link">
-            Đã có tài khoản? <a onClick={handleLoginClick}>Đăng nhập</a>
+            {t('auth.haveAccount')} <a onClick={handleLoginClick}>{t('auth.signIn')}</a>
           </div>
         </Form>
       </Modal>
