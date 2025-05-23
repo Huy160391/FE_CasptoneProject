@@ -19,6 +19,10 @@ interface ChangePasswordRequest {
     newPassword: string;
 }
 
+interface EditAvatarRequest {
+    avatar: string;
+}
+
 interface LoginResponse {
     user: {
         id: number;
@@ -115,5 +119,39 @@ export const authService = {
         } catch (error) {
             throw error;
         }
-    }
-}; 
+    },
+
+    sendOtpResetPassword: async (email: string): Promise<void> => {
+        try {
+            await axiosInstance.post('/Authentication/send-otp-reset-password', { email });
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    resetPassword: async (email: string, otp: string, newPassword: string): Promise<void> => {
+        try {
+            await axiosInstance.post('/Authentication/reset-password', { email, otp, newPassword });
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    editAvatar: async (avatar: string): Promise<void> => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const request: EditAvatarRequest = { avatar };
+            await axiosInstance.put('/Account/edit-Avatar', request, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        } catch (error) {
+            throw error;
+        }
+    },
+};

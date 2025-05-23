@@ -143,7 +143,16 @@
         "verify": "Xác thực",
         "otpInvalid": "Mã OTP phải gồm 6 chữ số",
         "verificationSuccess": "Xác thực email thành công",
-        "verificationFailed": "Xác thực thất bại. Vui lòng thử lại"
+        "verificationFailed": "Xác thực thất bại. Vui lòng thử lại",
+        "forgotPasswordTitle": "Quên Mật Khẩu",
+        "forgotPasswordInstructions": "Vui lòng nhập email để nhận mã đặt lại mật khẩu",
+        "sendResetCode": "Gửi Mã Đặt Lại",
+        "resetPasswordTitle": "Đặt Lại Mật Khẩu",
+        "resetPasswordInstructions": "Vui lòng nhập mã OTP đã được gửi đến email {email} và mật khẩu mới",
+        "newPassword": "Mật Khẩu Mới",
+        "resetPassword": "Đặt Lại Mật Khẩu",
+        "resetPasswordSuccess": "Đặt lại mật khẩu thành công",
+        "resetPasswordFailed": "Đặt lại mật khẩu thất bại. Vui lòng thử lại"
     },
     "footer": {
         "companyName": "Tay Ninh Tour",
@@ -171,6 +180,10 @@
     "profile": {
         "personalInfo": "Thông tin cá nhân",
         "changeAvatar": "Thay đổi ảnh đại diện",
+        "saveAvatar": "Lưu ảnh đại diện",
+        "avatarUpdateSuccess": "Cập nhật ảnh đại diện thành công",
+        "avatarUpdateFailed": "Cập nhật ảnh đại diện thất bại",
+        "avatarUploadFailed": "Tải lên ảnh đại diện thất bại",
         "name": "Họ và tên",
         "nameRequired": "Vui lòng nhập họ tên",
         "nameInvalid": "Tên chỉ được chứa chữ cái và khoảng trắng",
@@ -191,6 +204,7 @@
         "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu mới",
         "passwordMismatch": "Mật khẩu không khớp",
         "updateSuccess": "Cập nhật thông tin thành công",
+        "updateFailed": "Cập nhật thông tin thất bại",
         "passwordChangeSuccess": "Đổi mật khẩu thành công",
         "passwordChangeFailed": "Đổi mật khẩu thất bại",
         "bookingHistory": "Lịch sử đặt tour",

@@ -4,6 +4,7 @@ import { UserOutlined, LockOutlined, GoogleOutlined, FacebookOutlined } from '@a
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/useAuthStore'
 import { authService } from '@/services/authService'
+import ForgotPasswordModal from './ForgotPasswordModal'
 import './AuthModal.scss'
 
 interface LoginModalProps {
@@ -16,6 +17,7 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
   const login = useAuthStore(state => state.login)
 
   const handleSubmit = async (values: any) => {
@@ -94,7 +96,7 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>{t('auth.rememberMe')}</Checkbox>
             </Form.Item>
-            <a className="forgot-password" href="#">{t('auth.forgotPassword')}</a>
+            <a className="forgot-password" onClick={() => setShowForgotPassword(true)}>{t('auth.forgotPassword')}</a>
           </div>
         </Form.Item>
 
@@ -134,6 +136,11 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
           {t('auth.noAccount')} <a onClick={handleRegisterClick}>{t('auth.signUp')}</a>
         </div>
       </Form>
+
+      <ForgotPasswordModal
+        isVisible={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </Modal>
   )
 }
