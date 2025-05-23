@@ -97,3 +97,98 @@
     }
   }
 }
+
+/* Dark mode styles for admin reviews page */
+body.dark-mode {
+  .reviews-page {
+    .page-header {
+      h1 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+    
+    .reviews-table {
+      background-color: #141414;
+      
+      .ant-table {
+        background-color: #141414;
+        
+        .ant-table-thead > tr > th {
+          background-color: #1f1f1f;
+          color: rgba(255, 255, 255, 0.85);
+          border-bottom: 1px solid #303030;
+        }
+        
+        .ant-table-tbody > tr > td {
+          border-bottom: 1px solid #303030;
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-table-tbody > tr.ant-table-row:hover > td {
+          background-color: #1f1f1f;
+        }
+      }
+      
+      .status-tag {
+        &.success {
+          background-color: rgba(82, 196, 26, 0.2);
+          color: #52c41a;
+          border-color: rgba(82, 196, 26, 0.4);
+        }
+        
+        &.processing {
+          background-color: rgba(22, 119, 255, 0.2);
+          color: #1677ff;
+          border-color: rgba(22, 119, 255, 0.4);
+        }
+        
+        &.error {
+          background-color: rgba(245, 34, 45, 0.2);
+          color: #ff4d4f;
+          border-color: rgba(245, 34, 45, 0.4);
+        }
+      }
+    }
+    
+    .review-details {
+      background-color: #141414;
+      
+      .review-info {
+        p {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+      
+      .review-comment {
+        h3 {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        p {
+          background-color: #1f1f1f;
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+    
+    .edit-review-form {
+      .form-item {
+        .ant-form-item-label > label {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      
+      .ant-input, 
+      .ant-input-textarea {
+        background-color: #1f1f1f;
+        border-color: #303030;
+        color: rgba(255, 255, 255, 0.85);
+        
+        &:focus, 
+        &:hover {
+          border-color: #79eac0;
+        }
+      }
+    }
+  }
+}

@@ -60,9 +60,8 @@ const OTPVerificationModal = ({ isVisible, onClose, email, onVerificationSuccess
             onCancel={onClose}
             footer={null}
             destroyOnClose
-        >
-            <div style={{ textAlign: 'center' }}>
-                <p>{t('auth.otpInstructions', { email })}</p>
+        >            <div style={{ textAlign: 'center' }}>
+                <p>{t('auth.otpInstructions', { email: email })}</p>
                 <p>{t('auth.timeRemaining')}: {formatTime(timeLeft)}</p>
                 <Input
                     maxLength={6}

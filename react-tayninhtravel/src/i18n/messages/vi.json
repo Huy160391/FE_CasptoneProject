@@ -5,12 +5,105 @@
         "about": "Giới thiệu",
         "services": "Dịch vụ",
         "contact": "Liên hệ",
+        "jobs": "Sự nghiệp",
         "login": "Đăng nhập",
         "register": "Đăng ký",
         "bookings": "Đặt tour"
     },
     "tours": {
         "bookNow": "Đặt ngay"
+    },
+    "jobs": {
+        "title": "Cơ hội sự nghiệp",
+        "subtitle": "Trở thành Hướng dẫn viên du lịch tại Tây Ninh",
+        "jobInfo": {
+            "title": "Thông tin tuyển dụng",
+            "description": "Bạn đam mê du lịch và muốn giới thiệu vẻ đẹp của Tây Ninh đến với du khách? Chúng tôi đang tìm kiếm những hướng dẫn viên nhiệt huyết để tham gia vào đội ngũ của Tây Ninh Travel.",
+            "jobDescription": "Mô tả công việc",
+            "duties": [
+                "Dẫn đoàn khách tham quan các điểm du lịch tại Tây Ninh",
+                "Giới thiệu về lịch sử, văn hóa và đặc sản địa phương",
+                "Hỗ trợ khách hàng trong suốt hành trình",
+                "Đảm bảo an toàn và trải nghiệm tốt nhất cho du khách",
+                "Làm việc linh hoạt theo lịch tour"
+            ],
+            "benefits": "Quyền lợi",
+            "benefitsList": [
+                "Thu nhập hấp dẫn (thỏa thuận dựa trên kinh nghiệm)",
+                "Cơ hội gặp gỡ và giao lưu với du khách trong và ngoài nước",
+                "Môi trường làm việc chuyên nghiệp, năng động",
+                "Được đào tạo và phát triển kỹ năng chuyên môn",
+                "Cơ hội khám phá các điểm du lịch mới"
+            ],
+            "requirements": "Yêu cầu"
+        },
+        "requirements": {
+            "communication": {
+                "title": "Kỹ năng giao tiếp tốt",
+                "content": "Có khả năng giao tiếp rõ ràng, tự tin và thân thiện với du khách."
+            },
+            "localKnowledge": {
+                "title": "Hiểu biết về địa phương",
+                "content": "Có kiến thức sâu rộng về lịch sử, văn hóa và địa điểm du lịch tại Tây Ninh."
+            },
+            "languages": {
+                "title": "Ngoại ngữ",
+                "content": "Ưu tiên ứng viên có khả năng giao tiếp bằng tiếng Anh hoặc các ngoại ngữ khác."
+            },
+            "certification": {
+                "title": "Chứng chỉ hướng dẫn viên",
+                "content": "Có chứng chỉ hướng dẫn viên du lịch là một lợi thế (không bắt buộc)."
+            }
+        },
+        "applicationForm": {
+            "title": "Đăng ký ứng tuyển",
+            "description": "Điền thông tin của bạn vào mẫu dưới đây để ứng tuyển vị trí Hướng dẫn viên du lịch tại Tây Ninh Travel.",
+            "fullName": "Họ và tên",
+            "fullNameRequired": "Vui lòng nhập họ và tên!",
+            "fullNamePlaceholder": "Nguyễn Văn A",
+            "email": "Email",
+            "emailRequired": "Vui lòng nhập email!",
+            "emailInvalid": "Email không hợp lệ!",
+            "emailPlaceholder": "example@gmail.com",
+            "phone": "Số điện thoại",
+            "phoneRequired": "Vui lòng nhập số điện thoại!",
+            "phoneInvalid": "Số điện thoại không hợp lệ! Vui lòng nhập 10 chữ số.",
+            "phonePlaceholder": "0912345678",
+            "age": "Tuổi",
+            "ageRequired": "Vui lòng nhập tuổi!",
+            "ageInvalid": "Tuổi phải là số!",
+            "ageMinimum": "Bạn phải đủ 18 tuổi trở lên!",
+            "ageMaximum": "Tuổi tối đa là 65!",
+            "agePlaceholder": "30",
+            "address": "Địa chỉ",
+            "addressRequired": "Vui lòng nhập địa chỉ!",
+            "addressPlaceholder": "Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố",
+            "experience": "Kinh nghiệm làm việc",
+            "experienceRequired": "Vui lòng mô tả kinh nghiệm làm việc của bạn!",
+            "experiencePlaceholder": "Mô tả ngắn gọn về kinh nghiệm của bạn trong lĩnh vực du lịch và hướng dẫn viên (nếu có)",
+            "languages": "Ngoại ngữ",
+            "languagesRequired": "Vui lòng liệt kê trình độ ngoại ngữ của bạn!",
+            "languagesPlaceholder": "Liệt kê các ngoại ngữ bạn biết và trình độ (cơ bản, trung cấp, thành thạo)",
+            "cv": "Tải lên CV của bạn",
+            "cvRequired": "Vui lòng tải lên CV của bạn!",
+            "invalidCvFormat": "Chỉ chấp nhận file .pdf, .doc, .docx!",
+            "fileTooLarge": "Kích thước file phải nhỏ hơn 5MB!",
+            "selectFile": "Chọn tệp",
+            "photo": "Tải lên ảnh chân dung",
+            "photoRequired": "Vui lòng tải lên ảnh chân dung!",
+            "invalidPhotoFormat": "Chỉ chấp nhận file .jpg, .jpeg, .png!",
+            "photoTooLarge": "Kích thước ảnh phải nhỏ hơn 2MB!",
+            "selectPhoto": "Chọn ảnh",
+            "fileHint": "Chấp nhận file .pdf, .doc, .docx (tối đa 5MB)",
+            "photoHint": "Chấp nhận file .jpg, .jpeg, .png (tối đa 2MB)",
+            "additionalInfo": "Thông tin bổ sung",
+            "additionalInfoPlaceholder": "Chia sẻ thêm về bản thân hoặc kỹ năng đặc biệt của bạn",
+            "submit": "Nộp đơn ứng tuyển",
+            "successMessage": "Đơn đăng ký của bạn đã được gửi thành công! Chúng tôi sẽ liên hệ lại trong thời gian sớm nhất.",
+            "errorMessage": "Đã xảy ra lỗi khi gửi đơn đăng ký. Vui lòng thử lại sau.",
+            "submissionSuccessTitle": "Nộp đơn thành công",
+            "submissionSuccessContent": "Cảm ơn bạn đã ứng tuyển! Chúng tôi đã nhận được đơn đăng ký của bạn và sẽ xem xét trong thời gian sớm nhất. Nếu hồ sơ của bạn phù hợp với yêu cầu của chúng tôi, chúng tôi sẽ liên hệ với bạn cho các bước tiếp theo."
+        }
     },
     "home": {
         "welcome": "Chào mừng đến với Tay Ninh Tour",
@@ -143,7 +236,16 @@
         "verify": "Xác thực",
         "otpInvalid": "Mã OTP phải gồm 6 chữ số",
         "verificationSuccess": "Xác thực email thành công",
-        "verificationFailed": "Xác thực thất bại. Vui lòng thử lại"
+        "verificationFailed": "Xác thực thất bại. Vui lòng thử lại",
+        "forgotPasswordTitle": "Quên Mật Khẩu",
+        "forgotPasswordInstructions": "Vui lòng nhập email để nhận mã đặt lại mật khẩu",
+        "sendResetCode": "Gửi Mã Đặt Lại",
+        "resetPasswordTitle": "Đặt Lại Mật Khẩu",
+        "resetPasswordInstructions": "Vui lòng nhập mã OTP đã được gửi đến email {email} và mật khẩu mới",
+        "newPassword": "Mật Khẩu Mới",
+        "resetPassword": "Đặt Lại Mật Khẩu",
+        "resetPasswordSuccess": "Đặt lại mật khẩu thành công",
+        "resetPasswordFailed": "Đặt lại mật khẩu thất bại. Vui lòng thử lại"
     },
     "footer": {
         "companyName": "Tay Ninh Tour",
@@ -171,6 +273,10 @@
     "profile": {
         "personalInfo": "Thông tin cá nhân",
         "changeAvatar": "Thay đổi ảnh đại diện",
+        "saveAvatar": "Lưu ảnh đại diện",
+        "avatarUpdateSuccess": "Cập nhật ảnh đại diện thành công",
+        "avatarUpdateFailed": "Cập nhật ảnh đại diện thất bại",
+        "avatarUploadFailed": "Tải lên ảnh đại diện thất bại",
         "name": "Họ và tên",
         "nameRequired": "Vui lòng nhập họ tên",
         "nameInvalid": "Tên chỉ được chứa chữ cái và khoảng trắng",
@@ -191,6 +297,7 @@
         "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu mới",
         "passwordMismatch": "Mật khẩu không khớp",
         "updateSuccess": "Cập nhật thông tin thành công",
+        "updateFailed": "Cập nhật thông tin thất bại",
         "passwordChangeSuccess": "Đổi mật khẩu thành công",
         "passwordChangeFailed": "Đổi mật khẩu thất bại",
         "bookingHistory": "Lịch sử đặt tour",

@@ -17,6 +17,8 @@ const ThemeToggle = () => {
     transition: 'all 0.3s',
     borderRadius: '50%',
     marginRight: '8px',
+    backgroundColor: isDarkMode ? '#79eac0' : undefined,
+    color: isDarkMode ? '#000000' : undefined,
   }
 
   return (

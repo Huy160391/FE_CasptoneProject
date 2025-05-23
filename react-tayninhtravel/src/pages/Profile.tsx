@@ -16,6 +16,7 @@ const Profile = () => {
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const { user, updateUser } = useAuthStore();
     const [loading, setLoading] = useState(false);
+    const [avatarLoading, setAvatarLoading] = useState(false);
 
     // Mock data - sẽ được thay thế bằng API call thực tế
     const bookingHistory = [
@@ -75,8 +76,7 @@ const Profile = () => {
             setLoading(true);
             const updatedData = {
                 name: values.name,
-                phoneNumber: values.phone,
-                avatar: fileList.length > 0 ? fileList[0].url || fileList[0].thumbUrl : user.avatar || 'string'
+                phoneNumber: values.phone
             };
 
             const response = await axiosInstance.put('/Account/edit-profile', updatedData);
@@ -85,8 +85,7 @@ const Profile = () => {
                 updateUser({
                     ...user,
                     name: updatedData.name,
-                    phone: updatedData.phoneNumber,
-                    avatar: updatedData.avatar
+                    phone: updatedData.phoneNumber
                 });
                 message.success(t('profile.updateSuccess'));
             }
@@ -95,6 +94,34 @@ const Profile = () => {
             message.error(error.response?.data?.message || t('profile.updateFailed'));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAvatarUpdate = async () => {
+        if (!user || fileList.length === 0) return;
+
+        try {
+            setAvatarLoading(true);
+            const avatarUrl = fileList[0].url || fileList[0].thumbUrl;
+
+            if (!avatarUrl) {
+                message.error(t('profile.avatarUploadFailed'));
+                return;
+            }
+
+            await authService.editAvatar(avatarUrl);
+
+            updateUser({
+                ...user,
+                avatar: avatarUrl
+            });
+
+            message.success(t('profile.avatarUpdateSuccess'));
+        } catch (error: any) {
+            console.error('Update avatar error:', error);
+            message.error(error.response?.data?.message || t('profile.avatarUpdateFailed'));
+        } finally {
+            setAvatarLoading(false);
         }
     };
 
@@ -141,8 +168,7 @@ const Profile = () => {
                                                 src={user.avatar || 'https://i.imgur.com/4AiXzf8.jpg'}
                                                 alt="avatar"
                                             />
-                                        </div>
-                                        <Upload
+                                        </div>                                        <Upload
                                             listType="picture"
                                             maxCount={1}
                                             fileList={fileList}
@@ -152,6 +178,16 @@ const Profile = () => {
                                         >
                                             <Button icon={<UploadOutlined />}>{t('profile.changeAvatar')}</Button>
                                         </Upload>
+                                        {fileList.length > 0 && (
+                                            <Button
+                                                type="primary"
+                                                onClick={handleAvatarUpdate}
+                                                loading={avatarLoading}
+                                                style={{ marginTop: '8px' }}
+                                            >
+                                                {t('profile.saveAvatar')}
+                                            </Button>
+                                        )}
                                     </div>
                                 </Col>
                                 <Col xs={24} md={16}>
@@ -335,4 +371,4 @@ const Profile = () => {
     );
 };
 
-export default Profile; 
+export default Profile;

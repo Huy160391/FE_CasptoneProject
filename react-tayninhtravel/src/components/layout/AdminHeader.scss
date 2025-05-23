@@ -2,6 +2,7 @@
   background-color: #fff;
   padding: 0;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   
   .header-content {
     display: flex;
@@ -29,6 +30,24 @@
       
       @media (max-width: 576px) {
         display: none;
+      }
+    }
+  }
+}
+
+/* Dark mode styles for admin header */
+body.dark-mode {
+  .admin-header {
+    background-color: #141414;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    
+    .page-title {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .user-dropdown {
+      .username {
+        color: rgba(255, 255, 255, 0.85);
       }
     }
   }

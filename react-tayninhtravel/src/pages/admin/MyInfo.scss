@@ -65,3 +65,99 @@
     }
   }
 }
+
+/* Dark mode styles for admin my info page */
+body.dark-mode {
+  .my-info-page {
+    .info-tabs {
+      .ant-tabs-tab {
+        color: rgba(255, 255, 255, 0.65);
+        
+        &.ant-tabs-tab-active {
+          .ant-tabs-tab-btn {
+            color: #79eac0;
+          }
+        }
+      }
+    }
+    
+    .profile-card, 
+    .password-card, 
+    .activity-card {
+      background-color: #141414;
+      
+      .ant-card-head {
+        border-bottom-color: #303030;
+        
+        .ant-card-head-title {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+    }
+    
+    .avatar-section {
+      .user-name {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .user-role {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .avatar-upload {
+        .ant-upload.ant-upload-select {
+          background-color: #1f1f1f;
+          border-color: #303030;
+          
+          .ant-upload-text {
+            color: rgba(255, 255, 255, 0.65);
+          }
+        }
+      }
+    }
+    
+    .profile-form,
+    .password-form {
+      .ant-form-item-label > label {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .ant-input {
+        background-color: #1f1f1f;
+        border-color: #303030;
+        color: rgba(255, 255, 255, 0.85);
+        
+        &:focus, 
+        &:hover {
+          border-color: #79eac0;
+        }
+      }
+    }
+    
+    .activity-list {
+      .activity-item {
+        border-bottom-color: #303030;
+        
+        .activity-time {
+          color: rgba(255, 255, 255, 0.45);
+        }
+        
+        .activity-description {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+    }
+    
+    .save-button {
+      background-color: #79eac0;
+      border-color: #79eac0;
+      color: #000000;
+      
+      &:hover, 
+      &:focus {
+        background-color: #5dc9a0;
+        border-color: #5dc9a0;
+      }
+    }
+  }
+}

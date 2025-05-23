@@ -6,25 +6,34 @@
   padding: 0;
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  
+  &.ant-layout-header {
+    height: auto;
+    line-height: 1.5;
+    padding: 0;
+  }
 
   .navbar-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 64px;
-    padding: 0 16px;
+    padding: 0 24px;
+    width: 100%;
   }
 
   .logo {
     display: flex;
     align-items: center;
+    min-width: 170px;
 
     .logo-image {
       margin-top: 20px;
-      width: 170px;
-      height: 100px;
+      width: 150px;
+      height: 90px;
       object-fit: contain;
     }
   }
@@ -35,6 +44,19 @@
     justify-content: center;
     border-bottom: none;
     background: transparent;
+    margin-left: 40px;
+    
+    .ant-menu-item {
+      padding: 0 12px;
+      margin: 0 4px;
+    }
+
+    @media (max-width: 1024px) {
+      .ant-menu-item {
+        padding: 0 8px;
+        margin: 0 2px;
+      }
+    }
 
     @media (max-width: 768px) {
       display: none;
@@ -52,6 +74,8 @@
   .navbar-right {
     display: flex;
     align-items: center;
+    min-width: 220px;
+    justify-content: flex-end;
 
     @media (max-width: 768px) {
       display: none;
@@ -122,3 +146,70 @@
 .user-dropdown {
   align-items: center !important;
 }
+
+/* Dark mode styles for navbar */
+body.dark-mode {
+  .navbar {
+    background-color: #000000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    
+    .button-login,
+    .button-register {
+      &.ant-btn-primary.ant-btn-background-ghost {
+        color: #79eac0;
+        border-color: #79eac0;
+        
+        &:hover, &:focus {
+          color: #8aedcb;
+          border-color: #8aedcb;
+        }
+      }
+    }
+    
+    .cart-button {
+      color: rgba(255, 255, 255, 0.85);
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+    
+    .ant-menu {
+      color: rgba(255, 255, 255, 0.85);
+      
+      .ant-menu-item:hover:not(.ant-menu-item-selected) {
+        color: #79eac0;
+      }
+      
+      .ant-menu-item-selected {
+        color: #79eac0;
+        
+        &::after {
+          border-bottom-color: #79eac0;
+        }
+      }
+    }
+  }
+}
+
+.ant-menu {
+    min-width: 0;
+    flex-grow: 1;
+    
+    &.desktop-menu {
+      line-height: 62px;
+      
+      .ant-menu-title-content {
+        font-size: 14px;
+        white-space: nowrap;
+      }
+      
+      .ant-menu-item {
+        padding: 0px 10px;
+        
+        @media (min-width: 1200px) {
+          padding: 0px 15px;
+        }
+      }
+    }
+  }

@@ -34,3 +34,28 @@
     }
   }
 }
+
+/* Dark mode styles for why choose us section */
+body.dark-mode {
+  .why-choose-us {
+    h2 {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .feature-card {
+      background-color: #141414;
+      
+      .feature-icon {
+        color: #79eac0;
+      }
+      
+      h3 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+  }
+}

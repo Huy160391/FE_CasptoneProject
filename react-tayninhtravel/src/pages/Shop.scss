@@ -20,6 +20,7 @@
     p {
       font-size: 16px;
       color: rgba(0, 0, 0, 0.65);
+      transition: color 0.3s ease;
     }
   }
 
@@ -106,5 +107,66 @@
     margin-top: 40px;
     display: flex;
     justify-content: center;
+  }
+}
+
+/* Dark mode styles for shop page */
+body.dark-mode {
+  .shop-page {
+    .shop-header {
+      h1 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+
+    .filter-sidebar {
+      .filter-section {
+        h3 {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+    }
+
+    .product-grid {
+      .product-card {
+        background-color: #141414;
+
+        .product-title {
+          color: rgba(255, 255, 255, 0.85);
+        }
+
+        .product-price {
+          color: #79eac0;
+        }
+
+        .product-description {
+          color: rgba(255, 255, 255, 0.65);
+        }
+
+        .add-to-cart-btn {
+          background-color: #79eac0;
+          color: #000000;
+
+          &:hover {
+            background-color: #5dc9a0;
+          }
+        }
+      }
+    }
+
+    .pagination-container {
+      .ant-pagination-item-active {
+        background-color: #79eac0;
+        border-color: #79eac0;
+
+        a {
+          color: #000000;
+        }
+      }
+    }
   }
 }

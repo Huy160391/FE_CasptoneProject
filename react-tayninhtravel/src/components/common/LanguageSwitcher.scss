@@ -20,3 +20,18 @@
     color: inherit;
   }
 }
+
+/* Dark mode styles for language switcher */
+body.dark-mode {
+  .language-switcher {
+    .ant-select-selector {
+      background-color: transparent !important;
+      color: rgba(255, 255, 255, 0.85) !important;
+      border-color: #303030 !important;
+    }
+    
+    .ant-select-arrow {
+      color: rgba(255, 255, 255, 0.65) !important;
+    }
+  }
+}

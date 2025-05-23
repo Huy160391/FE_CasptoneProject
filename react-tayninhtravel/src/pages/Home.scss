@@ -5,3 +5,10 @@
     padding: 0 16px;
   }
 }
+
+/* Dark mode styles for home page */
+body.dark-mode {
+  .home-page {
+    background-color: #000000;
+  }
+}

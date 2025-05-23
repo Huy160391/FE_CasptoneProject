@@ -96,15 +96,18 @@
     font-size: 16px;
     line-height: 1.8;
     color: rgba(0, 0, 0, 0.85);
+    transition: color 0.3s ease;
     
     h3 {
       font-size: 22px;
       font-weight: 600;
       margin: 30px 0 15px;
+      transition: color 0.3s ease;
     }
     
     p {
       margin-bottom: 20px;
+      transition: color 0.3s ease;
     }
     
     ul, ol {
@@ -278,6 +281,123 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
+      }
+    }
+  }
+}
+
+/* Dark mode styles for blog post page */
+body.dark-mode {
+  .blog-post-page {
+    .post-header {
+      .breadcrumb {
+        a, span {
+          color: rgba(255, 255, 255, 0.65);
+        }
+        
+        .ant-breadcrumb-separator {
+          color: rgba(255, 255, 255, 0.45);
+        }
+      }
+      
+      .post-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .post-meta {
+        color: rgba(255, 255, 255, 0.65);
+        
+        .post-category {
+          color: #79eac0;
+        }
+        
+        .post-date, .post-author-name {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+    
+    .post-content {
+      color: rgba(255, 255, 255, 0.85);
+      
+      p, h2, h3, h4, li {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      blockquote {
+        background-color: #1f1f1f;
+        border-left: 4px solid #79eac0;
+        
+        p {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      
+      .post-image-caption {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .post-author {
+        background-color: #1f1f1f;
+        
+        .author-info {
+          .author-name {
+            color: rgba(255, 255, 255, 0.85);
+          }
+          
+          .author-bio {
+            color: rgba(255, 255, 255, 0.65);
+          }
+        }
+      }
+    }
+    
+    .post-tags {
+      .tag-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .tag-list {
+        .tag-item {
+          background-color: #1f1f1f;
+          color: rgba(255, 255, 255, 0.65);
+          border-color: #303030;
+          
+          &:hover {
+            color: #79eac0;
+            border-color: #79eac0;
+          }
+        }
+      }
+    }
+    
+    .related-posts {
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .related-post-card {
+        background-color: #141414;
+        
+        .ant-card-meta-title {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-card-meta-description {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+    
+    .comments-section {
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .comment-form {
+        .ant-form-item-label > label {
+          color: rgba(255, 255, 255, 0.85);
+        }
       }
     }
   }

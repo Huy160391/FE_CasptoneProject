@@ -68,3 +68,86 @@
     }
   }
 }
+
+/* Dark mode styles for admin products page */
+body.dark-mode {
+  .products-page {
+    .page-header {
+      h1 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+    
+    .products-table {
+      background-color: #141414;
+      
+      .ant-table {
+        background-color: #141414;
+        
+        .ant-table-thead > tr > th {
+          background-color: #1f1f1f;
+          color: rgba(255, 255, 255, 0.85);
+          border-bottom: 1px solid #303030;
+        }
+        
+        .ant-table-tbody > tr > td {
+          border-bottom: 1px solid #303030;
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-table-tbody > tr.ant-table-row:hover > td {
+          background-color: #1f1f1f;
+        }
+      }
+      
+      .product-cell {
+        .product-name {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      
+      .status-tag {
+        &.success {
+          background-color: rgba(82, 196, 26, 0.2);
+          color: #52c41a;
+          border-color: rgba(82, 196, 26, 0.4);
+        }
+        
+        &.error {
+          background-color: rgba(245, 34, 45, 0.2);
+          color: #ff4d4f;
+          border-color: rgba(245, 34, 45, 0.4);
+        }
+      }
+    }
+    
+    .product-form {
+      .ant-form-item-label > label {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .image-uploader {
+        background-color: #1f1f1f;
+        border-color: #303030;
+        
+        .ant-upload-text {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+      
+      .price-inputs {
+        .original-price-input {
+          .ant-form-item-label > label {
+            color: rgba(255, 255, 255, 0.85);
+          }
+        }
+        
+        .discount-price-input {
+          .ant-form-item-label > label {
+            color: rgba(255, 255, 255, 0.85);
+          }
+        }
+      }
+    }
+  }
+}
