@@ -23,8 +23,10 @@ import RegisterModal from '../auth/RegisterModal'
 import CartDrawer from '../cart/CartDrawer'
 import { useCartStore } from '@/store/useCartStore'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useThemeStore } from '@/store/useThemeStore'
 // import { authService } from '@/services/authService'
 import logoImage from '@/assets/TNDT_Logo.png'
+import darkLogo from '@/assets/TNDT_logo_darkmode.png'
 import './Navbar.scss'
 
 const { Header } = Layout
@@ -38,6 +40,7 @@ const Navbar = () => {
   const location = useLocation()
   const { getTotalItems } = useCartStore()
   const { isAuthenticated, user, logout } = useAuthStore()
+  const { isDarkMode } = useThemeStore()
   const navigate = useNavigate()
 
   const showDrawer = () => {
@@ -105,6 +108,11 @@ const Navbar = () => {
       label: <Link to="/blog">Blog</Link>,
     },
     {
+      key: '/career',
+      icon: <UserOutlined />,
+      label: <Link to="/career">{t('navigation.jobs')}</Link>,
+    },
+    {
       key: '/about',
       icon: <InfoCircleOutlined />,
       label: <Link to="/about">{t('navigation.about')}</Link>,
@@ -146,7 +154,11 @@ const Navbar = () => {
         <div className="navbar-container">
           <div className="logo">
             <Link to="/">
-              <img src={logoImage} alt="Tay Ninh Tour Logo" className="logo-image" />
+              <img
+                src={isDarkMode ? darkLogo : logoImage}
+                alt="Tay Ninh Tour Logo"
+                className="logo-image"
+              />
             </Link>
           </div>
 
@@ -156,6 +168,8 @@ const Navbar = () => {
             selectedKeys={[location.pathname]}
             items={menuItems}
             className="desktop-menu"
+            disabledOverflow={true}
+            style={{ flex: '1 1 auto' }}
           />
 
           {/* Mobile Menu Button */}
@@ -168,7 +182,7 @@ const Navbar = () => {
 
           {/* Right side buttons */}
           <div className="navbar-right">
-            <Space>
+            <Space size={12}>
               <ThemeToggle />
               <LanguageSwitcher />
 

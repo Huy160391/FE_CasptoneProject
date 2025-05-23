@@ -2,6 +2,7 @@
   background-color: #001529;
   color: rgba(255, 255, 255, 0.65);
   padding: 48px 0 24px;
+  transition: background-color 0.3s ease;
   
   .footer-container {
     max-width: 1200px;
@@ -32,7 +33,7 @@
       transition: color 0.3s;
       
       &:hover {
-        color: #1677ff;
+        color: #79eac0;
       }
     }
   }
@@ -50,7 +51,7 @@
         transition: color 0.3s;
         
         &:hover {
-          color: #1677ff;
+          color: #79eac0;
         }
       }
     }
@@ -76,5 +77,40 @@
   .footer-bottom {
     text-align: center;
     margin-top: 16px;
+  }
+}
+
+/* Dark mode styles for footer */
+body.dark-mode {
+  .footer {
+    background-color: #111111;
+    
+    .footer-section {
+      h4 {
+        color: #ffffff;
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+    
+    .social-icons a {
+      &:hover {
+        color: #79eac0;
+      }
+    }
+    
+    .footer-links li a {
+      color: rgba(255, 255, 255, 0.85);
+      
+      &:hover {
+        color: #79eac0;
+      }
+    }
+    
+    .contact-info li {
+      color: rgba(255, 255, 255, 0.85);
+    }
   }
 }

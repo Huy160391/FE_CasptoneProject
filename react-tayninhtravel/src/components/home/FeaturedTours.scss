@@ -38,3 +38,52 @@
     }
   }
 }
+
+/* Dark mode styles for featured tours section */
+body.dark-mode {
+  .featured-tours {
+    h2 {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .tour-card {
+      background-color: #141414;
+      
+      .ant-card-meta-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .ant-card-meta-description {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .tour-info {
+        color: rgba(255, 255, 255, 0.65);
+        
+        .info-item {
+          .label {
+            color: rgba(255, 255, 255, 0.85);
+          }
+        }
+      }
+      
+      .tour-footer {
+        .tour-price {
+          color: #79eac0;
+        }
+        
+        .ant-btn-primary {
+          background-color: #79eac0;
+          border-color: #79eac0;
+          color: #000000;
+          
+          &:hover,
+          &:focus {
+            background-color: #5dc9a0;
+            border-color: #5dc9a0;
+          }
+        }
+      }
+    }
+  }
+}

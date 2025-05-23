@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { ConfigProvider, theme as antTheme } from 'antd';
 import routes from './routes';
 import Chatbot from './components/common/Chatbot';
+import { useThemeStore } from './store/useThemeStore';
 import './styles/global.scss';
 
 const AppRoutes = () => {
@@ -9,11 +12,55 @@ const AppRoutes = () => {
 };
 
 const App = () => {
+  const { isDarkMode, setDarkMode } = useThemeStore();
+
+  // Check for system preferences
+  useEffect(() => {
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDarkMode) {
+      setDarkMode(true);
+    }
+
+    // Listen for changes in system preferences
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setDarkMode(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [setDarkMode]);
+
+  useEffect(() => {
+    // Apply dark mode class to body
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [isDarkMode]);
+
+  // Configure Ant Design theme
+  const theme = {
+    token: {
+      colorPrimary: isDarkMode ? '#79eac0' : '#1677ff',
+      borderRadius: 6,
+    },
+    algorithm: isDarkMode ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
+    components: {
+      Button: isDarkMode ? {
+        colorPrimaryText: '#000000',
+      } : {}
+    }
+  };
+
   return (
-    <Router>
-      <AppRoutes />
-      <Chatbot />
-    </Router>
+    <ConfigProvider theme={theme}>
+      <Router>
+        <AppRoutes />
+        <Chatbot />
+      </Router>
+    </ConfigProvider>
   );
 };
 

@@ -154,3 +154,125 @@
         }
     }
 }
+
+/* Dark mode styles for profile page */
+body.dark-mode {
+    .profile-page {
+        background-color: #000000;
+
+        .profile-card {
+            background: #141414;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+            .ant-tabs-tab {
+                color: rgba(255, 255, 255, 0.65);
+
+                &.ant-tabs-tab-active {
+                    .ant-tabs-tab-btn {
+                        color: #79eac0;
+                    }
+                }
+            }
+        }
+
+        .avatar-section {
+            background: #1f1f1f;
+
+            .user-name {
+                color: rgba(255, 255, 255, 0.85);
+            }
+
+            .user-role {
+                color: rgba(255, 255, 255, 0.65);
+            }
+        }
+
+        .profile-form {
+            .form-title {
+                color: rgba(255, 255, 255, 0.85);
+            }
+
+            .ant-form-item-label > label {
+                color: rgba(255, 255, 255, 0.85);
+            }
+        }
+
+        .addresses-section {
+            .address-card {
+                background-color: #1f1f1f;
+                border-color: #303030;
+
+                .card-title {
+                    color: rgba(255, 255, 255, 0.85);
+                }
+
+                .address-details {
+                    color: rgba(255, 255, 255, 0.65);
+                }
+            }
+        }
+
+        .orders-section {
+            .order-card {
+                background-color: #1f1f1f;
+                border-color: #303030;
+
+                .order-header {
+                    border-bottom-color: #303030;
+
+                    .order-id {
+                        color: rgba(255, 255, 255, 0.85);
+                    }
+
+                    .order-date {
+                        color: rgba(255, 255, 255, 0.45);
+                    }
+                }
+
+                .order-content {
+                    .product-name {
+                        color: rgba(255, 255, 255, 0.85);
+                    }
+
+                    .product-price {
+                        color: #79eac0;
+                    }
+                }
+            }
+        }
+
+        .wishlist-section {
+            .wishlist-item {
+                background-color: #1f1f1f;
+                border-color: #303030;
+
+                .item-name {
+                    color: rgba(255, 255, 255, 0.85);
+                }
+
+                .item-price {
+                    color: #79eac0;
+                }
+            }
+        }
+
+        .reviews-section {
+            .review-item {
+                background-color: #1f1f1f;
+                border-color: #303030;
+
+                .review-title {
+                    color: rgba(255, 255, 255, 0.85);
+                }
+
+                .review-content {
+                    color: rgba(255, 255, 255, 0.65);
+                }
+
+                .review-date {
+                    color: rgba(255, 255, 255, 0.45);
+                }
+            }
+        }
+    }
+}

@@ -73,11 +73,12 @@ const BestSellers: React.FC = () => {
                             <Card
                                 hoverable
                                 cover={<img alt={product.name} src={product.image} />}
-                                className="product-card"
-                                actions={[
-                                    <Button type="primary" icon={<ShoppingCartOutlined />} block>
-                                        {t('home.bestSellers.addToCart')}
-                                    </Button>
+                                className="product-card" actions={[
+                                    <div style={{ width: '100%', padding: 0 }}>
+                                        <Button type="primary" icon={<ShoppingCartOutlined />} block>
+                                            {t('home.bestSellers.addToCart')}
+                                        </Button>
+                                    </div>
                                 ]}
                             >
                                 <div className="product-tag">

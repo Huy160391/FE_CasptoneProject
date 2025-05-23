@@ -5,12 +5,105 @@
         "about": "About",
         "services": "Services",
         "contact": "Contact",
+        "jobs": "Careers",
         "login": "Login",
         "register": "Register",
         "bookings": "Book Tour"
     },
     "tours": {
         "bookNow": "Book Now"
+    },
+    "jobs": {
+        "title": "Career Opportunities",
+        "subtitle": "Become a Tour Guide in Tay Ninh",
+        "jobInfo": {
+            "title": "Job Information",
+            "description": "Are you passionate about travel and want to introduce the beauty of Tay Ninh to tourists? We are looking for enthusiastic tour guides to join the team at Tay Ninh Travel.",
+            "jobDescription": "Job Description",
+            "duties": [
+                "Guide tourists through Tay Ninh's attractions",
+                "Introduce local history, culture, and specialties",
+                "Support customers throughout their journey",
+                "Ensure safety and best experience for tourists",
+                "Work flexibly according to tour schedules"
+            ],
+            "benefits": "Benefits",
+            "benefitsList": [
+                "Attractive income (negotiable based on experience)",
+                "Opportunity to meet and interact with domestic and international tourists",
+                "Professional, dynamic working environment",
+                "Training and professional skill development",
+                "Opportunity to explore new tourist destinations"
+            ],
+            "requirements": "Requirements"
+        },
+        "requirements": {
+            "communication": {
+                "title": "Good Communication Skills",
+                "content": "Ability to communicate clearly, confidently, and friendly with tourists."
+            },
+            "localKnowledge": {
+                "title": "Local Knowledge",
+                "content": "Deep knowledge about history, culture, and tourist attractions in Tay Ninh."
+            },
+            "languages": {
+                "title": "Foreign Languages",
+                "content": "Priority is given to candidates who can communicate in English or other foreign languages."
+            },
+            "certification": {
+                "title": "Tour Guide Certificate",
+                "content": "Having a tour guide certificate is an advantage (not mandatory)."
+            }
+        },
+        "applicationForm": {
+            "title": "Application Form",
+            "description": "Fill in your information below to apply for the Tour Guide position at Tay Ninh Travel.",
+            "fullName": "Full Name",
+            "fullNameRequired": "Please enter your full name!",
+            "fullNamePlaceholder": "John Doe",
+            "email": "Email",
+            "emailRequired": "Please enter your email!",
+            "emailInvalid": "Invalid email format!",
+            "emailPlaceholder": "example@gmail.com",
+            "phone": "Phone Number",
+            "phoneRequired": "Please enter your phone number!",
+            "phoneInvalid": "Invalid phone number format! Please enter 10 digits.",
+            "phonePlaceholder": "0912345678",
+            "age": "Age",
+            "ageRequired": "Please enter your age!",
+            "ageInvalid": "Age must be a number!",
+            "ageMinimum": "You must be at least 18 years old!",
+            "ageMaximum": "Maximum age is 65 years old!",
+            "agePlaceholder": "30",
+            "address": "Address",
+            "addressRequired": "Please enter your address!",
+            "addressPlaceholder": "House number, street, ward/commune, district, province/city",
+            "experience": "Work Experience",
+            "experienceRequired": "Please describe your work experience!",
+            "experiencePlaceholder": "Briefly describe your experience in tourism and as a tour guide (if any)",
+            "languages": "Languages",
+            "languagesRequired": "Please list your language proficiency!",
+            "languagesPlaceholder": "List languages you know and proficiency level (basic, intermediate, fluent)",
+            "cv": "Upload your CV",
+            "cvRequired": "Please upload your CV!",
+            "invalidCvFormat": "Only .pdf, .doc, .docx files are accepted!",
+            "fileTooLarge": "File size must be less than 5MB!",
+            "selectFile": "Select File",
+            "photo": "Upload your portrait photo",
+            "photoRequired": "Please upload your portrait photo!",
+            "invalidPhotoFormat": "Only .jpg, .jpeg, .png files are accepted!",
+            "photoTooLarge": "Photo size must be less than 2MB!",
+            "selectPhoto": "Select Photo",
+            "fileHint": "Accept file formats: .pdf, .doc, .docx (max 5MB)",
+            "photoHint": "Accept file formats: .jpg, .jpeg, .png (max 2MB)",
+            "additionalInfo": "Additional Information",
+            "additionalInfoPlaceholder": "Share more about yourself or your special skills",
+            "submit": "Submit Application",
+            "successMessage": "Your application has been submitted successfully! We will contact you as soon as possible.",
+            "errorMessage": "There was an error submitting your application. Please try again later.",
+            "submissionSuccessTitle": "Application Submitted Successfully",
+            "submissionSuccessContent": "Thank you for applying! We've received your application and will review it shortly. If your qualifications match our requirements, we will contact you for the next steps."
+        }
     },
     "home": {
         "welcome": "Welcome to Tay Ninh Tour",

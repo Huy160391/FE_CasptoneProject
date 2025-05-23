@@ -8,6 +8,7 @@ import ThingsToDo from '@/pages/ThingsToDo';
 import ThingsToDoDetail from '@/pages/ThingsToDoDetail';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
+import Career from '@/pages/Career';
 import NotFound from '@/pages/NotFound';
 
 export const publicRoutes: RouteObject[] = [
@@ -42,10 +43,12 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/blog',
         element: <Blog />,
-    },
-    {
+    }, {
         path: '/blog/post/:id',
         element: <BlogPost />,
+    }, {
+        path: '/career',
+        element: <Career />,
     },
     {
         path: '/404',

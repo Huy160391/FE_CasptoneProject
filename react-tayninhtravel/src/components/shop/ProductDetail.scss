@@ -506,6 +506,111 @@
   }
 }
 
+/* Dark mode styles for product detail */
+body.dark-mode {
+  .product-detail-container {
+    .breadcrumb {
+      a, span {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .ant-breadcrumb-separator {
+        color: rgba(255, 255, 255, 0.45);
+      }
+    }
+
+    .product-detail-content {
+      color: rgba(255, 255, 255, 0.85);
+      
+      .product-info {
+        h1 {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .product-price {
+          .current-price {
+            color: #79eac0;
+          }
+          
+          .original-price {
+            color: rgba(255, 255, 255, 0.45);
+          }
+          
+          .discount-percentage {
+            background-color: #79eac0;
+            color: #000000;
+          }
+        }
+        
+        .availability {
+          color: rgba(255, 255, 255, 0.65);
+          
+          .in-stock {
+            color: #52c41a;
+          }
+          
+          .out-of-stock {
+            color: #ff4d4f;
+          }
+        }
+        
+        .product-description {
+          color: rgba(255, 255, 255, 0.65);
+        }
+        
+        .product-features {
+          .feature-item {
+            color: rgba(255, 255, 255, 0.65);
+          }
+        }
+      }
+    }
+    
+    .ant-tabs {
+      .ant-tabs-tab {
+        color: rgba(255, 255, 255, 0.65);
+        
+        &.ant-tabs-tab-active {
+          .ant-tabs-tab-btn {
+            color: #79eac0;
+          }
+        }
+      }
+      
+      .ant-tabs-content {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+    
+    .related-products {
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .product-card {
+        background-color: #141414;
+        
+        .ant-card-meta-title {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .product-price {
+          color: #79eac0;
+        }
+      }
+    }
+    
+    .add-to-cart-button {
+      background-color: #79eac0;
+      color: #000000;
+      
+      &:hover {
+        background-color: #5dc9a0;
+      }
+    }
+  }
+}
+
 // Responsive styles
 @media (max-width: 768px) {
   .product-detail-container {

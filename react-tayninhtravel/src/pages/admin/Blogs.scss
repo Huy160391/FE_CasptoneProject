@@ -4,6 +4,10 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    
+    h2 {
+      color: rgba(255, 255, 255, 0.85);
+    }
   }
   
   .blogs-card {
@@ -32,15 +36,59 @@
       .blog-title {
         font-weight: 500;
         margin-bottom: 4px;
+        color: rgba(255, 255, 255, 0.85);
       }
       
       .blog-meta {
         font-size: 12px;
-        color: rgba(0, 0, 0, 0.45);
+        color: rgba(255, 255, 255, 0.45);
         
         span {
           margin-right: 5px;
         }
+      }
+    }
+    
+    background-color: #141414;
+    
+    .ant-card-head {
+      border-bottom-color: #303030;
+      
+      .ant-card-head-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+    
+    .ant-table {
+      background-color: #141414;
+      
+      .ant-table-thead > tr > th {
+        background-color: #1f1f1f;
+        color: rgba(255, 255, 255, 0.85);
+        border-bottom: 1px solid #303030;
+      }
+      
+      .ant-table-tbody > tr > td {
+        border-bottom: 1px solid #303030;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .ant-table-tbody > tr.ant-table-row:hover > td {
+        background-color: #1f1f1f;
+      }
+    }
+    
+    .status-tag {
+      &.published {
+        background-color: rgba(82, 196, 26, 0.2);
+        color: #52c41a;
+        border-color: rgba(82, 196, 26, 0.4);
+      }
+      
+      &.draft {
+        background-color: rgba(250, 173, 20, 0.2);
+        color: #faad14;
+        border-color: rgba(250, 173, 20, 0.4);
       }
     }
   }
@@ -104,6 +152,114 @@
         
         .search-input {
           width: 100%;
+        }
+      }
+    }
+  }
+}
+
+/* Dark mode styles for admin blogs page */
+body.dark-mode {
+  .blogs-page {
+    .page-header {
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+    
+    .blogs-card {
+      background-color: #141414;
+      
+      .ant-card-head {
+        border-bottom-color: #303030;
+        
+        .ant-card-head-title {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      
+      .ant-table {
+        background-color: #141414;
+        
+        .ant-table-thead > tr > th {
+          background-color: #1f1f1f;
+          color: rgba(255, 255, 255, 0.85);
+          border-bottom: 1px solid #303030;
+        }
+        
+        .ant-table-tbody > tr > td {
+          border-bottom: 1px solid #303030;
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-table-tbody > tr.ant-table-row:hover > td {
+          background-color: #1f1f1f;
+        }
+      }
+      
+      .blog-title-cell {
+        .blog-title {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .blog-meta {
+          color: rgba(255, 255, 255, 0.45);
+        }
+      }
+      
+      .status-tag {
+        &.published {
+          background-color: rgba(82, 196, 26, 0.2);
+          color: #52c41a;
+          border-color: rgba(82, 196, 26, 0.4);
+        }
+        
+        &.draft {
+          background-color: rgba(250, 173, 20, 0.2);
+          color: #faad14;
+          border-color: rgba(250, 173, 20, 0.4);
+        }
+      }
+    }
+    
+    .blog-form {
+      .ant-form-item-label > label {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .ant-input,
+      .ant-input-textarea,
+      .ant-select-selector {
+        background-color: #1f1f1f;
+        border-color: #303030;
+        color: rgba(255, 255, 255, 0.85);
+        
+        &:focus, 
+        &:hover {
+          border-color: #79eac0;
+        }
+      }
+      
+      .editor-wrapper {
+        border-color: #303030;
+        
+        .ql-toolbar {
+          background-color: #1f1f1f;
+          border-color: #303030;
+        }
+        
+        .ql-editor {
+          background-color: #1f1f1f;
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      
+      .image-uploader {
+        background-color: #1f1f1f;
+        border-color: #303030;
+        
+        .ant-upload-text {
+          color: rgba(255, 255, 255, 0.65);
         }
       }
     }

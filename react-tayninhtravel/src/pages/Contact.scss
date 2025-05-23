@@ -184,3 +184,139 @@
     }
   }
 }
+
+/* Dark mode styles for contact page */
+body.dark-mode {
+  .contact-page {
+    .contact-info {
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .info-cards {
+        .info-card {
+          background-color: #141414;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+          
+          .icon {
+            color: #79eac0;
+          }
+          
+          h3 {
+            color: rgba(255, 255, 255, 0.85);
+          }
+          
+          p {
+            color: rgba(255, 255, 255, 0.65);
+          }
+        }
+      }
+    }
+    
+    .contact-form {
+      background-color: #141414;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .form-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .ant-form-item-label > label {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .ant-input, 
+      .ant-input-textarea,
+      textarea.ant-input {
+        background-color: #1f1f1f;
+        border-color: #303030;
+        color: rgba(255, 255, 255, 0.85);
+        
+        &:focus, 
+        &:hover {
+          border-color: #79eac0;
+        }
+      }
+      
+      .ant-form-item-has-error .ant-input,
+      .ant-form-item-has-error .ant-input-textarea {
+        background-color: #1f1f1f;
+        border-color: #ff4d4f;
+      }
+      
+      .form {
+        .ant-form-item {
+          .ant-form-item-label > label {
+            color: rgba(255, 255, 255, 0.85);
+          }
+        }
+        
+        .ant-btn-primary {
+          background-color: #79eac0;
+          border-color: #79eac0;
+          color: #000000;
+          
+          &:hover, 
+          &:focus {
+            background-color: #5dc9a0;
+            border-color: #5dc9a0;
+          }
+        }
+      }
+    }
+    
+    .map-section {
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .map-container {
+        border-color: #303030;
+      }
+    }
+    
+    .faq-section {
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .ant-collapse {
+        background-color: #141414;
+        border-color: #303030;
+        
+        .ant-collapse-item {
+          border-bottom-color: #303030;
+          
+          .ant-collapse-header {
+            color: rgba(255, 255, 255, 0.85);
+          }
+          
+          .ant-collapse-content {
+            background-color: #1f1f1f;
+            border-top-color: #303030;
+            
+            .ant-collapse-content-box {
+              color: rgba(255, 255, 255, 0.65);
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,10 +2,22 @@
   font-size: 18px;
   
   &.light-icon {
-    color: #faad14;
+    color: #000000;
   }
   
   &.dark-icon {
     color: #177ddc;
+  }
+}
+
+body.dark-mode {
+  .theme-icon {
+    &.light-icon {
+      color: #000000;
+    }
+    
+    &.dark-icon {
+      color: #000000;
+    }
   }
 }

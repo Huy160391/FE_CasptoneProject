@@ -91,3 +91,44 @@
     }
   }
 }
+
+/* Dark mode styles for cart drawer */
+body.dark-mode {
+  .cart-drawer {
+    .cart-drawer-title {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .cart-list {
+      .cart-item {
+        border-bottom-color: #303030;
+        
+        .item-details {
+          .item-name {
+            color: rgba(255, 255, 255, 0.85);
+          }
+          
+          .item-type {
+            color: rgba(255, 255, 255, 0.45);
+          }
+          
+          .item-price {
+            color: #79eac0;
+          }
+        }
+      }
+    }
+    
+    .cart-footer {
+      .cart-total {
+        .total-label {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .total-price {
+          color: #79eac0;
+        }
+      }
+    }
+  }
+}

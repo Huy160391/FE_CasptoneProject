@@ -1,5 +1,6 @@
 .blog-posts {
     padding: 60px 0;
+    transition: background-color 0.3s ease;
 
     .container {
         max-width: 1200px;
@@ -13,11 +14,13 @@
 
         h2 {
             margin-bottom: 16px;
+            transition: color 0.3s ease;
         }
 
         p {
             font-size: 16px;
             color: rgba(0, 0, 0, 0.65);
+            transition: color 0.3s ease;
         }
     }
 
@@ -247,10 +250,43 @@
         .post-content {
             h3 {
                 font-size: 20px;
-            }
-
-            h4 {
+            }            h4 {
                 font-size: 16px;
+            }
+        }
+    }
+}
+
+/* Dark mode styles for blog posts */
+body.dark-mode {
+    .blog-posts {
+        .section-header {
+            h2 {
+                color: rgba(255, 255, 255, 0.85);
+            }
+            
+            p {
+                color: rgba(255, 255, 255, 0.65);
+            }
+        }
+        
+        .post-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            
+            .post-meta {
+                color: rgba(255, 255, 255, 0.45);
+            }
+            
+            .post-title {
+                color: rgba(255, 255, 255, 0.85);
+            }
+            
+            .post-excerpt {
+                color: rgba(255, 255, 255, 0.65);
+            }
+            
+            .post-author {
+                color: rgba(255, 255, 255, 0.45);
             }
         }
     }

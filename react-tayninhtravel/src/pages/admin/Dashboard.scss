@@ -72,3 +72,81 @@
     }
   }
 }
+
+/* Dark mode styles for admin dashboard */
+body.dark-mode {
+  .dashboard-page {
+    .page-title {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .stat-card {
+      background-color: #141414;
+      
+      .stat-title {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .stat-value {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .stat-icon {
+        background-color: #1f1f1f;
+      }
+    }
+    
+    .recent-orders-card, 
+    .top-products-card {
+      background-color: #141414;
+      
+      .ant-card-head {
+        border-bottom-color: #303030;
+        
+        .ant-card-head-title {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+    }
+    
+    .status-tag {
+      &.success {
+        background-color: rgba(82, 196, 26, 0.2);
+        color: #52c41a;
+        border-color: rgba(82, 196, 26, 0.4);
+      }
+      
+      &.processing {
+        background-color: rgba(22, 119, 255, 0.2);
+        color: #1677ff;
+        border-color: rgba(22, 119, 255, 0.4);
+      }
+      
+      &.error {
+        background-color: rgba(245, 34, 45, 0.2);
+        color: #ff4d4f;
+        border-color: rgba(245, 34, 45, 0.4);
+      }
+    }
+    
+    .top-products-card {
+      .product-item {
+        border-bottom-color: #303030;
+        
+        .product-info {
+          .product-name {
+            color: rgba(255, 255, 255, 0.85);
+          }
+          
+          .product-sold {
+            color: rgba(255, 255, 255, 0.45);
+          }
+        }
+      }
+    }
+    
+    .chart-card {
+      background-color: #141414;
+    }
+  }
+}

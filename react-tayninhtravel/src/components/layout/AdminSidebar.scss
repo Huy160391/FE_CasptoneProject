@@ -1,5 +1,6 @@
 .admin-sidebar {
   min-height: 100vh;
+  transition: background-color 0.3s ease;
   
   .logo-container {
     height: 64px;
@@ -10,6 +11,7 @@
     font-size: 18px;
     font-weight: 600;
     background-color: #002140;
+    transition: background-color 0.3s ease;
   }
   
   .collapse-button {
@@ -21,6 +23,29 @@
     
     &:hover {
       color: #fff;
+    }
+  }
+}
+
+/* Dark mode styles for admin sidebar */
+body.dark-mode {
+  .admin-sidebar {
+    .logo-container {
+      background-color: #000000;
+      color: #ffffff;
+    }
+    
+    .ant-menu.ant-menu-dark {
+      background-color: #141414;
+      
+      .ant-menu-item-selected {
+        background-color: #79eac0;
+        color: #000000;
+        
+        a {
+          color: #000000;
+        }
+      }
     }
   }
 }

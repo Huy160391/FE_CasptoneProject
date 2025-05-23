@@ -225,3 +225,112 @@
     }
   }
 }
+
+/* Dark mode styles for about page */
+body.dark-mode {
+  .about-page {
+    .section-title {
+      color: rgba(255, 255, 255, 0.85);
+      
+      &:after {
+        background-color: #79eac0;
+      }
+    }
+    
+    .about-section {
+      .about-content {
+        h2 {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        p {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+    
+    .mission-section {
+      .mission-card,
+      .vision-card {
+        background-color: #141414;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        
+        h3 {
+          color: #79eac0;
+        }
+        
+        p {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+    
+    .team-section {
+      .team-card {
+        background-color: #141414;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        
+        h4 {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .position {
+          color: #79eac0;
+        }
+        
+        .description {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+    
+    .milestone-section {
+      .timeline {
+        &:before {
+          background-color: #303030;
+        }
+        
+        .timeline-item {
+          .timeline-badge {
+            background-color: #79eac0;
+            color: #000000;
+          }
+          
+          .timeline-content {
+            background-color: #141414;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            
+            h4 {
+              color: #79eac0;
+            }
+            
+            p {
+              color: rgba(255, 255, 255, 0.65);
+            }
+          }
+        }
+      }
+    }
+    
+    .cta-section {
+      background-color: #141414;
+      
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .cta-button {
+        background-color: #79eac0;
+        color: #000000;
+        
+        &:hover {
+          background-color: #5dc9a0;
+        }
+      }
+    }
+  }
+}
