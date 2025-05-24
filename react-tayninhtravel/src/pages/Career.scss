@@ -1,7 +1,7 @@
 .career-page {
   .hero-section {
-    height: 300px;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/hero-bg.jpg');
+    height: 350px; // Increased height
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/hero-bg.jpg');
     background-size: cover;
     background-position: center;
     display: flex;
@@ -11,17 +11,40 @@
     color: #fff;
     margin-bottom: 60px;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    
+    // Add subtle parallax effect
+    &:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: inherit;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.1);
+      z-index: -1;
+      filter: blur(5px);
+      opacity: 0.8;
+    }
     
     .hero-content {
       max-width: 800px;
       padding: 0 16px;
       animation: fadeIn 0.8s ease-in-out;
+      position: relative;
+      z-index: 2;
       
       h1 {
-        font-size: 48px;
+        font-size: 52px; // Increased font size
         font-weight: 700;
         margin-bottom: 16px;
         color: #fff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        letter-spacing: 0.5px;
         
         @media (max-width: 768px) {
           font-size: 36px;
@@ -29,8 +52,10 @@
       }
       
       p {
-        font-size: 20px;
+        font-size: 22px; // Increased font size
         margin-bottom: 0;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        letter-spacing: 0.3px;
         
         @media (max-width: 768px) {
           font-size: 18px;
@@ -44,20 +69,50 @@
     margin: 0 auto;
     padding: 0 16px;
     margin-bottom: 80px;
-  }
-  
-  .job-info {
+  }    .job-info {
     animation: slideInFromLeft 0.6s ease-in-out;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    height: 100%;
     
     h2 {
       margin-bottom: 24px;
       transition: color 0.3s ease;
+      position: relative;
+      display: inline-block;
+      
+      &:after {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 3px;
+        background-color: #1677ff;
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+      }
     }
     
     h3 {
       margin-top: 32px;
       margin-bottom: 16px;
       transition: color 0.3s ease;
+      position: relative;
+      display: inline-block;
+      
+      &:after {
+        content: '';
+        display: block;
+        width: 30px;
+        height: 2px;
+        background-color: #1677ff;
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        opacity: 0.7;
+      }
     }
     
     p {
@@ -67,26 +122,53 @@
       transition: color 0.3s ease;
     }
     
+    ul {
+      padding-left: 20px;
+      margin-bottom: 32px;
+      
+      li {
+        margin-bottom: 8px;
+        line-height: 1.6;
+        position: relative;
+        
+        &:before {
+          content: '•';
+          color: #1677ff;
+          font-weight: bold;
+          display: inline-block;
+          width: 1em;
+          margin-left: -1em;
+        }
+      }
+    }
+    
     .requirement-cards {
       margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
       
       .requirement-card {
-        display: flex;
-        align-items: flex-start;
+        flex: 1 1 calc(50% - 8px);
+        min-width: 160px;
         margin-bottom: 16px;
         padding: 16px;
         border-radius: 8px;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
         border: 1px solid transparent;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        
+        @media (max-width: 576px) {
+          flex: 1 1 100%;
+        }
         
         &:hover {
           transform: translateY(-5px);
           box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        &:last-child {
-          margin-bottom: 0;
         }
         
         .icon-wrapper {
@@ -97,7 +179,7 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-right: 16px;
+          margin: 0 auto 16px;
           flex-shrink: 0;
           
           .anticon {
@@ -107,7 +189,12 @@
         }
         
         .content {
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           flex: 1;
+          width: 100%;
           
           h5 {
             margin-top: 0;
@@ -122,12 +209,157 @@
             font-size: 14px;
             color: rgba(0, 0, 0, 0.65);
             transition: color 0.3s ease;
+            text-align: center;
+            width: 100%;
           }
         }
       }
     }
   }
-    .job-application-form {
+  .requirements-section {
+    margin-top: 60px;
+    margin-bottom: 40px;
+    width: 100%;
+    animation: fadeInUp 1s ease-in-out;
+    opacity: 1;
+    transform: translateY(0);
+    
+    h2 {
+      margin-bottom: 32px;
+      transition: color 0.3s ease;
+      font-size: 28px;
+      text-align: center;
+      position: relative;
+      
+      &:after {
+        content: '';
+        display: block;
+        width: 50px;
+        height: 3px;
+        background-color: #1677ff;
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+    
+    .requirement-cards {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 16px;
+      justify-content: space-between;
+      
+      // Enhanced responsive behavior
+      @media (max-width: 1200px) {
+        flex-wrap: wrap;
+      }
+      
+      @media (max-width: 992px) {
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      
+      @media (max-width: 576px) {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .requirement-card {
+        flex: 1 1 calc(25% - 12px);
+        min-width: 230px;
+        margin-bottom: 16px;
+        padding: 24px 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0;
+        animation: fadeInCard 0.5s ease-in-out forwards;
+        
+        // Staggered animation delay for each card
+        &:nth-child(1) { animation-delay: 0.1s; }
+        &:nth-child(2) { animation-delay: 0.3s; }
+        &:nth-child(3) { animation-delay: 0.5s; }
+        &:nth-child(4) { animation-delay: 0.7s; }
+        
+        // Enhanced responsive behavior
+        @media (max-width: 1200px) {
+          flex: 1 1 calc(50% - 10px);
+          min-width: 200px;
+        }
+        
+        @media (max-width: 992px) {
+          flex: 1 1 calc(50% - 10px);
+        }
+        
+        @media (max-width: 576px) {
+          flex: 0 0 100%;
+          width: 100%;
+          max-width: 350px;
+        }
+        
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+          border-color: #e6f4ff;
+          
+          .icon-wrapper {
+            background-color: #4096ff;
+            transform: scale(1.1);
+          }
+          
+          h4 {
+            color: #1677ff;
+          }
+        }          .icon-wrapper {
+          width: 64px;
+          height: 64px;
+          background-color: #1677ff;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 16px;
+          flex-shrink: 0;
+          transition: all 0.3s ease;
+            .anticon {
+            font-size: 30px;
+            color: #fff;
+            transition: all 0.3s ease;
+          }
+        }          .content {
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex: 1;
+          width: 100%;
+            h5, h4 {            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+          }
+          
+          p {
+            margin-bottom: 0;
+            font-size: 15px;
+            line-height: 1.6;
+            color: rgba(0, 0, 0, 0.65);
+            transition: color 0.3s ease;
+            text-align: center;
+            width: 100%;
+          }
+        }
+      }
+    }
+  }  
+  .job-application-form {
     background-color: #fff;
     border-radius: 8px;
     padding: 32px;
@@ -154,9 +386,39 @@
       .ant-picker,
       .ant-select-selector {
         border-radius: 4px;
+        padding: 12px 16px;
+        height: auto;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border: 1px solid #d9d9d9;
+        
         &:hover,
         &:focus {
           border-color: #1677ff;
+          box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+        }
+      }
+      
+      .ant-input-affix-wrapper {
+        padding: 0;
+        
+        .ant-input {
+          padding: 12px 16px;
+          height: auto;
+        }
+      }
+      
+      .ant-form-item {
+        margin-bottom: 24px;
+        
+        .ant-form-item-label > label {
+          font-weight: 500;
+          font-size: 16px;
+          height: 32px;
+        }
+        
+        &.ant-form-item-with-help {
+          margin-bottom: 32px;
         }
       }
       
@@ -175,13 +437,87 @@
         max-width: 320px;
         margin-top: 16px;
         transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
         
         &:hover {
           opacity: 0.9;
           transform: translateY(-2px);
           box-shadow: 0 5px 10px rgba(22, 119, 255, 0.2);
         }
+        
+        &.ant-btn-loading {
+          &:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: loading 1.5s infinite;
+          }
+        }
       }
+      
+      // Upload component enhancements
+      .ant-upload-list {
+        margin-top: 8px;
+        
+        .ant-upload-list-item {
+          transition: all 0.3s ease;
+          border-radius: 4px;
+          
+          &:hover {
+            background-color: #f5f5f5;
+          }
+          
+          .ant-upload-list-item-name {
+            color: #333;
+            font-weight: 500;
+          }
+          
+          .ant-upload-list-item-card-actions {
+            opacity: 0;
+            transition: opacity 0.3s;
+          }
+          
+          &:hover .ant-upload-list-item-card-actions {
+            opacity: 1;
+          }
+        }
+      }
+    }
+  }
+  
+  // Back to top button style
+  .back-to-top {
+    height: 40px;
+    width: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    background-color: #1677ff;
+    color: #fff;
+    text-align: center;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+    
+    &:hover {
+      background-color: #4096ff;
+      transform: scale(1.1);
+    }
+    
+    .anticon {
+      margin-top: 10px;
+    }
+  }
+  
+  // Improved focus states for accessibility
+  .ant-btn, .ant-input, .ant-upload {
+    &:focus-visible {
+      outline: 2px solid #1677ff;
+      outline-offset: 2px;
     }
   }
 }
@@ -218,10 +554,49 @@
   }
 }
 
+// Additional animations
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInCard {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+// Add loading animation
+@keyframes loading {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
 // Dark mode styles
 body.dark-mode {
   .career-page {
     .job-info {
+      background-color: #1f1f1f;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid #303030;
+      
       h2, h3 {
         color: rgba(255, 255, 255, 0.85);
       }
@@ -230,13 +605,36 @@ body.dark-mode {
         color: rgba(255, 255, 255, 0.65);
       }
       
-      .requirement-cards {
+      ul {
+        li {
+          color: rgba(255, 255, 255, 0.65);
+          
+          &:before {
+            color: #4096ff;
+          }
+        }
+      }
+        .requirement-cards {
         .requirement-card {
           background-color: #1f1f1f;
           border-color: #303030;
           
+          &:hover {
+            background-color: #2a2a2a;
+            border-color: #1677ff;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            
+            .icon-wrapper {
+              background-color: #4096ff;
+            }
+            
+            h4 {
+              color: #69b1ff;
+            }
+          }
+          
           .content {
-            h5 {
+            h5, h4 {
               color: rgba(255, 255, 255, 0.85);
             }
             
@@ -340,5 +738,151 @@ body.dark-mode {
         }
       }
     }
+      // Back-to-top button in dark mode
+    .back-to-top {
+      background-color: #177ddc;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      
+      &:hover {
+        background-color: #4096ff;
+      }
+    }
+      // Modal styles for dark mode
+    .ant-modal-confirm {
+      .ant-modal-content {
+        background-color: #1f1f1f;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        
+        .ant-modal-body {
+          background-color: #1f1f1f;
+          
+          .ant-modal-confirm-body-wrapper {
+            .ant-modal-confirm-body {
+              .ant-modal-confirm-title {
+                color: rgba(255, 255, 255, 0.85);
+              }
+              
+              .ant-modal-confirm-content {
+                color: rgba(255, 255, 255, 0.65);
+              }
+              
+              .anticon-check-circle {
+                color: #52c41a;
+              }
+            }
+            
+            .ant-modal-confirm-btns {
+              .ant-btn {
+                background-color: #177ddc;
+                border-color: #177ddc;
+                color: #fff;
+                
+                &:hover {
+                  background-color: #4096ff;
+                  border-color: #4096ff;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+      // Specific class for the success modal
+    .career-success-modal {
+      .ant-modal-content {
+        background-color: #1f1f1f;
+        
+        .ant-modal-body {
+          background-color: #1f1f1f;
+          
+          .ant-modal-confirm-body {
+            .anticon-check-circle {
+              color: #52c41a;
+            }
+            
+            .ant-modal-confirm-title {
+              color: rgba(255, 255, 255, 0.85);
+            }
+            
+            .ant-modal-confirm-content {
+              color: rgba(255, 255, 255, 0.65);
+            }
+          }
+          
+          .ant-modal-confirm-btns {
+            .ant-btn {
+              background-color: #177ddc;
+              border-color: #177ddc;
+              color: white;
+              
+              &:hover {
+                background-color: #4096ff;
+                border-color: #4096ff;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
+
+// Thêm CSS đặc biệt cho modal nộp đơn thành công ở cả light mode và dark mode
+.career-success-modal {
+  .ant-modal-content {
+    .ant-modal-body {
+      .ant-modal-confirm-body-wrapper {
+        .ant-modal-confirm-body {
+          .anticon-check-circle {
+            color: #52c41a;
+            font-size: 22px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// CSS đặc biệt cho dark mode
+body.dark-mode {
+  .career-success-modal {
+    .ant-modal-content {
+      background-color: #1f1f1f !important;
+      
+      .ant-modal-body {
+        background-color: #1f1f1f !important;
+        
+        .ant-modal-confirm-body-wrapper {
+          .ant-modal-confirm-body {
+            .anticon-check-circle {
+              color: #52c41a !important;
+            }
+            
+            .ant-modal-confirm-title {
+              color: rgba(255, 255, 255, 0.85) !important;
+            }
+            
+            .ant-modal-confirm-content {
+              color: rgba(255, 255, 255, 0.65) !important;
+            }
+          }
+          
+          .ant-modal-confirm-btns {
+            .ant-btn {
+              background-color: #177ddc !important;
+              border-color: #177ddc !important;
+              color: white !important;
+              
+              &:hover {
+                background-color: #4096ff !important;
+                border-color: #4096ff !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+  
+

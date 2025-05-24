@@ -90,37 +90,37 @@ const Navbar = () => {
     {
       key: '/',
       icon: <HomeOutlined />,
-      label: <Link to="/">{t('navigation.home')}</Link>,
+      label: <Link to="/">{t('navigation.home')}</Link>
     },
     {
       key: '/things-to-do',
       icon: <AppstoreOutlined />,
-      label: <Link to="/things-to-do">{t('navigation.tours')}</Link>,
+      label: <Link to="/things-to-do">{t('navigation.tours')}</Link>
     },
     {
       key: '/shop',
       icon: <ShoppingOutlined />,
-      label: <Link to="/shop">{t('navigation.services')}</Link>,
+      label: <Link to="/shop">{t('navigation.services')}</Link>
     },
     {
       key: '/blog',
       icon: <ReadOutlined />,
-      label: <Link to="/blog">Blog</Link>,
+      label: <Link to="/blog">Blog</Link>
     },
     {
       key: '/career',
       icon: <UserOutlined />,
-      label: <Link to="/career">{t('navigation.jobs')}</Link>,
+      label: <Link to="/career">{t('navigation.jobs')}</Link>
     },
     {
       key: '/about',
       icon: <InfoCircleOutlined />,
-      label: <Link to="/about">{t('navigation.about')}</Link>,
+      label: <Link to="/about">{t('navigation.about')}</Link>
     },
     {
       key: '/contact',
       icon: <PhoneOutlined />,
-      label: <Link to="/contact">{t('navigation.contact')}</Link>,
+      label: <Link to="/contact">{t('navigation.contact')}</Link>
     },
   ]
 
@@ -168,8 +168,8 @@ const Navbar = () => {
             selectedKeys={[location.pathname]}
             items={menuItems}
             className="desktop-menu"
-            disabledOverflow={true}
-            style={{ flex: '1 1 auto' }}
+            disabledOverflow={false}
+            style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'space-between', width: '100%' }}
           />
 
           {/* Mobile Menu Button */}
@@ -222,6 +222,7 @@ const Navbar = () => {
                   <Button
                     className="button-register"
                     type="primary"
+                    ghost
                     onClick={handleRegisterClick}
                   >
                     {t('common.register')}
@@ -248,10 +249,10 @@ const Navbar = () => {
           style={{ border: 'none' }}
         />
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Button type="primary" ghost onClick={handleLoginClick}>
+          <Button type="primary" ghost onClick={handleLoginClick} className="button-login">
             {t('navigation.login')}
           </Button>
-          <Button type="primary" onClick={handleRegisterClick}>
+          <Button type="primary" ghost onClick={handleRegisterClick} className="button-register">
             {t('navigation.register')}
           </Button>
         </div>

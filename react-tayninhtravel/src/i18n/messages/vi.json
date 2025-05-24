@@ -101,8 +101,10 @@
             "submit": "Nộp đơn ứng tuyển",
             "successMessage": "Đơn đăng ký của bạn đã được gửi thành công! Chúng tôi sẽ liên hệ lại trong thời gian sớm nhất.",
             "errorMessage": "Đã xảy ra lỗi khi gửi đơn đăng ký. Vui lòng thử lại sau.",
+            "fileUploadSuccess": "đã được tải lên thành công!",
             "submissionSuccessTitle": "Nộp đơn thành công",
-            "submissionSuccessContent": "Cảm ơn bạn đã ứng tuyển! Chúng tôi đã nhận được đơn đăng ký của bạn và sẽ xem xét trong thời gian sớm nhất. Nếu hồ sơ của bạn phù hợp với yêu cầu của chúng tôi, chúng tôi sẽ liên hệ với bạn cho các bước tiếp theo."
+            "submissionSuccessContent": "Cảm ơn bạn đã ứng tuyển! Chúng tôi đã nhận được đơn đăng ký của bạn và sẽ xem xét trong thời gian sớm nhất. Nếu hồ sơ của bạn phù hợp với yêu cầu của chúng tôi, chúng tôi sẽ liên hệ với bạn cho các bước tiếp theo.",
+            "loginRequired": "Vui lòng đăng nhập để gửi đơn ứng tuyển của bạn."
         }
     },
     "home": {
