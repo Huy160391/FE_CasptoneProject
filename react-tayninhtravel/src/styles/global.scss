@@ -261,6 +261,75 @@ body {
     }
   }
   
+  // Modal confirmations (success, error, etc.)
+  .ant-modal-confirm {
+    .ant-modal-content {
+      background-color: #141414;
+      
+      .ant-modal-body {
+        background-color: #141414;
+        
+        .ant-modal-confirm-body-wrapper {
+          .ant-modal-confirm-body {
+            .ant-modal-confirm-title {
+              color: rgba(255, 255, 255, 0.85);
+            }
+            
+            .ant-modal-confirm-content {
+              color: rgba(255, 255, 255, 0.65);
+            }
+          }
+          
+          .ant-modal-confirm-btns {
+            .ant-btn {
+              &-primary {
+                background-color: #79eac0;
+                border-color: #79eac0;
+                color: #000000;
+                
+                &:hover {
+                  background-color: #5dc9a0;
+                  border-color: #5dc9a0;
+                }
+              }
+              
+              &-default {
+                background-color: transparent;
+                border-color: #303030;
+                color: rgba(255, 255, 255, 0.85);
+                
+                &:hover {
+                  border-color: #79eac0;
+                  color: #79eac0;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Success icon
+    .anticon-check-circle {
+      color: #52c41a;
+    }
+    
+    // Warning icon
+    .anticon-exclamation-circle {
+      color: #faad14;
+    }
+    
+    // Error icon
+    .anticon-close-circle {
+      color: #ff4d4f;
+    }
+    
+    // Info icon
+    .anticon-info-circle {
+      color: #1677ff;
+    }
+  }
+  
   // Content fixes for various components
   .blog-summary, 
   .post-content,

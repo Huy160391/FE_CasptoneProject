@@ -9,16 +9,17 @@ const ThemeToggle = () => {
   const { t } = useTranslation()
 
   const buttonStyle = {
-    width: '40px',
-    height: '40px',
+    width: '36px',
+    height: '36px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.3s',
     borderRadius: '50%',
-    marginRight: '8px',
+    marginRight: '12px',
     backgroundColor: isDarkMode ? '#79eac0' : undefined,
     color: isDarkMode ? '#000000' : undefined,
+    zIndex: 1,
   }
 
   return (

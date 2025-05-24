@@ -101,8 +101,10 @@
             "submit": "Submit Application",
             "successMessage": "Your application has been submitted successfully! We will contact you as soon as possible.",
             "errorMessage": "There was an error submitting your application. Please try again later.",
+            "fileUploadSuccess": "has been uploaded successfully!",
             "submissionSuccessTitle": "Application Submitted Successfully",
-            "submissionSuccessContent": "Thank you for applying! We've received your application and will review it shortly. If your qualifications match our requirements, we will contact you for the next steps."
+            "submissionSuccessContent": "Thank you for applying! We've received your application and will review it shortly. If your qualifications match our requirements, we will contact you for the next steps.",
+            "loginRequired": "Please log in to submit your application."
         }
     },
     "home": {
