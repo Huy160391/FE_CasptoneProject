@@ -95,45 +95,45 @@ const Profile = () => {
         } finally {
             setLoading(false);
         }
-    }; const handleAvatarUpdate = async () => {
+    };    const handleAvatarUpdate = async () => {
         if (!user || fileList.length === 0) return;
 
         try {
             setAvatarLoading(true);
-            const file = fileList[0].originFileObj;
 
-            console.log('File object:', file);
-            console.log('File type:', file?.type);
-            console.log('File size:', file?.size);
-
-            if (!file) {
+            // Kiểm tra xem có file đã chọn hay không
+            if (fileList.length === 0) {
                 message.error(t('profile.avatarUploadFailed'));
                 return;
             }
 
-            // Create FormData object for file upload
+            // Lấy file từ originFileObj - đây là cách tiếp cận đúng
+            const file = fileList[0].originFileObj as File;
+
+            if (!file) {
+                console.error('No originFileObj found in the fileList item');
+                message.error(t('profile.avatarUploadFailed'));
+                return;
+            }
+
+            console.log('File to upload:', file);
+            console.log('File type:', file.type);
+            console.log('File size:', file.size);
+
+            // Create FormData object for file upload (similar to CV upload in Career.tsx)
             const formData = new FormData();
-            formData.append('Avatar', file);
+            formData.append('Avatar', file, file.name);
 
-            // Log FormData contents (for debugging)
-            for (let pair of formData.entries()) {
-                console.log('FormData entry:', pair[0], pair[1]);
-            }
-
-            // Call the API directly instead of using the service
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
-
-            await axiosInstance.put('/Account/edit-Avatar', formData, {
+            // Send API request directly (similar to CV upload approach)
+            const response = await axiosInstance.put('/Account/edit-Avatar', formData, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                }
+                    'Content-Type': 'multipart/form-data', // Important for file uploads
+                },
             });
 
-            // Create a temporary URL for the file to display the new avatar immediately
+            console.log('API response:', response.data);
+
+            // Tạo URL tạm thời cho file để hiển thị avatar mới ngay lập tức
             const tempUrl = URL.createObjectURL(file);
 
             updateUser({
@@ -142,6 +142,7 @@ const Profile = () => {
             });
 
             message.success(t('profile.avatarUpdateSuccess'));
+            setFileList([]); // Reset file list sau khi tải lên thành công
         } catch (error: any) {
             console.error('Update avatar error:', error);
             message.error(error.response?.data?.message || t('profile.avatarUpdateFailed'));
@@ -200,6 +201,11 @@ const Profile = () => {
                                             onChange={({ fileList }) => {
                                                 console.log('Upload onChange:', fileList);
                                                 setFileList(fileList);
+                                                // Hiển thị thông báo thành công khi tải lên file hợp lệ
+                                                if (fileList.length > 0) {
+                                                    console.log('File selected:', fileList[0]);
+                                                    console.log('File object:', fileList[0].originFileObj);
+                                                }
                                             }}
                                             beforeUpload={(file) => {
                                                 // Validate file type and size
@@ -220,9 +226,8 @@ const Profile = () => {
                                                 return false; // Prevent automatic upload
                                             }}
                                             className="avatar-upload"
-                                        >
-                                            <Button icon={<UploadOutlined />}>{t('profile.changeAvatar')}</Button>
-                                            <span className="upload-hint"> {t('profile.imageFormatHint')}</span>
+                                        >                                            <Button icon={<UploadOutlined />}>{t('profile.changeAvatar')}</Button>
+                                            <span className="upload-hint">{t('profile.imageFormatHint')}</span>
                                         </Upload>
                                         {fileList.length > 0 && (
                                             <Button
@@ -233,6 +238,11 @@ const Profile = () => {
                                             >
                                                 {t('profile.saveAvatar')}
                                             </Button>
+                                        )}
+                                        {fileList.length > 0 && (
+                                            <div className="file-selected-info">
+                                                {t('profile.fileSelected')}: {fileList[0].name}
+                                            </div>
                                         )}
                                     </div>
                                 </Col>
