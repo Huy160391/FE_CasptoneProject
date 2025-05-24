@@ -169,7 +169,7 @@ const Navbar = () => {
             items={menuItems}
             className="desktop-menu"
             disabledOverflow={false}
-            style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'space-between', width: '100%' }}
+            style={{ flex: '1 1 auto' }}
           />
 
           {/* Mobile Menu Button */}
@@ -222,7 +222,6 @@ const Navbar = () => {
                   <Button
                     className="button-register"
                     type="primary"
-                    ghost
                     onClick={handleRegisterClick}
                   >
                     {t('common.register')}
@@ -249,10 +248,10 @@ const Navbar = () => {
           style={{ border: 'none' }}
         />
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Button type="primary" ghost onClick={handleLoginClick} className="button-login">
+          <Button type="primary" ghost onClick={handleLoginClick}>
             {t('navigation.login')}
           </Button>
-          <Button type="primary" ghost onClick={handleRegisterClick} className="button-register">
+          <Button type="primary" onClick={handleRegisterClick}>
             {t('navigation.register')}
           </Button>
         </div>

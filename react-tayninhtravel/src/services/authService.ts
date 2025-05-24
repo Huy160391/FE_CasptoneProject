@@ -19,10 +19,6 @@ interface ChangePasswordRequest {
     newPassword: string;
 }
 
-interface EditAvatarRequest {
-    avatar: string;
-}
-
 interface LoginResponse {
     user: {
         id: number;
@@ -137,20 +133,33 @@ export const authService = {
         }
     },
 
-    editAvatar: async (avatar: string): Promise<void> => {
+    editAvatar: async (avatarFile: File): Promise<void> => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('No authentication token found');
             }
 
-            const request: EditAvatarRequest = { avatar };
-            await axiosInstance.put('/Account/edit-Avatar', request, {
+            console.log('Avatar file to upload:', avatarFile);
+            console.log('Avatar file type:', avatarFile.type);
+            console.log('Avatar file size:', avatarFile.size);
+
+            const formData = new FormData();
+            formData.append('Avatar', avatarFile);
+
+            // Log FormData contents (for debugging)
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+            await axiosInstance.put('/Account/edit-Avatar', formData, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    // Content-Type will be set automatically by the browser with the correct boundary
                 }
             });
         } catch (error) {
+            console.error('Edit avatar error details:', error);
             throw error;
         }
     },

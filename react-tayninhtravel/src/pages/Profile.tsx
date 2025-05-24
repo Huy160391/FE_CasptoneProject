@@ -95,25 +95,50 @@ const Profile = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleAvatarUpdate = async () => {
+    }; const handleAvatarUpdate = async () => {
         if (!user || fileList.length === 0) return;
 
         try {
             setAvatarLoading(true);
-            const avatarUrl = fileList[0].url || fileList[0].thumbUrl;
+            const file = fileList[0].originFileObj;
 
-            if (!avatarUrl) {
+            console.log('File object:', file);
+            console.log('File type:', file?.type);
+            console.log('File size:', file?.size);
+
+            if (!file) {
                 message.error(t('profile.avatarUploadFailed'));
                 return;
             }
 
-            await authService.editAvatar(avatarUrl);
+            // Create FormData object for file upload
+            const formData = new FormData();
+            formData.append('Avatar', file);
+
+            // Log FormData contents (for debugging)
+            for (let pair of formData.entries()) {
+                console.log('FormData entry:', pair[0], pair[1]);
+            }
+
+            // Call the API directly instead of using the service
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            await axiosInstance.put('/Account/edit-Avatar', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+
+            // Create a temporary URL for the file to display the new avatar immediately
+            const tempUrl = URL.createObjectURL(file);
 
             updateUser({
                 ...user,
-                avatar: avatarUrl
+                avatar: tempUrl
             });
 
             message.success(t('profile.avatarUpdateSuccess'));
@@ -172,11 +197,32 @@ const Profile = () => {
                                             listType="picture"
                                             maxCount={1}
                                             fileList={fileList}
-                                            onChange={({ fileList }) => setFileList(fileList)}
-                                            beforeUpload={() => false}
+                                            onChange={({ fileList }) => {
+                                                console.log('Upload onChange:', fileList);
+                                                setFileList(fileList);
+                                            }}
+                                            beforeUpload={(file) => {
+                                                // Validate file type and size
+                                                const isImage = file.type.startsWith('image/');
+                                                const isLessThan2M = file.size / 1024 / 1024 < 2;
+
+                                                if (!isImage) {
+                                                    message.error(t('profile.imageOnly'));
+                                                    return Upload.LIST_IGNORE;
+                                                }
+
+                                                if (!isLessThan2M) {
+                                                    message.error(t('profile.imageTooLarge'));
+                                                    return Upload.LIST_IGNORE;
+                                                }
+
+                                                console.log('Valid file to upload:', file);
+                                                return false; // Prevent automatic upload
+                                            }}
                                             className="avatar-upload"
                                         >
                                             <Button icon={<UploadOutlined />}>{t('profile.changeAvatar')}</Button>
+                                            <span className="upload-hint"> {t('profile.imageFormatHint')}</span>
                                         </Upload>
                                         {fileList.length > 0 && (
                                             <Button

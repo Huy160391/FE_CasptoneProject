@@ -21,10 +21,10 @@
     justify-content: space-between;
     align-items: center;
     height: 64px;
-    padding: 0 15px;
+    padding: 0 24px;
     width: 100%;
     position: relative;
-    gap: 5px;
+    gap: 10px;
   }
 
   .logo {
@@ -235,7 +235,6 @@ body.dark-mode {
     line-height: 64px;
     display: flex;
     justify-content: space-between !important;
-    width: 100%;
     
     .ant-menu-title-content {
       font-size: 13px;
@@ -258,13 +257,12 @@ body.dark-mode {
       }
 
       .anticon {
-        font-size: 15px;
+        font-size: 16px;
         display: flex;
         align-items: center;
         line-height: 1;
         margin-top: 0;
         margin-bottom: 0;
-        margin-right: 6px !important;
       }
 
       a {
