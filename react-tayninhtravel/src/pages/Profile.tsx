@@ -95,28 +95,54 @@ const Profile = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleAvatarUpdate = async () => {
+    }; const handleAvatarUpdate = async () => {
         if (!user || fileList.length === 0) return;
 
         try {
             setAvatarLoading(true);
-            const avatarUrl = fileList[0].url || fileList[0].thumbUrl;
 
-            if (!avatarUrl) {
+            // Kiểm tra xem có file đã chọn hay không
+            if (fileList.length === 0) {
                 message.error(t('profile.avatarUploadFailed'));
                 return;
             }
 
-            await authService.editAvatar(avatarUrl);
+            // Lấy file từ originFileObj - đây là cách tiếp cận đúng
+            const file = fileList[0].originFileObj as File;
+
+            if (!file) {
+                console.error('No originFileObj found in the fileList item');
+                message.error(t('profile.avatarUploadFailed'));
+                return;
+            }
+
+            console.log('File to upload:', file);
+            console.log('File type:', file.type);
+            console.log('File size:', file.size);
+
+            // Create FormData object for file upload (similar to CV upload in Career.tsx)
+            const formData = new FormData();
+            formData.append('Avatar', file, file.name);
+
+            // Send API request directly (similar to CV upload approach)
+            const response = await axiosInstance.put('/Account/edit-Avatar', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data', // Important for file uploads
+                },
+            });
+
+            console.log('API response:', response.data);
+
+            // Tạo URL tạm thời cho file để hiển thị avatar mới ngay lập tức
+            const tempUrl = URL.createObjectURL(file);
 
             updateUser({
                 ...user,
-                avatar: avatarUrl
+                avatar: tempUrl
             });
 
             message.success(t('profile.avatarUpdateSuccess'));
+            setFileList([]); // Reset file list sau khi tải lên thành công
         } catch (error: any) {
             console.error('Update avatar error:', error);
             message.error(error.response?.data?.message || t('profile.avatarUpdateFailed'));
@@ -172,11 +198,36 @@ const Profile = () => {
                                             listType="picture"
                                             maxCount={1}
                                             fileList={fileList}
-                                            onChange={({ fileList }) => setFileList(fileList)}
-                                            beforeUpload={() => false}
+                                            onChange={({ fileList }) => {
+                                                console.log('Upload onChange:', fileList);
+                                                setFileList(fileList);
+                                                // Hiển thị thông báo thành công khi tải lên file hợp lệ
+                                                if (fileList.length > 0) {
+                                                    console.log('File selected:', fileList[0]);
+                                                    console.log('File object:', fileList[0].originFileObj);
+                                                }
+                                            }}
+                                            beforeUpload={(file) => {
+                                                // Validate file type and size
+                                                const isImage = file.type.startsWith('image/');
+                                                const isLessThan2M = file.size / 1024 / 1024 < 2;
+
+                                                if (!isImage) {
+                                                    message.error(t('profile.imageOnly'));
+                                                    return Upload.LIST_IGNORE;
+                                                }
+
+                                                if (!isLessThan2M) {
+                                                    message.error(t('profile.imageTooLarge'));
+                                                    return Upload.LIST_IGNORE;
+                                                }
+
+                                                console.log('Valid file to upload:', file);
+                                                return false; // Prevent automatic upload
+                                            }}
                                             className="avatar-upload"
-                                        >
-                                            <Button icon={<UploadOutlined />}>{t('profile.changeAvatar')}</Button>
+                                        >                                            <Button icon={<UploadOutlined />}>{t('profile.changeAvatar')}</Button>
+                                            <span className="upload-hint">{t('profile.imageFormatHint')}</span>
                                         </Upload>
                                         {fileList.length > 0 && (
                                             <Button
@@ -187,6 +238,11 @@ const Profile = () => {
                                             >
                                                 {t('profile.saveAvatar')}
                                             </Button>
+                                        )}
+                                        {fileList.length > 0 && (
+                                            <div className="file-selected-info">
+                                                {t('profile.fileSelected')}: {fileList[0].name}
+                                            </div>
                                         )}
                                     </div>
                                 </Col>

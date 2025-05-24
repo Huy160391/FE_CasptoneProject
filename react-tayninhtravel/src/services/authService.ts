@@ -19,10 +19,6 @@ interface ChangePasswordRequest {
     newPassword: string;
 }
 
-interface EditAvatarRequest {
-    avatar: string;
-}
-
 interface LoginResponse {
     user: {
         id: number;
@@ -137,20 +133,38 @@ export const authService = {
         }
     },
 
-    editAvatar: async (avatar: string): Promise<void> => {
+    editAvatar: async (avatarFile: File): Promise<void> => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('No authentication token found');
             }
 
-            const request: EditAvatarRequest = { avatar };
-            await axiosInstance.put('/Account/edit-Avatar', request, {
+            console.log('Avatar file to upload:', avatarFile);
+            console.log('Avatar file type:', avatarFile.type);
+            console.log('Avatar file size:', avatarFile.size);
+            console.log('Avatar file name:', avatarFile.name);
+
+            // Tạo FormData để gửi file theo đúng định dạng multipart/form-data
+            const formData = new FormData();
+            formData.append('Avatar', avatarFile, avatarFile.name);
+
+            console.log('FormData created with file');
+
+            // Log các entries trong FormData (để debug)
+            for (let entry of formData.entries()) {
+                console.log('FormData entry:', entry[0], entry[1]);
+            }
+
+            // Gửi FormData với file thật, không chuyển đổi thành base64
+            await axiosInstance.put('/Account/edit-Avatar', formData, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    // Content-Type sẽ được tự động set với boundary phù hợp
                 }
             });
         } catch (error) {
+            console.error('Edit avatar error details:', error);
             throw error;
         }
     },
