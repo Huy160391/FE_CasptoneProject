@@ -95,7 +95,7 @@ const Profile = () => {
         } finally {
             setLoading(false);
         }
-    };    const handleAvatarUpdate = async () => {
+    }; const handleAvatarUpdate = async () => {
         if (!user || fileList.length === 0) return;
 
         try {
