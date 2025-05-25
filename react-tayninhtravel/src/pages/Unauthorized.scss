@@ -1,0 +1,20 @@
+.unauthorized-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  
+  .ant-result-title {
+    font-size: 28px;
+    font-weight: 600;
+  }
+  
+  .ant-result-subtitle {
+    font-size: 16px;
+    margin-top: 16px;
+  }
+  
+  .ant-btn-primary {
+    margin-top: 24px;
+  }
+}

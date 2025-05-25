@@ -13,7 +13,8 @@ import {
   UserOutlined,
   ReadOutlined,
   LogoutOutlined,
-  SettingOutlined
+  SettingOutlined,
+  DashboardOutlined
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from '../common/ThemeToggle'
@@ -131,6 +132,12 @@ const Navbar = () => {
       icon: <UserOutlined />,
       onClick: () => navigate('/profile'),
     },
+    ...(user?.role === 'Admin' ? [{
+      key: 'admin',
+      label: 'Admin Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/admin/dashboard'),
+    }] : []),
     {
       key: 'settings',
       label: t('common.settings'),
@@ -248,12 +255,30 @@ const Navbar = () => {
           style={{ border: 'none' }}
         />
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Button type="primary" ghost onClick={handleLoginClick}>
-            {t('navigation.login')}
-          </Button>
-          <Button type="primary" onClick={handleRegisterClick}>
-            {t('navigation.register')}
-          </Button>
+          {isAuthenticated ? (
+            <>
+              {user?.role === 'Admin' && (
+                <Button type="primary" onClick={() => navigate('/admin/dashboard')}>
+                  Admin Dashboard
+                </Button>
+              )}
+              <Button type="primary" onClick={() => navigate('/profile')}>
+                {t('common.profile')}
+              </Button>
+              <Button danger onClick={handleLogout}>
+                {t('common.logout')}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button type="primary" ghost onClick={handleLoginClick}>
+                {t('navigation.login')}
+              </Button>
+              <Button type="primary" onClick={handleRegisterClick}>
+                {t('navigation.register')}
+              </Button>
+            </>
+          )}
         </div>
       </Drawer>
 

@@ -10,6 +10,7 @@ import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import Career from '@/pages/Career';
 import NotFound from '@/pages/NotFound';
+import Unauthorized from '@/pages/Unauthorized';
 
 export const publicRoutes: RouteObject[] = [
     {
@@ -49,10 +50,13 @@ export const publicRoutes: RouteObject[] = [
     }, {
         path: '/career',
         element: <Career />,
-    },
-    {
+    }, {
         path: '/404',
         element: <NotFound />,
+    },
+    {
+        path: '/unauthorized',
+        element: <Unauthorized />,
     },
     {
         path: '*',
