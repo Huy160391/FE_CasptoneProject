@@ -2,10 +2,10 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 interface User {
-  id: number
+  id: string
   name: string
   email: string
-  role: 'user' | 'admin'
+  role: 'user' | 'Admin'
   avatar?: string
   phone?: string
   address?: string
@@ -25,7 +25,19 @@ const getStoredUser = (): User | null => {
   const userStr = localStorage.getItem('user')
   if (userStr) {
     try {
-      return JSON.parse(userStr)
+      const user = JSON.parse(userStr);
+
+      // Đảm bảo role luôn đúng định dạng
+      if (user && user.role) {
+        // Chuẩn hóa role
+        if (user.role.toLowerCase() === 'admin' || user.role === 'Admin') {
+          user.role = 'Admin';
+        } else {
+          user.role = 'user';
+        }
+      }
+
+      return user;
     } catch (e) {
       console.error('Error parsing stored user:', e)
       return null

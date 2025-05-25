@@ -21,15 +21,28 @@ interface ChangePasswordRequest {
 
 interface LoginResponse {
     user: {
-        id: number;
+        id: string;
         name: string;
         email: string;
-        role: 'user' | 'admin';
+        role: 'user' | 'Admin';
         avatar?: string;
         phone?: string;
         address?: string;
     };
     token: string;
+}
+
+interface LoginApiResponse {
+    statusCode: number;
+    message: string;
+    token: string;
+    refreshToken: string;
+    tokenExpirationTime: string;
+    userId: string;
+    email: string;
+    name: string;
+    phoneNumber: string;
+    avatar: string;
 }
 
 export interface DecodedToken {
@@ -47,30 +60,49 @@ export function decodeToken(token: string): DecodedToken | null {
 export const authService = {
     login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
         try {
-            const response = await axiosInstance.post('/Authentication/login', credentials);
-            if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
+            const response = await axiosInstance.post<LoginApiResponse>('/Authentication/login', credentials);
+            const { data } = response;
 
-                // Decode token để lấy role và các thông tin khác
-                const decoded = decodeToken(response.data.token);
-                if (decoded) {
-                    const userInfo = {
-                        id: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
-                        email: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-                        name: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
-                        role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
-                        phone: decoded['Phone'] || undefined,
-                        avatar: decoded['Avatar'] || 'https://i.imgur.com/4AiXzf8.jpg',
-                        address: undefined
-                    };
-                    localStorage.setItem('user', JSON.stringify(userInfo));
-                    return {
-                        user: userInfo,
-                        token: response.data.token
-                    };
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+
+                // Chỉ decode token để lấy role
+                const decoded = decodeToken(data.token);
+                if (!decoded) {
+                    throw new Error('Invalid token format');
                 }
+
+                // Lấy role từ token
+                let userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+                // Đảm bảo role là 'Admin' hoặc 'user'
+                if (userRole && (userRole.toLowerCase() === 'admin' || userRole === 'Admin')) {
+                    userRole = 'Admin';
+                } else {
+                    userRole = 'user';
+                }
+
+                // Tạo user info từ response API
+                const userInfo = {
+                    id: data.userId,
+                    email: data.email,
+                    name: data.name,
+                    role: userRole,
+                    phone: data.phoneNumber,
+                    avatar: data.avatar || 'https://i.imgur.com/4AiXzf8.jpg',
+                    address: undefined
+                };
+
+                localStorage.setItem('user', JSON.stringify(userInfo));
+                localStorage.setItem('refreshToken', data.refreshToken);
+                localStorage.setItem('tokenExpirationTime', data.tokenExpirationTime);
+
+                return {
+                    user: userInfo,
+                    token: data.token
+                };
             }
-            throw new Error('Invalid token response');
+            throw new Error('Invalid response from server');
         } catch (error) {
             throw error;
         }

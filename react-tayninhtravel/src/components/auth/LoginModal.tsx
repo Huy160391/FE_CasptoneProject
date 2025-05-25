@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Modal, Form, Input, Button, Checkbox, Divider, message } from 'antd'
 import { UserOutlined, LockOutlined, GoogleOutlined, FacebookOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { authService } from '@/services/authService'
 import ForgotPasswordModal from './ForgotPasswordModal'
@@ -19,6 +20,7 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
   const [loading, setLoading] = useState(false)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const login = useAuthStore(state => state.login)
+  const navigate = useNavigate()
 
   const handleSubmit = async (values: any) => {
     try {
@@ -28,13 +30,34 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
         password: values.password
       })
 
-      login(response.user, response.token)
-      message.success(t('common.loginSuccess'))
-      form.resetFields()
-      onClose()
+      if (response.user && response.token) {
+        login(response.user, response.token)
+        message.success(t('auth.loginSuccess'))
+        form.resetFields()
+        onClose()
+
+        // Lưu thông tin phiên đăng nhập
+        localStorage.setItem('lastLoginTime', new Date().toISOString())
+
+        // Chuyển hướng dựa vào role
+        if (response.user.role === 'Admin') {
+          navigate('/admin/dashboard')
+        } else {
+          // Chuyển về trang trước đó hoặc trang chủ
+          navigate(-1)
+        }
+      } else {
+        throw new Error('Login response invalid')
+      }
     } catch (error: any) {
       console.error('Login error:', error)
-      message.error(error.response?.data?.message || t('common.loginFailed'))
+      if (error.response?.status === 401) {
+        message.error(t('auth.invalidCredentials'))
+      } else if (error.response?.status === 403) {
+        message.error(t('auth.sessionExpired'))
+      } else {
+        message.error(error.response?.data?.message || t('auth.loginFailed'))
+      }
     } finally {
       setLoading(false)
     }
@@ -96,7 +119,9 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>{t('auth.rememberMe')}</Checkbox>
             </Form.Item>
-            <a className="forgot-password" onClick={() => setShowForgotPassword(true)}>{t('auth.forgotPassword')}</a>
+            <a className="forgot-password" onClick={() => setShowForgotPassword(true)}>
+              {t('auth.forgotPassword')}
+            </a>
           </div>
         </Form.Item>
 

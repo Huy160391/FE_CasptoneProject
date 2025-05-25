@@ -1,7 +1,10 @@
-import { RouteObject } from 'react-router-dom';
+import { RouteObject, Navigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { publicRoutes } from './publicRoutes';
 import { privateRoutes } from './privateRoutes';
+import { adminRoutes } from './adminRoutes';
+import AdminRoute from './AdminRoute';
 
 const routes: RouteObject[] = [
   {
@@ -10,6 +13,20 @@ const routes: RouteObject[] = [
     children: [
       ...publicRoutes,
       ...privateRoutes,
+    ],
+  },
+  {
+    path: '/admin',
+    element: <AdminRoute />,
+    children: [
+      {
+        path: '',
+        element: <AdminLayout />,
+        children: [
+          { path: '', element: <Navigate to="/admin/dashboard" /> },
+          ...(adminRoutes[0].children || []),
+        ],
+      }
     ],
   },
 ];

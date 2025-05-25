@@ -1,18 +1,21 @@
 import { useState } from 'react'
-import { Layout, Menu } from 'antd'
-import { Link, useLocation } from 'react-router-dom'
+import { Layout, Menu, Button, Divider, Avatar } from 'antd'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   DashboardOutlined,
   UserOutlined,
-  ShoppingOutlined,
   FileTextOutlined,
   AppstoreOutlined,
   CommentOutlined,
   IdcardOutlined,
   ReadOutlined,
+  HomeOutlined,
+  LogoutOutlined,
+  ShoppingCartOutlined
 } from '@ant-design/icons'
+import { useAuthStore } from '@/store/useAuthStore'
 import './AdminSidebar.scss'
 
 const { Sider } = Layout
@@ -20,16 +23,27 @@ const { Sider } = Layout
 const AdminSidebar = () => {
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, logout } = useAuthStore()
 
   const toggleCollapsed = () => {
     setCollapsed(!collapsed)
   }
 
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
+
+  const handleBackToSite = () => {
+    navigate('/')
+  }
+
   const menuItems = [
     {
-      key: '/admin',
+      key: '/admin/dashboard',
       icon: <DashboardOutlined />,
-      label: <Link to="/admin">Dashboard</Link>,
+      label: <Link to="/admin/dashboard">Dashboard</Link>,
     },
     {
       key: '/admin/users',
@@ -37,13 +51,13 @@ const AdminSidebar = () => {
       label: <Link to="/admin/users">Quản lý người dùng</Link>,
     },
     {
-      key: '/admin/products',
-      icon: <ShoppingOutlined />,
-      label: <Link to="/admin/products">Quản lý sản phẩm</Link>,
+      key: '/admin/CVManagement',
+      icon: <FileTextOutlined />,
+      label: <Link to="/admin/CVManagement">Quản lý CV</Link>,
     },
     {
       key: '/admin/orders',
-      icon: <FileTextOutlined />,
+      icon: <ShoppingCartOutlined />,
       label: <Link to="/admin/orders">Quản lý đơn hàng</Link>,
     },
     {
@@ -85,12 +99,54 @@ const AdminSidebar = () => {
         {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
       </div>
 
+      {/* Admin info section */}
+      <div className="admin-info">
+        <Avatar
+          size={collapsed ? 40 : 64}
+          src={user?.avatar || "https://i.imgur.com/4AiXzf8.jpg"}
+          icon={<UserOutlined />}
+        />
+        {!collapsed && (
+          <div className="admin-details">
+            <div className="admin-name">{user?.name || 'Admin'}</div>
+            <div className="admin-role">Quản trị viên</div>
+          </div>
+        )}
+      </div>
+
+      <Divider style={{ margin: '8px 0', borderColor: 'rgba(255, 255, 255, 0.2)' }} />
+
+      {/* Main menu */}
       <Menu
         theme="dark"
         mode="inline"
         selectedKeys={[location.pathname]}
         items={menuItems}
       />
+
+      {/* Bottom actions */}
+      <div className="sidebar-bottom">
+        <Button
+          type="primary"
+          icon={<HomeOutlined />}
+          onClick={handleBackToSite}
+          className="back-to-site-btn"
+          block
+        >
+          {!collapsed && "Về trang chủ"}
+        </Button>
+
+        <Button
+          type="primary"
+          danger
+          icon={<LogoutOutlined />}
+          onClick={handleLogout}
+          className="logout-btn"
+          block
+        >
+          {!collapsed && "Đăng xuất"}
+        </Button>
+      </div>
     </Sider>
   )
 }

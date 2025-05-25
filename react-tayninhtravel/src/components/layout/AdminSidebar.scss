@@ -1,6 +1,8 @@
 .admin-sidebar {
   min-height: 100vh;
   transition: background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
   
   .logo-container {
     height: 64px;
@@ -25,6 +27,46 @@
       color: #fff;
     }
   }
+  
+  .admin-info {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    
+    .ant-avatar {
+      margin-bottom: 8px;
+    }
+    
+    .admin-details {
+      text-align: center;
+      
+      .admin-name {
+        font-size: 16px;
+        font-weight: 500;
+      }
+      
+      .admin-role {
+        font-size: 12px;
+        opacity: 0.7;
+      }
+    }
+  }
+  
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px;
+    
+    .back-to-site-btn {
+      margin-bottom: 8px;
+    }
+    
+    .logout-btn {
+      background-color: #f5222d;
+      border-color: #f5222d;
+    }
+  }
 }
 
 /* Dark mode styles for admin sidebar */
@@ -44,6 +86,37 @@ body.dark-mode {
         
         a {
           color: #000000;
+        }
+      }
+    }
+    
+    .admin-info {
+      color: #e0e0e0;
+      
+      .admin-role {
+        color: #a0a0a0;
+      }
+    }
+    
+    .sidebar-bottom {
+      .back-to-site-btn {
+        background-color: #79eac0;
+        border-color: #79eac0;
+        color: #000000;
+        
+        &:hover {
+          background-color: #52c49c;
+          border-color: #52c49c;
+        }
+      }
+      
+      .logout-btn {
+        background-color: #ff4d4f;
+        border-color: #ff4d4f;
+        
+        &:hover {
+          background-color: #ff7875;
+          border-color: #ff7875;
         }
       }
     }
