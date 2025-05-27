@@ -10,6 +10,72 @@
         "register": "Register",
         "bookings": "Book Tour"
     },
+    "admin": {
+        "sidebar": {
+            "dashboard": "Dashboard",
+            "users": "Users Management",
+            "orders": "Orders Management",
+            "tours": "Tours Management",
+            "reviews": "Reviews Management",
+            "blogs": "Blogs Management",
+            "cvManagement": "CV Management",
+            "myInfo": "My Information"
+        },
+        "cvManagement": {
+            "title": "CV Management",
+            "searchPlaceholder": "Search by email",
+            "columns": {
+                "index": "No.",
+                "email": "Email",
+                "submitDate": "Submit Date",
+                "attachment": "Attachment",
+                "status": "Status",
+                "actions": "Actions"
+            },
+            "status": {
+                "pending": "Pending",
+                "approved": "Approved",
+                "rejected": "Rejected"
+            },
+            "actions": {
+                "approve": "Approve",
+                "reject": "Reject",
+                "delete": "Delete",
+                "viewCV": "View CV"
+            },
+            "confirmations": {
+                "approve": {
+                    "title": "Approve CV",
+                    "content": "Are you sure you want to approve this CV?"
+                },
+                "reject": {
+                    "title": "Reject CV",
+                    "content": "Please provide rejection reason",
+                    "label": "Rejection Reason",
+                    "placeholder": "Enter rejection reason...",
+                    "required": "Please enter rejection reason"
+                },
+                "delete": {
+                    "title": "Delete CV",
+                    "content": "Are you sure you want to delete this CV?"
+                }
+            },
+            "messages": {
+                "success": {
+                    "approved": "CV approved successfully",
+                    "rejected": "CV rejected successfully",
+                    "deleted": "CV deleted successfully"
+                },
+                "error": {
+                    "loading": "Could not load CVs. Please try again later.",
+                    "approve": "Could not approve CV. Please try again later.",
+                    "reject": "Could not reject CV. Please try again later.",
+                    "delete": "Could not delete CV. Please try again later.",
+                    "auth": "Please login to continue"
+                }
+            }
+        }
+    },
     "tours": {
         "bookNow": "Book Now"
     },

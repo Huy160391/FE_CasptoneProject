@@ -10,6 +10,72 @@
         "register": "Đăng ký",
         "bookings": "Đặt tour"
     },
+    "admin": {
+        "sidebar": {
+            "dashboard": "Bảng điều khiển",
+            "users": "Quản lý người dùng",
+            "orders": "Quản lý đơn hàng",
+            "tours": "Quản lý tour",
+            "reviews": "Quản lý đánh giá",
+            "blogs": "Quản lý bài viết",
+            "cvManagement": "Quản lý CV",
+            "myInfo": "Thông tin cá nhân"
+        },
+        "cvManagement": {
+            "title": "Quản lý CV ứng tuyển",
+            "searchPlaceholder": "Tìm kiếm theo email",
+            "columns": {
+                "index": "STT",
+                "email": "Email",
+                "submitDate": "Ngày nộp",
+                "attachment": "File đính kèm",
+                "status": "Trạng thái",
+                "actions": "Thao tác"
+            },
+            "status": {
+                "pending": "Đang xử lý",
+                "approved": "Đã duyệt",
+                "rejected": "Từ chối"
+            },
+            "actions": {
+                "approve": "Duyệt",
+                "reject": "Từ chối",
+                "delete": "Xóa",
+                "viewCV": "Xem CV"
+            },
+            "confirmations": {
+                "approve": {
+                    "title": "Xác nhận duyệt CV",
+                    "content": "Bạn có chắc chắn muốn duyệt CV này không?"
+                },
+                "reject": {
+                    "title": "Từ chối CV",
+                    "content": "Vui lòng cung cấp lý do từ chối",
+                    "label": "Lý do từ chối",
+                    "placeholder": "Nhập lý do từ chối...",
+                    "required": "Vui lòng nhập lý do từ chối"
+                },
+                "delete": {
+                    "title": "Xác nhận xóa",
+                    "content": "Bạn có chắc chắn muốn xóa CV này không?"
+                }
+            },
+            "messages": {
+                "success": {
+                    "approved": "CV đã được duyệt",
+                    "rejected": "CV đã bị từ chối",
+                    "deleted": "CV đã được xóa"
+                },
+                "error": {
+                    "loading": "Không thể tải danh sách CV. Vui lòng thử lại sau.",
+                    "approve": "Không thể duyệt CV. Vui lòng thử lại sau.",
+                    "reject": "Không thể từ chối CV. Vui lòng thử lại sau.",
+                    "delete": "Không thể xóa CV. Vui lòng thử lại sau.",
+                    "auth": "Vui lòng đăng nhập để tiếp tục"
+                }
+            }
+        }
+    },
     "tours": {
         "bookNow": "Đặt ngay"
     },

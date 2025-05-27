@@ -16,6 +16,7 @@ import {
   ShoppingCartOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useTranslation } from 'react-i18next'
 import './AdminSidebar.scss'
 
 const { Sider } = Layout
@@ -25,6 +26,7 @@ const AdminSidebar = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+  const { t } = useTranslation()
 
   const toggleCollapsed = () => {
     setCollapsed(!collapsed)
@@ -43,42 +45,42 @@ const AdminSidebar = () => {
     {
       key: '/admin/dashboard',
       icon: <DashboardOutlined />,
-      label: <Link to="/admin/dashboard">Dashboard</Link>,
+      label: <Link to="/admin/dashboard">{t('admin.sidebar.dashboard')}</Link>,
     },
     {
       key: '/admin/users',
       icon: <UserOutlined />,
-      label: <Link to="/admin/users">Quản lý người dùng</Link>,
+      label: <Link to="/admin/users">{t('admin.sidebar.users')}</Link>,
     },
     {
       key: '/admin/CVManagement',
       icon: <FileTextOutlined />,
-      label: <Link to="/admin/CVManagement">Quản lý CV</Link>,
+      label: <Link to="/admin/CVManagement">{t('admin.sidebar.cvManagement')}</Link>,
     },
     {
       key: '/admin/orders',
       icon: <ShoppingCartOutlined />,
-      label: <Link to="/admin/orders">Quản lý đơn hàng</Link>,
+      label: <Link to="/admin/orders">{t('admin.sidebar.orders')}</Link>,
     },
     {
       key: '/admin/tours',
       icon: <AppstoreOutlined />,
-      label: <Link to="/admin/tours">Quản lý tour</Link>,
+      label: <Link to="/admin/tours">{t('admin.sidebar.tours')}</Link>,
     },
     {
       key: '/admin/reviews',
       icon: <CommentOutlined />,
-      label: <Link to="/admin/reviews">Đánh giá</Link>,
+      label: <Link to="/admin/reviews">{t('admin.sidebar.reviews')}</Link>,
     },
     {
       key: '/admin/blogs',
       icon: <ReadOutlined />,
-      label: <Link to="/admin/blogs">Quản lý bài viết</Link>,
+      label: <Link to="/admin/blogs">{t('admin.sidebar.blogs')}</Link>,
     },
     {
       key: '/admin/my-info',
       icon: <IdcardOutlined />,
-      label: <Link to="/admin/my-info">Thông tin cá nhân</Link>,
+      label: <Link to="/admin/my-info">{t('admin.sidebar.myInfo')}</Link>,
     },
   ]
 
