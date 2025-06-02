@@ -2,7 +2,6 @@
     padding: 80px 0;
     background-color: #f5f5f5;
     transition: background-color 0.3s ease;
-
     .container {
         max-width: 1200px;
         margin: 0 auto;
@@ -86,7 +85,7 @@
 /* Dark mode styles for FeaturedGuides section */
 body.dark-mode {
     .featured-guides {
-        background-color: #141414;
+        background-color: inherit; /* Inherits the background-color from body.dark-mode */
         
         .section-title {
             color: rgba(255, 255, 255, 0.85);

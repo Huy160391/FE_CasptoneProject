@@ -260,6 +260,8 @@
 /* Dark mode styles for blog posts */
 body.dark-mode {
     .blog-posts {
+        background-color: inherit; /* Inherits the background-color from body.dark-mode */
+        
         .section-header {
             h2 {
                 color: rgba(255, 255, 255, 0.85);

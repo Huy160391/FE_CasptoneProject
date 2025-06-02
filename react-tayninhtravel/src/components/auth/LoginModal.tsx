@@ -12,9 +12,10 @@ interface LoginModalProps {
   isVisible: boolean
   onClose: () => void
   onRegisterClick: () => void
+  onLoginSuccess?: () => void
 }
 
-const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) => {
+const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: LoginModalProps) => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -32,9 +33,14 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick }: LoginModalProps) =>
 
       if (response.user && response.token) {
         login(response.user, response.token)
-        message.success(t('auth.loginSuccess'))
+        message.success(t('common.loginSuccess'))
         form.resetFields()
         onClose()
+
+        // Gọi callback nếu được cung cấp
+        if (onLoginSuccess) {
+          onLoginSuccess()
+        }
 
         // Lưu thông tin phiên đăng nhập
         localStorage.setItem('lastLoginTime', new Date().toISOString())

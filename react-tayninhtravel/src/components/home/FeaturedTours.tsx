@@ -6,7 +6,7 @@ const { Meta } = Card
 
 const FeaturedTours = () => {
   const { t } = useTranslation()
-  
+
   const tours = [
     {
       id: 1,
@@ -33,11 +33,11 @@ const FeaturedTours = () => {
       rating: 4.3,
     },
   ]
-  
+
   return (
     <section className="featured-tours">
       <h2>{t('home.featuredToursTitle')}</h2>
-      
+
       <Row gutter={[24, 24]}>
         {tours.map(tour => (
           <Col xs={24} sm={12} md={8} key={tour.id}>

@@ -157,7 +157,7 @@
 /* Dark mode styles for BestSellers section */
 body.dark-mode {
     .best-sellers {
-        background-color: #141414;
+        background-color: inherit; /* Inherits the background-color from body.dark-mode */
         
         .section-title {
             color: rgba(255, 255, 255, 0.85);

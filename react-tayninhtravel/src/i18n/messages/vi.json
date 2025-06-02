@@ -8,7 +8,8 @@
         "jobs": "Sự nghiệp",
         "login": "Đăng nhập",
         "register": "Đăng ký",
-        "bookings": "Đặt tour"
+        "bookings": "Đặt tour",
+        "activities": "Hoạt động"
     },
     "admin": {
         "sidebar": {
@@ -20,6 +21,76 @@
             "blogs": "Quản lý bài viết",
             "cvManagement": "Quản lý CV",
             "myInfo": "Thông tin cá nhân"
+        },
+        "users": {
+            "title": "Quản lý người dùng",
+            "searchPlaceholder": "Tìm kiếm theo tên, email, số điện thoại",
+            "columns": {
+                "id": "ID",
+                "name": "Tên",
+                "email": "Email",
+                "phone": "Số điện thoại",
+                "role": "Vai trò",
+                "status": "Trạng thái",
+                "actions": "Thao tác"
+            },
+            "status": {
+                "active": "Hoạt động",
+                "inactive": "Không hoạt động"
+            },
+            "actions": {
+                "add": "Thêm người dùng",
+                "edit": "Sửa",
+                "delete": "Xóa",
+                "activate": "Kích hoạt",
+                "deactivate": "Vô hiệu hóa"
+            },
+            "modal": {
+                "add": "Thêm người dùng mới",
+                "edit": "Sửa người dùng"
+            },
+            "validation": {
+                "roleRequired": "Vui lòng chọn vai trò",
+                "statusRequired": "Vui lòng chọn trạng thái"
+            },
+            "confirmations": {
+                "delete": {
+                    "title": "Xác nhận xóa",
+                    "content": "Bạn có chắc chắn muốn xóa người dùng \"{name}\" không?"
+                },
+                "activate": {
+                    "title": "Xác nhận kích hoạt",
+                    "content": "Bạn có chắc chắn muốn kích hoạt người dùng này không?"
+                },
+                "deactivate": {
+                    "title": "Xác nhận vô hiệu hóa",
+                    "content": "Bạn có chắc chắn muốn vô hiệu hóa người dùng này không?"
+                }
+            },
+            "messages": {
+                "success": {
+                    "created": "Tạo người dùng thành công",
+                    "updated": "Cập nhật người dùng thành công",
+                    "deleted": "Xóa người dùng thành công",
+                    "activated": "Kích hoạt người dùng thành công",
+                    "deactivated": "Vô hiệu hóa người dùng thành công"
+                },
+                "error": {
+                    "loading": "Không thể tải danh sách người dùng. Vui lòng thử lại sau.",
+                    "create": "Không thể tạo người dùng. Vui lòng thử lại sau.",
+                    "update": "Không thể cập nhật người dùng. Vui lòng thử lại sau.",
+                    "delete": "Không thể xóa người dùng. Vui lòng thử lại sau.",
+                    "activate": "Không thể kích hoạt người dùng. Vui lòng thử lại sau.",
+                    "deactivate": "Không thể vô hiệu hóa người dùng. Vui lòng thử lại sau.",
+                    "auth": "Bạn cần đăng nhập để truy cập trang này",
+                    "permission": "Bạn không có quyền truy cập trang này",
+                    "invalidUser": "Thông tin người dùng không hợp lệ"
+                }
+            },
+            "pagination": {
+                "of": "của",
+                "items": "mục"
+            }
         },
         "cvManagement": {
             "title": "Quản lý CV ứng tuyển",
@@ -78,6 +149,48 @@
     },
     "tours": {
         "bookNow": "Đặt ngay"
+    },
+    "thingsToDo": {
+        "pageTitle": "Khám phá Tây Ninh",
+        "pageSubtitle": "Trải nghiệm những hoạt động thú vị và địa điểm tham quan hấp dẫn",
+        "location": "Địa điểm",
+        "duration": "Thời gian",
+        "price": "Giá",
+        "rating": "Đánh giá",
+        "viewDetails": "Xem chi tiết"
+    },
+    "thingsToDoDetail": {
+        "tourNotFound": "Không tìm thấy tour",
+        "tourNotExist": "Tour này không tồn tại hoặc đã bị xóa",
+        "back": "Quay lại",
+        "home": "Trang Chủ",
+        "activities": "Hoạt Động",
+        "highlights": "Điểm nổi bật",
+        "tourDetails": "Chi tiết tour",
+        "includedServices": "Dịch vụ bao gồm",
+        "excludedServices": "Dịch vụ không bao gồm",
+        "reviews": "Đánh giá",
+        "writeReview": "Viết đánh giá",
+        "bookNow": "Đặt ngay",
+        "favorite": "Yêu thích",
+        "share": "Chia sẻ",
+        "participationDate": "Ngày tham gia",
+        "numberOfParticipants": "Số người tham gia",
+        "pleaseSelectDate": "Vui lòng chọn ngày",
+        "pleaseEnterParticipants": "Vui lòng nhập số người",
+        "chooseDate": "Chọn ngày",
+        "maximumPeople": "Số người tối đa",
+        "peoplePerTour": "người/tour",
+        "freeCancellation": "Hủy miễn phí",
+        "beforeDays": "Trước 3 ngày",
+        "needHelp": "Cần hỗ trợ?",
+        "contactSupport": "Liên hệ với chúng tôi nếu bạn có bất kỳ câu hỏi nào về tour này",
+        "contactSupportButton": "Liên hệ hỗ trợ",
+        "loginRequired": "Yêu cầu đăng nhập",
+        "loginRequiredMessage": "Vui lòng đăng nhập để đặt tour này.",
+        "bookingConfirmation": "Xác nhận đặt tour",
+        "redirectingToBooking": "Bạn sẽ được chuyển đến trang đặt tour.",
+        "continueToBooking": "Bạn có thể tiếp tục đặt tour ngay bây giờ."
     },
     "jobs": {
         "title": "Cơ hội sự nghiệp",

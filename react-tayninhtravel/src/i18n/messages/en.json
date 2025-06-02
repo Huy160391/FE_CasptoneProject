@@ -8,7 +8,8 @@
         "jobs": "Careers",
         "login": "Login",
         "register": "Register",
-        "bookings": "Book Tour"
+        "bookings": "Book Tour",
+        "activities": "Activities"
     },
     "admin": {
         "sidebar": {
@@ -20,6 +21,76 @@
             "blogs": "Blogs Management",
             "cvManagement": "CV Management",
             "myInfo": "My Information"
+        },
+        "users": {
+            "title": "Users Management",
+            "searchPlaceholder": "Search by name, email, phone",
+            "columns": {
+                "id": "ID",
+                "name": "Name",
+                "email": "Email",
+                "phone": "Phone",
+                "role": "Role",
+                "status": "Status",
+                "actions": "Actions"
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "actions": {
+                "add": "Add User",
+                "edit": "Edit",
+                "delete": "Delete",
+                "activate": "Activate",
+                "deactivate": "Deactivate"
+            },
+            "modal": {
+                "add": "Add New User",
+                "edit": "Edit User"
+            },
+            "validation": {
+                "roleRequired": "Please select a role",
+                "statusRequired": "Please select a status"
+            },
+            "confirmations": {
+                "delete": {
+                    "title": "Confirm Delete",
+                    "content": "Are you sure you want to delete user \"{name}\"?"
+                },
+                "activate": {
+                    "title": "Confirm Activation",
+                    "content": "Are you sure you want to activate this user?"
+                },
+                "deactivate": {
+                    "title": "Confirm Deactivation",
+                    "content": "Are you sure you want to deactivate this user?"
+                }
+            },
+            "messages": {
+                "success": {
+                    "created": "User created successfully",
+                    "updated": "User updated successfully",
+                    "deleted": "User deleted successfully",
+                    "activated": "User activated successfully",
+                    "deactivated": "User deactivated successfully"
+                },
+                "error": {
+                    "loading": "Could not load users. Please try again later.",
+                    "create": "Could not create user. Please try again later.",
+                    "update": "Could not update user. Please try again later.",
+                    "delete": "Could not delete user. Please try again later.",
+                    "activate": "Could not activate user. Please try again later.",
+                    "deactivate": "Could not deactivate user. Please try again later.",
+                    "auth": "You need to log in to access this page",
+                    "permission": "You don't have permission to access this page",
+                    "invalidUser": "Invalid user information"
+                }
+            },
+            "pagination": {
+                "of": "of",
+                "items": "items"
+            }
         },
         "cvManagement": {
             "title": "CV Management",
@@ -78,6 +149,48 @@
     },
     "tours": {
         "bookNow": "Book Now"
+    },
+    "thingsToDo": {
+        "pageTitle": "Explore Tay Ninh",
+        "pageSubtitle": "Experience exciting activities and attractive tourist destinations",
+        "location": "Location",
+        "duration": "Duration",
+        "price": "Price",
+        "rating": "Rating",
+        "viewDetails": "View Details"
+    },
+    "thingsToDoDetail": {
+        "tourNotFound": "Tour not found",
+        "tourNotExist": "This tour does not exist or has been deleted",
+        "back": "Back",
+        "home": "Home",
+        "activities": "Activities",
+        "highlights": "Highlights",
+        "tourDetails": "Tour Details",
+        "includedServices": "Included Services",
+        "excludedServices": "Excluded Services",
+        "reviews": "Reviews",
+        "writeReview": "Write a Review",
+        "bookNow": "Book Now",
+        "favorite": "Favorite",
+        "share": "Share",
+        "participationDate": "Participation Date",
+        "numberOfParticipants": "Number of Participants",
+        "pleaseSelectDate": "Please select a date",
+        "pleaseEnterParticipants": "Please enter number of participants",
+        "chooseDate": "Choose date",
+        "maximumPeople": "Maximum people",
+        "peoplePerTour": "people/tour",
+        "freeCancellation": "Free cancellation",
+        "beforeDays": "Before 3 days",
+        "needHelp": "Need Help?",
+        "contactSupport": "Contact us if you have any questions about this tour",
+        "contactSupportButton": "Contact Support",
+        "loginRequired": "Login Required",
+        "loginRequiredMessage": "Please login to book this tour.",
+        "bookingConfirmation": "Booking Confirmed",
+        "redirectingToBooking": "You will be redirected to the booking page.",
+        "continueToBooking": "You can now continue to book your tour."
     },
     "jobs": {
         "title": "Career Opportunities",
