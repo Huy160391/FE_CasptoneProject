@@ -17,7 +17,8 @@ import {
   List,
   Avatar,
   Skeleton,
-  notification
+  notification,
+  Modal
 } from 'antd'
 import {
   ClockCircleOutlined,
@@ -33,8 +34,10 @@ import {
   ShareAltOutlined
 } from '@ant-design/icons'
 import './ThingsToDoDetail.scss'
-import { useCartStore } from '@/store/useCartStore'
 import { useTranslation } from 'react-i18next'
+import { useAuthStore } from '@/store/useAuthStore'
+import LoginModal from '@/components/auth/LoginModal'
+import RegisterModal from '@/components/auth/RegisterModal'
 
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
@@ -197,6 +200,37 @@ const tours = [
   }
 ]
 
+// Login required modal component
+const LoginRequiredModal = ({
+  visible,
+  onCancel,
+  onLoginClick
+}: {
+  visible: boolean,
+  onCancel: () => void,
+  onLoginClick: () => void
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <Modal
+      title={t('thingsToDoDetail.loginRequired')}
+      open={visible}
+      onCancel={onCancel}
+      footer={[
+        <Button key="cancel" onClick={onCancel}>
+          {t('common.cancel')}
+        </Button>,
+        <Button key="login" type="primary" onClick={onLoginClick}>
+          {t('common.login')}
+        </Button>
+      ]}
+    >
+      <p>{t('thingsToDoDetail.loginRequiredMessage')}</p>
+    </Modal>
+  )
+}
+
 const ThingsToDoDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -204,9 +238,12 @@ const ThingsToDoDetail = () => {
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState(0)
   const [form] = Form.useForm()
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
+  const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false)
+  const [isLoginRequiredVisible, setIsLoginRequiredVisible] = useState(false)
 
-  const addToCart = useCartStore(state => state.addItem)
   const { t } = useTranslation()
+  const { isAuthenticated } = useAuthStore()
 
   useEffect(() => {
     // Simulate API fetch
@@ -227,27 +264,69 @@ const ThingsToDoDetail = () => {
   const handleThumbnailClick = (index: number) => {
     setCurrentImage(index)
   }
-  // date
-  // Add to cart
+
+  // Handle booking button click
   const handleBookNow = (values: any) => {
     if (!tour) return
 
-    const { participants } = values
+    if (!isAuthenticated) {
+      // Show login required modal if user is not authenticated
+      setIsLoginRequiredVisible(true)
+      return
+    }
 
-    addToCart({
-      id: tour.id,
-      name: tour.title,
-      price: tour.discountPrice || tour.price,
-      image: tour.images[0],
-      type: 'tour',
-      quantity: participants
+    // For tours, navigate to booking page
+    notification.info({
+      message: t('thingsToDoDetail.bookingConfirmation'),
+      description: t('thingsToDoDetail.redirectingToBooking'),
+      icon: <InfoCircleOutlined style={{ color: '#1890ff' }} />,
     })
 
+    // Navigate to booking page
+    navigate(`/booking/${tour.id}`, {
+      state: {
+        tourData: tour,
+        bookingDetails: values
+      }
+    })
+  }
+
+  // Login/Register modal handlers
+  const handleLoginModalClose = () => {
+    setIsLoginModalVisible(false)
+  }
+
+  const handleRegisterClick = () => {
+    setIsLoginModalVisible(false)
+    setIsRegisterModalVisible(true)
+  }
+
+  const handleRegisterModalClose = () => {
+    setIsRegisterModalVisible(false)
+  }
+
+  const handleLoginClick = () => {
+    setIsRegisterModalVisible(false)
+    setIsLoginModalVisible(true)
+  }
+  // Login required modal handlers
+  const handleLoginRequiredCancel = () => {
+    setIsLoginRequiredVisible(false)
+  }
+
+  const handleLoginRequiredLogin = () => {
+    setIsLoginRequiredVisible(false)
+    setIsLoginModalVisible(true)
+  }
+
+  // Handle successful login
+  const handleLoginSuccess = () => {
     notification.success({
-      message: t('common.bookTourSuccess'),
-      description: t('common.bookTourDescription', { participants, name: tour.title }),
+      message: t('common.loginSuccess'),
+      description: t('thingsToDoDetail.continueToBooking'),
       icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
     })
+    setIsLoginModalVisible(false)
   }
 
   if (loading) {
@@ -274,10 +353,10 @@ const ThingsToDoDetail = () => {
       <div className="tour-detail-page">
         <div className="container">
           <div className="not-found">
-            <Title level={3}>Không tìm thấy tour</Title>
-            <Text>Tour này không tồn tại hoặc đã bị xóa.</Text>
+            <Title level={3}>{t('thingsToDoDetail.tourNotFound')}</Title>
+            <Text>{t('thingsToDoDetail.tourNotExist')}</Text>
             <Button type="primary" onClick={handleGoBack}>
-              Quay lại
+              {t('thingsToDoDetail.back')}
             </Button>
           </div>
         </div>
@@ -292,19 +371,18 @@ const ThingsToDoDetail = () => {
           <Breadcrumb
             className="breadcrumb"
             items={[
-              { title: <Link to="/">Trang Chủ</Link> },
-              { title: <Link to="/things-to-do">Hoạt Động</Link> },
+              { title: <Link to="/">{t('thingsToDoDetail.home')}</Link> },
+              { title: <Link to="/things-to-do">{t('thingsToDoDetail.activities')}</Link> },
               { title: tour.title }
             ]}
           />
 
           <Button
             type="text"
-            icon={<ArrowLeftOutlined />}
-            onClick={handleGoBack}
+            icon={<ArrowLeftOutlined />} onClick={handleGoBack}
             className="back-button"
           >
-            Quay lại
+            {t('thingsToDoDetail.back')}
           </Button>
 
           <Title level={1} className="tour-title">
@@ -320,7 +398,7 @@ const ThingsToDoDetail = () => {
             </div>
             <div className="meta-rating">
               <Rate disabled defaultValue={tour.rating} />
-              <Text className="review-count">({tour.reviews} đánh giá)</Text>
+              <Text className="review-count">({tour.reviews} {t('thingsToDoDetail.reviews').toLowerCase()})</Text>
             </div>
           </div>
         </div>
@@ -345,11 +423,11 @@ const ThingsToDoDetail = () => {
         <Row gutter={[32, 32]} className="tour-content">
           <Col xs={24} lg={16} className="tour-details">
             <Card className="tour-description">
-              <Title level={4}>Mô tả tour</Title>
+              <Title level={4}>{t('thingsToDoDetail.tourDetails')}</Title>
               <Paragraph>{tour.description}</Paragraph>
 
               <div className="tour-highlights">
-                <Title level={5}>Điểm nổi bật</Title>
+                <Title level={5}>{t('thingsToDoDetail.highlights')}</Title>
                 <ul className="highlights-list">
                   {tour.highlights.map((highlight: string, index: number) => (
                     <li key={index}>
@@ -359,15 +437,14 @@ const ThingsToDoDetail = () => {
                 </ul>
               </div>
             </Card>
-
             <Tabs defaultActiveKey="1" className="tour-tabs">
-              <TabPane tab="Chi tiết tour" key="1">
+              <TabPane tab={t('thingsToDoDetail.tourDetails')} key="1">
                 <div dangerouslySetInnerHTML={{ __html: tour.longDescription }} />
               </TabPane>
-              <TabPane tab="Dịch vụ bao gồm" key="2">
+              <TabPane tab={t('thingsToDoDetail.includedServices')} key="2">
                 <div className="included-excluded">
                   <div className="included">
-                    <Title level={5}>Dịch vụ bao gồm</Title>
+                    <Title level={5}>{t('thingsToDoDetail.includedServices')}</Title>
                     <ul>
                       {tour.included.map((item: string, index: number) => (
                         <li key={index}>
@@ -378,7 +455,7 @@ const ThingsToDoDetail = () => {
                   </div>
 
                   <div className="excluded">
-                    <Title level={5}>Dịch vụ không bao gồm</Title>
+                    <Title level={5}>{t('thingsToDoDetail.excludedServices')}</Title>
                     <ul>
                       {tour.excluded.map((item: string, index: number) => (
                         <li key={index}>
@@ -389,16 +466,16 @@ const ThingsToDoDetail = () => {
                   </div>
                 </div>
               </TabPane>
-              <TabPane tab={`Đánh giá (${tour.reviews})`} key="3">
+              <TabPane tab={`${t('thingsToDoDetail.reviews')} (${tour.reviews})`} key="3">
                 <div className="reviews-section">
                   <div className="reviews-summary">
                     <div className="rating-summary">
                       <Title level={2}>{tour.rating.toFixed(1)}</Title>
                       <Rate disabled defaultValue={tour.rating} />
-                      <Text>{tour.reviews} đánh giá</Text>
+                      <Text>{tour.reviews} {t('thingsToDoDetail.reviews').toLowerCase()}</Text>
                     </div>
                     <Button type="primary" icon={<StarOutlined />}>
-                      Viết đánh giá
+                      {t('thingsToDoDetail.writeReview')}
                     </Button>
                   </div>
 
@@ -456,7 +533,7 @@ const ThingsToDoDetail = () => {
                     {tour.price.toLocaleString('vi-VN')}₫
                   </Text>
                 )}
-                <Text className="price-per">/ người</Text>
+                <Text className="price-per">/ {t('thingsToDoDetail.peoplePerTour')}</Text>
               </div>
 
               <Form
@@ -467,20 +544,20 @@ const ThingsToDoDetail = () => {
               >
                 <Form.Item
                   name="date"
-                  label="Ngày tham gia"
-                  rules={[{ required: true, message: 'Vui lòng chọn ngày' }]}
+                  label={t('thingsToDoDetail.participationDate')}
+                  rules={[{ required: true, message: t('thingsToDoDetail.pleaseSelectDate') }]}
                 >
                   <DatePicker
                     className="date-picker"
                     format="DD/MM/YYYY"
-                    placeholder="Chọn ngày"
+                    placeholder={t('thingsToDoDetail.chooseDate')}
                   />
                 </Form.Item>
 
                 <Form.Item
                   name="participants"
-                  label="Số người tham gia"
-                  rules={[{ required: true, message: 'Vui lòng nhập số người' }]}
+                  label={t('thingsToDoDetail.numberOfParticipants')}
+                  rules={[{ required: true, message: t('thingsToDoDetail.pleaseEnterParticipants') }]}
                 >
                   <InputNumber
                     min={1}
@@ -496,17 +573,17 @@ const ThingsToDoDetail = () => {
                     className="book-button"
                     block
                   >
-                    Đặt ngay
+                    {t('thingsToDoDetail.bookNow')}
                   </Button>
                 </Form.Item>
               </Form>
 
               <div className="booking-actions">
                 <Button type="text" icon={<HeartOutlined />}>
-                  Yêu thích
+                  {t('thingsToDoDetail.favorite')}
                 </Button>
                 <Button type="text" icon={<ShareAltOutlined />}>
-                  Chia sẻ
+                  {t('thingsToDoDetail.share')}
                 </Button>
               </div>
 
@@ -514,29 +591,47 @@ const ThingsToDoDetail = () => {
 
               <div className="booking-info">
                 <div className="info-item">
-                  <CalendarOutlined /> <Text strong>Thời gian:</Text> {tour.duration}
+                  <CalendarOutlined /> <Text strong>{t('thingsToDo.duration')}:</Text> {tour.duration}
                 </div>
                 <div className="info-item">
-                  <TeamOutlined /> <Text strong>Số người tối đa:</Text> 20 người/tour
+                  <TeamOutlined /> <Text strong>{t('thingsToDoDetail.maximumPeople')}:</Text> 20 {t('thingsToDoDetail.peoplePerTour')}
                 </div>
                 <div className="info-item">
-                  <InfoCircleOutlined /> <Text strong>Hủy miễn phí:</Text> Trước 3 ngày
+                  <InfoCircleOutlined /> <Text strong>{t('thingsToDoDetail.freeCancellation')}:</Text> {t('thingsToDoDetail.beforeDays')}
                 </div>
               </div>
             </Card>
 
             <Card className="need-help-card">
-              <Title level={5}>Cần hỗ trợ?</Title>
+              <Title level={5}>{t('thingsToDoDetail.needHelp')}</Title>
               <Paragraph>
-                Liên hệ với chúng tôi nếu bạn có bất kỳ câu hỏi nào về tour này.
+                {t('thingsToDoDetail.contactSupport')}
               </Paragraph>
               <Button type="primary" block>
-                Liên hệ hỗ trợ
+                {t('thingsToDoDetail.contactSupportButton')}
               </Button>
             </Card>
           </Col>
         </Row>
       </div>
+
+      {/* Login required modal */}
+      <LoginRequiredModal
+        visible={isLoginRequiredVisible}
+        onCancel={handleLoginRequiredCancel}
+        onLoginClick={handleLoginRequiredLogin}
+      />      {/* Login and Register Modals */}
+      <LoginModal
+        isVisible={isLoginModalVisible}
+        onClose={handleLoginModalClose}
+        onRegisterClick={handleRegisterClick}
+        onLoginSuccess={handleLoginSuccess}
+      />
+      <RegisterModal
+        isVisible={isRegisterModalVisible}
+        onClose={handleRegisterModalClose}
+        onLoginClick={handleLoginClick}
+      />
     </div>
   )
 }

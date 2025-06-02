@@ -1,6 +1,6 @@
 import { RouteObject } from 'react-router-dom';
 import Dashboard from '@/pages/admin/Dashboard';
-import Users from '@/pages/admin/Users';
+import UserManagement from '@/pages/admin/UserManagement';
 import Orders from '@/pages/admin/Orders';
 import Tours from '@/pages/admin/Tours';
 import Reviews from '@/pages/admin/Reviews';
@@ -15,10 +15,9 @@ export const adminRoutes: RouteObject[] = [
             {
                 path: 'dashboard',
                 element: <Dashboard />,
-            },
-            {
+            }, {
                 path: 'users',
-                element: <Users />,
+                element: <UserManagement />,
             },
             {
                 path: 'orders',

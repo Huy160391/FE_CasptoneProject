@@ -1,9 +1,9 @@
-.users-page {
+.user-management-page {
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     
     @media (max-width: 768px) {
       flex-direction: column;
@@ -40,18 +40,41 @@
   }
   
   .users-table {
+    margin-bottom: 20px;
+    
     .status-tag {
-      &.success {
+      &.active {
         background-color: #f6ffed;
         border: 1px solid #b7eb8f;
         color: #52c41a;
       }
       
-      &.error {
+      &.inactive {
         background-color: #fff2f0;
         border: 1px solid #ffccc7;
         color: #f5222d;
       }
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+  }
+  
+  .activate-btn {
+    background-color: #52c41a;
+    border-color: #52c41a;
+    
+    &:hover, &:focus {
+      background-color: #73d13d;
+      border-color: #73d13d;
+    }
+  }
+  
+  .ant-modal-content {
+    .ant-form-item {
+      margin-bottom: 16px;
     }
   }
 }

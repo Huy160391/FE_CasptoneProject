@@ -38,6 +38,8 @@
 /* Dark mode styles for why choose us section */
 body.dark-mode {
   .why-choose-us {
+    background-color: inherit; /* Inherits the background-color from body.dark-mode */
+    
     h2 {
       color: rgba(255, 255, 255, 0.85);
     }

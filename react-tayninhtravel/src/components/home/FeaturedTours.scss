@@ -42,6 +42,8 @@
 /* Dark mode styles for featured tours section */
 body.dark-mode {
   .featured-tours {
+    background-color: inherit; /* Inherits the background-color from body.dark-mode */
+    
     h2 {
       color: rgba(255, 255, 255, 0.85);
     }
