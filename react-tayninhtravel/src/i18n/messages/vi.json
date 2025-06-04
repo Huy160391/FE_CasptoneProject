@@ -330,6 +330,20 @@
             "title": "Tin Tức & Câu Chuyện",
             "subtitle": "Khám phá tin tức mới nhất, mẹo du lịch và những câu chuyện về Tây Ninh",
             "viewMore": "Xem tất cả bài viết"
+        },
+        "highlights": {
+            "blackLady": {
+                "title": "Núi Bà Đen - Nóc nhà Nam Bộ",
+                "description": "Núi Bà Đen cao 986m là ngọn núi cao nhất Nam Bộ, là điểm đến tâm linh và du lịch nổi tiếng với hệ thống cáp treo hiện đại bậc nhất Việt Nam."
+            },
+            "location": {
+                "title": "Cửa ngõ Đông Nam Bộ",
+                "description": "Tây Ninh là tỉnh cửa ngõ phía Tây Nam của vùng Đông Nam Bộ, giáp với Campuchia, có vị trí địa lý đặc biệt quan trọng về kinh tế và an ninh quốc phòng."
+            },
+            "cuisine": {
+                "title": "Ẩm thực đặc sắc",
+                "description": "Tây Ninh nổi tiếng với nhiều món ăn đặc sản như bánh canh Trảng Bàng, tung lò mò, rượu đế Gò Đen, muối tôm... đã trở thành thương hiệu ẩm thực độc đáo của vùng đất này."
+            }
         }
     },
     "common": {

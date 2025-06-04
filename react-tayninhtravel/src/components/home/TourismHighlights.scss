@@ -1,0 +1,74 @@
+.tourism-highlights {
+  padding: 60px 0;
+  background-color: var(--background-color);
+  overflow: hidden; // Thêm overflow: hidden vào container chính
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+
+  .highlight-item {
+    .highlight-content {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      height: 250px; // Đã giảm từ 400px xuống 250px để phù hợp với tour card
+
+      .text-content {
+        flex: 1;
+        padding: 20px;
+
+        h2 {
+          font-size: 1.8rem; // Đã giảm từ 2.5rem để phù hợp với chiều cao mới
+          margin-bottom: 15px; // Đã giảm từ 20px
+          color: var(--text-color);
+        }
+
+        p {
+          font-size: 1rem; // Đã giảm từ 1.2rem
+          line-height: 1.5;
+          color: var(--text-color);
+        }
+      }
+
+      .image-content {
+        flex: 1;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  :global(.ant-carousel) {
+    overflow: hidden; // Thêm overflow: hidden cho carousel
+
+    .slick-slider {
+      overflow: hidden; // Đảm bảo không có overflow từ slider
+    }
+
+    .slick-list {
+      overflow: hidden; // Đảm bảo không có overflow từ list
+    }
+
+    .slick-dots {
+      bottom: -30px;
+
+      li {
+        button {
+          background-color: var(--primary-color);
+          opacity: 0.3;
+        }
+
+        &.slick-active button {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
