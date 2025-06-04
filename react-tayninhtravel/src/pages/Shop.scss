@@ -129,30 +129,31 @@ body.dark-mode {
           color: rgba(255, 255, 255, 0.85);
         }
       }
-    }
-
-    .product-grid {
-      .product-card {
+    }    .product-card {
         background-color: #141414;
+        border-color: #303030;
 
-        .product-title {
+        .ant-card-meta-title {
           color: rgba(255, 255, 255, 0.85);
+        }
+
+        .ant-card-meta-description {
+          color: rgba(255, 255, 255, 0.65);
         }
 
         .product-price {
           color: #79eac0;
         }
 
-        .product-description {
-          color: rgba(255, 255, 255, 0.65);
-        }
-
         .add-to-cart-btn {
           background-color: #79eac0;
+          border-color: #79eac0;
           color: #000000;
 
           &:hover {
             background-color: #5dc9a0;
+            border-color: #5dc9a0;
+            transform: translateY(-2px);
           }
         }
       }
@@ -169,4 +170,4 @@ body.dark-mode {
       }
     }
   }
-}
+

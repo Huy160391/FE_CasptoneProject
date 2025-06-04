@@ -111,36 +111,41 @@
     margin-top: 32px;
     text-align: center;
     
-    .ant-pagination-item {
-      background-color: #fff;
-      border: 1px solid #d9d9d9;
+    .ant-pagination {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       
-      a {
-        color: rgba(0, 0, 0, 0.85);
-      }
-      
-      &:hover {
-        border-color: #1890ff;
+      .ant-pagination-item {
+        border-radius: 4px;
+        margin: 0 4px;
         
-        a {
-          color: #1890ff;
-        }
-      }
-      
-      &-active {
-        background-color: #1890ff;
-        border-color: #1890ff;
-        
-        a {
-          color: #fff;
-        }
-        
-        &:hover {
-          border-color: #40a9ff;
+        &-active {
+          background-color: #1677ff;
+          border-color: #1677ff;
           
           a {
             color: #fff;
           }
+        }
+        
+        &:hover {
+          border-color: #1677ff;
+          
+          a {
+            color: #1677ff;
+          }
+        }
+      }
+      
+      .ant-pagination-prev,
+      .ant-pagination-next {
+        border-radius: 4px;
+        margin: 0 4px;
+        
+        &:hover button {
+          border-color: #1677ff;
+          color: #1677ff;
         }
       }
     }
@@ -214,32 +219,37 @@ body.dark-mode {
     }
     
     .pagination-container {
-      .ant-pagination-item {
-        background-color: #141414;
-        border-color: #303030;
+      .ant-pagination {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         
-        a {
-          color: rgba(255, 255, 255, 0.85);
+        .ant-pagination-item {
+          border-radius: 4px;
+          margin: 0 4px;
+          
+          &-active {
+            background-color: #79eac0;
+            border-color: #79eac0;
+            
+            a {
+              color: #000000;
+            }
+            
+            &:hover {
+              border-color: #5dc9a0;
+            }
+          }
         }
         
-        &:hover {
-          border-color: #79eac0;
+        .ant-pagination-prev,
+        .ant-pagination-next {
+          border-radius: 4px;
+          margin: 0 4px;
           
-          a {
+          &:hover button {
+            border-color: #79eac0;
             color: #79eac0;
-          }
-        }
-        
-        &-active {
-          background-color: #79eac0;
-          border-color: #79eac0;
-          
-          a {
-            color: #000000;
-          }
-          
-          &:hover {
-            border-color: #5dc9a0;
           }
         }
       }

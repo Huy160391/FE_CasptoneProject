@@ -1,5 +1,6 @@
 // import { useTranslation } from 'react-i18next'
 import HeroSection from '../components/home/HeroSection'
+import TourismHighlights from '../components/home/TourismHighlights'
 import FeaturedTours from '../components/home/FeaturedTours'
 import WhyChooseUs from '../components/home/WhyChooseUs'
 import FeaturedGuides from '../components/home/FeaturedGuides'
@@ -13,6 +14,7 @@ const Home = () => {
   return (
     <div className="home-page">
       <HeroSection />
+      <TourismHighlights />
       <div className="container">
         <FeaturedTours />
         <BlogPosts />

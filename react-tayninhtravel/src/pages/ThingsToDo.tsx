@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Row, Col, Card, Button, Tag, Rate } from 'antd'
+import { Row, Col, Card, Button, Tag, Rate, Pagination } from 'antd'
 import { Link, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +18,8 @@ const ThingsToDo = () => {
   const [selectedDestination, setSelectedDestination] = useState(locationParam ? locationParam : 'all')
   const [searchKeyword, setSearchKeyword] = useState(keywordParam || '')
   const [selectedDate, setSelectedDate] = useState(dateParam ? dayjs(dateParam) : null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 6; // Số items trên mỗi trang
 
   // Update search fields when URL params change
   useEffect(() => {
@@ -130,6 +132,21 @@ const ThingsToDo = () => {
     return matchDestination && matchKeyword && matchDate;
   })
 
+  // Tính toán các items cho trang hiện tại
+  const currentItems = filteredActivities.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="things-to-do-page">
       <div className="container">
@@ -144,7 +161,7 @@ const ThingsToDo = () => {
 
         <div className="activities-grid">
           <Row gutter={[24, 24]}>
-            {filteredActivities.map(activity => (
+            {currentItems.map(activity => (
               <Col xs={24} sm={12} md={8} key={activity.id}>
                 <Card
                   hoverable
@@ -188,6 +205,18 @@ const ThingsToDo = () => {
               </Col>
             ))}
           </Row>
+
+          {filteredActivities.length > pageSize && (
+            <div className="pagination-container">
+              <Pagination
+                current={currentPage}
+                total={filteredActivities.length}
+                pageSize={pageSize}
+                onChange={handlePageChange}
+                showSizeChanger={false}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

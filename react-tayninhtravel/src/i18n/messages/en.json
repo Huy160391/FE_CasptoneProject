@@ -330,6 +330,20 @@
             "title": "Latest News & Stories",
             "subtitle": "Discover the latest news, travel tips, and stories about Tay Ninh",
             "viewMore": "View All Posts"
+        },
+        "highlights": {
+            "blackLady": {
+                "title": "Black Lady Mountain - The Roof of Southern Vietnam",
+                "description": "Standing at 986m, Black Lady Mountain is the highest peak in Southern Vietnam, a famous spiritual and tourist destination featuring one of Vietnam's most modern cable car systems."
+            },
+            "location": {
+                "title": "Gateway to Southeast",
+                "description": "Tay Ninh is the southwestern gateway of the Southeast region, bordering Cambodia, holding a strategically important position for both economy and national security."
+            },
+            "cuisine": {
+                "title": "Distinctive Cuisine",
+                "description": "Tay Ninh is famous for its specialty foods such as Trang Bang rice noodle soup, Tung Lo Mo, Go Den rice wine, shrimp salt... which have become unique culinary brands of this land."
+            }
         }
     },
     "common": {
