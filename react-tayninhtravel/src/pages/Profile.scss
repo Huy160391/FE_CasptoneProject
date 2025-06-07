@@ -144,6 +144,114 @@
         margin-top: 8px;
         color: #999;
         font-size: 14px;
+    }    // Ticket styling
+    .ticket-content {
+        margin-bottom: 8px;
+        color: rgba(0, 0, 0, 0.85);
+        white-space: pre-line;
+        max-height: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .ticket-content-table {
+        color: rgba(0, 0, 0, 0.85);
+        white-space: pre-line;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ticket-title {
+        font-weight: 500;
+    }
+
+    .ticket-date {
+        margin-bottom: 8px;
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 12px;
+    }
+
+    .ticket-attachment {
+        margin-top: 8px;
+    }    // Support ticket table styling
+    .ant-table-wrapper {
+        margin-top: 8px;
+        
+        .ant-table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .ant-table-thead > tr > th {
+            background-color: #f7f7f7;
+            font-weight: 600;
+        }
+        
+        .ant-table-row:hover .ticket-content-table {
+            color: rgba(0, 0, 0, 0.95);
+        }
+        
+        .ticket-content-table {
+            max-width: 300px;
+            cursor: pointer;
+        }
+          .ticket-attachment {
+            a {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                
+                .anticon {
+                    color: #1890ff;
+                }
+            }
+        }
+        
+        .no-attachment {
+            color: rgba(0, 0, 0, 0.45);
+        }
+    }
+    
+    // CSS cho bảng yêu cầu hỗ trợ
+    .ant-table-wrapper {
+      // Đảm bảo nút xem tệp đính kèm không bị chồng lấp
+      .view-attachment-btn {
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 140px;
+        text-overflow: ellipsis;
+        display: inline-block;
+      }
+
+      // Điều chỉnh kích thước cho cột tệp đính kèm
+      td.ant-table-cell:nth-child(3) {
+        min-width: 150px;
+      }
+
+      // Điều chỉnh kích thước cho cột ngày gửi
+      td.ant-table-cell:nth-child(4) {
+        white-space: nowrap;
+        min-width: 130px;
+      }
+
+      // Ngăn chồng lấp nội dung trong các ô bảng
+      .ant-table-cell {
+        overflow: visible;
+        position: relative;
+      }
+    }
+    
+    // Responsive adjustments
+    @media (max-width: 768px) {
+        .ant-table-wrapper {
+            .ticket-content-table {
+                max-width: 150px;
+            }
+        }
     }
 
     @media (max-width: 768px) {
@@ -157,6 +265,19 @@
 
 /* Dark mode styles for profile page */
 body.dark-mode {
+    // Override for Ant Design tooltip in dark mode
+    .ant-tooltip {
+        .ant-tooltip-inner {
+            background-color: #1f1f1f;
+            color: rgba(255, 255, 255, 0.85);
+            border: 1px solid #303030;
+        }
+        
+        .ant-tooltip-arrow-content {
+            background-color: #1f1f1f;
+        }
+    }
+    
     .profile-page {
         background-color: #000000;
 
@@ -271,6 +392,114 @@ body.dark-mode {
 
                 .review-date {
                     color: rgba(255, 255, 255, 0.45);
+                }
+            }
+        }        // Styling cho Support Tickets trong dark mode
+        .ticket-content {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .ticket-content-table {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .ticket-title {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .ticket-date {
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .ticket-attachment a {
+            color: #79eac0;
+            
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+          // Support ticket table styling in dark mode
+        .ant-table-wrapper {
+            .ant-table {
+                background-color: #141414;
+                
+                .ant-table-thead > tr > th {
+                    background-color: #1f1f1f;
+                    color: rgba(255, 255, 255, 0.85);
+                    border-bottom: 1px solid #303030;
+                }
+                
+                .ant-table-tbody > tr > td {
+                    border-bottom: 1px solid #303030;
+                    transition: background 0.3s;
+                }
+                
+                .ant-table-tbody > tr.ant-table-row:hover > td {
+                    background-color: #1f1f1f;
+                }
+                
+                .ant-table-row:hover .ticket-content-table {
+                    color: rgba(255, 255, 255, 0.95);
+                }
+                
+                .ant-empty-description {
+                    color: rgba(255, 255, 255, 0.65);
+                }
+                  .ticket-attachment a .anticon {
+                    color: #79eac0;
+                }
+                
+                .no-attachment {
+                    color: rgba(255, 255, 255, 0.45);
+                }
+            }
+            
+            .ant-pagination-item {
+                background-color: #1f1f1f;
+                border-color: #303030;
+                
+                a {
+                    color: rgba(255, 255, 255, 0.65);
+                }
+                
+                &-active {
+                    border-color: #79eac0;
+                    
+                    a {
+                        color: #79eac0;
+                    }
+                }
+            }
+            
+            .ant-pagination-prev, 
+            .ant-pagination-next {
+                .ant-pagination-item-link {
+                    background-color: #1f1f1f;
+                    border-color: #303030;
+                    color: rgba(255, 255, 255, 0.65);
+                }
+            }
+        }
+        
+        // Fix hover effect in dark mode
+        .ant-list-item {
+            &:hover {
+                background-color: #1f1f1f; // Dark background for hover state
+                
+                .ant-list-item-meta-title {
+                    color: rgba(255, 255, 255, 0.95); // Brighter white for title on hover
+                }
+                
+                .ant-list-item-meta-description {
+                    color: rgba(255, 255, 255, 0.85); // Keep description visible on hover
+                }
+                
+                .ticket-content {
+                    color: rgba(255, 255, 255, 0.85); // Keep ticket content visible
+                }
+                
+                .ticket-date {
+                    color: rgba(255, 255, 255, 0.65); // Keep date visible
                 }
             }
         }

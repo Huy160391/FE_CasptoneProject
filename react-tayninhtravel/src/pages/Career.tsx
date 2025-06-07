@@ -4,7 +4,7 @@ import { UploadOutlined, EnvironmentOutlined, PhoneOutlined, TeamOutlined, Troph
 import { useTranslation } from 'react-i18next';
 import './Career.scss';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
-import axiosInstance from '@/config/axios';
+import { userService } from '@/services/userService';
 import { useAuthStore } from '@/store/useAuthStore';
 import LoginModal from '@/components/auth/LoginModal';
 
@@ -76,45 +76,38 @@ const Career = () => {
             message.success(`${fileList[0].name} ${t('jobs.applicationForm.fileUploadSuccess')}`)
         }
     }
-
     const handleSubmit = async (values: any) => {
-        console.log('Form values:', values)
+        console.log('Form values:', values);
 
         // Validate CV file is uploaded
         if (!cvFile.length) {
-            message.error(t('jobs.applicationForm.cvRequired'))
-            return
+            message.error(t('jobs.applicationForm.cvRequired'));
+            return;
         }
 
         // Check if user is authenticated
         if (!isAuthenticated) {
-            message.info(t('jobs.applicationForm.loginRequired') || 'Please log in to submit your application')
-            handleLoginModalOpen()
-            return
+            message.info(t('jobs.applicationForm.loginRequired') || 'Please log in to submit your application');
+            handleLoginModalOpen();
+            return;
         }
 
         try {
-            setSubmitting(true)
+            setSubmitting(true);
 
-            // Create FormData object for file upload
-            const formData = new FormData()
-            formData.append('Email', values.email)
+            // Get the CV file from the upload component
+            const file = cvFile[0].originFileObj as File;
 
-            // Add the CV file if it exists
-            if (cvFile[0].originFileObj) {
-                formData.append('CurriculumVitae', cvFile[0].originFileObj)
-            }            // Send API request to the specified endpoint
-            // The token will be automatically included by the axios interceptor in the headers
-            const response = await axiosInstance.post('/Account/tourguide-application', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data', // Important for file uploads
-                },
-            })
+            // Use userService instead of direct axios call
+            const response = await userService.submitTourGuideApplication({
+                email: values.email,
+                curriculumVitae: file
+            });
 
-            console.log('API response:', response.data)
+            console.log('API response:', response);
 
             // Show success message
-            message.success(t('jobs.applicationForm.successMessage'))
+            message.success(t('jobs.applicationForm.successMessage'));
 
             // Show modal with confirmation
             Modal.success({
@@ -127,15 +120,15 @@ const Career = () => {
                 },
                 onOk: () => {
                     // Reset form
-                    form.resetFields()
-                    setCvFile([])
+                    form.resetFields();
+                    setCvFile([]);
                 }
-            })
+            });
         } catch (error) {
-            console.error('Application submission error:', error)
-            message.error(t('jobs.applicationForm.errorMessage'))
+            console.error('Application submission error:', error);
+            message.error(t('jobs.applicationForm.errorMessage'));
         } finally {
-            setSubmitting(false)
+            setSubmitting(false);
         }
     }
 

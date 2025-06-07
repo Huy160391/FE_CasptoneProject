@@ -320,3 +320,211 @@ body.dark-mode {
     }
   }
 }
+
+.support-page {
+  .hero-section {
+    height: 300px;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    margin-bottom: 60px;
+    
+    .hero-content {
+      max-width: 800px;
+      padding: 0 16px;
+      
+      h1 {
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #fff;
+        
+        @media (max-width: 768px) {
+          font-size: 36px;
+        }
+      }
+      
+      p {
+        font-size: 20px;
+        margin-bottom: 0;
+        
+        @media (max-width: 768px) {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  
+  .support-info {
+    margin-bottom: 60px;
+    
+    .info-card {
+      text-align: center;
+      padding: 24px;
+      height: 100%;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+      
+      .icon {
+        width: 64px;
+        height: 64px;
+        background-color: #1677ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        transition: all 0.3s;
+        
+        .anticon {
+          font-size: 28px;
+          color: #fff;
+        }
+      }
+      
+      h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      
+      p {
+        color: rgba(0, 0, 0, 0.65);
+        margin-bottom: 0;
+      }
+    }
+  }
+  
+  .form-section {
+    background-color: #f9f9f9;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    
+    h2 {
+      margin-bottom: 24px;
+    }
+    
+    p {
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+    
+    .support-form {
+      .ant-form-item-label {
+        label {
+          font-weight: 500;
+        }
+      }
+      
+      .ant-input,
+      .ant-input-textarea {
+        border-radius: 4px;
+        
+        &:focus,
+        &:hover {
+          border-color: #1677ff;
+          box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+        }
+      }
+      
+      .ant-btn {
+        height: 48px;
+        font-size: 16px;
+        font-weight: 500;
+        width: 100%;
+      }
+    }
+  }
+  
+  .map-section {
+    h2 {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .map-container {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* Dark mode styles for support page */
+body.dark-mode {
+  .support-page {
+    .support-info {
+      .info-card {
+        background-color: #141414;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        
+        .icon {
+          background-color: #1677ff;
+        }
+        
+        h3 {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        p {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+    
+    .form-section {
+      background-color: #141414;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .support-form {
+        .ant-form-item-label > label {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-input, 
+        .ant-input-textarea {
+          background-color: #1f1f1f;
+          border-color: #303030;
+          color: rgba(255, 255, 255, 0.85);
+          
+          &:focus, 
+          &:hover {
+            border-color: #79eac0;
+          }
+        }
+        
+        .ant-btn {
+          &:hover {
+            background-color: #4096ff;
+            border-color: #4096ff;
+          }
+        }
+      }
+    }
+  }
+}

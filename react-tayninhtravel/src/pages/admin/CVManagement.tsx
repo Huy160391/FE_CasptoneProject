@@ -9,25 +9,23 @@ import {
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { Key } from 'react'
-import axiosInstance from '@/config/axios'
+import { userService } from '@/services/userService'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
 import './CVManagement.scss'
 
-const { TextArea } = Input
-
+// Define the CV interface that's used in this component
 interface CV {
-    id: string
-    email: string
-    curriculumVitae: string
-    status: number
-    rejectionReason: string | null
-    createdAt: string
-    user: {
-        name: string
-    }
+    id: string;
+    email: string;
+    curriculumVitae: string;
+    status: number;
+    createdAt: string;
+    reason?: string;
 }
+
+const { TextArea } = Input
 
 const CVManagement = () => {
     const navigate = useNavigate()
@@ -39,7 +37,6 @@ const CVManagement = () => {
     const [cvs, setCvs] = useState<CV[]>([])
     const [loading, setLoading] = useState(false)
     const [form] = Form.useForm()
-
     const fetchCVs = async () => {
         try {
             setLoading(true)
@@ -47,9 +44,9 @@ const CVManagement = () => {
             const token = localStorage.getItem('token')
             console.log('Current token:', token)
 
-            const response = await axiosInstance.get('Cms/tour-guide-application')
-            console.log('Response:', response)
-            setCvs(response.data)
+            const cvs = await userService.getTourGuideApplications();
+            console.log('Response:', cvs)
+            setCvs(cvs)
         } catch (error: any) {
             console.error('Error fetching CVs:', error)
             if (error.response) {
@@ -183,7 +180,6 @@ const CVManagement = () => {
     const handleSearch = (value: string) => {
         setSearchText(value)
     }
-
     const handleApprove = async (cvId: string) => {
         Modal.confirm({
             title: t('admin.cvManagement.confirmations.approve.title'), content: t('admin.cvManagement.confirmations.approve.content'),
@@ -192,7 +188,7 @@ const CVManagement = () => {
             cancelText: t('common.cancel'),
             onOk: async () => {
                 try {
-                    await axiosInstance.put(`Cms/${cvId}/approve-application`)
+                    await userService.approveTourGuideApplication(cvId);
                     fetchCVs()
                     Modal.success({
                         title: t('admin.cvManagement.messages.success.approved'),
@@ -217,9 +213,7 @@ const CVManagement = () => {
     const handleRejectModalOk = async () => {
         try {
             const values = await form.validateFields()
-            await axiosInstance.put(`Cms/${selectedCV}/reject-application`, {
-                reason: values.reason
-            })
+            await userService.rejectTourGuideApplication(selectedCV as string, values.reason);
             fetchCVs()
             setRejectModalVisible(false)
             setSelectedCV(null)

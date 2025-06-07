@@ -92,8 +92,7 @@ const Navbar = () => {
       key: '/',
       icon: <HomeOutlined />,
       label: <Link to="/">{t('navigation.home')}</Link>
-    },
-    {
+    }, {
       key: '/things-to-do',
       icon: <AppstoreOutlined />,
       label: <Link to="/things-to-do">{t('navigation.tours')}</Link>
@@ -101,27 +100,26 @@ const Navbar = () => {
     {
       key: '/shop',
       icon: <ShoppingOutlined />,
-      label: <Link to="/shop">{t('navigation.services')}</Link>
+      label: <Link to="/shop">{t('navigation.shop')}</Link>
     },
     {
       key: '/blog',
       icon: <ReadOutlined />,
-      label: <Link to="/blog">Blog</Link>
-    },
-    {
-      key: '/career',
-      icon: <UserOutlined />,
-      label: <Link to="/career">{t('navigation.jobs')}</Link>
+      label: <Link to="/blog">{t('navigation.blog')}</Link>
     },
     {
       key: '/about',
       icon: <InfoCircleOutlined />,
       label: <Link to="/about">{t('navigation.about')}</Link>
+    }, {
+      key: '/support',
+      icon: <PhoneOutlined />,
+      label: <Link to="/support">{t('navigation.support')}</Link>
     },
     {
-      key: '/contact',
-      icon: <PhoneOutlined />,
-      label: <Link to="/contact">{t('navigation.contact')}</Link>
+      key: '/career',
+      icon: <UserOutlined />,
+      label: <Link to="/career">{t('navigation.jobs')}</Link>
     },
   ]
 

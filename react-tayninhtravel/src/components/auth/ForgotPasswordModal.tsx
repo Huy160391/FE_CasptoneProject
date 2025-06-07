@@ -45,7 +45,7 @@ const ForgotPasswordModal = ({ isVisible, onClose }: ForgotPasswordModalProps) =
                 open={isVisible && !showResetModal}
                 onCancel={onClose}
                 footer={null}
-                destroyOnClose
+                destroyOnHidden
             >
                 <div style={{ textAlign: 'center' }}>
                     <p>{t('auth.forgotPasswordInstructions')}</p>

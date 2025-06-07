@@ -49,7 +49,9 @@ const UserManagement = () => {
         } finally {
             setLoading(false)
         }
-    }    // Gọi API khi component được mount hoặc khi các điều kiện tìm kiếm thay đổi
+    }
+
+    // Gọi API khi component được mount hoặc khi các điều kiện tìm kiếm thay đổi
     useEffect(() => {
         // Kiểm tra xác thực
         if (!isAuthenticated || !user) {
@@ -78,94 +80,14 @@ const UserManagement = () => {
         }, 500)
 
         return () => clearTimeout(timer)
-    }, [searchText])
-
-    const columns: ColumnsType<User> = [
-        {
-            title: t('admin.users.columns.id'),
-            dataIndex: 'id',
-            key: 'id',
-            width: '80px',
-            ellipsis: true,
-        },
-        {
-            title: t('admin.users.columns.name'),
-            dataIndex: 'name',
-            key: 'name',
-            sorter: true,
-        },
-        {
-            title: t('admin.users.columns.email'),
-            dataIndex: 'email',
-            key: 'email',
-            ellipsis: true,
-        }, {
-            title: t('admin.users.columns.phone'),
-            dataIndex: 'phone',
-            key: 'phone',
-        },
-        {
-            title: t('admin.users.columns.status'),
-            dataIndex: 'status',
-            key: 'status',
-            render: (status: boolean) => {
-                const color = status ? 'success' : 'error'
-                const text = status ? t('admin.users.status.active') : t('admin.users.status.inactive')
-
-                return <Tag color={color}>{text}</Tag>
-            },
-            filters: [
-                { text: t('admin.users.status.active'), value: true },
-                { text: t('admin.users.status.inactive'), value: false },],
-            onFilter: (value: any, record: User) =>
-                record.status === value,
-        },
-        {
-            title: t('admin.users.columns.actions'),
-            key: 'action',
-            render: (_, record: User) => (
-                <Space size="middle">
-                    <Button
-                        type="primary"
-                        icon={<EditOutlined />}
-                        size="small"
-                        onClick={() => handleEdit(record)}
-                    >
-                        {t('common.edit')}
-                    </Button>
-                    {record.status ? (
-                        <Button
-                            icon={<StopOutlined />}
-                            danger
-                            size="small"
-                            onClick={() => handleToggleStatus(record, false)}
-                        >
-                            {t('admin.users.actions.deactivate')}
-                        </Button>
-                    ) : (
-                        <Button
-                            icon={<CheckCircleOutlined />}
-                            type="primary"
-                            size="small"
-                            className="activate-btn"
-                            onClick={() => handleToggleStatus(record, true)}
-                        >
-                            {t('admin.users.actions.activate')}
-                        </Button>
-                    )}
-                    <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        size="small"
-                        onClick={() => handleDelete(record)}
-                    >
-                        {t('common.delete')}
-                    </Button>
-                </Space>
-            ),
-        },]
+    }, [searchText])    // Hàm xử lý filter theo trạng thái
+    const handleStatusFilterChange = (status: boolean | undefined) => {
+        setStatusFilter(status);
+        setPagination(prev => ({ ...prev, current: 1 }));
+    }
 
     const handleTableChange = (newPagination: any, filters: any) => {
+        // Chỉ xử lý pagination và filters, không xử lý sorter vì đã sort phía client
         setPagination({
             ...pagination,
             current: newPagination.current,
@@ -182,6 +104,7 @@ const UserManagement = () => {
     const handleSearch = (value: string) => {
         setSearchText(value)
     }
+
     const handleAdd = () => {
         setEditingUser(null)
         form.resetFields()
@@ -256,7 +179,8 @@ const UserManagement = () => {
     const handleModalOk = () => {
         form.validateFields().then(async values => {
             try {
-                if (editingUser) {                    // Cập nhật người dùng hiện có
+                if (editingUser) {
+                    // Cập nhật người dùng hiện có
                     await userService.updateUser(editingUser.id, {
                         name: values.name,
                         email: values.email,
@@ -264,7 +188,8 @@ const UserManagement = () => {
                         status: values.status,
                     })
                     message.success(t('admin.users.messages.success.updated'))
-                } else {                    // Thêm người dùng mới
+                } else {
+                    // Thêm người dùng mới
                     await userService.createUser({
                         name: values.name,
                         email: values.email,
@@ -291,27 +216,130 @@ const UserManagement = () => {
         setIsModalVisible(false)
     }
 
+    const columns: ColumnsType<User> = [
+        {
+            title: t('admin.users.columns.id'),
+            dataIndex: 'id',
+            key: 'id',
+            width: '80px',
+            ellipsis: true,
+        }, {
+            title: t('admin.users.columns.name'),
+            dataIndex: 'name',
+            key: 'name',
+            sorter: (a: User, b: User) => a.name.localeCompare(b.name),
+        }, {
+            title: t('admin.users.columns.email'),
+            dataIndex: 'email',
+            key: 'email',
+            ellipsis: true,
+            sorter: (a: User, b: User) => a.email.localeCompare(b.email),
+        },
+        {
+            title: t('admin.users.columns.phone'),
+            dataIndex: 'phone',
+            key: 'phone',
+            sorter: (a: User, b: User) => a.phone.localeCompare(b.phone),
+        },
+        {
+            title: t('admin.users.columns.status'),
+            dataIndex: 'status',
+            key: 'status',
+            render: (status: boolean) => {
+                const color = status ? 'success' : 'error'
+                const text = status ? t('admin.users.status.active') : t('admin.users.status.inactive')
+
+                return <Tag color={color}>{text}</Tag>
+            },
+            filters: [
+                { text: t('admin.users.status.active'), value: true },
+                { text: t('admin.users.status.inactive'), value: false },
+            ],
+            onFilter: (value: any, record: User) =>
+                record.status === value,
+        },
+        {
+            title: t('admin.users.columns.actions'),
+            key: 'action',
+            render: (_, record: User) => (
+                <Space size="middle">
+                    <Button
+                        type="primary"
+                        icon={<EditOutlined />}
+                        size="small"
+                        onClick={() => handleEdit(record)}
+                    >
+                        {t('common.edit')}
+                    </Button>
+                    {record.status ? (
+                        <Button
+                            icon={<StopOutlined />}
+                            danger
+                            size="small"
+                            onClick={() => handleToggleStatus(record, false)}
+                        >
+                            {t('admin.users.actions.deactivate')}
+                        </Button>
+                    ) : (
+                        <Button
+                            icon={<CheckCircleOutlined />}
+                            type="primary"
+                            size="small"
+                            className="activate-btn"
+                            onClick={() => handleToggleStatus(record, true)}
+                        >
+                            {t('admin.users.actions.activate')}
+                        </Button>
+                    )}
+                    <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        size="small"
+                        onClick={() => handleDelete(record)}
+                    >
+                        {t('common.delete')}
+                    </Button>
+                </Space>
+            ),
+        },
+    ]
+
     return (
-        <div className="user-management-page">
-            <div className="page-header">
+        <div className="user-management-page">            <div className="page-header">
+            <div className="title-with-filters">
                 <h1>{t('admin.users.title')}</h1>
-                <div className="header-actions">
+            </div>
+            <div className="header-actions">
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                >
+                    {t('admin.users.actions.add')}
+                </Button>                </div>
+        </div>
+
+            <div className="table-actions">
+                <Space>
                     <Input
                         placeholder={t('admin.users.searchPlaceholder')}
                         prefix={<SearchOutlined />}
                         onChange={e => handleSearch(e.target.value)}
-                        className="search-input"
+                        style={{ width: 250 }}
                         allowClear
                         value={searchText}
                     />
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={handleAdd}
+                    <Select
+                        placeholder={t('admin.users.filters.all') || 'Tất cả người dùng'}
+                        onChange={handleStatusFilterChange}
+                        allowClear
+                        style={{ width: 150 }}
+                        value={statusFilter}
                     >
-                        {t('admin.users.actions.add')}
-                    </Button>
-                </div>
+                        <Option value={true}>{t('admin.users.status.active')}</Option>
+                        <Option value={false}>{t('admin.users.status.inactive')}</Option>
+                    </Select>
+                </Space>
             </div>
 
             <Spin spinning={loading}>
@@ -358,7 +386,9 @@ const UserManagement = () => {
                         ]}
                     >
                         <Input />
-                    </Form.Item>                    <Form.Item
+                    </Form.Item>
+
+                    <Form.Item
                         name="phone"
                         label={t('profile.phone')}
                         rules={[
