@@ -1,29 +1,27 @@
 import axios from '@/config/axios';
 
-// Actual API response structure
-export interface ApiUser {
+// API response interfaces
+interface ApiUser {
     id: string;
-    email: string;
     name: string;
+    email: string;
     phoneNumber: string;
-    avatar: string;
-    isVerified: boolean;
-    isActive: boolean;
     role?: string;
+    isActive: boolean;
+    avatar?: string;
+    isVerified: boolean;
     createdAt: string;
     updatedAt: string;
 }
 
-// API response for pagination
-export interface ApiGetUsersResponse {
+interface ApiGetUsersResponse {
     data: ApiUser[];
-    totalPages: number;
     totalRecord: number;
     page: number;
     pageSize: number;
 }
 
-// Application interface used throughout the app
+// Application interfaces
 export interface User {
     id: string;
     name: string;
@@ -32,9 +30,9 @@ export interface User {
     role: string;
     status: boolean;
     avatar?: string;
-    isVerified?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
+    isVerified: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface GetUsersResponse {
@@ -52,7 +50,47 @@ export interface UpdateUserPayload {
     status?: boolean;
 }
 
-// Map to API payload format
+export interface CreateUserPayload extends UpdateUserPayload {
+    password: string;
+}
+
+export interface ProfileUpdatePayload {
+    name: string;
+    phoneNumber: string;
+}
+
+// Support ticket interfaces
+interface ImageAttachment {
+    id: string;
+    url: string;
+}
+
+export type TicketStatus = 'Open' | 'Resolved' | 'Rejected';
+export const TICKET_STATUS_MAP = {
+    0: 'Open',
+    1: 'Resolved',
+    2: 'Rejected'
+} as const;
+
+export interface SupportTicket {
+    id: string;
+    title: string;
+    content: string;
+    status: TicketStatus;
+    createdAt: string;
+    userId?: string;
+    userName?: string;
+    userEmail?: string;
+    images: ImageAttachment[];
+    response?: string;
+}
+
+export interface TourGuideApplication {
+    email: string;
+    curriculumVitae: File;
+}
+
+// API request interfaces
 interface ApiUpdateUserPayload {
     name?: string;
     email?: string;
@@ -61,14 +99,24 @@ interface ApiUpdateUserPayload {
     status?: boolean;
 }
 
-export interface CreateUserPayload extends UpdateUserPayload {
-    password: string;
+// CV management interfaces
+export interface CV {
+    id: string;
+    email: string;
+    curriculumVitae: string;
+    status: number;
+    rejectionReason: string | null;
+    createdAt: string;
+    user: {
+        name: string;
+    }
 }
 
 /**
  * Service handling user management API operations
  */
-export const userService = {    /**
+export const userService = {
+    /**
      * Map API user format to application user format
      * @param apiUser User data from API
      * @returns User data in application format
@@ -86,7 +134,8 @@ export const userService = {    /**
             createdAt: apiUser.createdAt,
             updatedAt: apiUser.updatedAt
         };
-    },/**
+    },
+    /**
      * Get a list of users with pagination, search, and filtering
      * @param page Current page number
      * @param pageSize Number of records per page
@@ -123,7 +172,8 @@ export const userService = {    /**
             currentPage: apiResponse.page,
             pageSize: apiResponse.pageSize
         };
-    },    /**
+    },
+    /**
      * Get a specific user by ID
      * @param id User ID
      * @returns Promise with user data
@@ -131,7 +181,8 @@ export const userService = {    /**
     getUserById: async (id: string): Promise<User> => {
         const response = await axios.get<ApiUser>(`/Cms/user/${id}`);
         return userService.mapApiUserToUser(response.data);
-    },    /**
+    },
+    /**
      * Update an existing user
      * @param id User ID
      * @param userData New user data
@@ -149,14 +200,16 @@ export const userService = {    /**
 
         const response = await axios.put<ApiUser>(`/Cms/user/${id}`, apiPayload);
         return userService.mapApiUserToUser(response.data);
-    },/**
+    },
+    /**
      * Delete a user
      * @param id User ID
      * @returns Promise with operation result
      */
     deleteUser: async (id: string): Promise<void> => {
         await axios.delete(`/Cms/user/${id}`);
-    },    /**
+    },
+    /**
      * Toggle user active/inactive status
      * @param id User ID
      * @param status New status (true = active, false = inactive)
@@ -165,7 +218,8 @@ export const userService = {    /**
     toggleUserStatus: async (id: string, status: boolean): Promise<User> => {
         const response = await axios.patch<ApiUser>(`/Cms/user/${id}/status`, { status });
         return userService.mapApiUserToUser(response.data);
-    },    /**
+    },
+    /**
      * Create a new user
      * @param userData User data including password
      * @returns Promise with created user data
@@ -183,6 +237,271 @@ export const userService = {    /**
 
         const response = await axios.post<ApiUser>('/Cms/user', apiPayload);
         return userService.mapApiUserToUser(response.data);
+    },
+    /**
+     * Update user profile
+     * @param updatedData Profile data to update
+     * @returns Promise with operation result
+     */
+    updateProfile: async (updatedData: ProfileUpdatePayload): Promise<any> => {
+        const response = await axios.put('/Account/edit-profile', updatedData);
+        return response.data;
+    },
+    /**
+     * Update user avatar
+     * @param avatarFile Avatar image file
+     * @returns Promise with operation result
+     */
+    updateAvatar: async (avatarFile: File): Promise<any> => {
+        const formData = new FormData();
+        formData.append('Avatar', avatarFile, avatarFile.name);
+
+        const response = await axios.put('/Account/edit-Avatar', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+
+    /**
+     * Get user's support tickets
+     * @returns Promise with support tickets
+     */
+    getUserSupportTickets: async (): Promise<SupportTicket[]> => {
+        try {
+            const response = await axios.get<SupportTicket[]>('SupportTickets/User');
+
+            // Ensure response data is an array, otherwise return empty array
+            const tickets = Array.isArray(response.data) ? response.data : [];
+
+            // Validate and transform ticket data
+            return tickets.map(ticket => ({
+                id: ticket.id,
+                title: ticket.title,
+                content: ticket.content,
+                status: ticket.status,
+                createdAt: ticket.createdAt,
+                userId: ticket.userId || '',
+                userName: ticket.userName || '',
+                userEmail: ticket.userEmail || '',
+                images: Array.isArray(ticket.images) ? ticket.images : [],
+                response: ticket.response
+            }));
+        } catch (error) {
+            if (error && typeof error === 'object' && 'response' in error) {
+                // Add preventDefault flag to suppress default error handling
+                (error as any).preventDefault = true;
+
+                // Log error in development only
+                if (process.env.NODE_ENV === 'development') {
+                    const axiosError = error as { response?: { status: number; data: any } };
+                    console.error(
+                        'Support tickets fetch error:',
+                        axiosError.response?.status,
+                        axiosError.response?.data
+                    );
+                }
+            }
+            return [];
+        }
+    },
+    /**
+     * Submit a new support ticket
+     * @param title Ticket title
+     * @param content Ticket content
+     * @param file Optional attachment file
+     * @returns Promise with operation result
+     */
+    submitSupportTicket: async (title: string, content: string, file?: File): Promise<SupportTicket> => {
+        try {
+            // Validate inputs
+            if (!title.trim()) {
+                throw new Error('Title is required');
+            }
+            if (!content.trim()) {
+                throw new Error('Content is required');
+            }
+            if (file && !['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
+                throw new Error('Invalid file type. Only JPEG, PNG and PDF files are allowed.');
+            }
+
+            const formData = new FormData();
+            formData.append('Title', title.trim());
+            formData.append('Content', content.trim());
+            if (file) {
+                formData.append('Files', file);
+            }
+
+            const response = await axios.post<SupportTicket>('SupportTickets', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+
+            // Validate response
+            if (!response.data || typeof response.data !== 'object') {
+                throw new Error('Invalid server response');
+            }
+
+            return {
+                id: response.data.id,
+                title: response.data.title,
+                content: response.data.content,
+                status: response.data.status,
+                createdAt: response.data.createdAt,
+                userId: response.data.userId || '',
+                userName: response.data.userName || '',
+                userEmail: response.data.userEmail || '',
+                images: Array.isArray(response.data.images) ? response.data.images : [],
+                response: response.data.response
+            };
+        } catch (error) {
+            // Handle specific error cases
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { status: number; data: any } };
+
+                if (axiosError.response?.status === 401) {
+                    throw new Error('Please log in to submit a support ticket');
+                }
+                if (axiosError.response?.status === 413) {
+                    throw new Error('File size is too large');
+                }
+
+                // Log detailed error in development
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Support ticket submission error:', {
+                        status: axiosError.response?.status,
+                        data: axiosError.response?.data
+                    });
+                }
+            }
+
+            // Re-throw error for component handling
+            throw error instanceof Error ? error : new Error('Failed to submit support ticket');
+        }
+    },
+    /**
+     * Submit tour guide application
+     * @param application Tour guide application data
+     * @returns Promise with operation result
+     */
+    submitTourGuideApplication: async (application: TourGuideApplication): Promise<any> => {
+        const formData = new FormData();
+        formData.append('Email', application.email);
+        formData.append('CurriculumVitae', application.curriculumVitae);
+
+        const response = await axios.post('/Account/tourguide-application', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+    /**
+     * Get all support tickets (admin)
+     * @param status Optional status filter
+     * @returns Promise with support tickets
+     */
+    getAdminSupportTickets: async (status?: string): Promise<SupportTicket[]> => {
+        try {
+            let url = 'SupportTickets/Admin';
+            if (status) {
+                url += `?status=${encodeURIComponent(status)}`;
+            }
+
+            const response = await axios.get<SupportTicket[]>(url);
+
+            // Ensure response data is an array
+            const tickets = Array.isArray(response.data) ? response.data : [];
+
+            // Validate and transform ticket data
+            return tickets.map(ticket => ({
+                id: ticket.id,
+                title: ticket.title,
+                content: ticket.content,
+                status: ticket.status,
+                createdAt: ticket.createdAt,
+                userId: ticket.userId || '',
+                userName: ticket.userName || '',
+                userEmail: ticket.userEmail || '',
+                images: Array.isArray(ticket.images) ? ticket.images : [],
+                response: ticket.response
+            }));
+        } catch (error) {
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { status: number; data: any } };
+
+                // Log error in development
+                if (process.env.NODE_ENV === 'development') {
+                    console.error(
+                        'Admin support tickets fetch error:',
+                        axiosError.response?.status,
+                        axiosError.response?.data
+                    );
+                }
+
+                // Handle 401/403 errors
+                if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+                    throw new Error('Unauthorized access to admin support tickets');
+                }
+            }
+            return [];
+        }
+    },
+    /**
+     * Update support ticket status (admin)
+     * @param ticketId Ticket ID
+     * @param newStatus New status
+     * @returns Promise with operation result
+     */
+    updateTicketStatus: async (ticketId: string, newStatus: string): Promise<any> => {
+        const response = await axios.put(`SupportTickets/Admin/${ticketId}/status`, {
+            status: newStatus
+        });
+        return response.data;
+    },
+    /**
+     * Respond to a support ticket (admin)
+     * @param ticketId Ticket ID
+     * @param response Response content
+     * @returns Promise with operation result
+     */
+    respondToTicket: async (ticketId: string, response: string): Promise<any> => {
+        const responseData = await axios.put(`SupportTickets/Admin/${ticketId}/respond`, {
+            response
+        });
+        return responseData.data;
+    },
+    /**
+     * Get all tour guide applications (admin)
+     * @returns Promise with CV applications
+     */
+    getTourGuideApplications: async (): Promise<CV[]> => {
+        const response = await axios.get<CV[]>('Cms/tour-guide-application');
+        return response.data;
+    },
+    /**
+     * Approve tour guide application (admin)
+     * @param cvId Application ID
+     * @returns Promise with operation result
+     */
+    approveTourGuideApplication: async (cvId: string): Promise<any> => {
+        const response = await axios.put(`Cms/${cvId}/approve-application`);
+        return response.data;
+    },
+
+    /**
+     * Reject tour guide application (admin)
+     * @param cvId Application ID
+     * @param reason Rejection reason
+     * @returns Promise with operation result
+     */
+    rejectTourGuideApplication: async (cvId: string, reason: string): Promise<any> => {
+        const response = await axios.put(`Cms/${cvId}/reject-application`, {
+            reason
+        });
+        return response.data;
     }
 };
 

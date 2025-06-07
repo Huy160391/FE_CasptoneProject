@@ -68,7 +68,7 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
         open={isVisible}
         onCancel={onClose}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
         className="auth-modal"
       >
         <Form

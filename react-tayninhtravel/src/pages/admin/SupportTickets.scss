@@ -1,0 +1,294 @@
+.support-tickets-page {
+  padding: 24px;
+
+  .page-header {
+    margin-bottom: 24px;
+
+    h2 {
+      margin-bottom: 8px;
+    }
+  }
+
+  .table-actions {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+
+    // Consistent button and select styling with UserManagement
+    .ant-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      background-color: #ffffff;
+      border: 1px solid #d9d9d9;
+      box-shadow: none;
+      color: rgba(0, 0, 0, 0.85);
+      
+      &:hover {
+        background-color: #fafafa;
+        border-color: #40a9ff;
+        color: #40a9ff;
+      }
+    }
+
+    .ant-select {
+      .ant-select-selector {
+        border-radius: 4px;
+        
+        &:hover {
+          border-color: #40a9ff;
+        }
+      }
+    }
+  }
+
+  .tickets-table {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    
+    .ant-table-tbody > tr.ant-table-row:hover > td {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+  }    .ticket-details {
+      .ticket-header {
+        margin-bottom: 24px;
+
+        h4 {
+          margin-bottom: 8px;
+        }
+
+        .ticket-meta {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          color: rgba(0, 0, 0, 0.65);
+        }
+      }
+
+    .content-box, .response-box {
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 24px;
+      white-space: pre-line;
+      border: 1px solid #eee;
+    }
+
+    .ticket-actions {
+      margin-top: 24px;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 24px;
+    }
+  }
+
+  .respond-form {
+    .ticket-summary {
+      margin-bottom: 16px;
+      padding: 12px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      
+      div {
+        margin-bottom: 4px;
+      }
+    }
+
+    .form-item {
+      margin-bottom: 16px;
+      
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Dark mode support
+body.dark {
+  .support-tickets-page {
+    background: #141414; // Set dark background for the whole page
+    color: rgba(255, 255, 255, 0.85);
+    
+    // Dark mode button styles - consistent with UserManagement
+    .table-actions {
+      .ant-btn {
+        background-color: #1f1f1f;
+        border-color: #434343;
+        color: rgba(255, 255, 255, 0.85);
+        
+        &:hover {
+          background-color: #262626;
+          border-color: #177ddc;
+          color: #177ddc;
+        }
+      }
+
+      .ant-select {
+        .ant-select-selector {
+          background-color: #1f1f1f;
+          border-color: #434343;
+          color: rgba(255, 255, 255, 0.85);
+
+          &:hover {
+            border-color: #177ddc;
+          }
+        }
+      }
+    }
+
+    .tickets-table {
+      background: #1f1f1f;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+
+      .ant-table {
+        background: #1f1f1f;
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .ant-table-thead > tr > th {
+        background: #2a2a2a;
+        color: rgba(255, 255, 255, 0.85);
+        border-bottom: 1px solid #333;
+      }
+
+      .ant-table-tbody > tr > td {
+        background: #1f1f1f;
+        color: rgba(255, 255, 255, 0.85);
+        border-bottom: 1px solid #333;
+      }
+
+      .ant-table-tbody > tr.ant-table-row:hover > td {
+        background-color: #2a2a2a;
+      }
+
+      .ant-table-placeholder {
+        background: #1f1f1f;
+        
+        .ant-table-cell {
+          background: #1f1f1f !important;
+          border-bottom: 1px solid #333;
+        }
+      }      .ant-pagination {
+        color: rgba(255, 255, 255, 0.85);
+        
+        .ant-pagination-item-link {
+          background: #1f1f1f;
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-pagination-item a {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-pagination-item {
+          background: #1f1f1f;
+          border-color: #333;
+          
+          &-active {
+            border-color: #1890ff;
+          }
+        }
+      }
+      
+      .ant-table-footer {
+        background: #1f1f1f;
+        border-top: 1px solid #333;
+      }
+      
+      .ant-table-wrapper {
+        background: #1f1f1f;
+      }
+      
+      .ant-pagination-options {
+        .ant-select-dropdown {
+          background-color: #1f1f1f;
+          
+          .ant-select-item {
+            color: rgba(255, 255, 255, 0.85);
+            
+            &-option-selected,
+            &-option-active {
+              background-color: #2a2a2a;
+            }
+          }
+        }
+        
+        .ant-select-selector {
+          background-color: #1f1f1f !important;
+          color: rgba(255, 255, 255, 0.85) !important;
+          border-color: #333 !important;
+        }
+        
+        .ant-pagination-options-size-changer {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+    }    .ticket-details {
+      .content-box, .response-box {
+        background-color: #2a2a2a;
+        border-color: #333;
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .ticket-header {
+        .ticket-meta {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+
+      .ticket-actions {
+        border-top-color: #333;
+      }
+    }    .respond-form {
+      .ticket-summary {
+        background-color: #2a2a2a;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      label {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+  }
+  
+  // Override Ant Design modal styles for dark theme
+  .ant-modal-content {
+    background-color: #1f1f1f;
+    
+    .ant-modal-header {
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+      
+      .ant-modal-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+    
+    .ant-modal-body {
+      background-color: #1f1f1f;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .ant-modal-footer {
+      background-color: #1f1f1f;
+      border-top: 1px solid #333;
+    }
+  }
+  
+  .ant-select-dropdown {
+    background-color: #1f1f1f;
+    border: 1px solid #333;
+    
+    .ant-select-item {
+      color: rgba(255, 255, 255, 0.85);
+      
+      &-option-selected,
+      &-option-active {
+        background-color: #2a2a2a;
+      }
+    }
+  }
+}

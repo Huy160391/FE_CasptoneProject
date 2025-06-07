@@ -4,12 +4,14 @@
         "tours": "Tour du lịch",
         "about": "Giới thiệu",
         "services": "Dịch vụ",
-        "contact": "Liên hệ",
+        "support": "Hỗ trợ",
         "jobs": "Sự nghiệp",
         "login": "Đăng nhập",
         "register": "Đăng ký",
         "bookings": "Đặt tour",
-        "activities": "Hoạt động"
+        "activities": "Hoạt động",
+        "shop": "Cửa hàng",
+        "blog": "Blog"
     },
     "admin": {
         "sidebar": {
@@ -20,6 +22,7 @@
             "reviews": "Quản lý đánh giá",
             "blogs": "Quản lý bài viết",
             "cvManagement": "Quản lý CV",
+            "supportTickets": "Hỗ trợ khách hàng",
             "myInfo": "Thông tin cá nhân"
         },
         "users": {
@@ -37,6 +40,10 @@
             "status": {
                 "active": "Hoạt động",
                 "inactive": "Không hoạt động"
+            },
+            "filters": {
+                "all": "Tất cả người dùng",
+                "filter": "Lọc"
             },
             "actions": {
                 "add": "Thêm người dùng",
@@ -145,6 +152,38 @@
                     "auth": "Vui lòng đăng nhập để tiếp tục"
                 }
             }
+        },
+        "supportTickets": {
+            "title": "Quản lý hỗ trợ khách hàng",
+            "subtitle": "Quản lý và phản hồi các yêu cầu hỗ trợ từ người dùng",
+            "searchPlaceholder": "Tìm kiếm theo tiêu đề, nội dung, email hoặc tên",
+            "filterByStatus": "Lọc theo trạng thái",
+            "columns": {
+                "title": "Tiêu đề",
+                "user": "Người dùng",
+                "date": "Ngày tạo",
+                "status": "Trạng thái",
+                "hasAttachment": "Tệp đính kèm",
+                "actions": "Thao tác"
+            },
+            "actions": {
+                "view": "Xem",
+                "respond": "Phản hồi"
+            },
+            "viewTicket": "Xem chi tiết yêu cầu",
+            "respondToTicket": "Phản hồi yêu cầu",
+            "submittedBy": "Gửi bởi",
+            "dateSubmitted": "Ngày gửi",
+            "status": "Trạng thái",
+            "message": "Nội dung",
+            "response": "Phản hồi",
+            "updateStatus": "Cập nhật trạng thái",
+            "markInProgress": "Đang xử lý",
+            "markResolved": "Đã giải quyết",
+            "markRejected": "Từ chối",
+            "yourResponse": "Phản hồi của bạn",
+            "responseHint": "Nhập phản hồi của bạn cho yêu cầu này...",
+            "downloadAttachment": "Tải tệp đính kèm"
         }
     },
     "tours": {
@@ -506,12 +545,68 @@
         "upcoming": "Sắp tới",
         "transactionHistory": "Lịch sử giao dịch",
         "transactionDate": "Ngày giao dịch",
+        "sendDate": "Ngày gửi",
         "amount": "Số tiền",
         "commentHistory": "Lịch sử đánh giá",
         "personalInfoUpdateSuccess": "Thông tin cá nhân đã được cập nhật",
-        "passwordUpdateSuccess": "Mật khẩu đã được thay đổi"
+        "passwordUpdateSuccess": "Mật khẩu đã được thay đổi",
+        "supportTickets": "Yêu cầu hỗ trợ",
+        "viewAttachment": "Xem tệp đính kèm",
+        "noAttachment": "Không có tệp đính kèm",
+        "noTickets": "Không tìm thấy yêu cầu hỗ trợ nào",
+        "ticketStatus": {
+            "Pending": "Đang chờ",
+            "Resolved": "Đã giải quyết",
+            "InProgress": "Đang xử lý",
+            "Rejected": "Đã từ chối",
+            "Open": "Mở"
+        },
+        "ticketTable": {
+            "orderNumber": "STT",
+            "responseFromTNDT": "Phản hồi từ TNDT",
+            "attachment": "Tệp đính kèm"
+        }
     },
     "contact": {
         "submitSuccess": "Cảm ơn bạn đã liên hệ với chúng tôi! Chúng tôi sẽ phản hồi trong thời gian sớm nhất."
+    },
+    "support": {
+        "title": "Liên Hệ Hỗ Trợ",
+        "submitSuccess": "Cảm ơn bạn đã gửi tin nhắn. Chúng tôi sẽ liên hệ lại sớm.",
+        "formTitle": "Gửi Yêu Cầu Hỗ Trợ",
+        "formSubtitle": "Hãy điền thông tin bên dưới và chúng tôi sẽ phản hồi trong thời gian sớm nhất",
+        "subtitle": "Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7",
+        "hint": "Tất cả các trường có dấu * là bắt buộc",
+        "mapTitle": "Vị Trí Của Chúng Tôi",
+        "loginRequired": "Vui lòng đăng nhập để gửi yêu cầu hỗ trợ",
+        "loginModal": {
+            "title": "Yêu cầu đăng nhập",
+            "content": "Bạn cần đăng nhập để gửi yêu cầu hỗ trợ.",
+            "loginButton": "Đăng nhập ngay",
+            "registerButton": "Đăng ký tài khoản"
+        },
+        "form": {
+            "title": "Tiêu đề",
+            "titleRequired": "Vui lòng nhập tiêu đề",
+            "content": "Nội dung",
+            "contentRequired": "Vui lòng nhập nội dung",
+            "attachment": "Tệp đính kèm",
+            "attachmentHint": "Chấp nhận các file .pdf, .doc, .docx, .jpg, .png (tối đa 5MB)",
+            "uploadButton": "Tải Tệp Lên",
+            "submit": "Gửi Tin Nhắn"
+        },
+        "ticketParams": {
+            "title": "Tiêu đề",
+            "content": "Nội dung",
+            "file": "Tệp đính kèm"
+        },
+        "contactInfo": {
+            "title": "Thông Tin Liên Hệ",
+            "mapTitle": "Vị Trí Của Chúng Tôi",
+            "address": "Địa chỉ",
+            "phone": "Điện thoại",
+            "email": "Email",
+            "workingHours": "Giờ làm việc"
+        }
     }
 }

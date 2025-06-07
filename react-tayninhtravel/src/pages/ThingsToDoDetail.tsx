@@ -40,7 +40,7 @@ import LoginModal from '@/components/auth/LoginModal'
 import RegisterModal from '@/components/auth/RegisterModal'
 
 const { Title, Text, Paragraph } = Typography
-const { TabPane } = Tabs
+// Removed TabPane constant since we'll use items prop
 
 // Mock tour data
 const tours = [
@@ -437,76 +437,86 @@ const ThingsToDoDetail = () => {
                 </ul>
               </div>
             </Card>
-            <Tabs defaultActiveKey="1" className="tour-tabs">
-              <TabPane tab={t('thingsToDoDetail.tourDetails')} key="1">
-                <div dangerouslySetInnerHTML={{ __html: tour.longDescription }} />
-              </TabPane>
-              <TabPane tab={t('thingsToDoDetail.includedServices')} key="2">
-                <div className="included-excluded">
-                  <div className="included">
-                    <Title level={5}>{t('thingsToDoDetail.includedServices')}</Title>
-                    <ul>
-                      {tour.included.map((item: string, index: number) => (
-                        <li key={index}>
-                          <CheckCircleOutlined className="included-icon" /> {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="excluded">
-                    <Title level={5}>{t('thingsToDoDetail.excludedServices')}</Title>
-                    <ul>
-                      {tour.excluded.map((item: string, index: number) => (
-                        <li key={index}>
-                          <InfoCircleOutlined className="excluded-icon" /> {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </TabPane>
-              <TabPane tab={`${t('thingsToDoDetail.reviews')} (${tour.reviews})`} key="3">
-                <div className="reviews-section">
-                  <div className="reviews-summary">
-                    <div className="rating-summary">
-                      <Title level={2}>{tour.rating.toFixed(1)}</Title>
-                      <Rate disabled defaultValue={tour.rating} />
-                      <Text>{tour.reviews} {t('thingsToDoDetail.reviews').toLowerCase()}</Text>
+            <Tabs defaultActiveKey="1" className="tour-tabs" items={[
+              {
+                key: '1',
+                label: t('thingsToDoDetail.tourDetails'),
+                children: <div dangerouslySetInnerHTML={{ __html: tour.longDescription }} />
+              },
+              {
+                key: '2',
+                label: t('thingsToDoDetail.includedServices'),
+                children: (
+                  <div className="included-excluded">
+                    <div className="included">
+                      <Title level={5}>{t('thingsToDoDetail.includedServices')}</Title>
+                      <ul>
+                        {tour.included.map((item: string, index: number) => (
+                          <li key={index}>
+                            <CheckCircleOutlined className="included-icon" /> {item}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <Button type="primary" icon={<StarOutlined />}>
-                      {t('thingsToDoDetail.writeReview')}
-                    </Button>
+
+                    <div className="excluded">
+                      <Title level={5}>{t('thingsToDoDetail.excludedServices')}</Title>
+                      <ul>
+                        {tour.excluded.map((item: string, index: number) => (
+                          <li key={index}>
+                            <InfoCircleOutlined className="excluded-icon" /> {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
+                )
+              },
+              {
+                key: '3',
+                label: `${t('thingsToDoDetail.reviews')} (${tour.reviews})`,
+                children: (
+                  <div className="reviews-section">
+                    <div className="reviews-summary">
+                      <div className="rating-summary">
+                        <Title level={2}>{tour.rating.toFixed(1)}</Title>
+                        <Rate disabled defaultValue={tour.rating} />
+                        <Text>{tour.reviews} {t('thingsToDoDetail.reviews').toLowerCase()}</Text>
+                      </div>
+                      <Button type="primary" icon={<StarOutlined />}>
+                        {t('thingsToDoDetail.writeReview')}
+                      </Button>
+                    </div>
 
-                  <Divider />
+                    <Divider />
 
-                  <List
-                    itemLayout="horizontal"
-                    dataSource={tour.reviewsData}
-                    renderItem={(review: any) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          avatar={<Avatar src={review.avatar} icon={<UserOutlined />} />}
-                          title={
-                            <div className="review-header">
-                              <Text strong>{review.name}</Text>
-                              <Rate disabled defaultValue={review.rating} />
-                            </div>
-                          }
-                          description={
-                            <div className="review-content">
-                              <Text type="secondary">{review.date}</Text>
-                              <Paragraph>{review.comment}</Paragraph>
-                            </div>
-                          }
-                        />
-                      </List.Item>
-                    )}
-                  />
-                </div>
-              </TabPane>
-            </Tabs>
+                    <List
+                      itemLayout="horizontal"
+                      dataSource={tour.reviewsData}
+                      renderItem={(review: any) => (
+                        <List.Item>
+                          <List.Item.Meta
+                            avatar={<Avatar src={review.avatar} icon={<UserOutlined />} />}
+                            title={
+                              <div className="review-header">
+                                <Text strong>{review.name}</Text>
+                                <Rate disabled defaultValue={review.rating} />
+                              </div>
+                            }
+                            description={
+                              <div className="review-content">
+                                <Text type="secondary">{review.date}</Text>
+                                <Paragraph>{review.comment}</Paragraph>
+                              </div>
+                            }
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  </div>
+                )
+              }
+            ]} />
           </Col>
 
           <Col xs={24} lg={8} className="tour-sidebar">

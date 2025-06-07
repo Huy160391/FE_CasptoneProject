@@ -13,7 +13,8 @@ import {
   ReadOutlined,
   HomeOutlined,
   LogoutOutlined,
-  ShoppingCartOutlined
+  ShoppingCartOutlined,
+  CustomerServiceOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
@@ -40,7 +41,6 @@ const AdminSidebar = () => {
   const handleBackToSite = () => {
     navigate('/')
   }
-
   const menuItems = [
     {
       key: '/admin/dashboard',
@@ -76,6 +76,11 @@ const AdminSidebar = () => {
       key: '/admin/blogs',
       icon: <ReadOutlined />,
       label: <Link to="/admin/blogs">{t('admin.sidebar.blogs')}</Link>,
+    },
+    {
+      key: '/admin/support-tickets',
+      icon: <CustomerServiceOutlined />,
+      label: <Link to="/admin/support-tickets">{t('admin.sidebar.supportTickets')}</Link>,
     },
     {
       key: '/admin/my-info',

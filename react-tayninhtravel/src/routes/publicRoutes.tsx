@@ -1,7 +1,7 @@
 import { RouteObject } from 'react-router-dom';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
-import Contact from '@/pages/Contact';
+import Support from '@/pages/Support';
 import Shop from '@/pages/Shop';
 import ProductDetail from '@/pages/ProductDetail';
 import ThingsToDo from '@/pages/ThingsToDo';
@@ -22,8 +22,8 @@ export const publicRoutes: RouteObject[] = [
         element: <About />,
     },
     {
-        path: '/contact',
-        element: <Contact />,
+        path: '/support',
+        element: <Support />,
     },
     {
         path: '/shop',
@@ -62,4 +62,4 @@ export const publicRoutes: RouteObject[] = [
         path: '*',
         element: <NotFound />,
     }
-]; 
+];

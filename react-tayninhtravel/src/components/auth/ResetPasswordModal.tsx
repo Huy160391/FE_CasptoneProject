@@ -70,7 +70,7 @@ const ResetPasswordModal = ({ isVisible, onClose, email, onResetSuccess }: Reset
             open={isVisible}
             onCancel={onClose}
             footer={null}
-            destroyOnClose
+            destroyOnHidden
         >
             <div style={{ textAlign: 'center' }}>
                 <p>{t('auth.resetPasswordInstructions', { email: email })}</p>

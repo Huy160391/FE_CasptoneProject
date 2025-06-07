@@ -37,19 +37,19 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         form.resetFields()
         onClose()
 
-        // Gọi callback nếu được cung cấp
+        // Call callback if provided
         if (onLoginSuccess) {
           onLoginSuccess()
         }
 
-        // Lưu thông tin phiên đăng nhập
+        // Save login session info
         localStorage.setItem('lastLoginTime', new Date().toISOString())
 
-        // Chuyển hướng dựa vào role
+        // Redirect based on role
         if (response.user.role === 'Admin') {
           navigate('/admin/dashboard')
         } else {
-          // Chuyển về trang trước đó hoặc trang chủ
+          // Return to previous page or home
           navigate(-1)
         }
       } else {
@@ -58,11 +58,11 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
     } catch (error: any) {
       console.error('Login error:', error)
       if (error.response?.status === 401) {
-        message.error(t('auth.invalidCredentials'))
+        message.error(t('common.loginFailed'))
       } else if (error.response?.status === 403) {
-        message.error(t('auth.sessionExpired'))
+        message.error(t('common.loginFailed'))
       } else {
-        message.error(error.response?.data?.message || t('auth.loginFailed'))
+        message.error(error.response?.data?.message || t('common.loginFailed'))
       }
     } finally {
       setLoading(false)
@@ -85,7 +85,7 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
       open={isVisible}
       onCancel={onClose}
       footer={null}
-      destroyOnClose
+      destroyOnHidden
       className="auth-modal"
     >
       <Form
