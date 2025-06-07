@@ -554,6 +554,7 @@
         "viewAttachment": "Xem tệp đính kèm",
         "noAttachment": "Không có tệp đính kèm",
         "noTickets": "Không tìm thấy yêu cầu hỗ trợ nào",
+        "noSupportTickets": "Chưa có yêu cầu hỗ trợ nào",
         "ticketStatus": {
             "Pending": "Đang chờ",
             "Resolved": "Đã giải quyết",
