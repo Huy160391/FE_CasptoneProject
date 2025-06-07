@@ -413,6 +413,7 @@
         "confirm": "Confirm",
         "delete": "Delete",
         "edit": "Edit",
+        "view": "View",
         "save": "Save",
         "submit": "Submit",
         "reset": "Reset",
@@ -426,6 +427,8 @@
         "yes": "Yes",
         "no": "No",
         "ok": "OK",
+        "of": "of",
+        "items": "items",
         "logoutSuccess": "Logout successful",
         "addToCartSuccess": "Added to cart successfully",
         "addToCartDescription": "Added {{quantity}} {{name}} to cart",
@@ -608,6 +611,126 @@
             "phone": "Phone",
             "email": "Email",
             "workingHours": "Working Hours"
+        }
+    },
+    "blogger": {
+        "header": {
+            "title": "Blogger Dashboard"
+        },
+        "sidebar": {
+            "title": "Blogger",
+            "dashboard": "Dashboard",
+            "myBlogs": "My Blogs",
+            "createBlog": "Create Blog",
+            "myInfo": "My Info",
+            "role": "Blogger",
+            "editProfile": "Edit Profile",
+            "settings": "Settings",
+            "backToSite": "Back to Site",
+            "logout": "Logout"
+        },
+        "dashboard": {
+            "title": "Blogger Dashboard",
+            "createNew": "Create New Post",
+            "stats": {
+                "totalPosts": "Total Posts",
+                "publishedPosts": "Published",
+                "totalViews": "Total Views",
+                "totalLikes": "Total Likes"
+            },
+            "recentPosts": "Recent Posts",
+            "table": {
+                "title": "Title",
+                "status": "Status",
+                "views": "Views",
+                "likes": "Likes",
+                "createdAt": "Created At",
+                "actions": "Actions"
+            },
+            "status": {
+                "published": "Published",
+                "draft": "Draft",
+                "pending": "Pending",
+                "rejected": "Rejected"
+            }
+        },
+        "myBlogs": {
+            "title": "My Blogs",
+            "createNew": "Create New Post",
+            "searchPlaceholder": "Search by title or content...",
+            "table": {
+                "title": "Title",
+                "status": "Status",
+                "views": "Views",
+                "likes": "Likes",
+                "updatedAt": "Updated At",
+                "actions": "Actions"
+            },
+            "status": {
+                "published": "Published",
+                "draft": "Draft",
+                "pending": "Pending",
+                "rejected": "Rejected"
+            },
+            "noData": "No posts yet",
+            "confirmDelete": "Delete Post",
+            "confirmDeleteDesc": "Are you sure you want to delete this post? This action cannot be undone.",
+            "messages": {
+                "deleteSuccess": "Post deleted successfully",
+                "deleteError": "Failed to delete post"
+            }
+        },
+        "createBlog": {
+            "title": "Create New Post",
+            "preview": "Preview",
+            "saveDraft": "Save Draft",
+            "publish": "Publish",
+            "form": {
+                "title": "Title",
+                "titlePlaceholder": "Enter post title...",
+                "excerpt": "Excerpt",
+                "excerptPlaceholder": "Enter a short summary of the post...",
+                "content": "Content",
+                "contentPlaceholder": "Write your post content..."
+            },
+            "sidebar": {
+                "featured": "Featured Image",
+                "uploadImage": "Upload Image",
+                "category": "Category",
+                "selectCategory": "Select category",
+                "tags": "Tags",
+                "addTag": "Add tag"
+            },
+            "validation": {
+                "titleRequired": "Please enter title",
+                "titleMaxLength": "Title cannot exceed 200 characters",
+                "excerptRequired": "Please enter excerpt",
+                "excerptMaxLength": "Excerpt cannot exceed 500 characters",
+                "categoryRequired": "Please select category"
+            },
+            "messages": {
+                "success": "Post created successfully",
+                "error": "Failed to create post"
+            }
+        },
+        "editBlog": {
+            "title": "Edit Post",
+            "notFound": "Post not found",
+            "status": "Post Information",
+            "currentStatus": "Current Status",
+            "views": "Views",
+            "likes": "Likes",
+            "lastUpdated": "Last Updated",
+            "messages": {
+                "success": "Post updated successfully",
+                "error": "Failed to update post",
+                "loadError": "Failed to load post"
+            }
+        },
+        "myInfo": {
+            "title": "My Information",
+            "personalInfo": "Personal Information",
+            "changePassword": "Change Password"
         }
     }
 }

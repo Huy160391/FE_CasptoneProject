@@ -413,6 +413,7 @@
         "confirm": "Xác nhận",
         "delete": "Xóa",
         "edit": "Sửa",
+        "view": "Xem",
         "save": "Lưu",
         "submit": "Gửi",
         "reset": "Đặt lại",
@@ -426,6 +427,8 @@
         "yes": "Có",
         "no": "Không",
         "ok": "OK",
+        "of": "trên",
+        "items": "mục",
         "logoutSuccess": "Đăng xuất thành công",
         "addToCartSuccess": "Thêm vào giỏ hàng thành công",
         "addToCartDescription": "Đã thêm {{quantity}} {{name}} vào giỏ hàng",
@@ -608,6 +611,126 @@
             "phone": "Điện thoại",
             "email": "Email",
             "workingHours": "Giờ làm việc"
+        }
+    },
+    "blogger": {
+        "header": {
+            "title": "Bảng điều khiển Blogger"
+        },
+        "sidebar": {
+            "title": "Blogger",
+            "dashboard": "Bảng điều khiển",
+            "myBlogs": "Bài viết của tôi",
+            "createBlog": "Tạo bài viết",
+            "myInfo": "Thông tin cá nhân",
+            "role": "Blogger",
+            "editProfile": "Chỉnh sửa hồ sơ",
+            "settings": "Cài đặt",
+            "backToSite": "Về trang chủ",
+            "logout": "Đăng xuất"
+        },
+        "dashboard": {
+            "title": "Bảng điều khiển Blogger",
+            "createNew": "Tạo bài viết mới",
+            "stats": {
+                "totalPosts": "Tổng bài viết",
+                "publishedPosts": "Đã xuất bản",
+                "totalViews": "Tổng lượt xem",
+                "totalLikes": "Tổng lượt thích"
+            },
+            "recentPosts": "Bài viết gần đây",
+            "table": {
+                "title": "Tiêu đề",
+                "status": "Trạng thái",
+                "views": "Lượt xem",
+                "likes": "Thích",
+                "createdAt": "Ngày tạo",
+                "actions": "Thao tác"
+            },
+            "status": {
+                "published": "Đã xuất bản",
+                "draft": "Bản nháp",
+                "pending": "Chờ duyệt",
+                "rejected": "Bị từ chối"
+            }
+        },
+        "myBlogs": {
+            "title": "Bài viết của tôi",
+            "createNew": "Tạo bài viết mới",
+            "searchPlaceholder": "Tìm kiếm theo tiêu đề hoặc nội dung...",
+            "table": {
+                "title": "Tiêu đề",
+                "status": "Trạng thái",
+                "views": "Lượt xem",
+                "likes": "Thích",
+                "updatedAt": "Ngày cập nhật",
+                "actions": "Thao tác"
+            },
+            "status": {
+                "published": "Đã xuất bản",
+                "draft": "Bản nháp",
+                "pending": "Chờ duyệt",
+                "rejected": "Bị từ chối"
+            },
+            "noData": "Chưa có bài viết nào",
+            "confirmDelete": "Xóa bài viết",
+            "confirmDeleteDesc": "Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.",
+            "messages": {
+                "deleteSuccess": "Xóa bài viết thành công",
+                "deleteError": "Không thể xóa bài viết"
+            }
+        },
+        "createBlog": {
+            "title": "Tạo bài viết mới",
+            "preview": "Xem trước",
+            "saveDraft": "Lưu nháp",
+            "publish": "Xuất bản",
+            "form": {
+                "title": "Tiêu đề",
+                "titlePlaceholder": "Nhập tiêu đề bài viết...",
+                "excerpt": "Tóm tắt",
+                "excerptPlaceholder": "Nhập tóm tắt ngắn về bài viết...",
+                "content": "Nội dung",
+                "contentPlaceholder": "Viết nội dung bài viết của bạn..."
+            },
+            "sidebar": {
+                "featured": "Ảnh đại diện",
+                "uploadImage": "Tải ảnh lên",
+                "category": "Danh mục",
+                "selectCategory": "Chọn danh mục",
+                "tags": "Thẻ",
+                "addTag": "Thêm thẻ"
+            },
+            "validation": {
+                "titleRequired": "Vui lòng nhập tiêu đề",
+                "titleMaxLength": "Tiêu đề không được vượt quá 200 ký tự",
+                "excerptRequired": "Vui lòng nhập tóm tắt",
+                "excerptMaxLength": "Tóm tắt không được vượt quá 500 ký tự",
+                "categoryRequired": "Vui lòng chọn danh mục"
+            },
+            "messages": {
+                "success": "Tạo bài viết thành công",
+                "error": "Không thể tạo bài viết"
+            }
+        },
+        "editBlog": {
+            "title": "Chỉnh sửa bài viết",
+            "notFound": "Không tìm thấy bài viết",
+            "status": "Thông tin bài viết",
+            "currentStatus": "Trạng thái hiện tại",
+            "views": "Lượt xem",
+            "likes": "Lượt thích",
+            "lastUpdated": "Cập nhật lần cuối",
+            "messages": {
+                "success": "Cập nhật bài viết thành công",
+                "error": "Không thể cập nhật bài viết",
+                "loadError": "Không thể tải bài viết"
+            }
+        },
+        "myInfo": {
+            "title": "Thông tin cá nhân",
+            "personalInfo": "Thông tin cá nhân",
+            "changePassword": "Đổi mật khẩu"
         }
     }
 }

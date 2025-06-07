@@ -122,7 +122,6 @@ const Navbar = () => {
       label: <Link to="/career">{t('navigation.jobs')}</Link>
     },
   ]
-
   const userMenuItems: MenuProps['items'] = [
     {
       key: 'profile',
@@ -135,6 +134,12 @@ const Navbar = () => {
       label: 'Admin Dashboard',
       icon: <DashboardOutlined />,
       onClick: () => navigate('/admin/dashboard'),
+    }] : []),
+    ...(user?.role === 'Blogger' ? [{
+      key: 'blogger',
+      label: 'Blogger Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/blogger/dashboard'),
     }] : []),
     {
       key: 'settings',
@@ -251,13 +256,17 @@ const Navbar = () => {
           selectedKeys={[location.pathname]}
           items={menuItems}
           style={{ border: 'none' }}
-        />
-        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        />        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {isAuthenticated ? (
             <>
               {user?.role === 'Admin' && (
                 <Button type="primary" onClick={() => navigate('/admin/dashboard')}>
                   Admin Dashboard
+                </Button>
+              )}
+              {user?.role === 'Blogger' && (
+                <Button type="primary" onClick={() => navigate('/blogger/dashboard')}>
+                  Blogger Dashboard
                 </Button>
               )}
               <Button type="primary" onClick={() => navigate('/profile')}>

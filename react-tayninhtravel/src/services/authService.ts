@@ -73,11 +73,11 @@ export const authService = {
                 }
 
                 // Lấy role từ token
-                let userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-
-                // Đảm bảo role là 'Admin' hoặc 'user'
+                let userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];                // Đảm bảo role là 'Admin', 'Blogger' hoặc 'user'
                 if (userRole && (userRole.toLowerCase() === 'admin' || userRole === 'Admin')) {
                     userRole = 'Admin';
+                } else if (userRole && (userRole.toLowerCase() === 'blogger' || userRole === 'Blogger')) {
+                    userRole = 'Blogger';
                 } else {
                     userRole = 'user';
                 }

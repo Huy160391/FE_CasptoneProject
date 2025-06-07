@@ -1,0 +1,107 @@
+.blogger-header {
+  background-color: #fff;
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 24px;
+  }
+  
+  .page-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .notification-btn {
+    color: #666;
+    font-size: 16px;
+    
+    &:hover {
+      color: #1890ff;
+      background: rgba(24, 144, 255, 0.1);
+    }
+  }
+  
+  .user-dropdown {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.3s;
+
+    &:hover {
+      background: #f5f5f5;
+    }
+    
+    .username {
+      margin-left: 8px;
+      font-weight: 500;
+      color: #1f1f1f;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      
+      @media (max-width: 576px) {
+        display: none;
+      }
+    }
+
+    .ant-avatar {
+      border: 2px solid #f0f0f0;
+    }
+  }
+}
+
+/* Dark mode styles for blogger header */
+body.dark-mode {
+  .blogger-header {
+    background-color: #141414;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    
+    .page-title {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .notification-btn {
+      color: rgba(255, 255, 255, 0.65);
+      
+      &:hover {
+        color: #177ddc;
+        background: rgba(23, 125, 220, 0.1);
+      }
+    }
+    
+    .user-dropdown {
+      &:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      
+      .username {
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .ant-avatar {
+        border-color: #303030;
+      }
+    }
+  }
+}

@@ -1,0 +1,170 @@
+.blogger-my-info-page {
+  .page-header {
+    margin-bottom: 24px;
+    
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f1f1f;
+    }
+  }
+  
+  .info-tabs {
+    .ant-tabs-nav {
+      margin-bottom: 24px;
+    }
+    
+    .ant-tabs-tab {
+      font-weight: 500;
+      
+      .anticon {
+        margin-right: 8px;
+      }
+    }
+  }
+  
+  .profile-card, .password-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  
+  .avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    
+    .user-avatar {
+      margin-bottom: 8px;
+      
+      .ant-avatar {
+        border: 3px solid #f0f0f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+    
+    .avatar-upload {
+      width: 100%;
+      
+      .ant-btn {
+        width: 100%;
+      }
+      
+      .ant-upload-list {
+        margin-top: 12px;
+      }
+    }
+    
+    .user-role {
+      margin-top: 12px;
+      padding: 8px 16px;
+      background: #f0f2ff;
+      border-radius: 6px;
+      color: #1890ff;
+      font-size: 14px;
+      
+      strong {
+        color: #1890ff;
+      }
+    }
+  }
+  
+  .save-button {
+    min-width: 120px;
+    height: 40px;
+    font-weight: 500;
+  }
+  
+  .password-form {
+    .ant-form-item {
+      margin-bottom: 20px;
+    }
+  }
+  
+  // Mobile responsive
+  @media (max-width: 768px) {
+    .avatar-section {
+      margin-bottom: 24px;
+    }
+    
+    .profile-card, .password-card {
+      .ant-card-body {
+        padding: 16px;
+      }
+    }
+  }
+}
+
+// Dark mode support
+body.dark-mode .blogger-my-info-page {
+  .page-header h1 {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  
+  .profile-card, .password-card {
+    background: #1f1f1f;
+    border-color: #303030;
+    
+    .ant-card-body {
+      background: #1f1f1f;
+    }
+  }
+  
+  .avatar-section {
+    .user-avatar .ant-avatar {
+      border-color: #303030;
+    }
+    
+    .user-role {
+      background: rgba(23, 125, 220, 0.1);
+      color: #177ddc;
+      
+      strong {
+        color: #177ddc;
+      }
+    }
+  }
+  
+  .ant-form {
+    .ant-form-item-label > label {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .ant-input,
+    .ant-input-password {
+      background: #262626;
+      border-color: #434343;
+      color: rgba(255, 255, 255, 0.85);
+      
+      &:focus,
+      &:hover {
+        border-color: #177ddc;
+        background: #262626;
+      }
+      
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.45);
+      }
+    }
+    
+    .ant-input-prefix {
+      color: rgba(255, 255, 255, 0.45);
+    }
+  }
+  
+  .ant-upload {
+    .ant-btn {
+      background: #262626;
+      border-color: #434343;
+      color: rgba(255, 255, 255, 0.85);
+      
+      &:hover {
+        background: #303030;
+        border-color: #177ddc;
+        color: #177ddc;
+      }
+    }
+  }
+}
