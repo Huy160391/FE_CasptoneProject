@@ -552,22 +552,22 @@ const BlogPost = () => {
                     >
                       <Card className="recent-blog-card" bordered={false} size="small">
                         <div className="recent-blog-content" style={{ display: 'flex', gap: '12px' }}>
-                          <div 
-                            className="recent-blog-image" 
-                            style={{ 
-                              flexShrink: 0, 
-                              width: '80px', 
-                              height: '60px', 
-                              overflow: 'hidden', 
-                              borderRadius: '4px' 
+                          <div
+                            className="recent-blog-image"
+                            style={{
+                              flexShrink: 0,
+                              width: '80px',
+                              height: '60px',
+                              overflow: 'hidden',
+                              borderRadius: '4px'
                             }}
                           >
                             <img
                               src={blog.imageUrl && blog.imageUrl.length > 0 ? blog.imageUrl[0] : ''}
                               alt={blog.title}
-                              style={{ 
-                                width: '100%', 
-                                height: '100%', 
+                              style={{
+                                width: '100%',
+                                height: '100%',
                                 objectFit: 'cover',
                                 display: 'block',
                                 maxWidth: '100%',
@@ -576,9 +576,9 @@ const BlogPost = () => {
                             />
                           </div>
                           <div className="recent-blog-title" style={{ flex: 1 }}>
-                            <h5 style={{ 
-                              margin: 0, 
-                              fontSize: '14px', 
+                            <h5 style={{
+                              margin: 0,
+                              fontSize: '14px',
                               lineHeight: '1.4',
                               overflow: 'hidden',
                               display: '-webkit-box',
