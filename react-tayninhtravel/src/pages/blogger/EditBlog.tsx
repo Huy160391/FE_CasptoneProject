@@ -5,8 +5,6 @@ import {
     Button,
     Card,
     Upload,
-    Select,
-    Tag,
     Space,
     Divider,
     Row,
@@ -17,7 +15,6 @@ import {
     Skeleton
 } from 'antd';
 import {
-    PlusOutlined,
     UploadOutlined,
     SaveOutlined,
     EyeOutlined,
@@ -29,36 +26,10 @@ import { useTranslation } from 'react-i18next';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import type { UploadFile } from 'antd/es/upload/interface';
-import './CreateBlog.scss'; // Reuse the same styles
+import bloggerService, { type UpdateBlogPayload, type BlogPost } from '@/services/bloggerService';
+import './CreateBlog.scss';
 
-const { Option } = Select;
 const { Title } = Typography;
-const { TextArea } = Input;
-
-interface BlogFormData {
-    title: string;
-    excerpt: string;
-    content: string;
-    category: string;
-    tags: string[];
-    featuredImage: string;
-    status: 'draft' | 'published';
-}
-
-interface BlogPost {
-    id: string;
-    title: string;
-    excerpt: string;
-    content: string;
-    category: string;
-    tags: string[];
-    featuredImage: string;
-    status: 'draft' | 'published' | 'pending' | 'rejected';
-    views: number;
-    likes: number;
-    createdAt: string;
-    updatedAt: string;
-}
 
 const EditBlog: React.FC = () => {
     const navigate = useNavigate();
@@ -66,24 +37,12 @@ const EditBlog: React.FC = () => {
     const { t } = useTranslation();
     const [form] = Form.useForm();
     const [content, setContent] = useState('');
-    const [tags, setTags] = useState<string[]>([]);
-    const [inputTag, setInputTag] = useState('');
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewData, setPreviewData] = useState<any>(null);
     const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
-
-    const categories = [
-        'Du lịch',
-        'Văn hóa',
-        'Ẩm thực',
-        'Lễ hội',
-        'Kinh nghiệm',
-        'Khám phá',
-        'Tips'
-    ];
 
     const quillModules = {
         toolbar: [
@@ -105,87 +64,43 @@ const EditBlog: React.FC = () => {
         'align', 'link', 'image', 'video', 'blockquote', 'code-block'
     ];
 
-    // Load existing blog post data
     useEffect(() => {
         const loadBlogPost = async () => {
+            if (!id) {
+                message.error(t('blogger.editBlog.messages.invalidId'));
+                navigate('/blogger/my-blogs');
+                return;
+            }
+
             try {
                 setInitialLoading(true);
+                const post = await bloggerService.getBlogById(id);
+                setBlogPost(post);
 
-                // Simulate API call to fetch blog post
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // Mock data - in real app, this would come from API
-                const mockPost: BlogPost = {
-                    id: id || '1',
-                    title: 'Khám phá vẻ đẹp Tây Ninh - Hành trình khó quên',
-                    excerpt: 'Tây Ninh không chỉ nổi tiếng với Núi Bà Đen mà còn có nhiều điểm du lịch thú vị khác...',
-                    content: `<h2>Giới thiệu về Tây Ninh</h2>
-                    <p>Tây Ninh là một tỉnh ở miền Nam Việt Nam, nổi tiếng với <strong>Núi Bà Đen</strong> - ngọn núi cao nhất Nam Bộ và <em>Tòa Thánh Cao Đài</em> - trung tâm tôn giáo độc đáo.</p>
-                    
-                    <h3>Các điểm đến nổi tiếng</h3>
-                    <ul>
-                        <li>Núi Bà Đen với hệ thống cáp treo hiện đại</li>
-                        <li>Tòa Thánh Cao Đài với kiến trúc độc đáo</li>
-                        <li>Địa đạo Củ Chi với lịch sử hào hùng</li>
-                        <li>Hồ Dầu Tiếng thơ mộng</li>
-                    </ul>
-                    
-                    <blockquote>
-                        "Tây Ninh là vùng đất của những câu chuyện huyền thoại và vẻ đẹp thiên nhiên tuyệt vời."
-                    </blockquote>`,
-                    category: 'Du lịch',
-                    tags: ['Tây Ninh', 'Du lịch', 'Khám phá'],
-                    featuredImage: 'https://example.com/featured-image.jpg',
-                    status: 'published',
-                    views: 150,
-                    likes: 25,
-                    createdAt: '2024-01-15',
-                    updatedAt: '2024-01-16'
-                };
-
-                setBlogPost(mockPost);
-
-                // Set form data
                 form.setFieldsValue({
-                    title: mockPost.title,
-                    excerpt: mockPost.excerpt,
-                    category: mockPost.category,
-                });
+                    title: post.title
+                }); setContent(post.content || '');
 
-                setContent(mockPost.content);
-                setTags(mockPost.tags);
-
-                if (mockPost.featuredImage) {
+                // Load existing files nếu có
+                if (post.featuredImage) {
                     setFileList([{
                         uid: '-1',
-                        name: 'featured-image.jpg',
+                        name: 'existing-file',
                         status: 'done',
-                        url: mockPost.featuredImage,
+                        url: post.featuredImage
                     }]);
                 }
-
             } catch (error) {
+                console.error('Error loading blog post:', error);
                 message.error(t('blogger.editBlog.messages.loadError'));
+                navigate('/blogger/my-blogs');
             } finally {
                 setInitialLoading(false);
             }
         };
 
-        if (id) {
-            loadBlogPost();
-        }
-    }, [id, form, t]);
-
-    const handleAddTag = () => {
-        if (inputTag && !tags.includes(inputTag)) {
-            setTags([...tags, inputTag]);
-            setInputTag('');
-        }
-    };
-
-    const handleRemoveTag = (removedTag: string) => {
-        setTags(tags.filter(tag => tag !== removedTag));
-    };
+        loadBlogPost();
+    }, [id, form, t, navigate]);
 
     const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
         setFileList(fileList);
@@ -196,44 +111,61 @@ const EditBlog: React.FC = () => {
         setPreviewData({
             ...formData,
             content,
-            tags,
             featuredImage: fileList[0]?.url || fileList[0]?.thumbUrl || ''
         });
         setPreviewVisible(true);
     }; const handleSubmit = async (values: any) => {
-        try {
+        if (!content.trim()) {
+            message.error(t('blogger.createBlog.validation.contentRequired'));
+            return;
+        }
+
+        if (!id) {
+            message.error(t('blogger.editBlog.messages.invalidId'));
+            return;
+        } try {
             setLoading(true);
 
-            const blogData: BlogFormData = {
+            // Chuyển đổi UploadFile thành File (chỉ lấy file mới upload)
+            const files: File[] = fileList
+                .filter(file => file.originFileObj)
+                .map(file => file.originFileObj as File);
+
+            const blogData: UpdateBlogPayload = {
+                id: id,
                 title: values.title,
-                excerpt: values.excerpt,
                 content: content,
-                category: values.category,
-                tags: tags,
-                featuredImage: fileList[0]?.url || fileList[0]?.thumbUrl || '',
-                status: values.status
+                files: files.length > 0 ? files : undefined
             };
 
-            // Simulate API call with the blog data
-            console.log('Updating blog post:', blogData);
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            console.log('Updating blog with data:', blogData);
+
+            const result = await bloggerService.updateBlog(blogData);
+            console.log('Blog updated successfully:', result);
 
             message.success(t('blogger.editBlog.messages.success'));
             navigate('/blogger/my-blogs');
         } catch (error) {
-            message.error(t('blogger.editBlog.messages.error'));
+            console.error('Error updating blog:', error);
+
+            // Xử lý lỗi chi tiết hơn
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as any;
+                const errorMessage = axiosError.response?.data?.message ||
+                    axiosError.message ||
+                    t('blogger.editBlog.messages.updateError');
+                message.error(errorMessage);
+            } else {
+                message.error(t('blogger.editBlog.messages.updateError'));
+            }
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleSaveDraft = () => {
-        form.setFieldValue('status', 'draft');
+    }; const handleSaveDraft = () => {
         form.submit();
     };
 
     const handlePublish = () => {
-        form.setFieldValue('status', 'published');
         form.submit();
     };
 
@@ -249,12 +181,12 @@ const EditBlog: React.FC = () => {
                     </Space>
                 </div>
                 <Row gutter={[24, 24]}>
-                    <Col xs={24} lg={18}>
+                    <Col xs={24} lg={20}>
                         <Card>
                             <Skeleton active paragraph={{ rows: 8 }} />
                         </Card>
                     </Col>
-                    <Col xs={24} lg={6}>
+                    <Col xs={24} lg={4}>
                         <Card>
                             <Skeleton active paragraph={{ rows: 3 }} />
                         </Card>
@@ -323,171 +255,63 @@ const EditBlog: React.FC = () => {
             </div>
 
             <Row gutter={[24, 24]}>
-                <Col xs={24} lg={18}>
-                    <Card className="main-form-card">
-                        <Form
-                            form={form}
-                            layout="vertical"
-                            onFinish={handleSubmit}
-                            initialValues={{
-                                status: blogPost.status
-                            }}
+                <Col xs={24} lg={20}>
+                    <Card className="main-form-card">                        <Form
+                        form={form}
+                        layout="vertical"
+                        onFinish={handleSubmit}
+                    >
+                        <Form.Item
+                            name="title"
+                            label={t('blogger.createBlog.form.title')}
+                            rules={[
+                                { required: true, message: t('blogger.createBlog.validation.titleRequired') },
+                                { max: 200, message: t('blogger.createBlog.validation.titleMaxLength') }
+                            ]}
                         >
-                            <Form.Item
-                                name="title"
-                                label={t('blogger.createBlog.form.title')}
-                                rules={[
-                                    { required: true, message: t('blogger.createBlog.validation.titleRequired') },
-                                    { max: 200, message: t('blogger.createBlog.validation.titleMaxLength') }
-                                ]}
-                            >
-                                <Input
-                                    placeholder={t('blogger.createBlog.form.titlePlaceholder')}
-                                    size="large"
+                            <Input
+                                placeholder={t('blogger.createBlog.form.titlePlaceholder')}
+                                size="large"
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label={t('blogger.createBlog.form.content')}
+                            required
+                        >
+                            <div className="quill-wrapper">
+                                <ReactQuill
+                                    value={content}
+                                    onChange={setContent}
+                                    modules={quillModules}
+                                    formats={quillFormats}
+                                    placeholder={t('blogger.createBlog.form.contentPlaceholder')}
+                                    style={{ height: '400px', marginBottom: '50px' }}
                                 />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="excerpt"
-                                label={t('blogger.createBlog.form.excerpt')}
-                                rules={[
-                                    { required: true, message: t('blogger.createBlog.validation.excerptRequired') },
-                                    { max: 500, message: t('blogger.createBlog.validation.excerptMaxLength') }
-                                ]}
-                            >
-                                <TextArea
-                                    rows={3}
-                                    placeholder={t('blogger.createBlog.form.excerptPlaceholder')}
-                                    showCount
-                                    maxLength={500}
-                                />
-                            </Form.Item>
-
-                            <Form.Item
-                                label={t('blogger.createBlog.form.content')}
-                                required
-                            >
-                                <div className="quill-wrapper">
-                                    <ReactQuill
-                                        value={content}
-                                        onChange={setContent}
-                                        modules={quillModules}
-                                        formats={quillFormats}
-                                        placeholder={t('blogger.createBlog.form.contentPlaceholder')}
-                                        style={{ height: '400px', marginBottom: '50px' }}
-                                    />
-                                </div>
-                            </Form.Item>
-
-                            <Form.Item name="status" style={{ display: 'none' }}>
-                                <Input />
-                            </Form.Item>
-                        </Form>
+                            </div>                            </Form.Item>
+                    </Form>
                     </Card>
-                </Col>
-
-                <Col xs={24} lg={6}>
-                    <Space direction="vertical" style={{ width: '100%' }} size="large">
-                        <Card title={t('blogger.createBlog.sidebar.featured')} size="small">
-                            <Upload
-                                listType="picture-card"
-                                fileList={fileList}
-                                onChange={handleUploadChange}
-                                beforeUpload={() => false}
-                                maxCount={1}
-                            >
-                                {fileList.length === 0 && (
-                                    <div>
-                                        <UploadOutlined />
-                                        <div style={{ marginTop: 8 }}>
-                                            {t('blogger.createBlog.sidebar.uploadImage')}
-                                        </div>
-                                    </div>
-                                )}
-                            </Upload>
-                        </Card>
-
-                        <Card title={t('blogger.createBlog.sidebar.category')} size="small">
-                            <Form.Item
-                                name="category"
-                                rules={[
-                                    { required: true, message: t('blogger.createBlog.validation.categoryRequired') }
-                                ]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <Select
-                                    placeholder={t('blogger.createBlog.sidebar.selectCategory')}
-                                    style={{ width: '100%' }}
-                                >
-                                    {categories.map(category => (
-                                        <Option key={category} value={category}>
-                                            {category}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Card>
-
-                        <Card title={t('blogger.createBlog.sidebar.tags')} size="small">
-                            <Space direction="vertical" style={{ width: '100%' }}>
-                                <Space.Compact style={{ width: '100%' }}>
-                                    <Input
-                                        placeholder={t('blogger.createBlog.sidebar.addTag')}
-                                        value={inputTag}
-                                        onChange={(e) => setInputTag(e.target.value)}
-                                        onPressEnter={handleAddTag}
-                                    />
-                                    <Button
-                                        type="primary"
-                                        icon={<PlusOutlined />}
-                                        onClick={handleAddTag}
-                                    />
-                                </Space.Compact>
-
-                                <div className="tags-container">
-                                    {tags.map(tag => (
-                                        <Tag
-                                            key={tag}
-                                            closable
-                                            onClose={() => handleRemoveTag(tag)}
-                                        >
-                                            {tag}
-                                        </Tag>
-                                    ))}
+                </Col>                <Col xs={24} lg={4}>
+                    <Card title={t('blogger.createBlog.sidebar.files')} size="small">
+                        <Upload
+                            listType="picture-card"
+                            fileList={fileList}
+                            onChange={handleUploadChange}
+                            beforeUpload={() => false}
+                            multiple={true}
+                            accept="image/*,.pdf,.doc,.docx"
+                        >
+                            <div>
+                                <UploadOutlined />
+                                <div style={{ marginTop: 8 }}>
+                                    {t('blogger.createBlog.sidebar.uploadFiles')}
                                 </div>
-                            </Space>
-                        </Card>
-
-                        {/* Blog Status Info */}
-                        <Card title={t('blogger.editBlog.status')} size="small">
-                            <Space direction="vertical" style={{ width: '100%' }}>
-                                <div>
-                                    <strong>{t('blogger.editBlog.currentStatus')}:</strong>{' '}
-                                    <Tag color={
-                                        blogPost.status === 'published' ? 'green' :
-                                            blogPost.status === 'draft' ? 'orange' :
-                                                blogPost.status === 'pending' ? 'blue' : 'red'
-                                    }>
-                                        {blogPost.status.toUpperCase()}
-                                    </Tag>
-                                </div>
-                                <div>
-                                    <strong>{t('blogger.editBlog.views')}:</strong> {blogPost.views}
-                                </div>
-                                <div>
-                                    <strong>{t('blogger.editBlog.likes')}:</strong> {blogPost.likes}
-                                </div>
-                                <div>
-                                    <strong>{t('blogger.editBlog.lastUpdated')}:</strong><br />
-                                    {new Date(blogPost.updatedAt).toLocaleString()}
-                                </div>
-                            </Space>
-                        </Card>
-                    </Space>
+                            </div>
+                        </Upload>
+                    </Card>
                 </Col>
             </Row>
 
-            {/* Preview Modal */}
             <Modal
                 title={t('blogger.createBlog.preview')}
                 open={previewVisible}
@@ -503,16 +327,10 @@ const EditBlog: React.FC = () => {
                                 src={previewData.featuredImage}
                                 alt={previewData.title}
                                 className="preview-image"
+                                style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', marginBottom: '20px' }}
                             />
                         )}
                         <Title level={2}>{previewData.title}</Title>
-                        <p className="preview-excerpt">{previewData.excerpt}</p>
-                        <div className="preview-meta">
-                            <Tag color="blue">{previewData.category}</Tag>
-                            {previewData.tags?.map((tag: string) => (
-                                <Tag key={tag}>{tag}</Tag>
-                            ))}
-                        </div>
                         <Divider />
                         <div
                             className="preview-content"

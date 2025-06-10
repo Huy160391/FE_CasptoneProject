@@ -25,16 +25,10 @@ import { useTranslation } from 'react-i18next';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import type { UploadFile } from 'antd/es/upload/interface';
+import bloggerService, { type CreateBlogPayload } from '@/services/bloggerService';
 import './CreateBlog.scss';
 
 const { Title } = Typography;
-
-interface BlogFormData {
-    title: string;
-    content: string;
-    featuredImage: string;
-    status: 'draft' | 'published';
-}
 
 const CreateBlog: React.FC = () => {
     const navigate = useNavigate();
@@ -43,9 +37,8 @@ const CreateBlog: React.FC = () => {
     const [content, setContent] = useState('');
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [loading, setLoading] = useState(false);
-    const [previewVisible, setPreviewVisible] = useState(false); const [previewData, setPreviewData] = useState<any>(null);
-
-    const quillModules = {
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const [previewData, setPreviewData] = useState<any>(null); const quillModules = {
         toolbar: [
             [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
             ['bold', 'italic', 'underline', 'strike'],
@@ -62,7 +55,8 @@ const CreateBlog: React.FC = () => {
     const quillFormats = [
         'header', 'bold', 'italic', 'underline', 'strike',
         'color', 'background', 'list', 'bullet', 'indent',
-        'align', 'link', 'image', 'video', 'blockquote', 'code-block'];
+        'align', 'link', 'image', 'video', 'blockquote', 'code-block'
+    ];
 
     const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
         setFileList(fileList);
@@ -74,39 +68,66 @@ const CreateBlog: React.FC = () => {
             featuredImage: fileList[0]?.url || fileList[0]?.thumbUrl || ''
         });
         setPreviewVisible(true);
-    };
+    }; const handleSubmit = async (values: any) => {
+        if (!content.trim()) {
+            message.error(t('blogger.createBlog.validation.contentRequired'));
+            return;
+        }
 
-    const handleSubmit = async (values: any) => {
         try {
             setLoading(true);
 
-            const blogData: BlogFormData = {
+            // Chuyển đổi UploadFile thành File
+            const files: File[] = fileList
+                .filter(file => file.originFileObj)
+                .map(file => file.originFileObj as File);
+
+            const blogData: CreateBlogPayload = {
                 title: values.title,
                 content: content,
-                featuredImage: fileList[0]?.url || fileList[0]?.thumbUrl || '',
-                status: values.status
+                files: files.length > 0 ? files : undefined
             };
 
-            // Simulate API call - in real app, this would send blogData to the server
-            console.log('Creating blog:', blogData);
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            console.log('Creating blog with data:', blogData);
+
+            const result = await bloggerService.createBlog(blogData);
+            console.log('Blog created successfully:', result);
 
             message.success(t('blogger.createBlog.messages.success'));
             navigate('/blogger/my-blogs');
         } catch (error) {
-            message.error(t('blogger.createBlog.messages.error'));
+            console.error('Error creating blog:', error);
+
+            // Xử lý lỗi chi tiết hơn
+            let errorMessage = t('blogger.createBlog.messages.error');
+
+            if (error instanceof Error) {
+                // Lỗi từ service hoặc validation
+                errorMessage = error.message;
+
+                // Nếu message có thông báo thành công nhưng format không đúng
+                if (errorMessage.includes('successfully but response format is unexpected')) {
+                    message.success('Blog đã được tạo thành công!');
+                    navigate('/blogger/my-blogs');
+                    return;
+                }
+            } else if (error && typeof error === 'object' && 'response' in error) {
+                // Lỗi từ axios
+                const axiosError = error as any;
+                errorMessage = axiosError.response?.data?.message ||
+                    axiosError.message ||
+                    t('blogger.createBlog.messages.error');
+            }
+
+            message.error(errorMessage);
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleSaveDraft = () => {
-        form.setFieldValue('status', 'draft');
+    }; const handleSaveDraft = () => {
         form.submit();
     };
 
     const handlePublish = () => {
-        form.setFieldValue('status', 'published');
         form.submit();
     };
 
@@ -155,74 +176,61 @@ const CreateBlog: React.FC = () => {
 
             <Row gutter={[24, 24]}>
                 <Col xs={24} lg={20}>
-                    <Card className="main-form-card">
-                        <Form
-                            form={form}
-                            layout="vertical"
-                            onFinish={handleSubmit}
-                            initialValues={{
-                                status: 'draft'
-                            }}
+                    <Card className="main-form-card">                        <Form
+                        form={form}
+                        layout="vertical"
+                        onFinish={handleSubmit}
+                    >
+                        <Form.Item
+                            name="title"
+                            label={t('blogger.createBlog.form.title')}
+                            rules={[
+                                { required: true, message: t('blogger.createBlog.validation.titleRequired') },
+                                { max: 200, message: t('blogger.createBlog.validation.titleMaxLength') }
+                            ]}
                         >
-                            <Form.Item
-                                name="title"
-                                label={t('blogger.createBlog.form.title')}
-                                rules={[
-                                    { required: true, message: t('blogger.createBlog.validation.titleRequired') },
-                                    { max: 200, message: t('blogger.createBlog.validation.titleMaxLength') }
-                                ]}
-                            >
-                                <Input
-                                    placeholder={t('blogger.createBlog.form.titlePlaceholder')}
-                                    size="large"
-                                />                            </Form.Item>
+                            <Input
+                                placeholder={t('blogger.createBlog.form.titlePlaceholder')}
+                                size="large"
+                            />
+                        </Form.Item>
 
-                            <Form.Item
-                                label={t('blogger.createBlog.form.content')}
-                                required
-                            >
-                                <div className="quill-wrapper">
-                                    <ReactQuill
-                                        value={content}
-                                        onChange={setContent}
-                                        modules={quillModules}
-                                        formats={quillFormats}
-                                        placeholder={t('blogger.createBlog.form.contentPlaceholder')}
-                                        style={{ height: '400px', marginBottom: '50px' }}
-                                    />
-                                </div>
-                            </Form.Item>
-
-                            <Form.Item name="status" style={{ display: 'none' }}>
-                                <Input />
-                            </Form.Item>
-                        </Form>
+                        <Form.Item
+                            label={t('blogger.createBlog.form.content')}
+                            required
+                        >
+                            <div className="quill-wrapper">
+                                <ReactQuill
+                                    value={content}
+                                    onChange={setContent}
+                                    modules={quillModules}
+                                    formats={quillFormats}
+                                    placeholder={t('blogger.createBlog.form.contentPlaceholder')}
+                                    style={{ height: '400px', marginBottom: '50px' }}
+                                />
+                            </div>                        </Form.Item>
+                    </Form>
                     </Card>
-                </Col>
-
-                <Col xs={24} lg={4}>
-                    <Card title={t('blogger.createBlog.sidebar.featured')} size="small">
+                </Col>                <Col xs={24} lg={4}>
+                    <Card title={t('blogger.createBlog.sidebar.files')} size="small">
                         <Upload
                             listType="picture-card"
                             fileList={fileList}
                             onChange={handleUploadChange}
                             beforeUpload={() => false}
-                            maxCount={1}
+                            multiple={true}
+                            accept="image/*,.pdf,.doc,.docx"
                         >
-                            {fileList.length === 0 && (
-                                <div>
-                                    <UploadOutlined />
-                                    <div style={{ marginTop: 8 }}>
-                                        {t('blogger.createBlog.sidebar.uploadImage')}
-                                    </div>
+                            <div>
+                                <UploadOutlined />
+                                <div style={{ marginTop: 8 }}>
+                                    {t('blogger.createBlog.sidebar.uploadFiles')}
                                 </div>
-                            )}
+                            </div>
                         </Upload>
                     </Card>
                 </Col>
-            </Row>
-
-            {/* Preview Modal */}
+            </Row>            {/* Preview Modal */}
             <Modal
                 title={t('blogger.createBlog.preview')}
                 open={previewVisible}
@@ -238,7 +246,9 @@ const CreateBlog: React.FC = () => {
                                 src={previewData.featuredImage}
                                 alt={previewData.title}
                                 className="preview-image"
-                            />)}
+                                style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', marginBottom: '20px' }}
+                            />
+                        )}
                         <Title level={2}>{previewData.title}</Title>
                         <Divider />
                         <div

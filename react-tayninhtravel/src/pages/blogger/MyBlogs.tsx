@@ -7,7 +7,9 @@ import {
     Tag,
     message,
     Popconfirm,
-    Card
+    Card,
+    Spin,
+    Empty
 } from 'antd';
 import {
     SearchOutlined,
@@ -20,99 +22,109 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ColumnsType } from 'antd/es/table';
+import bloggerService, { type BlogPost, type GetBlogsParams } from '@/services/bloggerService';
 import './MyBlogs.scss';
-
-interface BlogPost {
-    id: string;
-    title: string;
-    excerpt: string;
-    status: 'published' | 'draft' | 'pending' | 'rejected';
-    views: number;
-    likes: number;
-    createdAt: string;
-    updatedAt: string;
-    featuredImage?: string;
-}
 
 const MyBlogs = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const [searchText, setSearchText] = useState('');
     const [posts, setPosts] = useState<BlogPost[]>([]);
-
-    // Mock data for demonstration
-    useEffect(() => {
-        const mockPosts: BlogPost[] = [
-            {
-                id: '1',
-                title: 'Khám phá vẻ đẹp Tây Ninh - Hành trình khó quên',
-                excerpt: 'Tây Ninh không chỉ nổi tiếng với Núi Bà Đen mà còn có nhiều điểm du lịch thú vị khác...',
-                status: 'published',
-                views: 150,
-                likes: 25,
-                createdAt: '2024-01-15',
-                updatedAt: '2024-01-16',
-                featuredImage: 'https://example.com/image1.jpg'
-            },
-            {
-                id: '2',
-                title: 'Hướng dẫn du lịch Núi Bà Đen chi tiết',
-                excerpt: 'Núi Bà Đen là điểm du lịch tâm linh nổi tiếng nhất của Tây Ninh...',
-                status: 'draft',
-                views: 0,
-                likes: 0,
-                createdAt: '2024-01-10',
-                updatedAt: '2024-01-12',
-            },
-            {
-                id: '3',
-                title: 'Ẩm thực đặc sản Tây Ninh không thể bỏ qua',
-                excerpt: 'Tây Ninh có rất nhiều món ăn đặc sản độc đáo mà du khách nên thử...',
-                status: 'pending',
-                views: 75,
-                likes: 12,
-                createdAt: '2024-01-08',
-                updatedAt: '2024-01-09',
-            },
-            {
-                id: '4',
-                title: 'Lịch sử và văn hóa Cao Đài',
-                excerpt: 'Tìm hiểu về tôn giáo Cao Đài và thánh địa Tây Ninh...',
-                status: 'rejected',
-                views: 20,
-                likes: 2,
-                createdAt: '2024-01-05',
-                updatedAt: '2024-01-06',
-            }
-        ];
-        setPosts(mockPosts);
-    }, []);
-
-    const getStatusTag = (status: string) => {
-        const statusConfig = {
-            published: { color: 'green', text: t('blogger.myBlogs.status.published') },
-            draft: { color: 'orange', text: t('blogger.myBlogs.status.draft') },
-            pending: { color: 'blue', text: t('blogger.myBlogs.status.pending') },
-            rejected: { color: 'red', text: t('blogger.myBlogs.status.rejected') }
-        };
-        const config = statusConfig[status as keyof typeof statusConfig];
-        return <Tag color={config.color}>{config.text}</Tag>;
-    };
-
-    const handleDelete = async (id: string) => {
+    const [loading, setLoading] = useState(false);
+    const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);    // Fetch blogs from API
+    const fetchBlogs = async (params?: Partial<GetBlogsParams>) => {
         try {
-            // API call would go here
-            setPosts(posts.filter(post => post.id !== id));
-            message.success(t('blogger.myBlogs.messages.deleteSuccess'));
+            setLoading(true);
+            console.log('Fetching blogs with params:', {
+                pageIndex: currentPage,
+                pageSize,
+                textSearch: searchText,
+                status: true,
+                ...params
+            });
+
+            const response = await bloggerService.getMyBlogs({
+                pageIndex: currentPage,
+                pageSize,
+                textSearch: searchText,
+                status: true,
+                ...params
+            });
+
+            console.log('Blogs response:', response);
+
+            // Kiểm tra an toàn cho response
+            if (response && Array.isArray(response.blogs)) {
+                setPosts(response.blogs);
+                setTotalCount(response.totalCount || 0);
+            } else {
+                console.warn('Invalid response format:', response);
+                setPosts([]);
+                setTotalCount(0);
+            }
         } catch (error) {
-            message.error(t('blogger.myBlogs.messages.deleteError'));
+            console.error('Error fetching blogs:', error);
+
+            // Reset state khi có lỗi
+            setPosts([]);
+            setTotalCount(0);
+
+            // Hiển thị thông báo lỗi chi tiết hơn
+            let errorMessage = t('blogger.myBlogs.messages.fetchError') || 'Failed to fetch blogs';
+
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            } else if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as any;
+                errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
+            }
+
+            message.error(errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const filteredPosts = posts.filter(post =>
-        post.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchText.toLowerCase())
-    ); const columns: ColumnsType<BlogPost> = [{
+    // Initial load
+    useEffect(() => {
+        fetchBlogs();
+    }, [currentPage, pageSize]);
+
+    // Search with debounce
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (searchText !== '') {
+                setCurrentPage(1); // Reset to first page when searching
+                fetchBlogs({ textSearch: searchText, pageIndex: 1 });
+            } else {
+                fetchBlogs({ textSearch: '', pageIndex: currentPage });
+            }
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchText]); const getStatusTag = (status: number) => {
+        const statusConfig = {
+            0: { color: 'blue', text: t('blogger.myBlogs.status.pending') },
+            1: { color: 'green', text: t('blogger.myBlogs.status.accepted') },
+            2: { color: 'red', text: t('blogger.myBlogs.status.rejected') }
+        };
+        const config = statusConfig[status as keyof typeof statusConfig];
+        return <Tag color={config.color}>{config.text}</Tag>;
+    }; const handleDelete = async (id: string) => {
+        try {
+            await bloggerService.deleteBlog(id);
+            message.success(t('blogger.myBlogs.messages.deleteSuccess') || 'Blog deleted successfully');
+            // Refresh the list
+            fetchBlogs();
+        } catch (error) {
+            console.error('Error deleting blog:', error);
+            message.error(t('blogger.myBlogs.messages.deleteError') || 'Failed to delete blog');
+        }
+    };
+
+    const columns: ColumnsType<BlogPost> = [{
         title: t('blogger.myBlogs.table.title'),
         dataIndex: 'title',
         key: 'title',
@@ -128,29 +140,32 @@ const MyBlogs = () => {
         title: t('blogger.myBlogs.table.status'),
         dataIndex: 'status',
         key: 'status',
-        width: 110,
-        render: (status: string) => getStatusTag(status),
+        width: 110, render: (status: number) => getStatusTag(status),
         filters: [
-            { text: t('blogger.myBlogs.status.published'), value: 'published' },
-            { text: t('blogger.myBlogs.status.draft'), value: 'draft' },
-            { text: t('blogger.myBlogs.status.pending'), value: 'pending' },
-            { text: t('blogger.myBlogs.status.rejected'), value: 'rejected' },
-        ],
-        onFilter: (value, record) => record.status === value,
-    },
-    {
-        title: t('blogger.myBlogs.table.views'),
-        dataIndex: 'views',
-        key: 'views',
-        width: 90,
-        sorter: (a, b) => a.views - b.views,
-    },
-    {
+            { text: t('blogger.myBlogs.status.pending'), value: 0 },
+            { text: t('blogger.myBlogs.status.accepted'), value: 1 },
+            { text: t('blogger.myBlogs.status.rejected'), value: 2 },
+        ], onFilter: (value, record) => record.status === value,
+    }, {
         title: t('blogger.myBlogs.table.likes'),
         dataIndex: 'likes',
         key: 'likes',
-        width: 90,
-        sorter: (a, b) => a.likes - b.likes,
+        width: 100,
+        align: 'center' as const,
+        render: (likes: number) => (
+            <span className="likes-count">{likes || 0}</span>
+        ),
+        sorter: (a, b) => (a.likes || 0) - (b.likes || 0),
+    },
+    {
+        title: t('blogger.myBlogs.table.comments'),
+        dataIndex: 'comments',
+        key: 'comments', width: 100,
+        align: 'center' as const,
+        render: (comments: number) => (
+            <span className="comments-count">{comments || 0}</span>
+        ),
+        sorter: (a, b) => (a.comments || 0) - (b.comments || 0),
     },
     {
         title: t('blogger.myBlogs.table.updatedAt'),
@@ -174,13 +189,16 @@ const MyBlogs = () => {
                     title={t('common.edit')}
                     className="action-btn edit-btn"
                 />
-                <Button
-                    size="small"
-                    icon={<EyeOutlined />}
-                    onClick={() => navigate(`/blog/post/${record.id}`)}
-                    title={t('common.view')}
-                    className="action-btn view-btn"
-                />
+                {/* Only show view button for accepted posts (status === 1) */}
+                {record.status === 1 && (
+                    <Button
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() => navigate(`/blog/post/${record.id}`)}
+                        title={t('common.view')}
+                        className="action-btn view-btn"
+                    />
+                )}
                 <Popconfirm
                     title={t('blogger.myBlogs.confirmDelete')}
                     description={t('blogger.myBlogs.confirmDeleteDesc')}
@@ -198,8 +216,27 @@ const MyBlogs = () => {
                 </Popconfirm>
             </Space>
         ),
-    },
-    ];
+    },];
+
+    // Custom empty state component
+    const EmptyState = () => (
+        <Empty
+            image={<FileTextOutlined style={{ fontSize: 64, color: '#d9d9d9' }} />}
+            description={
+                <span style={{ color: '#999' }}>
+                    {t('blogger.myBlogs.noData')}
+                </span>
+            }
+        >
+            <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => navigate('/blogger/create-blog')}
+            >
+                {t('blogger.myBlogs.createNew')}
+            </Button>
+        </Empty>
+    );
 
     return (
         <div className="my-blogs-page">
@@ -228,19 +265,29 @@ const MyBlogs = () => {
                         allowClear
                     />
                 </div>                <Table
-                    dataSource={filteredPosts}
+                    dataSource={posts}
                     columns={columns}
                     rowKey="id"
+                    loading={loading}
                     scroll={{ x: 'max-content' }}
                     pagination={{
-                        pageSize: 10,
+                        current: currentPage,
+                        pageSize: pageSize,
+                        total: totalCount,
                         showSizeChanger: true,
                         showQuickJumper: true,
+                        pageSizeOptions: ['10', '20', '50'],
                         showTotal: (total, range) =>
-                            `${range[0]}-${range[1]} ${t('common.of')} ${total} ${t('common.items')}`
-                    }}
-                    locale={{
-                        emptyText: t('blogger.myBlogs.noData')
+                            `${range[0]}-${range[1]} ${t('common.of')} ${total} ${t('common.items')}`,
+                        onChange: (page, size) => {
+                            setCurrentPage(page);
+                            if (size !== pageSize) {
+                                setPageSize(size);
+                                setCurrentPage(1); // Reset to first page when changing page size
+                            }
+                        }
+                    }} locale={{
+                        emptyText: loading ? <Spin /> : <EmptyState />
                     }}
                 />
             </Card>
