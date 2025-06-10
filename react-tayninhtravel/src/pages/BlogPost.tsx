@@ -434,9 +434,7 @@ const BlogPost = () => {
                             icon={<RollbackOutlined />}
                             className="reply-button"
                             title="Trả lời"
-                          />
-
-                          {/* Reply form for the comment */}
+                          />                          {/* Reply form for the comment */}
                           {replyingTo === comment.id && (
                             <div className="reply-form">
                               <TextArea
@@ -444,6 +442,7 @@ const BlogPost = () => {
                                 value={replyContent}
                                 onChange={(e) => setReplyContent(e.target.value)}
                                 placeholder="Nhập phản hồi của bạn tại đây..."
+                                className="reply-textarea"
                               />
                               <div className="reply-form-actions">
                                 <Button
@@ -544,9 +543,7 @@ const BlogPost = () => {
               <div className="sidebar-section">
                 <Title level={4} className="section-title">
                   Bài viết gần đây
-                </Title>
-
-                <div className="recent-blogs-list">
+                </Title>                <div className="recent-blogs-list">
                   {recentBlogs.map((blog) => (
                     <Link
                       to={`/blog/post/${blog.id}`}
@@ -554,15 +551,40 @@ const BlogPost = () => {
                       className="recent-blog-link"
                     >
                       <Card className="recent-blog-card" bordered={false} size="small">
-                        <div className="recent-blog-content">
-                          <div className="recent-blog-image">
+                        <div className="recent-blog-content" style={{ display: 'flex', gap: '12px' }}>
+                          <div
+                            className="recent-blog-image"
+                            style={{
+                              flexShrink: 0,
+                              width: '80px',
+                              height: '60px',
+                              overflow: 'hidden',
+                              borderRadius: '4px'
+                            }}
+                          >
                             <img
                               src={blog.imageUrl && blog.imageUrl.length > 0 ? blog.imageUrl[0] : ''}
                               alt={blog.title}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block',
+                                maxWidth: '100%',
+                                maxHeight: '100%'
+                              }}
                             />
                           </div>
-                          <div className="recent-blog-title">
-                            <h5>{blog.title}</h5>
+                          <div className="recent-blog-title" style={{ flex: 1 }}>
+                            <h5 style={{
+                              margin: 0,
+                              fontSize: '14px',
+                              lineHeight: '1.4',
+                              overflow: 'hidden',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical'
+                            }}>{blog.title}</h5>
                           </div>
                         </div>
                       </Card>
