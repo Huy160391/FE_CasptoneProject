@@ -71,8 +71,7 @@ const AdminSidebar = () => {
       key: '/admin/reviews',
       icon: <CommentOutlined />,
       label: <Link to="/admin/reviews">{t('admin.sidebar.reviews')}</Link>,
-    },
-    {
+    }, {
       key: '/admin/blogs',
       icon: <ReadOutlined />,
       label: <Link to="/admin/blogs">{t('admin.sidebar.blogs')}</Link>,

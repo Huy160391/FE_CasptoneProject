@@ -634,25 +634,27 @@
             "createNew": "Tạo bài viết mới",
             "stats": {
                 "totalPosts": "Tổng bài viết",
-                "publishedPosts": "Đã xuất bản",
-                "totalViews": "Tổng lượt xem",
+                "acceptedPosts": "Đã được duyệt",
+                "pendingPosts": "Chờ duyệt",
+                "rejectedPosts": "Bị từ chối",
+                "totalComments": "Tổng bình luận",
                 "totalLikes": "Tổng lượt thích"
             },
             "recentPosts": "Bài viết gần đây",
             "table": {
                 "title": "Tiêu đề",
                 "status": "Trạng thái",
-                "views": "Lượt xem",
-                "likes": "Thích",
+                "comments": "Bình luận",
+                "likes": "Lượt thích",
                 "createdAt": "Ngày tạo",
                 "actions": "Thao tác"
             },
             "status": {
-                "published": "Đã xuất bản",
-                "draft": "Bản nháp",
                 "pending": "Chờ duyệt",
+                "accepted": "Đã được duyệt",
                 "rejected": "Bị từ chối"
-            }
+            },
+            "fetchError": "Không thể tải dữ liệu bảng điều khiển"
         },
         "myBlogs": {
             "title": "Bài viết của tôi",
@@ -661,15 +663,14 @@
             "table": {
                 "title": "Tiêu đề",
                 "status": "Trạng thái",
-                "views": "Lượt xem",
-                "likes": "Thích",
+                "likes": "Lượt thích",
+                "comments": "Bình luận",
                 "updatedAt": "Ngày cập nhật",
                 "actions": "Thao tác"
             },
             "status": {
-                "published": "Đã xuất bản",
-                "draft": "Bản nháp",
                 "pending": "Chờ duyệt",
+                "accepted": "Đã được duyệt",
                 "rejected": "Bị từ chối"
             },
             "noData": "Chưa có bài viết nào",
@@ -677,7 +678,8 @@
             "confirmDeleteDesc": "Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.",
             "messages": {
                 "deleteSuccess": "Xóa bài viết thành công",
-                "deleteError": "Không thể xóa bài viết"
+                "deleteError": "Không thể xóa bài viết",
+                "fetchError": "Không thể tải danh sách bài viết"
             }
         },
         "createBlog": {
@@ -691,11 +693,17 @@
                 "excerpt": "Tóm tắt",
                 "excerptPlaceholder": "Nhập tóm tắt ngắn về bài viết...",
                 "content": "Nội dung",
-                "contentPlaceholder": "Viết nội dung bài viết của bạn..."
+                "contentPlaceholder": "Viết nội dung bài viết của bạn...",
+                "category": "Danh mục",
+                "categoryPlaceholder": "Chọn danh mục",
+                "tags": "Thẻ",
+                "tagsPlaceholder": "Nhập thẻ và nhấn Enter để thêm..."
             },
             "sidebar": {
                 "featured": "Ảnh đại diện",
                 "uploadImage": "Tải ảnh lên",
+                "uploadFiles": "Tải tệp lên",
+                "files": "Tệp",
                 "category": "Danh mục",
                 "selectCategory": "Chọn danh mục",
                 "tags": "Thẻ",
@@ -706,7 +714,8 @@
                 "titleMaxLength": "Tiêu đề không được vượt quá 200 ký tự",
                 "excerptRequired": "Vui lòng nhập tóm tắt",
                 "excerptMaxLength": "Tóm tắt không được vượt quá 500 ký tự",
-                "categoryRequired": "Vui lòng chọn danh mục"
+                "categoryRequired": "Vui lòng chọn danh mục",
+                "contentRequired": "Vui lòng nhập nội dung"
             },
             "messages": {
                 "success": "Tạo bài viết thành công",
@@ -718,13 +727,14 @@
             "notFound": "Không tìm thấy bài viết",
             "status": "Thông tin bài viết",
             "currentStatus": "Trạng thái hiện tại",
-            "views": "Lượt xem",
+            "comments": "Bình luận",
             "likes": "Lượt thích",
             "lastUpdated": "Cập nhật lần cuối",
             "messages": {
                 "success": "Cập nhật bài viết thành công",
                 "error": "Không thể cập nhật bài viết",
-                "loadError": "Không thể tải bài viết"
+                "loadError": "Không thể tải bài viết",
+                "invalidId": "ID bài viết không hợp lệ"
             }
         },
         "myInfo": {

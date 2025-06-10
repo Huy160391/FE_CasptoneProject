@@ -4,6 +4,7 @@ import { API_BASE_URL } from './constants';
 // Tạo instance axios với cấu hình mặc định
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
+    timeout: 60000, // 30 giây
     headers: {
         'Content-Type': 'application/json',
         'accept': 'text/plain',
@@ -31,7 +32,12 @@ axiosInstance.interceptors.response.use(
         return response;
     },
     (error) => {
-        if (error.response) {
+        if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+            // Xử lý lỗi timeout
+            console.error('Yêu cầu đã hết thời gian chờ. Vui lòng thử lại sau.');
+            // Hiển thị thông báo cho người dùng
+            // Có thể sử dụng notification của Ant Design hoặc toast từ thư viện khác
+        } else if (error.response) {
             // Xử lý các lỗi từ server
             switch (error.response.status) {
                 case 401:

@@ -10,8 +10,10 @@ import {
   ArrowLeftOutlined,
   CommentOutlined,
   SendOutlined,
-  MessageOutlined,
-  CloseOutlined
+  CloseOutlined,
+  RollbackOutlined,
+  HeartOutlined,
+  HeartFilled
 } from '@ant-design/icons'
 import { publicService, type Blog } from '@/services/publicService'
 import { userService, type Comment } from '@/services/userService'
@@ -41,6 +43,7 @@ const BlogPost = () => {
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
   const [currentImageIndex, setCurrentImageIndex] = useState(0) // Bắt đầu với ảnh đầu tiên (index 0)
+  const [isFavorite, setIsFavorite] = useState(false)
   const commentListRef = useRef<HTMLDivElement>(null)
   // Hàm xử lý chuyển ảnh trước đó
   const handlePrevImage = () => {
@@ -126,6 +129,28 @@ const BlogPost = () => {
 
   const handleGoBack = () => {
     navigate(-1)
+  }
+
+  const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      handleLoginModalOpen()
+      return
+    }
+
+    if (!id) return
+
+    try {
+      // If already favorite, send dislike (0), otherwise send like (1)
+      const reaction = isFavorite ? 0 : 1
+
+      await userService.toggleBlogReaction(id, reaction)
+
+      setIsFavorite(!isFavorite)
+      message.success(isFavorite ? 'Đã bỏ yêu thích bài viết' : 'Đã yêu thích bài viết')
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+      message.error('Có lỗi xảy ra khi cập nhật yêu thích')
+    }
   }
 
   const handleLoginModalOpen = () => {
@@ -270,16 +295,13 @@ const BlogPost = () => {
                 { title: <Link to="/blog">Blog</Link> },
                 { title: post.title }
               ]}
-            />
-
-            <Button
+            />            <Button
               type="text"
-              icon={<ArrowLeftOutlined />}
-              onClick={handleGoBack}
-              className="back-button"
-            >
-              Quay lại
-            </Button>            <Title level={1} className="post-title">
+              icon={isFavorite ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+              onClick={handleFavoriteToggle}
+              className="favorite-button"
+              title={isFavorite ? "Bỏ yêu thích" : "Yêu thích bài viết"}
+            /><Title level={1} className="post-title">
               {post.title}
             </Title>
 
@@ -406,16 +428,13 @@ const BlogPost = () => {
                                 </List.Item>
                               ))}
                             </div>
-                          )}
-
-                          <Button
+                          )}                          <Button
                             type="link"
                             onClick={() => handleReplyClick(comment.id)}
-                            icon={<MessageOutlined />}
+                            icon={<RollbackOutlined />}
                             className="reply-button"
-                          >
-                            Trả lời
-                          </Button>
+                            title="Trả lời"
+                          />
 
                           {/* Reply form for the comment */}
                           {replyingTo === comment.id && (

@@ -112,6 +112,59 @@ export interface CV {
     }
 }
 
+// Blog interfaces
+export interface BlogImage {
+    id: string;
+    url: string;
+}
+
+export interface Blog {
+    id: string;
+    title: string;
+    content: string;
+    imageUrl?: string[];
+    authorName: string;
+    status?: number; // 0=pending, 1=published, 2=rejected
+    totalLikes?: number;
+    totalDislikes?: number;
+    totalComments?: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface GetBlogsResponse {
+    data: Blog[];
+    totalRecords: number;
+    currentPage: number;
+    pageSize: number;
+}
+
+// Comment interfaces
+export interface Comment {
+    id: string;
+    content: string;
+    userId: string;
+    userName: string;
+    userAvatar?: string;
+    blogId: string;
+    parentCommentId?: string | null;
+    createdAt: string;
+    updatedAt?: string;
+    likes?: number;
+    replies?: Comment[];
+    statusCode?: number;
+    message?: string | null;
+    isSuccess?: boolean;
+    validationErrors?: any[];
+}
+
+export interface GetCommentsResponse {
+    data: Comment[];
+    totalRecords: number;
+    currentPage: number;
+    pageSize: number;
+}
+
 /**
  * Service handling user management API operations
  */
@@ -496,12 +549,145 @@ export const userService = {
      * @param cvId Application ID
      * @param reason Rejection reason
      * @returns Promise with operation result
-     */
-    rejectTourGuideApplication: async (cvId: string, reason: string): Promise<any> => {
+     */    rejectTourGuideApplication: async (cvId: string, reason: string): Promise<any> => {
         const response = await axios.put(`Cms/${cvId}/reject-application`, {
             reason
         });
         return response.data;
+    },    /**
+     * Get comments for a blog post
+     * @param blogId Blog post ID
+     * @param page Page number
+     * @param pageSize Items per page
+     * @returns Promise with comments data
+     */
+    getBlogComments: async (
+        blogId: string,
+        page: number = 1,
+        pageSize: number = 5
+    ): Promise<GetCommentsResponse> => {
+        try {
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            const response = await axios.get(`/Blogger/${blogId}/comments`, {
+                params: {
+                    pageIndex: page,
+                    pageSize
+                },
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`
+                } : undefined
+            });
+
+            // Check if response is directly an array (not wrapped in data property)
+            const commentsData = Array.isArray(response.data) ? response.data :
+                (response.data?.data && Array.isArray(response.data.data)) ? response.data.data : [];
+
+            // For debugging
+            console.log('Comments API response:', response.data);
+            console.log('Processed comments data:', commentsData);
+
+            return {
+                data: commentsData,
+                totalRecords: response.data?.totalRecord || commentsData.length || 0,
+                currentPage: response.data?.page || page,
+                pageSize: response.data?.pageSize || pageSize
+            };
+        } catch (error) {
+            console.error('Error fetching blog comments:', error);
+            return {
+                data: [],
+                totalRecords: 0,
+                currentPage: page,
+                pageSize
+            };
+            return {
+                data: [],
+                totalRecords: 0,
+                currentPage: page,
+                pageSize
+            };
+        }
+    },    /**
+     * Create a new comment on a blog post
+     * @param blogId Blog post ID
+     * @param content Comment content
+     * @param parentCommentId Optional parent comment ID for replies
+     * @returns Promise with created comment
+     */
+    createComment: async (blogId: string, content: string, parentCommentId?: string): Promise<Comment | null> => {
+        try {
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            const payload: any = { content };
+            if (parentCommentId) {
+                payload.parentCommentId = parentCommentId;
+            }
+
+            const response = await axios.post(`/Blogger/${blogId}/comments`, payload, {
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`
+                } : undefined
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error creating comment:', error);
+            return null;
+        }
+    },    /**
+     * Like a comment
+     * @param commentId Comment ID
+     * @returns Promise with operation result
+     */    likeComment: async (commentId: string): Promise<any> => {
+        try {
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            const response = await axios.post(`/Comment/${commentId}/like`, {}, {
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`
+                } : undefined
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error liking comment:', error);
+            return null;
+        }
+    },
+
+    /**
+     * Add or remove favorite reaction to a blog post
+     * @param blogId Blog post ID
+     * @param reaction 0 for dislike, 1 for like
+     * @returns Promise with operation result
+     */
+    toggleBlogReaction: async (blogId: string, reaction: 0 | 1): Promise<any> => {
+        try {
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                throw new Error('User must be authenticated to react to blog posts');
+            }
+
+            const response = await axios.post(`/Blogger/${blogId}/reaction`, {
+                blogId: blogId,
+                reaction: reaction
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error toggling blog reaction:', error);
+            throw error;
+        }
     }
 };
 
