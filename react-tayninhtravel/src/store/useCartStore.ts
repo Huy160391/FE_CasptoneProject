@@ -1,20 +1,16 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { CartItem as BaseCartItem } from '../types'
 
-export interface CartItem {
-  id: number
-  name: string
-  price: number
-  image: string
-  quantity: number
+export interface CartItem extends BaseCartItem {
   type: 'product' | 'tour'
 }
 
 interface CartState {
   items: CartItem[]
   addItem: (item: CartItem) => void
-  removeItem: (id: number, type: 'product' | 'tour') => void
-  updateQuantity: (id: number, type: 'product' | 'tour', quantity: number) => void
+  removeItem: (id: string | number, type: 'product' | 'tour') => void
+  updateQuantity: (id: string | number, type: 'product' | 'tour', quantity: number) => void
   clearCart: () => void
   getTotalItems: () => number
   getTotalPrice: () => number

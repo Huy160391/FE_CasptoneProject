@@ -216,13 +216,12 @@ const ProductDetail = () => {
   }
 
   const handleAddToCart = () => {
-    if (!product) return
-
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.discountPrice || product.price,
-      image: product.image,
+    if (!product) return addToCart({
+      id: product!.id,
+      productId: String(product!.id),
+      name: product!.name,
+      price: product!.discountPrice || product!.price,
+      image: product!.image,
       type: 'product',
       quantity: quantity
     })
