@@ -160,10 +160,11 @@ const Profile = () => {
 
     const handlePasswordChange = async (values: any) => {
         try {
-            setLoading(true);
-            await authService.changePassword({
+            setLoading(true); await authService.changePassword({
+                currentPassword: values.currentPassword,
                 oldPassword: values.currentPassword,
-                newPassword: values.newPassword
+                newPassword: values.newPassword,
+                confirmPassword: values.confirmPassword
             });
             message.success(t('profile.passwordChangeSuccess'));
             form.resetFields();

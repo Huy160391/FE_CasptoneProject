@@ -1,22 +1,18 @@
 import axiosInstance from '@/config/axios';
+import { Blog as GlobalBlog } from '../types';
 
 export interface BlogImage {
     id: string;
     url: string;
 }
 
-export interface Blog {
-    id: string;
-    title: string;
-    content: string;
-    imageUrl?: string[];
+// Extend global Blog interface for specific API response
+export interface Blog extends Omit<GlobalBlog, 'authorId' | 'author'> {
     authorName: string;
-    status?: number; // 0=pending, 1=published, 2=rejected
+    imageUrl?: string[];
     totalLikes?: number;
     totalDislikes?: number;
     totalComments?: number;
-    createdAt?: string;
-    updatedAt?: string;
 }
 
 export interface GetBlogsResponse {

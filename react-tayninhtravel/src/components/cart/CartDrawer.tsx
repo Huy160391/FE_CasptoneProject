@@ -17,12 +17,11 @@ interface CartDrawerProps {
 const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
   // const { t } = useTranslation()
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore()
-
-  const handleQuantityChange = (id: number, type: 'product' | 'tour', quantity: number) => {
+  const handleQuantityChange = (id: string | number, type: 'product' | 'tour', quantity: number) => {
     updateQuantity(id, type, quantity)
   }
 
-  const handleRemoveItem = (id: number, type: 'product' | 'tour') => {
+  const handleRemoveItem = (id: string | number, type: 'product' | 'tour') => {
     removeItem(id, type)
   }
 

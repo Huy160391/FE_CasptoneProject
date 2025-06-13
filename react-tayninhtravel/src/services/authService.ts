@@ -1,36 +1,12 @@
 import axiosInstance from '@/config/axios';
 import { jwtDecode } from 'jwt-decode';
-
-interface LoginCredentials {
-    email: string;
-    password: string;
-}
-
-interface RegisterCredentials {
-    email: string;
-    name: string;
-    password: string;
-    phoneNumber: string;
-    avatar?: string;
-}
-
-interface ChangePasswordRequest {
-    oldPassword: string;
-    newPassword: string;
-}
-
-interface LoginResponse {
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        role: 'user' | 'Admin';
-        avatar?: string;
-        phone?: string;
-        address?: string;
-    };
-    token: string;
-}
+import {
+    User,
+    RegisterForm,
+    ChangePasswordForm,
+    AuthCredentials,
+    AuthResponse
+} from '../types';
 
 interface LoginApiResponse {
     statusCode: number;
@@ -47,6 +23,11 @@ interface LoginApiResponse {
 
 export interface DecodedToken {
     [key: string]: any;
+    exp?: number;
+    iat?: number;
+    userId?: string;
+    email?: string;
+    role?: string;
 }
 
 export function decodeToken(token: string): DecodedToken | null {
@@ -58,7 +39,7 @@ export function decodeToken(token: string): DecodedToken | null {
 }
 
 export const authService = {
-    login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
+    login: async (credentials: AuthCredentials): Promise<AuthResponse> => {
         try {
             const response = await axiosInstance.post<LoginApiResponse>('/Authentication/login', credentials);
             const { data } = response;
@@ -83,14 +64,15 @@ export const authService = {
                 }
 
                 // Tạo user info từ response API
-                const userInfo = {
+                const userInfo: User = {
                     id: data.userId,
                     email: data.email,
                     name: data.name,
-                    role: userRole,
+                    role: userRole as User['role'],
                     phone: data.phoneNumber,
                     avatar: data.avatar || 'https://i.imgur.com/4AiXzf8.jpg',
-                    address: undefined
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
                 };
 
                 localStorage.setItem('user', JSON.stringify(userInfo));
@@ -108,7 +90,7 @@ export const authService = {
         }
     },
 
-    register: async (credentials: RegisterCredentials): Promise<void> => {
+    register: async (credentials: RegisterForm): Promise<void> => {
         try {
             await axiosInstance.post('/Authentication/register', credentials);
         } catch (error) {
@@ -124,7 +106,7 @@ export const authService = {
         }
     },
 
-    changePassword: async (request: ChangePasswordRequest): Promise<void> => {
+    changePassword: async (request: ChangePasswordForm): Promise<void> => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {

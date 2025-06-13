@@ -1,23 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { User, AuthState as GlobalAuthState } from '../types'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  role: 'user' | 'Admin' | 'Blogger'
-  avatar?: string
-  phone?: string
-  address?: string
-}
-
-interface AuthState {
-  user: User | null
-  isAuthenticated: boolean
-  token: string | null
+interface AuthState extends GlobalAuthState {
   login: (user: User, token: string) => void
   logout: () => void
   updateUser: (user: Partial<User>) => void
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
+  clearError: () => void
 }
 
 // Lấy thông tin user từ localStorage nếu có
@@ -57,15 +48,17 @@ export const useAuthStore = create<AuthState>()(
       user: getStoredUser(),
       isAuthenticated: !!getStoredToken(),
       token: getStoredToken(),
+      isLoading: false,
+      error: null,
       login: (user, token) => {
         localStorage.setItem('token', token)
         localStorage.setItem('user', JSON.stringify(user))
-        set({ user, isAuthenticated: true, token })
+        set({ user, isAuthenticated: true, token, error: null })
       },
       logout: () => {
         localStorage.removeItem('token')
         localStorage.removeItem('user')
-        set({ user: null, isAuthenticated: false, token: null })
+        set({ user: null, isAuthenticated: false, token: null, error: null })
       },
       updateUser: (userData) =>
         set((state) => {
@@ -76,6 +69,9 @@ export const useAuthStore = create<AuthState>()(
           }
           return state
         }),
+      setLoading: (loading) => set({ isLoading: loading }),
+      setError: (error) => set({ error }),
+      clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-storage',
