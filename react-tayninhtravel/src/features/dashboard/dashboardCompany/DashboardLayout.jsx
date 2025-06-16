@@ -30,7 +30,7 @@ export default function DashboardLayout() {
         <Stats titles={titlesCompany} />
         <TodayActivity />
         <RightRanking />
-        <SalesChart beans={revCom} />
+        <SalesChart revenue={revCom} />
       </StyledDashboardLayout>
     </>
   );
