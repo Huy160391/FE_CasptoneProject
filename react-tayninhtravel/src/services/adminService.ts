@@ -1,27 +1,8 @@
 import axios from '@/config/axios';
 // Import type definitions
-import { TicketStatus } from './userService';
+import { TicketStatus, AdminBlogPost, AdminSupportTicket } from '../types';
 
 // Blog Management Interfaces
-export interface AdminBlogPost {
-    id: string;
-    title: string;
-    content: string;
-    excerpt?: string;
-    category?: string;
-    tags?: string[];
-    featuredImage?: string;
-    imageUrl?: string[];  // Thêm mảng URL ảnh
-    status: 0 | 1 | 2; // 0=pending, 1=published, 2=rejected
-    views: number;
-    likes: number;
-    authorId: string;
-    authorName: string;
-    createdAt: string;
-    updatedAt: string;
-    commentOfAdmin?: string;
-}
-
 export interface GetBlogsParams {
     pageIndex?: number;
     pageSize?: number;
@@ -65,22 +46,6 @@ export interface ApiUser {
     role?: string;
     createdAt: string;
     updatedAt: string;
-}
-
-export interface SupportTicket {
-    id: string;
-    title: string;
-    content: string;
-    status: TicketStatus;
-    createdAt: string;
-    userId?: string;
-    userName?: string;
-    userEmail?: string;
-    images: {
-        id: string;
-        url: string;
-    }[];
-    response?: string;
 }
 
 class AdminService {
@@ -229,17 +194,15 @@ class AdminService {
             updatedAt: apiBlog.updatedAt || new Date().toISOString(),
             commentOfAdmin: apiBlog.commentOfAdmin || ''
         };
-    }
-
-    // Support Tickets Management
-    async getSupportTickets(status?: TicketStatus): Promise<SupportTicket[]> {
+    }    // Support Tickets Management
+    async getSupportTickets(status?: TicketStatus): Promise<AdminSupportTicket[]> {
         try {
             let url = 'SupportTickets/Admin';
             if (status) {
                 url += `?status=${encodeURIComponent(status)}`;
             }
 
-            const response = await axios.get<SupportTicket[]>(url);
+            const response = await axios.get<AdminSupportTicket[]>(url);
 
             // Validate and transform response
             const tickets = Array.isArray(response.data) ? response.data : [];
@@ -290,7 +253,7 @@ class AdminService {
         } catch (error) {
             this.handleError(error, 'Error sending ticket response');
         }
-    } private validateTicket(ticket: any): SupportTicket {
+    } private validateTicket(ticket: any): AdminSupportTicket {
         if (!ticket || typeof ticket !== 'object') {
             throw new Error('Invalid ticket data received from server');
         }

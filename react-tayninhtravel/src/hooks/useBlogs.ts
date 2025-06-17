@@ -1,21 +1,13 @@
 import { useState, useEffect } from 'react';
 import { publicService, Blog, GetBlogsResponse } from '../services/publicService';
-
-interface UseBlogsState {
-    blogs: Blog[];
-    loading: boolean;
-    error: string | null;
-    totalRecords: number;
-    currentPage: number;
-    pageSize: number;
-}
+import { UseBlogsState } from '../types';
 
 export const useBlogs = (
     page: number = 1,
     pageSize: number = 10,
     searchText?: string
 ) => {
-    const [state, setState] = useState<UseBlogsState>({
+    const [state, setState] = useState<UseBlogsState<Blog>>({
         blogs: [],
         loading: false,
         error: null,

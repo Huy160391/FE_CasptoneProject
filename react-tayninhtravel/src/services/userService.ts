@@ -1,4 +1,13 @@
 import axios from '@/config/axios';
+import {
+    UpdateUserPayload,
+    CreateUserPayload,
+    ProfileUpdatePayload,
+    TourGuideApplication,
+    UserBlog,
+    UserComment,
+    UserSupportTicket
+} from '../types';
 
 // API response interfaces
 interface ApiUser {
@@ -42,54 +51,6 @@ export interface GetUsersResponse {
     pageSize: number;
 }
 
-export interface UpdateUserPayload {
-    name?: string;
-    email?: string;
-    phone?: string;
-    role?: string;
-    status?: boolean;
-}
-
-export interface CreateUserPayload extends UpdateUserPayload {
-    password: string;
-}
-
-export interface ProfileUpdatePayload {
-    name: string;
-    phoneNumber: string;
-}
-
-// Support ticket interfaces
-interface ImageAttachment {
-    id: string;
-    url: string;
-}
-
-export type TicketStatus = 'Open' | 'Resolved' | 'Rejected';
-export const TICKET_STATUS_MAP = {
-    0: 'Open',
-    1: 'Resolved',
-    2: 'Rejected'
-} as const;
-
-export interface SupportTicket {
-    id: string;
-    title: string;
-    content: string;
-    status: TicketStatus;
-    createdAt: string;
-    userId?: string;
-    userName?: string;
-    userEmail?: string;
-    images: ImageAttachment[];
-    response?: string;
-}
-
-export interface TourGuideApplication {
-    email: string;
-    curriculumVitae: File;
-}
-
 // API request interfaces
 interface ApiUpdateUserPayload {
     name?: string;
@@ -112,54 +73,15 @@ export interface CV {
     }
 }
 
-// Blog interfaces
-export interface BlogImage {
-    id: string;
-    url: string;
-}
-
-export interface Blog {
-    id: string;
-    title: string;
-    content: string;
-    imageUrl?: string[];
-    authorName: string;
-    status?: number; // 0=pending, 1=published, 2=rejected
-    totalLikes?: number;
-    totalDislikes?: number;
-    totalComments?: number;
-    createdAt?: string;
-    updatedAt?: string;
-}
-
 export interface GetBlogsResponse {
-    data: Blog[];
+    data: UserBlog[];
     totalRecords: number;
     currentPage: number;
     pageSize: number;
 }
 
-// Comment interfaces
-export interface Comment {
-    id: string;
-    content: string;
-    userId: string;
-    userName: string;
-    userAvatar?: string;
-    blogId: string;
-    parentCommentId?: string | null;
-    createdAt: string;
-    updatedAt?: string;
-    likes?: number;
-    replies?: Comment[];
-    statusCode?: number;
-    message?: string | null;
-    isSuccess?: boolean;
-    validationErrors?: any[];
-}
-
 export interface GetCommentsResponse {
-    data: Comment[];
+    data: UserComment[];
     totalRecords: number;
     currentPage: number;
     pageSize: number;
@@ -321,9 +243,9 @@ export const userService = {
      * Get user's support tickets
      * @returns Promise with support tickets
      */
-    getUserSupportTickets: async (): Promise<SupportTicket[]> => {
+    getUserSupportTickets: async (): Promise<UserSupportTicket[]> => {
         try {
-            const response = await axios.get<SupportTicket[]>('SupportTickets/User');
+            const response = await axios.get<UserSupportTicket[]>('SupportTickets/User');
 
             // Ensure response data is an array, otherwise return empty array
             const tickets = Array.isArray(response.data) ? response.data : [];
@@ -366,7 +288,7 @@ export const userService = {
      * @param file Optional attachment file
      * @returns Promise with operation result
      */
-    submitSupportTicket: async (title: string, content: string, file?: File): Promise<SupportTicket> => {
+    submitSupportTicket: async (title: string, content: string, file?: File): Promise<UserSupportTicket> => {
         try {
             // Validate inputs
             if (!title.trim()) {
@@ -386,7 +308,7 @@ export const userService = {
                 formData.append('Files', file);
             }
 
-            const response = await axios.post<SupportTicket>('SupportTickets', formData, {
+            const response = await axios.post<UserSupportTicket>('SupportTickets', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
@@ -456,14 +378,14 @@ export const userService = {
      * @param status Optional status filter
      * @returns Promise with support tickets
      */
-    getAdminSupportTickets: async (status?: string): Promise<SupportTicket[]> => {
+    getAdminSupportTickets: async (status?: string): Promise<UserSupportTicket[]> => {
         try {
             let url = 'SupportTickets/Admin';
             if (status) {
                 url += `?status=${encodeURIComponent(status)}`;
             }
 
-            const response = await axios.get<SupportTicket[]>(url);
+            const response = await axios.get<UserSupportTicket[]>(url);
 
             // Ensure response data is an array
             const tickets = Array.isArray(response.data) ? response.data : [];

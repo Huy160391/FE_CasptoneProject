@@ -16,13 +16,15 @@ const getStoredUser = (): User | null => {
   const userStr = localStorage.getItem('user')
   if (userStr) {
     try {
-      const user = JSON.parse(userStr);
-
-      // Đảm bảo role luôn đúng định dạng
+      const user = JSON.parse(userStr);      // Đảm bảo role luôn đúng định dạng
       if (user && user.role) {
         // Chuẩn hóa role
         if (user.role.toLowerCase() === 'admin' || user.role === 'Admin') {
           user.role = 'Admin';
+        } else if (user.role.toLowerCase() === 'blogger' || user.role === 'Blogger') {
+          user.role = 'Blogger';
+        } else if (user.role.toLowerCase() === 'tour company' || user.role === 'Tour Company') {
+          user.role = 'Tour Company';
         } else {
           user.role = 'user';
         }

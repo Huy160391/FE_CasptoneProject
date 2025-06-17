@@ -5,7 +5,8 @@ import {
     RegisterForm,
     ChangePasswordForm,
     AuthCredentials,
-    AuthResponse
+    AuthResponse,
+    DecodedToken
 } from '../types';
 
 interface LoginApiResponse {
@@ -19,15 +20,6 @@ interface LoginApiResponse {
     name: string;
     phoneNumber: string;
     avatar: string;
-}
-
-export interface DecodedToken {
-    [key: string]: any;
-    exp?: number;
-    iat?: number;
-    userId?: string;
-    email?: string;
-    role?: string;
 }
 
 export function decodeToken(token: string): DecodedToken | null {
@@ -59,6 +51,8 @@ export const authService = {
                     userRole = 'Admin';
                 } else if (userRole && (userRole.toLowerCase() === 'blogger' || userRole === 'Blogger')) {
                     userRole = 'Blogger';
+                } else if (userRole && (userRole.toLowerCase() === 'tour company' || userRole === 'Tour Company')) {
+                    userRole = 'Tour Company';
                 } else {
                     userRole = 'user';
                 }

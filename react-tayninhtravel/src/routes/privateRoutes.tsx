@@ -1,14 +1,14 @@
 import { RouteObject } from 'react-router-dom';
-import PrivateRoute from './PrivateRoute';
+import ProtectedRoute from './ProtectedRoute';
 import Profile from '@/pages/Profile';
 
 export const privateRoutes: RouteObject[] = [
     {
         path: '/profile',
         element: (
-            <PrivateRoute>
+            <ProtectedRoute>
                 <Profile />
-            </PrivateRoute>
+            </ProtectedRoute>
         ),
     }
-]; 
+];
