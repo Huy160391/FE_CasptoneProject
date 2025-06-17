@@ -2,6 +2,9 @@ import axios from '@/config/axios';
 // Import type definitions
 import { TicketStatus, AdminBlogPost, AdminSupportTicket } from '../types';
 
+// Re-export types for convenience
+export type { AdminBlogPost, SupportTicket, AdminSupportTicket } from '../types';
+
 // Blog Management Interfaces
 export interface GetBlogsParams {
     pageIndex?: number;

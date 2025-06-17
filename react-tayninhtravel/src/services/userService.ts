@@ -6,8 +6,12 @@ import {
     TourGuideApplication,
     UserBlog,
     UserComment,
-    UserSupportTicket
+    UserSupportTicket,
+    Comment
 } from '../types';
+
+// Re-export types for convenience
+export type { Comment, UserComment } from '../types';
 
 // API response interfaces
 interface ApiUser {

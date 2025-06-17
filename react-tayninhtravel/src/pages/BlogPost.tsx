@@ -16,7 +16,7 @@ import {
   HeartFilled
 } from '@ant-design/icons'
 import { publicService, type Blog } from '@/services/publicService'
-import { userService, type Comment } from '@/services/userService'
+import { userService, type UserComment } from '@/services/userService'
 import { useAuthStore } from '@/store/useAuthStore'
 import LoginModal from '@/components/auth/LoginModal'
 import RegisterModal from '@/components/auth/RegisterModal'
@@ -33,7 +33,7 @@ const BlogPost = () => {
   const [relatedPosts, setRelatedPosts] = useState<Blog[]>([])
   const [recentBlogs, setRecentBlogs] = useState<Blog[]>([])
   const [loading, setLoading] = useState(true)
-  const [comments, setComments] = useState<Comment[]>([])
+  const [comments, setComments] = useState<UserComment[]>([])
   const [commentContent, setCommentContent] = useState('')
   const [commentsLoading, setCommentsLoading] = useState(false)
   const [hasMoreComments, setHasMoreComments] = useState(false)
@@ -411,7 +411,7 @@ const BlogPost = () => {
                           {/* Render replies if any */}
                           {comment.replies && comment.replies.length > 0 && (
                             <div className="comment-replies">
-                              {comment.replies.map(reply => (
+                              {comment.replies.map((reply: UserComment) => (
                                 <List.Item key={reply.id} className="reply-item">
                                   <List.Item.Meta
                                     avatar={<Avatar src={reply.userAvatar} size="small" icon={<UserOutlined />} />}
