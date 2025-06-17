@@ -68,3 +68,20 @@ export const TOUR_OPERATION_ENDPOINTS = {
   PATCH_BY_ID: "/api/TourOperation/{id}",
   DELETE_BY_ID: "/api/TourOperation/{id}",
 };
+
+export const TOUR_COMPANY_ENDPOINTS = {
+  // Tour operations
+  GET_TOURS:             "/api/TourCompany/tour",
+  CREATE_TOUR:           "/api/TourCompany/tour",
+  GET_TOUR_BY_ID:        "/api/TourCompany/tour/{id}",
+  UPDATE_TOUR:           "/api/TourCompany/tour/{id}",
+  DELETE_TOUR:           "/api/TourCompany/tour/{id}",
+
+  // Template operations
+  GET_TEMPLATES:         "/api/TourCompany/template",
+  CREATE_TEMPLATE:       "/api/TourCompany/template",
+  GET_TEMPLATE_BY_ID:    "/api/TourCompany/template/{id}",
+  UPDATE_TEMPLATE:       "/api/TourCompany/template/{id}",
+  DELETE_TEMPLATE:       "/api/TourCompany/template/{id}",
+  COPY_TEMPLATE:         "/api/TourCompany/template/{id}/copy",
+};

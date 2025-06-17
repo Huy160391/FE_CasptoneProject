@@ -27,7 +27,7 @@ const Heading = styled.h1`
   line-height: 1.4;
 `;
 
-function DashboardAdmin() {
+function DashboardCompany() {
   const navigate = useNavigate();
 
   return (
@@ -46,4 +46,4 @@ function DashboardAdmin() {
   );
 }
 
-export default DashboardAdmin;
+export default DashboardCompany;
