@@ -6,8 +6,8 @@ import { publicRoutes } from './publicRoutes';
 import { privateRoutes } from './privateRoutes';
 import { adminRoutes } from './adminRoutes';
 import { bloggerRoutes } from './bloggerRoutes';
-import AdminRoute from './AdminRoute';
-import BloggerRoute from './BloggerRoute';
+import { tourCompanyRoutes } from './tourCompanyRoutes';
+import ProtectedRoute from './ProtectedRoute';
 
 const routes: RouteObject[] = [
   {
@@ -17,10 +17,9 @@ const routes: RouteObject[] = [
       ...publicRoutes,
       ...privateRoutes,
     ],
-  },
-  {
+  }, {
     path: '/admin',
-    element: <AdminRoute />,
+    element: <ProtectedRoute requiredRole="Admin" />,
     children: [
       {
         path: '',
@@ -34,7 +33,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/blogger',
-    element: <BloggerRoute />,
+    element: <ProtectedRoute requiredRole="Blogger" />,
     children: [
       {
         path: '',
@@ -42,6 +41,20 @@ const routes: RouteObject[] = [
         children: [
           { path: '', element: <Navigate to="/blogger/dashboard" /> },
           ...(bloggerRoutes[0].children || []),
+        ],
+      }
+    ],
+  },
+  {
+    path: '/tour-company',
+    element: <ProtectedRoute requiredRole="Tour Company" />,
+    children: [
+      {
+        path: '',
+        element: <div>Tour Company Layout</div>, // Temporary placeholder
+        children: [
+          { path: '', element: <Navigate to="/tour-company/dashboard" /> },
+          ...(tourCompanyRoutes[0].children || []),
         ],
       }
     ],

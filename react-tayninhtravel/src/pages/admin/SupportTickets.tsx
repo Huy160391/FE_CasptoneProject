@@ -21,8 +21,8 @@ import {
     ExclamationCircleOutlined
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import { adminService, type SupportTicket } from '@/services/adminService'
-import { type TicketStatus } from '@/services/userService'
+import { adminService, type AdminSupportTicket } from '@/services/adminService'
+import { type TicketStatus } from '@/types'
 import { useTranslation } from 'react-i18next'
 import './SupportTickets.scss'
 
@@ -56,9 +56,9 @@ const STATUS_CONFIG: Record<TicketStatus, TicketStatusConfig> = {
 
 const SupportTickets = () => {
     const { t } = useTranslation()
-    const [tickets, setTickets] = useState<SupportTicket[]>([])
+    const [tickets, setTickets] = useState<AdminSupportTicket[]>([])
     const [loading, setLoading] = useState(false)
-    const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null)
+    const [selectedTicket, setSelectedTicket] = useState<AdminSupportTicket | null>(null)
     const [isViewModalVisible, setIsViewModalVisible] = useState(false)
     const [isRespondModalVisible, setIsRespondModalVisible] = useState(false)
     const [searchText, setSearchText] = useState('')
@@ -91,12 +91,12 @@ const SupportTickets = () => {
         setStatusFilter(value)
     }
 
-    const handleView = (ticket: SupportTicket) => {
+    const handleView = (ticket: AdminSupportTicket) => {
         setSelectedTicket(ticket)
         setIsViewModalVisible(true)
     }
 
-    const handleRespond = (ticket: SupportTicket) => {
+    const handleRespond = (ticket: AdminSupportTicket) => {
         setSelectedTicket(ticket)
         setResponse(ticket.response || '')
         setIsRespondModalVisible(true)
@@ -142,7 +142,7 @@ const SupportTickets = () => {
         )
     }
 
-    const columns: ColumnsType<SupportTicket> = [
+    const columns: ColumnsType<AdminSupportTicket> = [
         {
             title: 'ID',
             dataIndex: 'id',

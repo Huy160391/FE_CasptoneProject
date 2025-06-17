@@ -18,7 +18,7 @@ import {
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import './Blogs.scss'
-import adminService, { AdminBlogPost } from '@/services/adminService'
+import adminService, { type AdminBlogPost } from '@/services/adminService'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -39,18 +39,13 @@ const mapStatusToUI = (status: number): string => {
   }
 }
 
-// Mở rộng interface AdminBlogPost để thêm hỗ trợ cho nhiều ảnh
-interface ExtendedAdminBlogPost extends AdminBlogPost {
-  // Interface đã được cập nhật trong adminService.ts
-}
-
 const Blogs = () => {
   const [blogs, setBlogs] = useState<AdminBlogPost[]>([])
   const [displayedBlogs, setDisplayedBlogs] = useState<AdminBlogPost[]>([])
   const [loading, setLoading] = useState(false)
   const [searchText, setSearchText] = useState('')
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
-  const [currentBlog, setCurrentBlog] = useState<ExtendedAdminBlogPost | null>(null)
+  const [currentBlog, setCurrentBlog] = useState<AdminBlogPost | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [approveComment, setApproveComment] = useState('')
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -128,9 +123,8 @@ const Blogs = () => {
       setStatusFilter([]);
     }
   }
-  const showViewModal = (blog: AdminBlogPost) => {
-    // Chuyển đổi sang ExtendedAdminBlogPost
-    const extendedBlog: ExtendedAdminBlogPost = {
+  const showViewModal = (blog: AdminBlogPost) => {    // Chuyển đổi sang AdminBlogPost và xử lý imageUrl
+    const extendedBlog: AdminBlogPost = {
       ...blog
     }
 

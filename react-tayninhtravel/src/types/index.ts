@@ -4,7 +4,7 @@ export interface User {
     name: string;
     email: string;
     phone?: string;
-    role: 'user' | 'Admin' | 'Blogger';
+    role: 'user' | 'Admin' | 'Blogger' | 'Tour Company';
     avatar?: string;
     address?: string;
     isVerified?: boolean;
@@ -135,6 +135,26 @@ export interface Blog {
     publishedAt?: string;
     createdAt: string;
     updatedAt: string;
+}
+
+// Admin-specific blog interface
+export interface AdminBlogPost {
+    id: string;
+    title: string;
+    content: string;
+    excerpt?: string;
+    category?: string;
+    tags?: string[];
+    featuredImage?: string;
+    imageUrl?: string[];
+    status: 0 | 1 | 2; // 0=pending, 1=published, 2=rejected
+    views: number;
+    likes: number;
+    authorId: string;
+    authorName: string;
+    createdAt: string;
+    updatedAt: string;
+    commentOfAdmin?: string;
 }
 
 export interface Comment {
@@ -354,6 +374,16 @@ export interface BlogFilters {
     featured?: boolean;
 }
 
+// Hook State Types
+export interface UseBlogsState<T = Blog> {
+    blogs: T[];
+    loading: boolean;
+    error: string | null;
+    totalRecords: number;
+    currentPage: number;
+    pageSize: number;
+}
+
 // Event Types
 export interface NotificationEvent {
     id: string;
@@ -398,4 +428,127 @@ export interface AuthResponse {
     user: User;
     token: string;
     refreshToken?: string;
+}
+
+export interface DecodedToken {
+    [key: string]: any;
+    exp?: number;
+    iat?: number;
+    userId?: string;
+    email?: string;
+    role?: string;
+}
+
+// Support Types
+export type TicketStatus = 'Open' | 'Resolved' | 'Rejected';
+
+export const TICKET_STATUS_MAP = {
+    0: 'Open',
+    1: 'Resolved',
+    2: 'Rejected'
+} as const;
+
+// Admin-specific support ticket interface
+export interface AdminSupportTicket {
+    id: string;
+    title: string;
+    content: string;
+    status: TicketStatus;
+    createdAt: string;
+    userId?: string;
+    userName?: string;
+    userEmail?: string;
+    images: {
+        id: string;
+        url: string;
+    }[];
+    response?: string;
+}
+
+// User Management Types
+export interface UpdateUserPayload {
+    name?: string;
+    email?: string;
+    phone?: string;
+    role?: string;
+    status?: boolean;
+}
+
+export interface CreateUserPayload extends UpdateUserPayload {
+    password: string;
+}
+
+export interface ProfileUpdatePayload {
+    name: string;
+    phoneNumber: string;
+}
+
+export interface TourGuideApplication {
+    email: string;
+    curriculumVitae: File;
+}
+
+// User-specific types (different from global User)
+export interface UserServiceUser {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+    status: boolean;
+    avatar?: string;
+    isVerified: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// User-specific Blog interface
+export interface UserBlog {
+    id: string;
+    title: string;
+    content: string;
+    imageUrl?: string[];
+    authorName: string;
+    status?: number; // 0=pending, 1=published, 2=rejected
+    totalLikes?: number;
+    totalDislikes?: number;
+    totalComments?: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+// User-specific Comment interface
+export interface UserComment {
+    id: string;
+    content: string;
+    userId: string;
+    userName: string;
+    userAvatar?: string;
+    blogId: string;
+    parentCommentId?: string | null;
+    createdAt: string;
+    updatedAt?: string;
+    likes?: number;
+    replies?: UserComment[];
+    statusCode?: number;
+    message?: string | null;
+    isSuccess?: boolean;
+    validationErrors?: any[];
+}
+
+// User-specific Support Ticket interface
+export interface UserSupportTicket {
+    id: string;
+    title: string;
+    content: string;
+    status: TicketStatus;
+    createdAt: string;
+    userId?: string;
+    userName?: string;
+    userEmail?: string;
+    images: {
+        id: string;
+        url: string;
+    }[];
+    response?: string;
 }
