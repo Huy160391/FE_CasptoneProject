@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TourTemplate } from '../../types';
 import {
     Table,
     Button,
@@ -16,7 +17,6 @@ import {
     Card,
     Row,
     Col,
-    TimePicker,
     Checkbox,
     Divider
 } from 'antd';
@@ -25,43 +25,15 @@ import {
     EditOutlined,
     DeleteOutlined,
     EyeOutlined,
-    SearchOutlined,
-    MinusCircleOutlined
+    SearchOutlined
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import dayjs from 'dayjs';
 import './TourTemplateManagement.scss';
 
 const { Title } = Typography;
-const { TextArea } = Input;
 const { Option } = Select;
 
-interface TourTemplate {
-    id: string;
-    name: string;
-    startLocation: string;
-    endLocation: string;
-    tourType: string;
-    availableDays: string[]; // ['monday', 'tuesday', etc.]
-    availableDates: number[]; // [1, 2, 3, ..., 31]
-    availableMonths: number[]; // [1, 2, 3, ..., 12]
-    images: string[];
-    itinerary: ItineraryItem[];
-    ticketQuantity: number;
-    description: string;
-    guideInfo: string;
-    createdAt: string;
-    usageCount: number;
-}
-
-interface ItineraryItem {
-    id: string;
-    checkpoint: string; // time like "08:00"
-    activity: string;
-}
-
 const TourTemplateManagement: React.FC = () => {
-    const { t } = useTranslation(); const [templates, setTemplates] = useState<TourTemplate[]>([
+    const [templates, setTemplates] = useState<TourTemplate[]>([
         {
             id: '1',
             name: 'Template Tour Núi Bà Đen',
@@ -69,19 +41,9 @@ const TourTemplateManagement: React.FC = () => {
             endLocation: 'Núi Bà Đen, Tây Ninh',
             tourType: 'Núi non',
             availableDays: ['saturday', 'sunday'],
-            availableDates: [1, 15, 30],
             availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             images: ['/images/tours/nui-ba-den.jpg'],
-            itinerary: [
-                { id: '1', checkpoint: '06:00', activity: 'Tập trung tại điểm hẹn' },
-                { id: '2', checkpoint: '08:00', activity: 'Khởi hành đi Núi Bà Đen' },
-                { id: '3', checkpoint: '10:00', activity: 'Đi cáp treo lên đỉnh núi' },
-                { id: '4', checkpoint: '12:00', activity: 'Ăn trưa tại chân núi' },
-                { id: '5', checkpoint: '14:00', activity: 'Tham quan chùa Bà' },
-                { id: '6', checkpoint: '16:00', activity: 'Khởi hành về TP.HCM' }
-            ], ticketQuantity: 30,
-            description: 'Template tour khám phá núi Bà Đen với lịch trình đầy đủ, phù hợp cho những ai yêu thích thiên nhiên và tâm linh.',
-            guideInfo: 'Hướng dẫn viên có kinh nghiệm 5+ năm, thông thạo tiếng Việt và tiếng Anh. Chuyên về tour tâm linh và leo núi.',
+            ticketQuantity: 30,
             createdAt: '2024-01-15',
             usageCount: 12
         },
@@ -92,19 +54,9 @@ const TourTemplateManagement: React.FC = () => {
             endLocation: 'Tòa Thánh Cao Đài, Tây Ninh',
             tourType: 'Tâm linh',
             availableDays: ['monday', 'wednesday', 'friday', 'sunday'],
-            availableDates: [5, 10, 15, 20, 25],
             availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             images: ['/images/tours/toa-thanh-cao-dai.jpg'],
-            itinerary: [
-                { id: '1', checkpoint: '07:00', activity: 'Tập trung và khởi hành' },
-                { id: '2', checkpoint: '09:00', activity: 'Đến Tòa Thánh Cao Đài' },
-                { id: '3', checkpoint: '09:30', activity: 'Tham quan và tìm hiểu lịch sử' },
-                { id: '4', checkpoint: '11:30', activity: 'Xem lễ cầu nguyện' },
-                { id: '5', checkpoint: '12:30', activity: 'Ăn trưa tại địa phương' },
-                { id: '6', checkpoint: '14:00', activity: 'Khởi hành về TP.HCM' }
-            ], ticketQuantity: 40,
-            description: 'Template tour tham quan Tòa Thánh Cao Đài, tìm hiểu về tôn giáo Cao Đài và văn hóa tín ngưỡng địa phương.',
-            guideInfo: 'Hướng dẫn viên am hiểu sâu về tôn giáo Cao Đài, có thể giải thích chi tiết về lịch sử và nghi lễ.',
+            ticketQuantity: 40,
             createdAt: '2024-01-10',
             usageCount: 8
         }
@@ -165,6 +117,13 @@ const TourTemplateManagement: React.FC = () => {
                 >
                     Sửa
                 </Button>
+                <Button
+                    icon={<PlusOutlined />}
+                    size="small"
+                    onClick={() => handleCreateTour(record)}
+                >
+                    Tạo tour
+                </Button>
                 <Popconfirm
                     title="Bạn có chắc muốn xóa template này?"
                     onConfirm={() => handleDelete(record.id)}
@@ -191,21 +150,16 @@ const TourTemplateManagement: React.FC = () => {
     }; const handleEdit = (template: TourTemplate) => {
         setEditingTemplate(template);
         form.setFieldsValue({
-            ...template,
-            itinerary: template.itinerary.map(item => ({
-                ...item,
-                checkpoint: dayjs(item.checkpoint, 'HH:mm')
-            }))
+            ...template
         });
         setIsModalVisible(true);
-    };
-
-    const handleView = (template: TourTemplate) => {
+    }; const handleView = (template: TourTemplate) => {
         Modal.info({
             title: template.name,
             width: 800,
             content: (
-                <div className="template-view">                    <p><strong>Điểm bắt đầu:</strong> {template.startLocation}</p>
+                <div className="template-view">
+                    <p><strong>Điểm bắt đầu:</strong> {template.startLocation}</p>
                     <p><strong>Điểm kết thúc:</strong> {template.endLocation}</p>
                     <p><strong>Loại tour:</strong> {template.tourType}</p>
                     <p><strong>Số lượng vé:</strong> {template.ticketQuantity}</p>
@@ -219,17 +173,8 @@ const TourTemplateManagement: React.FC = () => {
                             };
                             return dayNames[day];
                         }).join(', ')}</li>
-                        <li>Ngày: {template.availableDates.join(', ')}</li>
                         <li>Tháng: {template.availableMonths.join(', ')}</li>
-                    </ul>                    <p><strong>Lịch trình:</strong></p>
-                    <ul>
-                        {template.itinerary.map((item, index) => (
-                            <li key={index}><strong>{item.checkpoint}:</strong> {item.activity}</li>
-                        ))}
                     </ul>
-
-                    <p><strong>Mô tả:</strong> {template.description}</p>
-                    <p><strong>Thông tin hướng dẫn viên:</strong> {template.guideInfo}</p>
                 </div>
             ),
         });
@@ -242,11 +187,6 @@ const TourTemplateManagement: React.FC = () => {
         form.validateFields().then(values => {
             const processedValues = {
                 ...values,
-                itinerary: values.itinerary ? values.itinerary.map((item: any) => ({
-                    id: item.id || Date.now().toString() + Math.random(),
-                    checkpoint: item.checkpoint.format('HH:mm'),
-                    activity: item.activity
-                })) : [],
                 images: values.images ? values.images.map((file: any) => file.url || file.name) : []
             };
 
@@ -281,6 +221,12 @@ const TourTemplateManagement: React.FC = () => {
 
     const handleSearch = (value: string) => {
         setSearchText(value);
+    };
+
+    // Thêm hàm xử lý tạo tour từ template
+    const handleCreateTour = (template: TourTemplate) => {
+        // TODO: Mở modal tạo tour, hoặc chuyển sang trang tạo tour với template đã chọn
+        message.info(`Tạo tour từ template: ${template.name}`);
     };
 
     return (
@@ -323,15 +269,13 @@ const TourTemplateManagement: React.FC = () => {
                 width={1000}
             >                <Form
                 form={form}
-                layout="vertical" initialValues={{
+                layout="vertical"
+                initialValues={{
                     ticketQuantity: 30,
                     tourType: 'Núi non',
                     availableDays: ['saturday', 'sunday'],
-                    availableDates: [1, 15],
                     availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                    itinerary: [
-                        { checkpoint: dayjs('08:00', 'HH:mm'), activity: 'Tập trung tại điểm hẹn' }
-                    ]
+                    availableTourDates: []
                 }}
             >
                     {/* Thông tin cơ bản */}
@@ -408,34 +352,10 @@ const TourTemplateManagement: React.FC = () => {
                             >
                                 <Checkbox.Group
                                     options={[
-                                        { label: 'Thứ 2', value: 'monday' },
-                                        { label: 'Thứ 3', value: 'tuesday' },
-                                        { label: 'Thứ 4', value: 'wednesday' },
-                                        { label: 'Thứ 5', value: 'thursday' },
-                                        { label: 'Thứ 6', value: 'friday' },
                                         { label: 'Thứ 7', value: 'saturday' },
                                         { label: 'Chủ nhật', value: 'sunday' }
                                     ]}
                                 />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name="availableDates"
-                                label="Ngày trong tháng"
-                                rules={[{ required: true, message: 'Vui lòng chọn ít nhất 1 ngày' }]}
-                            >
-                                <Select
-                                    mode="multiple"
-                                    placeholder="Chọn ngày trong tháng"
-                                    style={{ width: '100%' }}
-                                >
-                                    {Array.from({ length: 31 }, (_, i) => (
-                                        <Option key={i + 1} value={i + 1}>
-                                            {i + 1}
-                                        </Option>
-                                    ))}
-                                </Select>
                             </Form.Item>
                         </Col>
                         <Col span={8}>
@@ -461,12 +381,27 @@ const TourTemplateManagement: React.FC = () => {
                                 </Select>
                             </Form.Item>
                         </Col>
+                        <Col span={8}>
+                            <Form.Item
+                                name="availableYears"
+                                label="Năm"
+                                rules={[{ required: true, message: 'Vui lòng chọn ít nhất 1 năm' }]}
+                            >
+                                <Select
+                                    mode="multiple"
+                                    placeholder="Chọn năm"
+                                    style={{ width: '100%' }}
+                                >
+                                    {[2024, 2025, 2026, 2027, 2028].map(year => (
+                                        <Option key={year} value={year}>{year}</Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
                     </Row>
 
                     {/* Hình ảnh */}
-                    <Divider orientation="left">Hình ảnh</Divider>
-
-                    <Form.Item
+                    <Divider orientation="left">Hình ảnh</Divider>                    <Form.Item
                         name="images"
                         label="Hình ảnh tour"
                         rules={[{ required: true, message: 'Vui lòng tải lên ít nhất 1 hình ảnh' }]}
@@ -482,89 +417,6 @@ const TourTemplateManagement: React.FC = () => {
                                 <div style={{ marginTop: 8 }}>Tải ảnh</div>
                             </div>
                         </Upload>
-                    </Form.Item>
-
-                    {/* Lịch trình */}
-                    <Divider orientation="left">Lịch trình</Divider>
-
-                    <Form.List name="itinerary">
-                        {(fields, { add, remove }) => (
-                            <>
-                                {fields.map(({ key, name, ...restField }) => (
-                                    <Row key={key} gutter={16} align="middle">
-                                        <Col span={6}>
-                                            <Form.Item
-                                                {...restField}
-                                                name={[name, 'checkpoint']}
-                                                label={key === 0 ? "Giờ" : ""}
-                                                rules={[{ required: true, message: 'Chọn giờ' }]}
-                                            >
-                                                <TimePicker
-                                                    format="HH:mm"
-                                                    placeholder="Chọn giờ"
-                                                    style={{ width: '100%' }}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={16}>
-                                            <Form.Item
-                                                {...restField}
-                                                name={[name, 'activity']}
-                                                label={key === 0 ? "Hoạt động" : ""}
-                                                rules={[{ required: true, message: 'Nhập hoạt động' }]}
-                                            >
-                                                <Input placeholder="Mô tả hoạt động tại thời điểm này" />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={2}>
-                                            {fields.length > 1 && (
-                                                <Button
-                                                    type="link"
-                                                    icon={<MinusCircleOutlined />}
-                                                    onClick={() => remove(name)}
-                                                    style={{ marginTop: key === 0 ? 30 : 0 }}
-                                                >
-                                                </Button>
-                                            )}
-                                        </Col>
-                                    </Row>
-                                ))}
-                                <Form.Item>
-                                    <Button
-                                        type="dashed"
-                                        onClick={() => add()}
-                                        block
-                                        icon={<PlusOutlined />}
-                                    >
-                                        Thêm điểm lịch trình
-                                    </Button>
-                                </Form.Item>
-                            </>
-                        )}
-                    </Form.List>
-
-                    {/* Mô tả và hướng dẫn viên */}
-                    <Divider orientation="left">Thông tin bổ sung</Divider>
-
-                    <Form.Item
-                        name="description"
-                        label="Mô tả tour"
-                        rules={[{ required: true, message: 'Vui lòng nhập mô tả tour' }]}
-                    >
-                        <TextArea
-                            rows={4}
-                            placeholder="Mô tả chi tiết về tour, điểm đến, trải nghiệm..."
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="guideInfo"
-                        label="Thông tin hướng dẫn viên"
-                        rules={[{ required: true, message: 'Vui lòng nhập thông tin hướng dẫn viên' }]}
-                    >                        <TextArea
-                            rows={3}
-                            placeholder="Thông tin về hướng dẫn viên: kinh nghiệm, chuyên môn, ngôn ngữ..."
-                        />
                     </Form.Item>
                 </Form>
             </Modal>

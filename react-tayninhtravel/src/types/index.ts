@@ -48,6 +48,43 @@ export interface TourItinerary {
     accommodation?: string;
 }
 
+// Tour Company Management Types
+export interface TourTemplate {
+    id: string;
+    name: string;
+    startLocation: string;
+    endLocation: string;
+    tourType: string;
+    availableDays: string[]; // ['monday', 'tuesday', etc.]
+    availableMonths: number[]; // [1, 2, 3, ..., 12]
+    images: string[];
+    ticketQuantity: number;
+    createdAt: string;
+    usageCount: number;
+    availableTourDates?: string[]; // Ngày đi cụ thể cho template
+}
+
+export interface ItineraryItem {
+    id: string;
+    checkpoint: string; // time like "08:00"
+    activity: string;
+}
+
+export interface TourManagement {
+    id: string;
+    name: string;
+    templateId: string;
+    templateName: string;
+    maxGroupSize: number;
+    currentBookings: number;
+    price: number;
+    tourDate: string;
+    description: string;
+    guideInfo: string;
+    itinerary: ItineraryItem[];
+    createdAt: string;
+}
+
 export interface Booking {
     id: string;
     tourId: string;

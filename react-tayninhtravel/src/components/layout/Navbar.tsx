@@ -134,12 +134,17 @@ const Navbar = () => {
       label: 'Admin Dashboard',
       icon: <DashboardOutlined />,
       onClick: () => navigate('/admin/dashboard'),
-    }] : []),
-    ...(user?.role === 'Blogger' ? [{
+    }] : []), ...(user?.role === 'Blogger' ? [{
       key: 'blogger',
       label: 'Blogger Dashboard',
       icon: <DashboardOutlined />,
       onClick: () => navigate('/blogger/dashboard'),
+    }] : []),
+    ...(user?.role === 'Tour Company' ? [{
+      key: 'tour-company',
+      label: 'Tour Company Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/tour-company/dashboard'),
     }] : []),
     {
       key: 'settings',
@@ -263,10 +268,14 @@ const Navbar = () => {
                 <Button type="primary" onClick={() => navigate('/admin/dashboard')}>
                   Admin Dashboard
                 </Button>
-              )}
-              {user?.role === 'Blogger' && (
+              )}              {user?.role === 'Blogger' && (
                 <Button type="primary" onClick={() => navigate('/blogger/dashboard')}>
                   Blogger Dashboard
+                </Button>
+              )}
+              {user?.role === 'Tour Company' && (
+                <Button type="primary" onClick={() => navigate('/tour-company/dashboard')}>
+                  Tour Company Dashboard
                 </Button>
               )}
               <Button type="primary" onClick={() => navigate('/profile')}>
