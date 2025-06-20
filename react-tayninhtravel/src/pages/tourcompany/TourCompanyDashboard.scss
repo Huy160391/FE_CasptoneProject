@@ -1,0 +1,212 @@
+.tour-company-dashboard {
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+
+        .ant-typography {
+            margin-bottom: 0;
+        }
+    }
+
+    .stats-cards {
+        .ant-card {
+            .ant-statistic {
+                .ant-statistic-title {
+                    color: #666;
+                    font-weight: 500;
+                }
+
+                .ant-statistic-content {
+                    color: #1890ff;
+                }
+            }
+
+            .growth-indicator {
+                margin-top: 8px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 12px;
+            }
+        }
+    }
+
+    .revenue-chart {
+        .revenue-chart-placeholder {
+            padding: 20px 0;
+
+            .revenue-bar {
+                display: flex;
+                align-items: center;
+                margin-bottom: 12px;
+                gap: 12px;
+
+                span {
+                    min-width: 30px;
+                    font-weight: 500;
+                }
+
+                .ant-progress {
+                    flex: 1;
+                }
+            }
+        }
+    }
+
+    .popular-tours {
+        .tour-item {
+            margin-bottom: 16px;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .tour-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 8px;
+
+                .tour-name {
+                    font-weight: 500;
+                    color: #333;
+                }
+
+                .booking-count {
+                    color: #666;
+                    font-size: 12px;
+                }
+            }
+
+            .ant-progress {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    .recent-bookings {
+        .ant-table {
+            .ant-table-thead > tr > th {
+                background-color: #fafafa;
+                font-weight: 600;
+            }
+
+            .ant-table-tbody > tr:hover > td {
+                background-color: #f0f9ff;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .stats-cards {
+            .ant-col {
+                margin-bottom: 16px;
+            }
+        }
+    }
+
+    /* Dark mode styles */
+    .dark-mode & {
+        .stats-cards {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+
+                .ant-statistic {
+                    .ant-statistic-title {
+                        color: #a0a0a0;
+                    }
+
+                    .ant-statistic-content {
+                        color: #79eac0;
+                    }
+                }
+
+                .growth-indicator {
+                    color: #a0a0a0;
+                }
+            }
+        }
+
+        .revenue-chart {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+
+                .ant-card-head-title {
+                    color: #ffffff;
+                }
+            }
+
+            .revenue-chart-placeholder {
+                .revenue-bar {
+                    span {
+                        color: #ffffff;
+                    }
+                }
+            }
+        }
+
+        .popular-tours {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+
+                .ant-card-head-title {
+                    color: #ffffff;
+                }
+            }
+
+            .tour-item {
+                .tour-info {
+                    .tour-name {
+                        color: #ffffff;
+                    }
+
+                    .booking-count {
+                        color: #a0a0a0;
+                    }
+                }
+            }
+        }
+
+        .recent-bookings {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+
+                .ant-card-head-title {
+                    color: #ffffff;
+                }
+            }
+
+            .ant-table {
+                background-color: #262626;
+
+                .ant-table-thead > tr > th {
+                    background-color: #1f1f1f;
+                    color: #ffffff;
+                    border-bottom: 1px solid #404040;
+                }
+
+                .ant-table-tbody > tr > td {
+                    background-color: #262626;
+                    color: #ffffff;
+                    border-bottom: 1px solid #404040;
+                }
+
+                .ant-table-tbody > tr:hover > td {
+                    background-color: #2f2f2f !important;
+                }
+            }
+        }
+    }
+}

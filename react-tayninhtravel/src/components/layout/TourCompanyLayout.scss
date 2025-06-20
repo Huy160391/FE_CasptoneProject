@@ -1,0 +1,225 @@
+.tour-company-layout {
+    min-height: 100vh;
+
+    .tour-company-sider {
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+        display: flex;
+        flex-direction: column;
+
+        .logo-container {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            background-color: #002140;
+            transition: background-color 0.3s ease;
+        }
+
+        .collapse-button {
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.65);
+            transition: color 0.3s;
+            
+            &:hover {
+                color: #fff;
+            }
+        }
+
+        .company-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            
+            .ant-avatar {
+                margin-bottom: 8px;
+            }
+            
+            .company-details {
+                text-align: center;
+                
+                .company-name {
+                    font-size: 16px;
+                    font-weight: 500;
+                }
+                
+                .company-role {
+                    font-size: 12px;
+                    opacity: 0.7;
+                }
+            }
+        }
+
+        .ant-menu {
+            border-right: none;
+            flex: 1;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 16px;
+            
+            .profile-btn {
+                margin-bottom: 8px;
+                color: rgba(255, 255, 255, 0.65);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                
+                &:hover {
+                    color: #79eac0;
+                    border-color: #79eac0;
+                    background-color: rgba(121, 234, 192, 0.1);
+                }
+            }
+            
+            .back-to-site-btn {
+                margin-bottom: 8px;
+                background-color: #79eac0;
+                border-color: #79eac0;
+                color: #000000;
+                
+                &:hover {
+                    background-color: #52c49c;
+                    border-color: #52c49c;
+                }
+            }
+            
+            .logout-btn {
+                background-color: #f5222d;
+                border-color: #f5222d;
+                
+                &:hover {
+                    background-color: #ff4d4f;
+                    border-color: #ff4d4f;
+                }
+            }
+        }
+    }
+
+    .tour-company-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        .header-left {
+            .page-title {
+                font-size: 20px;
+                font-weight: 600;
+                color: #333;
+            }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+    }
+
+    .tour-company-content {
+        margin: 24px 16px;
+        padding: 24px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        min-height: calc(100vh - 112px);
+    }
+}
+
+/* Dark mode styles */
+.tour-company-layout.dark-mode {
+    .tour-company-sider {
+        .logo-container {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        .company-info {
+            color: #e0e0e0;
+            
+            .company-role {
+                color: #a0a0a0;
+            }
+        }
+
+        .ant-menu.ant-menu-dark {
+            background-color: #141414;
+            
+            .ant-menu-item-selected {
+                background-color: #79eac0;
+                color: #000000;
+                
+                .anticon {
+                    color: #000000;
+                }
+            }
+
+            .ant-menu-item:hover {
+                background-color: #79eac0;
+                color: #000000;
+                
+                .anticon {
+                    color: #000000;
+                }
+            }
+        }
+
+        .sidebar-bottom {
+            .profile-btn {
+                color: rgba(255, 255, 255, 0.65);
+                border-color: rgba(255, 255, 255, 0.2);
+                
+                &:hover {
+                    color: #79eac0;
+                    border-color: #79eac0;
+                    background-color: rgba(121, 234, 192, 0.1);
+                }
+            }
+            
+            .back-to-site-btn {
+                background-color: #79eac0;
+                border-color: #79eac0;
+                color: #000000;
+                
+                &:hover {
+                    background-color: #52c49c;
+                    border-color: #52c49c;
+                }
+            }
+            
+            .logout-btn {
+                background-color: #ff4d4f;
+                border-color: #ff4d4f;
+                
+                &:hover {
+                    background-color: #ff7875;
+                    border-color: #ff7875;
+                }
+            }
+        }
+    }
+
+    .tour-company-header {
+        background-color: #141414 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+        .header-left {
+            .page-title {
+                color: #ffffff;
+            }
+        }
+    }
+
+    .tour-company-content {
+        background: #1f1f1f;
+        color: #ffffff;
+    }
+}

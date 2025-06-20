@@ -6,6 +6,7 @@ import { publicRoutes } from './publicRoutes';
 import { privateRoutes } from './privateRoutes';
 import { adminRoutes } from './adminRoutes';
 import { bloggerRoutes } from './bloggerRoutes';
+import TourCompanyLayout from '@/components/layout/TourCompanyLayout';
 import { tourCompanyRoutes } from './tourCompanyRoutes';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -48,15 +49,14 @@ const routes: RouteObject[] = [
   {
     path: '/tour-company',
     element: <ProtectedRoute requiredRole="Tour Company" />,
-    children: [
-      {
-        path: '',
-        element: <div>Tour Company Layout</div>, // Temporary placeholder
-        children: [
-          { path: '', element: <Navigate to="/tour-company/dashboard" /> },
-          ...(tourCompanyRoutes[0].children || []),
-        ],
-      }
+    children: [{
+      path: '',
+      element: <TourCompanyLayout />,
+      children: [
+        { path: '', element: <Navigate to="/tour-company/dashboard" /> },
+        ...(tourCompanyRoutes[0].children || []),
+      ],
+    }
     ],
   },
 ];
