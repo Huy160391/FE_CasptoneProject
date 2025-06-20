@@ -58,7 +58,6 @@ export interface TourTemplate {
     availableDays: string[]; // ['monday', 'tuesday', etc.]
     availableMonths: number[]; // [1, 2, 3, ..., 12]
     images: string[];
-    ticketQuantity: number;
     createdAt: string;
     usageCount: number;
     availableTourDates?: string[]; // Ngày đi cụ thể cho template

@@ -43,7 +43,6 @@ const TourTemplateManagement: React.FC = () => {
             availableDays: ['saturday', 'sunday'],
             availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             images: ['/images/tours/nui-ba-den.jpg'],
-            ticketQuantity: 30,
             createdAt: '2024-01-15',
             usageCount: 12
         },
@@ -56,7 +55,6 @@ const TourTemplateManagement: React.FC = () => {
             availableDays: ['monday', 'wednesday', 'friday', 'sunday'],
             availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             images: ['/images/tours/toa-thanh-cao-dai.jpg'],
-            ticketQuantity: 40,
             createdAt: '2024-01-10',
             usageCount: 8
         }
@@ -85,11 +83,6 @@ const TourTemplateManagement: React.FC = () => {
         render: (_: any, record: TourTemplate) => (
             <span>{record.startLocation} → {record.endLocation}</span>
         ),
-    },
-    {
-        title: 'Số vé',
-        dataIndex: 'ticketQuantity',
-        key: 'ticketQuantity',
     },
     {
         title: 'Số lần sử dụng',
@@ -162,7 +155,6 @@ const TourTemplateManagement: React.FC = () => {
                     <p><strong>Điểm bắt đầu:</strong> {template.startLocation}</p>
                     <p><strong>Điểm kết thúc:</strong> {template.endLocation}</p>
                     <p><strong>Loại tour:</strong> {template.tourType}</p>
-                    <p><strong>Số lượng vé:</strong> {template.ticketQuantity}</p>
 
                     <p><strong>Thời gian có sẵn:</strong></p>
                     <ul>
@@ -271,7 +263,6 @@ const TourTemplateManagement: React.FC = () => {
                 form={form}
                 layout="vertical"
                 initialValues={{
-                    ticketQuantity: 30,
                     tourType: 'Núi non',
                     availableDays: ['saturday', 'sunday'],
                     availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -312,7 +303,8 @@ const TourTemplateManagement: React.FC = () => {
                                 <Input placeholder="VD: Núi Bà Đen, Tây Ninh" />
                             </Form.Item>
                         </Col>
-                    </Row>                    <Row gutter={16}>
+                    </Row>
+                    <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
                                 name="tourType"
@@ -327,15 +319,6 @@ const TourTemplateManagement: React.FC = () => {
                                     <Option value="Lịch sử">Lịch sử</Option>
                                     <Option value="Du lịch trải nghiệm">Du lịch trải nghiệm</Option>
                                 </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item
-                                name="ticketQuantity"
-                                label="Số lượng vé"
-                                rules={[{ required: true, message: 'Vui lòng nhập số lượng vé' }]}
-                            >
-                                <InputNumber min={1} max={200} style={{ width: '100%' }} placeholder="Số lượng vé có sẵn" />
                             </Form.Item>
                         </Col>
                     </Row>
