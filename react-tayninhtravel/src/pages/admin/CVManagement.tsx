@@ -9,14 +9,14 @@ import {
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { Key } from 'react'
-import { userService } from '@/services/userService'
+import { adminService } from '@/services/adminService'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
 import './CVManagement.scss'
 
-// Define the CV interface that's used in this component
-interface CV {
+// Đổi tên interface CV thành AdminCV để tránh xung đột với type CV global
+interface AdminCV {
     id: string;
     email: string;
     curriculumVitae: string;
@@ -34,19 +34,25 @@ const CVManagement = () => {
     const [searchText, setSearchText] = useState('')
     const [rejectModalVisible, setRejectModalVisible] = useState(false)
     const [selectedCV, setSelectedCV] = useState<string | null>(null)
-    const [cvs, setCvs] = useState<CV[]>([])
+    const [cvs, setCvs] = useState<AdminCV[]>([])
     const [loading, setLoading] = useState(false)
     const [form] = Form.useForm()
     const fetchCVs = async () => {
         try {
             setLoading(true)
-            // Debug: Kiểm tra token
             const token = localStorage.getItem('token')
             console.log('Current token:', token)
-
-            const cvs = await userService.getTourGuideApplications();
-            console.log('Response:', cvs)
-            setCvs(cvs)
+            // Map dữ liệu trả về sang đúng shape của AdminCV
+            const apiCVs = await adminService.getCVs();
+            const mappedCVs: AdminCV[] = apiCVs.map((cv: any) => ({
+                id: cv.id,
+                email: cv.email,
+                curriculumVitae: cv.curriculumVitae,
+                status: typeof cv.status === 'number' ? cv.status : 0,
+                createdAt: cv.createdAt,
+                reason: cv.rejectionReason || undefined
+            }))
+            setCvs(mappedCVs)
         } catch (error: any) {
             console.error('Error fetching CVs:', error)
             if (error.response) {
@@ -73,7 +79,7 @@ const CVManagement = () => {
         fetchCVs()
     }, [isAuthenticated, navigate, t])
 
-    const columns: ColumnsType<CV> = [
+    const columns: ColumnsType<AdminCV> = [
         {
             title: t('admin.cvManagement.columns.index'),
             key: 'index',
@@ -86,7 +92,7 @@ const CVManagement = () => {
             key: 'email',
             width: '30%',
             filteredValue: searchText ? [searchText] : null,
-            onFilter: (value: boolean | Key, record: CV) => {
+            onFilter: (value: boolean | Key, record: AdminCV) => {
                 const searchValue = value.toString().toLowerCase()
                 return record.email.toLowerCase().includes(searchValue)
             },
@@ -97,7 +103,7 @@ const CVManagement = () => {
             key: 'createdAt',
             width: '15%',
             render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
-            sorter: (a: CV, b: CV) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+            sorter: (a: AdminCV, b: AdminCV) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         },
         {
             title: t('admin.cvManagement.columns.attachment'),
@@ -145,13 +151,13 @@ const CVManagement = () => {
                 { text: t('admin.cvManagement.status.approved'), value: 1 },
                 { text: t('admin.cvManagement.status.rejected'), value: 2 },
             ],
-            onFilter: (value: boolean | Key, record: CV) => record.status === Number(value),
+            onFilter: (value: boolean | Key, record: AdminCV) => record.status === Number(value),
         },
         {
             title: t('admin.cvManagement.columns.actions'),
             key: 'actions',
             width: '15%',
-            render: (_, record: CV) => (
+            render: (_, record: AdminCV) => (
                 <Space>                    {record.status === 0 && (
                     <>
                         <Button
@@ -188,7 +194,7 @@ const CVManagement = () => {
             cancelText: t('common.cancel'),
             onOk: async () => {
                 try {
-                    await userService.approveTourGuideApplication(cvId);
+                    await adminService.approveTourGuideApplication(cvId);
                     fetchCVs()
                     Modal.success({
                         title: t('admin.cvManagement.messages.success.approved'),
@@ -213,7 +219,7 @@ const CVManagement = () => {
     const handleRejectModalOk = async () => {
         try {
             const values = await form.validateFields()
-            await userService.rejectTourGuideApplication(selectedCV as string, values.reason);
+            await adminService.rejectTourGuideApplication(selectedCV as string, values.reason);
             fetchCVs()
             setRejectModalVisible(false)
             setSelectedCV(null)

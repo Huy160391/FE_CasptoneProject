@@ -65,6 +65,8 @@ export const authService = {
                     role: userRole as User['role'],
                     phone: data.phoneNumber,
                     avatar: data.avatar || 'https://i.imgur.com/4AiXzf8.jpg',
+                    status: true, // default true, hoặc lấy từ API nếu có
+                    isVerified: true, // default true, hoặc lấy từ API nếu có
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };

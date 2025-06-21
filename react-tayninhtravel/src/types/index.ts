@@ -1,89 +1,6 @@
 // Global Types for Tay Ninh Travel Project
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    role: 'user' | 'Admin' | 'Blogger' | 'Tour Company';
-    avatar?: string;
-    address?: string;
-    isVerified?: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface Tour {
-    id: string;
-    title: string;
-    description: string;
-    shortDescription?: string;
-    price: number;
-    originalPrice?: number;
-    duration: string;
-    location: string;
-    category: string;
-    images: string[];
-    thumbnail?: string;
-    maxGroupSize: number;
-    minGroupSize?: number;
-    difficulty: 'easy' | 'medium' | 'hard';
-    highlights: string[];
-    included: string[];
-    excluded?: string[];
-    itinerary?: TourItinerary[];
-    rating: number;
-    reviewCount: number;
-    isActive: boolean;
-    featured?: boolean;
-    tags?: string[];
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface TourItinerary {
-    day: number;
-    title: string;
-    activities: string[];
-    meals?: string[];
-    accommodation?: string;
-}
 
 // Tour Company Management Types
-export type TemplateType = 1 | 2; // 1: FreeScenic, 2: PaidAttraction
-
-export interface TourTemplate {
-    id: string;
-    title: string;
-    templateType: TemplateType;
-    startLocation: string;
-    endLocation: string;
-    isActive: boolean;
-    createdAt: string;
-    month: number;
-    year: number;
-    images: string[];
-}
-
-export interface ItineraryItem {
-    id: string;
-    checkpoint: string; // time like "08:00"
-    activity: string;
-}
-
-export interface TourManagement {
-    id: string;
-    name: string;
-    templateId: string;
-    templateName: string;
-    maxGroupSize: number;
-    currentBookings: number;
-    price: number;
-    tourDate: string;
-    description: string;
-    guideInfo: string;
-    itinerary: ItineraryItem[];
-    createdAt: string;
-}
 
 export interface Booking {
     id: string;
@@ -155,25 +72,6 @@ export interface Cart {
     couponCode?: string;
 }
 
-export interface Blog {
-    id: string;
-    title: string;
-    content: string;
-    excerpt?: string;
-    authorId: string;
-    author?: User;
-    category: string;
-    tags: string[];
-    images: string[];
-    thumbnail?: string;
-    status: 'draft' | 'published' | 'archived';
-    viewCount: number;
-    isFeature: boolean;
-    publishedAt?: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
 // Admin-specific blog interface
 export interface AdminBlogPost {
     id: string;
@@ -221,32 +119,6 @@ export interface Review {
     helpful: number;
     createdAt: string;
     updatedAt: string;
-}
-
-export interface SupportTicket {
-    id: string;
-    subject: string;
-    description: string;
-    category: 'booking' | 'payment' | 'technical' | 'general';
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    status: 'open' | 'in-progress' | 'resolved' | 'closed';
-    userId: string;
-    user?: User;
-    assignedTo?: string;
-    assignedUser?: User;
-    responses?: TicketResponse[];
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface TicketResponse {
-    id: string;
-    content: string;
-    userId: string;
-    user?: User;
-    isStaff: boolean;
-    attachments?: string[];
-    createdAt: string;
 }
 
 export interface ThingToDo {
@@ -476,228 +348,17 @@ export interface DecodedToken {
     role?: string;
 }
 
-// Support Types
-export type TicketStatus = 'Open' | 'Resolved' | 'Rejected';
+// Đã di chuyển các type liên quan tour sang ./tour
+// Đã tách các interface/type liên quan user, blog, comment, support sang các file riêng
+// Xoá các interface/type trùng lặp ở đây (User, UserServiceUser, UserBlog, UserComment, UserSupportTicket, ApiUser, ...)
+// Giữ lại các type liên quan đến tour, product, booking, ...
 
-export const TICKET_STATUS_MAP = {
-    0: 'Open',
-    1: 'Resolved',
-    2: 'Rejected'
-} as const;
+import type { User } from './user';
+import type { Blog } from './blog';
+import type { Tour } from './tour';
 
-// Admin-specific support ticket interface
-export interface AdminSupportTicket {
-    id: string;
-    title: string;
-    content: string;
-    status: TicketStatus;
-    createdAt: string;
-    userId?: string;
-    userName?: string;
-    userEmail?: string;
-    images: {
-        id: string;
-        url: string;
-    }[];
-    response?: string;
-}
-
-// User Management Types
-export interface UpdateUserPayload {
-    name?: string;
-    email?: string;
-    phone?: string;
-    role?: string;
-    status?: boolean;
-}
-
-export interface CreateUserPayload extends UpdateUserPayload {
-    password: string;
-}
-
-export interface ProfileUpdatePayload {
-    name: string;
-    phoneNumber: string;
-}
-
-export interface TourGuideApplication {
-    email: string;
-    curriculumVitae: File;
-}
-
-// User-specific types (different from global User)
-export interface UserServiceUser {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    role: string;
-    status: boolean;
-    avatar?: string;
-    isVerified: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-// User-specific Blog interface
-export interface UserBlog {
-    id: string;
-    title: string;
-    content: string;
-    imageUrl?: string[];
-    authorName: string;
-    status?: number; // 0=pending, 1=published, 2=rejected
-    totalLikes?: number;
-    totalDislikes?: number;
-    totalComments?: number;
-    createdAt?: string;
-    updatedAt?: string;
-}
-
-// User-specific Comment interface
-export interface UserComment {
-    id: string;
-    content: string;
-    userId: string;
-    userName: string;
-    userAvatar?: string;
-    blogId: string;
-    parentCommentId?: string | null;
-    createdAt: string;
-    updatedAt?: string;
-    likes?: number;
-    replies?: UserComment[];
-    statusCode?: number;
-    message?: string | null;
-    isSuccess?: boolean;
-    validationErrors?: any[];
-}
-
-// User-specific Support Ticket interface
-export interface UserSupportTicket {
-    id: string;
-    title: string;
-    content: string;
-    status: TicketStatus;
-    createdAt: string;
-    userId?: string;
-    userName?: string;
-    userEmail?: string;
-    images: {
-        id: string;
-        url: string;
-    }[];
-    response?: string;
-}
-
-// Blogger Service Types
-export interface ApiBlogPost {
-    id: string;
-    title: string;
-    content: string;
-    authorName: string;
-    commentOfAdmin?: string;
-    status: 0 | 1 | 2; // 0=pending, 1=accepted, 2=rejected
-    imageUrl?: string[];
-    totalLikes: number;
-    totalDislikes: number;
-    totalComments: number;
-}
-
-export interface ApiGetBlogsResponse {
-    statusCode: number;
-    message: string | null;
-    data: ApiBlogPost[];
-    totalPages: number;
-    totalRecord: number;
-    totalCount: number | null;
-    pageIndex: number | null;
-    pageSize: number | null;
-}
-
-export interface BlogPost {
-    id: string;
-    title: string;
-    excerpt: string;
-    content?: string;
-    category?: string;
-    tags?: string[];
-    featuredImage?: string;
-    status: 0 | 1 | 2; // 0=pending, 1=accepted, 2=rejected
-    likes: number;
-    comments: number;
-    createdAt: string;
-    updatedAt: string;
-    authorId?: string;
-    authorName?: string;
-}
-
-export interface GetBlogsParams {
-    pageIndex?: number;
-    pageSize?: number;
-    textSearch?: string;
-    status?: 0 | 1 | 2;
-    sortField?: string;
-    sortOrder?: 'asc' | 'desc';
-}
-
-export interface GetBloggerBlogsResponse {
-    blogs: BlogPost[];
-    totalCount: number;
-    pageIndex: number;
-    pageSize: number;
-    totalPages: number;
-}
-
-export interface GetUsersParams {
-    page: number;
-    pageSize: number;
-    search?: string;
-    status?: boolean;
-    sortField?: string;
-    sortOrder?: 'asc' | 'desc';
-}
-
-export interface ApiUser {
-    id: string;
-    email: string;
-    name: string;
-    phoneNumber: string;
-    avatar: string;
-    isVerified: boolean;
-    isActive: boolean;
-    role?: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-// Tour Company Service Types
-export interface GetTourTemplatesParams {
-    pageIndex?: number;
-    pageSize?: number;
-    textSearch?: string;
-    templateType?: string;
-    startLocation?: string;
-    includeInactive?: boolean;
-}
-
-export interface GetTourTemplatesResponse {
-    data: TourTemplate[];
-    totalRecord: number;
-    totalPages: number;
-    statusCode: number;
-    message: string;
-}
-
-export interface CreateBlogPayload {
-    title: string;
-    content: string;
-    files?: File[];
-}
-
-export interface UpdateBlogPayload {
-    id: string;
-    title: string;
-    content: string;
-    files?: File[];
-}
+export * from './user';
+export * from './blog';
+export * from './comment';
+export * from './support'; // Đảm bảo export AdminSupportTicket từ support.ts
+export * from './tour';

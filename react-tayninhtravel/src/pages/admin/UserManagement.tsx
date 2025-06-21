@@ -5,7 +5,8 @@ import type { ColumnsType } from 'antd/es/table'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
-import { userService, User } from '@/services/userService'
+import { adminService } from '@/services/adminService'
+import type { User } from '@/types/user'
 import './UserManagement.scss'
 
 const { Option } = Select
@@ -31,7 +32,7 @@ const UserManagement = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true)
-            const response = await userService.getUsers(
+            const response = await adminService.getUsers(
                 pagination.current,
                 pagination.pageSize,
                 searchText || undefined,
@@ -134,7 +135,7 @@ const UserManagement = () => {
             cancelText: t('common.cancel'),
             onOk: async () => {
                 try {
-                    await userService.toggleUserStatus(user.id, newStatus)
+                    await adminService.toggleUserStatus(user.id, newStatus)
                     message.success(newStatus
                         ? t('admin.users.messages.success.activated')
                         : t('admin.users.messages.success.deactivated')
@@ -165,7 +166,7 @@ const UserManagement = () => {
             cancelText: t('common.cancel'),
             onOk: async () => {
                 try {
-                    await userService.deleteUser(user.id)
+                    await adminService.deleteUser(user.id)
                     message.success(t('admin.users.messages.success.deleted'))
                     fetchUsers()
                 } catch (error) {
@@ -181,7 +182,7 @@ const UserManagement = () => {
             try {
                 if (editingUser) {
                     // Cập nhật người dùng hiện có
-                    await userService.updateUser(editingUser.id, {
+                    await adminService.updateUser(editingUser.id, {
                         name: values.name,
                         email: values.email,
                         phone: values.phone,
@@ -190,7 +191,7 @@ const UserManagement = () => {
                     message.success(t('admin.users.messages.success.updated'))
                 } else {
                     // Thêm người dùng mới
-                    await userService.createUser({
+                    await adminService.createUser({
                         name: values.name,
                         email: values.email,
                         phone: values.phone,
@@ -239,7 +240,7 @@ const UserManagement = () => {
             title: t('admin.users.columns.phone'),
             dataIndex: 'phone',
             key: 'phone',
-            sorter: (a: User, b: User) => a.phone.localeCompare(b.phone),
+            sorter: (a: User, b: User) => (a.phone || '').localeCompare(b.phone || ''),
         },
         {
             title: t('admin.users.columns.status'),
