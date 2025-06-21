@@ -22,7 +22,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ColumnsType } from 'antd/es/table';
-import bloggerService, { type BlogPost, type GetBlogsParams } from '@/services/bloggerService';
+import bloggerService from '@/services/bloggerService';
+import type { BlogPost, GetBlogsParams } from '@/types';
 import './MyBlogs.scss';
 
 const MyBlogs = () => {
@@ -41,7 +42,7 @@ const MyBlogs = () => {
                 pageIndex: currentPage,
                 pageSize,
                 textSearch: searchText,
-                status: true,
+                status: 1, // 1 = published
                 ...params
             });
 
@@ -49,7 +50,7 @@ const MyBlogs = () => {
                 pageIndex: currentPage,
                 pageSize,
                 textSearch: searchText,
-                status: true,
+                status: 1, // 1 = published
                 ...params
             });
 

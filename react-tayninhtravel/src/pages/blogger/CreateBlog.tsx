@@ -25,7 +25,8 @@ import { useTranslation } from 'react-i18next';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import type { UploadFile } from 'antd/es/upload/interface';
-import bloggerService, { type CreateBlogPayload } from '@/services/bloggerService';
+import bloggerService from '@/services/bloggerService';
+import type { CreateBlogPayload } from '@/types';
 import './CreateBlog.scss';
 
 const { Title } = Typography;

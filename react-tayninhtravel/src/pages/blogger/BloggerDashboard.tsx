@@ -11,7 +11,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ColumnsType } from 'antd/es/table';
-import bloggerService, { type BlogPost } from '@/services/bloggerService';
+import bloggerService from '@/services/bloggerService';
+import type { BlogPost } from '@/types';
 import './BloggerDashboard.scss';
 
 const BloggerDashboard = () => {
