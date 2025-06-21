@@ -4,92 +4,15 @@ import {
     CreateUserPayload,
     ProfileUpdatePayload,
     TourGuideApplication,
-    UserBlog,
     UserComment,
     UserSupportTicket,
-    Comment
+    Comment,
+    ApiUser,
+    CV
 } from '../types';
 
 // Re-export types for convenience
 export type { Comment, UserComment } from '../types';
-
-// API response interfaces
-interface ApiUser {
-    id: string;
-    name: string;
-    email: string;
-    phoneNumber: string;
-    role?: string;
-    isActive: boolean;
-    avatar?: string;
-    isVerified: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface ApiGetUsersResponse {
-    data: ApiUser[];
-    totalRecord: number;
-    page: number;
-    pageSize: number;
-}
-
-// Application types
-export type User = {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    role: string;
-    status: boolean;
-    avatar?: string;
-    isVerified: boolean;
-    createdAt: string;
-    updatedAt: string;
-};
-
-export type GetUsersResponse = {
-    data: User[];
-    totalRecords: number;
-    currentPage: number;
-    pageSize: number;
-};
-
-// API request types
-type ApiUpdateUserPayload = {
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    role?: string;
-    status?: boolean;
-};
-
-// CV management types
-export type CV = {
-    id: string;
-    email: string;
-    curriculumVitae: string;
-    status: number;
-    rejectionReason: string | null;
-    createdAt: string;
-    user: {
-        name: string;
-    };
-}
-
-export interface GetBlogsResponse {
-    data: UserBlog[];
-    totalRecords: number;
-    currentPage: number;
-    pageSize: number;
-}
-
-export interface GetCommentsResponse {
-    data: UserComment[];
-    totalRecords: number;
-    currentPage: number;
-    pageSize: number;
-}
 
 /**
  * Service handling user management API operations
@@ -105,7 +28,7 @@ export const userService = {
             id: apiUser.id,
             name: apiUser.name,
             email: apiUser.email,
-            phone: apiUser.phoneNumber,
+            phone: apiUser.phoneNumber || '',
             role: apiUser.role || '',
             status: apiUser.isActive,
             avatar: apiUser.avatar,
@@ -619,3 +542,48 @@ export const userService = {
 
 // Also export as default
 export default userService;
+
+// Định nghĩa lại các type còn thiếu tại đây nếu cần
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+    status: boolean;
+    avatar?: string;
+    isVerified: boolean;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type GetUsersResponse = {
+    data: User[];
+    totalRecords: number;
+    currentPage: number;
+    pageSize: number;
+};
+
+type ApiUpdateUserPayload = {
+    name?: string;
+    email?: string;
+    phoneNumber?: string;
+    role?: string;
+    status?: boolean;
+};
+
+// Định nghĩa lại GetCommentsResponse nếu chưa có trong types
+export type GetCommentsResponse = {
+    data: UserComment[];
+    totalRecords: number;
+    currentPage: number;
+    pageSize: number;
+};
+
+// Định nghĩa ApiGetUsersResponse nếu chưa có trong types
+export type ApiGetUsersResponse = {
+    data: ApiUser[];
+    totalRecord: number;
+    page: number;
+    pageSize: number;
+};

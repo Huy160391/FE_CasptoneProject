@@ -1,6 +1,8 @@
 import axios from '@/config/axios';
 // Import type definitions
 import { TicketStatus, AdminBlogPost, AdminSupportTicket } from '../types';
+import type { UpdateUserPayload, CreateUserPayload } from '@/types/user';
+import type { CV } from '@/types';
 
 // Re-export types for convenience
 export type { AdminBlogPost, SupportTicket, AdminSupportTicket } from '../types';
@@ -151,7 +153,8 @@ class AdminService {
         } catch (error) {
             this.handleError(error, 'Error deleting blog');
         }
-    } private mapApiBlogToAdmin(apiBlog: any): AdminBlogPost {
+    }
+    private mapApiBlogToAdmin(apiBlog: any): AdminBlogPost {
         return {
             id: apiBlog.id || '',
             title: apiBlog.title || 'No Title',
@@ -173,12 +176,12 @@ class AdminService {
     }    // Support Tickets Management
     async getSupportTickets(status?: TicketStatus): Promise<AdminSupportTicket[]> {
         try {
-            let url = 'SupportTickets/Admin';
+            let endpoint = 'Cms/SupportTicket';
             if (status) {
-                url += `?status=${encodeURIComponent(status)}`;
+                endpoint += `?status=${encodeURIComponent(status)}`;
             }
 
-            const response = await axios.get<AdminSupportTicket[]>(url);
+            const response = await axios.get<AdminSupportTicket[]>(endpoint);
 
             // Validate and transform response
             const tickets = Array.isArray(response.data) ? response.data : [];
@@ -287,6 +290,55 @@ class AdminService {
         }
 
         return error instanceof Error ? error : new Error(context);
+    }
+
+    // User Management Methods
+    async getUsers(page: number = 1, pageSize: number = 10, searchText?: string, status?: boolean) {
+        const params: any = {
+            pageIndex: page,
+            pageSize,
+        };
+        if (searchText) params.textSearch = searchText;
+        if (status !== undefined) params.status = status;
+        const response = await axios.get('/Cms/user', { params });
+        return response.data;
+    }
+
+    async getCVs(): Promise<CV[]> {
+        const response = await axios.get('Cms/tourguide-applications');
+        // Đảm bảo luôn trả về mảng
+        if (response.data && Array.isArray(response.data.data?.applications)) {
+            return response.data.data.applications;
+        }
+        return [];
+    }
+
+    async createUser(payload: CreateUserPayload) {
+        const response = await axios.post('/Cms/user', payload);
+        return response.data;
+    }
+
+    async updateUser(id: string, payload: UpdateUserPayload) {
+        const response = await axios.put(`/Cms/user/${id}`, payload);
+        return response.data;
+    }
+
+    async deleteUser(id: string) {
+        return axios.delete(`/Cms/user/${id}`);
+    }
+
+    async toggleUserStatus(id: string, status: boolean) {
+        const response = await axios.patch(`/Cms/user/${id}/status`, { status });
+        return response.data;
+    }
+
+    async approveTourGuideApplication(cvId: string): Promise<any> {
+        const response = await axios.put(`Cms/${cvId}/approve-application`);
+        return response.data;
+    }
+    async rejectTourGuideApplication(cvId: string, reason: string): Promise<any> {
+        const response = await axios.put(`Cms/${cvId}/reject-application`, { reason });
+        return response.data;
     }
 }
 

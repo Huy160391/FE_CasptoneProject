@@ -1,5 +1,5 @@
 import axiosInstance from '@/config/axios';
-import { BlogPost, ApiBlogPost, ApiGetBlogsResponse, GetBlogsParams, GetBloggerBlogsResponse, CreateBlogPayload, UpdateBlogPayload } from '@/types';
+import { BlogPost, ApiBlogPost, ApiGetBlogsResponse, GetBlogsParams, GetBloggerBlogsResponse, CreateBlogPayload, UpdateBlogPayload } from '@/types/blog';
 
 /**
  * Service handling blogger-specific API operations
