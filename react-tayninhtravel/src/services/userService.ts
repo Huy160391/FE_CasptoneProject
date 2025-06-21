@@ -34,8 +34,8 @@ interface ApiGetUsersResponse {
     pageSize: number;
 }
 
-// Application interfaces
-export interface User {
+// Application types
+export type User = {
     id: string;
     name: string;
     email: string;
@@ -46,26 +46,26 @@ export interface User {
     isVerified: boolean;
     createdAt: string;
     updatedAt: string;
-}
+};
 
-export interface GetUsersResponse {
+export type GetUsersResponse = {
     data: User[];
     totalRecords: number;
     currentPage: number;
     pageSize: number;
-}
+};
 
-// API request interfaces
-interface ApiUpdateUserPayload {
+// API request types
+type ApiUpdateUserPayload = {
     name?: string;
     email?: string;
     phoneNumber?: string;
     role?: string;
     status?: boolean;
-}
+};
 
-// CV management interfaces
-export interface CV {
+// CV management types
+export type CV = {
     id: string;
     email: string;
     curriculumVitae: string;
@@ -74,7 +74,7 @@ export interface CV {
     createdAt: string;
     user: {
         name: string;
-    }
+    };
 }
 
 export interface GetBlogsResponse {

@@ -36,16 +36,21 @@ export const bloggerService = {
                 pageIndex = 1,
                 pageSize = 10,
                 textSearch = '',
-                status = true
+                status
             } = params;
 
+            // Chỉ thêm status vào params nếu nó là true hoặc false
+            const apiParams: any = {
+                pageIndex,
+                pageSize,
+                textSearch
+            };
+            if (typeof status === 'boolean') {
+                apiParams.status = status;
+            }
+
             const response = await axiosInstance.get<ApiGetBlogsResponse>('/Blogger/Blog-Blogger', {
-                params: {
-                    pageIndex,
-                    pageSize,
-                    textSearch,
-                    status
-                }
+                params: apiParams
             });
 
             console.log('Get blogs response:', response.data);
