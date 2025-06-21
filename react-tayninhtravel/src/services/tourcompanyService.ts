@@ -1,27 +1,19 @@
 import axios from '../config/axios';
-import { TourTemplate } from '../types';
-
-export interface GetTourTemplatesParams {
-    pageIndex?: number;
-    pageSize?: number;
-    textSearch?: string;
-    templateType?: string;
-    startLocation?: string;
-    includeInactive?: boolean;
-}
-
-export interface GetTourTemplatesResponse {
-    data: TourTemplate[];
-    totalRecord: number;
-    totalPages: number;
-    statusCode: number;
-    message: string;
-}
+import { TourTemplate, GetTourTemplatesParams, GetTourTemplatesResponse } from '../types';
 
 // Tạo mới template tour
-export const createTourTemplate = async (data: Omit<TourTemplate, 'id' | 'createdAt'>) => {
+export const createTourTemplate = async (data: {
+    title: string;
+    startLocation: string;
+    endLocation: string;
+    templateType: number;
+    scheduleDays: number;
+    month: number;
+    year: number;
+    images: string[];
+}) => {
     // Gọi API backend tạo template
-    const response = await axios.post('/tourcompany/templates', data);
+    const response = await axios.post('/TourCompany/template', data);
     return response.data;
 };
 
@@ -50,16 +42,28 @@ export const getTourTemplates = async (params: GetTourTemplatesParams = {}, toke
     return response.data;
 };
 
+// Lấy chi tiết template tour
+export const getTourTemplateDetail = async (id: string, token: string): Promise<TourTemplate | null> => {
+    const headers = { Authorization: `Bearer ${token}` };
+    const response = await axios.get(`/TourCompany/template/${id}`, { headers });
+    if (response.data && response.data.data) {
+        return response.data.data;
+    }
+    return null;
+};
+
 // Xoá template tour
-export const deleteTourTemplate = async (id: string) => {
-    const response = await axios.delete(`/tourcompany/templates/${id}`);
+export const deleteTourTemplate = async (id: string, token?: string) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.delete(`/TourCompany/template/${id}`, { headers });
     return response.data;
 };
 
 // Cập nhật template tour
-export const updateTourTemplate = async (id: string, data: Partial<TourTemplate>) => {
-    const response = await axios.put(`/tourcompany/templates/${id}`, data);
-    return response.data;
+export const updateTourTemplate = async (id: string, body: any, token?: string) => {
+    return axios.patch(`/TourCompany/template/${id}`, body, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
 };
 
 // Tạo mới tour từ template

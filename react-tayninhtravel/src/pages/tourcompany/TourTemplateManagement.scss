@@ -238,5 +238,85 @@
                 color: #666;
             }
         }
+
+        /* Divider custom for modal in both light/dark mode */
+        .custom-modal-divider {
+            color: var(--ant-primary-color, #1677ff) !important;
+            font-weight: 600;
+            font-size: 16px;
+            transition: color 0.2s;
+        }
+        body.dark .custom-modal-divider,
+        .dark .custom-modal-divider,
+        [data-theme='dark'] .custom-modal-divider {
+            color: #1677ff !important;
+        }
+        body.dark .ant-divider-inner-text.custom-modal-divider,
+        .dark .ant-divider-inner-text.custom-modal-divider,
+        [data-theme='dark'] .ant-divider-inner-text.custom-modal-divider {
+            color: #1677ff !important;
+        }
+
+        /* Đổi màu toàn bộ văn bản trong modal view khi ở dark mode */
+        body.dark .template-view-modal,
+        .dark .template-view-modal,
+        [data-theme='dark'] .template-view-modal {
+            color: #fff !important;
+        }
+        body.dark .template-view-modal p,
+        body.dark .template-view-modal strong,
+        body.dark .template-view-modal label,
+        body.dark .template-view-modal span,
+        body.dark .template-view-modal div,
+        .dark .template-view-modal p,
+        .dark .template-view-modal strong,
+        .dark .template-view-modal label,
+        body.dark .template-view-modal span,
+        body.dark .template-view-modal div,
+        .dark .template-view-modal p,
+        .dark .template-view-modal strong,
+        .dark .template-view-modal label,
+        .dark .template-view-modal span,
+        .dark .template-view-modal div,
+        [data-theme='dark'] .template-view-modal p,
+        [data-theme='dark'] .template-view-modal strong,
+        [data-theme='dark'] .template-view-modal label,
+        [data-theme='dark'] .template-view-modal span,
+        [data-theme='dark'] .template-view-modal div {
+            color: #fff !important;
+        }
+
+        /* Đảm bảo màu chữ Divider luôn trắng trong dark mode */
+        body.dark .custom-modal-divider .ant-divider-inner-text,
+        .dark .custom-modal-divider .ant-divider-inner-text,
+        [data-theme='dark'] .custom-modal-divider .ant-divider-inner-text {
+          color: #fff !important;
+        }
+    }
+
+    .modal-section-title {
+      margin: 24px 0 12px 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #1677ff;
+      /* Light mode: primary color */
+    }
+    body.dark .modal-section-title,
+    .dark .modal-section-title,
+    [data-theme='dark'] .modal-section-title {
+      color: #fff !important;
+    }
+
+    .modal-section-divider {
+      border: none;
+      border-top: 1.5px solid rgba(22, 119, 255, 0.15); /* primary blue, mờ */
+      margin: 28px 0 16px 0;
+      border-radius: 2px;
+    }
+    body.dark .modal-section-divider,
+    .dark .modal-section-divider,
+    [data-theme='dark'] .modal-section-divider {
+      border-top: 1.5px solid rgba(255,255,255,0.18) !important;
     }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TourTemplate } from '../../types';
-import { getTourTemplates } from '../../services/tourcompanyService';
+import { getTourTemplates, createTourTemplate, getTourTemplateDetail, updateTourTemplate, deleteTourTemplate } from '../../services/tourcompanyService';
+import publicService from '../../services/publicService';
 import {
     Table,
     Button,
@@ -11,7 +12,6 @@ import {
     Upload,
     Space,
     Tag,
-    Popconfirm,
     message,
     Typography,
     Card,
@@ -25,7 +25,8 @@ import {
     EditOutlined,
     DeleteOutlined,
     EyeOutlined,
-    SearchOutlined
+    SearchOutlined,
+    ExclamationCircleOutlined
 } from '@ant-design/icons';
 import './TourTemplateManagement.scss';
 
@@ -38,6 +39,7 @@ const TourTemplateManagement: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingTemplate, setEditingTemplate] = useState<TourTemplate | null>(null);
     const [form] = Form.useForm(); const [searchText, setSearchText] = useState('');
+    const [uploadFileList, setUploadFileList] = useState<any[]>([]);
 
     const columns = [
         {
@@ -45,15 +47,22 @@ const TourTemplateManagement: React.FC = () => {
             dataIndex: 'title',
             key: 'title',
             filteredValue: searchText ? [searchText] : null,
-            onFilter: (value: any, record: TourTemplate) =>
-                record.title.toLowerCase().includes(value.toString().toLowerCase()) ||
-                record.templateType.toLowerCase().includes(value.toString().toLowerCase()),
+            onFilter: (value: any, record: TourTemplate) => {
+                const typeMap: Record<number, string> = { 1: 'FreeScenic', 2: 'PaidAttraction' };
+                return (
+                    record.title.toLowerCase().includes(value.toString().toLowerCase()) ||
+                    typeMap[record.templateType]?.toLowerCase().includes(value.toString().toLowerCase())
+                );
+            },
         },
         {
             title: 'Loại tour',
             dataIndex: 'templateType',
             key: 'templateType',
-            render: (templateType: string) => <Tag color="blue">{templateType}</Tag>
+            render: (templateType: number) => {
+                const typeMap: Record<number, string> = { 1: 'FreeScenic', 2: 'PaidAttraction' };
+                return <Tag color="blue">{typeMap[templateType] || templateType}</Tag>;
+            }
         },
         {
             title: 'Điểm bắt đầu',
@@ -86,6 +95,10 @@ const TourTemplateManagement: React.FC = () => {
             title: 'Ngày tạo',
             dataIndex: 'createdAt',
             key: 'createdAt',
+            render: (createdAt: string) => {
+                const date = new Date(createdAt);
+                return date.toLocaleDateString('vi-VN');
+            }
         },
         {
             title: 'Thao tác',
@@ -114,20 +127,14 @@ const TourTemplateManagement: React.FC = () => {
                     >
                         Tạo tour
                     </Button>
-                    <Popconfirm
-                        title="Bạn có chắc muốn xóa template này?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Xóa"
-                        cancelText="Hủy"
+                    <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        size="small"
+                        onClick={() => handleDelete(record.id)}
                     >
-                        <Button
-                            danger
-                            icon={<DeleteOutlined />}
-                            size="small"
-                        >
-                            Xóa
-                        </Button>
-                    </Popconfirm>
+                        Xóa
+                    </Button>
                 </Space>
             ),
         },
@@ -155,65 +162,177 @@ const TourTemplateManagement: React.FC = () => {
         form.resetFields();
         setIsModalVisible(true);
     }; const handleEdit = (template: TourTemplate) => {
+        const templateTypeMap: Record<number, string> = { 1: 'FreeScenic', 2: 'PaidAttraction' };
+        const fileList = Array.isArray(template.images)
+            ? template.images.map((url, idx) => ({
+                uid: idx + '',
+                name: `image_${idx}`,
+                status: 'done',
+                url,
+            }))
+            : [];
+        const formValues: any = {
+            ...template,
+            templateType: templateTypeMap[template.templateType] || 'FreeScenic',
+            images: fileList,
+            availableMonths: template.month ? [template.month] : [],
+            availableYears: template.year ? [template.year] : [],
+        };
         setEditingTemplate(template);
-        form.setFieldsValue({
-            ...template
-        });
+        setUploadFileList(fileList); // set fileList cho Upload
+        form.setFieldsValue(formValues);
         setIsModalVisible(true);
-    }; const handleView = (template: TourTemplate) => {
+    }; const handleView = async (template: TourTemplate) => {
+        const token = localStorage.getItem('token') || '';
+        const detail = await getTourTemplateDetail(template.id, token);
+        if (!detail) {
+            message.error('Không thể lấy thông tin chi tiết template');
+            return;
+        }
+        const typeMap: Record<number, string> = { 1: 'FreeScenic', 2: 'PaidAttraction' };
         Modal.info({
-            title: template.title,
-            width: 800,
+            title: detail.title,
+            width: 1000,
             content: (
-                <div className="template-view">
-                    <p><strong>Điểm bắt đầu:</strong> {template.startLocation}</p>
-                    <p><strong>Điểm kết thúc:</strong> {template.endLocation}</p>
-                    <p><strong>Loại tour:</strong> {template.templateType}</p>
-                    <p><strong>Tháng:</strong> {template.month}</p>
-                    <p><strong>Năm:</strong> {template.year}</p>
-                    <p><strong>Trạng thái:</strong> {template.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</p>
+                <div className="template-view-modal">
+                    <h3 className="modal-section-title">Thông tin cơ bản</h3>
+                    <Row gutter={16}>
+                        <Col span={24}>
+                            <p><strong>Tên template:</strong> {detail.title}</p>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <p><strong>Điểm bắt đầu:</strong> {detail.startLocation}</p>
+                        </Col>
+                        <Col span={12}>
+                            <p><strong>Điểm kết thúc:</strong> {detail.endLocation}</p>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <p><strong>Loại tour:</strong> {typeMap[detail.templateType] || detail.templateType}</p>
+                        </Col>
+                    </Row>
+                    <hr className="modal-section-divider" />
+                    <h3 className="modal-section-title">Thời gian có sẵn</h3>
+                    <Row gutter={16}>
+                        <Col span={8}>
+                            <p><strong>Tháng:</strong> {detail.month}</p>
+                        </Col>
+                        <Col span={8}>
+                            <p><strong>Năm:</strong> {detail.year}</p>
+                        </Col>
+                        <Col span={8}>
+                            <p><strong>Trạng thái:</strong> {detail.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</p>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={8}>
+                            <p><strong>Ngày tạo:</strong> {new Date(detail.createdAt).toLocaleDateString('vi-VN')}</p>
+                        </Col>
+                    </Row>
+                    <hr className="modal-section-divider" />
+                    <h3 className="modal-section-title">Hình ảnh</h3>
+                    <Row gutter={16}>
+                        <Col span={24}>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                {detail.images && detail.images.map((img: string, idx: number) => (
+                                    <img key={idx} src={img} alt="template" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }} />
+                                ))}
+                            </div>
+                        </Col>
+                    </Row>
                 </div>
             ),
         });
     };
 
     const handleDelete = (id: string) => {
-        setTemplates(templates.filter(t => t.id !== id));
-        message.success('Xóa template thành công');
-    }; const handleModalOk = () => {
-        form.validateFields().then(values => {
+        Modal.confirm({
+            title: 'Bạn có chắc muốn xóa template này?',
+            icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+            content: 'Hành động này không thể hoàn tác.',
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            centered: true,
+            onOk: async () => {
+                try {
+                    const token = localStorage.getItem('token') || undefined;
+                    await deleteTourTemplate(id, token);
+                    setTemplates(templates.filter(t => t.id !== id));
+                    message.success('Xóa template thành công');
+                } catch (error) {
+                    message.error('Xóa template thất bại');
+                }
+            },
+        });
+    };
+    const handleModalOk = async () => {
+        try {
+            const values = await form.validateFields();
+            let images: string[] = [];
+            let fileList: any[] = [];
+            if (Array.isArray(values.images)) {
+                fileList = values.images;
+            } else if (values.images && values.images.fileList) {
+                fileList = values.images.fileList;
+            }
+            const existedUrls: string[] = [];
+            const filesToUpload: File[] = [];
+            fileList.forEach((file: any) => {
+                if (file.url && typeof file.url === 'string') {
+                    existedUrls.push(file.url);
+                } else if (file.originFileObj) {
+                    filesToUpload.push(file.originFileObj);
+                }
+            });
+            let uploadedUrls: string[] = [];
+            if (filesToUpload.length > 0) {
+                uploadedUrls = (await Promise.all(filesToUpload.map(file => publicService.uploadImage(file)))).filter(Boolean) as string[];
+            }
+            images = [...existedUrls, ...uploadedUrls];
             const processedValues = {
                 ...values,
-                images: values.images ? values.images.map((file: any) => file.url || file.name) : []
+                images,
             };
-
+            const templateTypeMap: Record<string, number> = { FreeScenic: 1, PaidAttraction: 2 };
+            const apiBody = {
+                title: processedValues.title,
+                startLocation: processedValues.startLocation,
+                endLocation: processedValues.endLocation,
+                templateType: templateTypeMap[processedValues.templateType] || 1,
+                scheduleDays: 0,
+                images: processedValues.images,
+            };
+            const token = localStorage.getItem('token') || undefined;
             if (editingTemplate) {
-                // Update existing template
-                setTemplates(templates.map(t =>
-                    t.id === editingTemplate.id ? { ...t, ...processedValues } : t
-                ));
+                // EDIT: gọi updateTourTemplate
+                await updateTourTemplate(editingTemplate.id, apiBody, token);
                 message.success('Cập nhật template thành công');
             } else {
-                // Add new template
-                const newTemplate: TourTemplate = {
-                    id: Date.now().toString(),
-                    ...processedValues,
-                    createdAt: new Date().toISOString().split('T')[0],
-                    usageCount: 0
-                };
-                setTemplates([...templates, newTemplate]);
+                // CREATE: gọi createTourTemplate
+                await createTourTemplate({ ...apiBody, month: processedValues.month || (Array.isArray(processedValues.availableMonths) ? processedValues.availableMonths[0] : 1), year: processedValues.year || (Array.isArray(processedValues.availableYears) ? processedValues.availableYears[0] : new Date().getFullYear()) });
                 message.success('Thêm template thành công');
             }
             setIsModalVisible(false);
             form.resetFields();
-        }).catch(error => {
-            console.error('Validation failed:', error);
-        });
+            setUploadFileList([]);
+            setLoading(true);
+            const res = await getTourTemplates({}, token);
+            setTemplates(res.data || []);
+            setLoading(false);
+        } catch (error) {
+            message.error('Có lỗi khi lưu template');
+            console.error('Validation failed or API error:', error);
+        }
     };
 
     const handleModalCancel = () => {
         setIsModalVisible(false);
         form.resetFields();
+        setUploadFileList([]);
     };
 
     const handleSearch = (value: string) => {
@@ -319,12 +438,8 @@ const TourTemplateManagement: React.FC = () => {
                                 rules={[{ required: true, message: 'Vui lòng chọn loại tour' }]}
                             >
                                 <Select placeholder="Chọn loại tour">
-                                    <Option value="Núi non">Núi non</Option>
-                                    <Option value="Tâm linh">Tâm linh</Option>
-                                    <Option value="Văn hóa">Văn hóa</Option>
-                                    <Option value="Sinh thái">Sinh thái</Option>
-                                    <Option value="Lịch sử">Lịch sử</Option>
-                                    <Option value="Du lịch trải nghiệm">Du lịch trải nghiệm</Option>
+                                    <Option value="FreeScenic">FreeScenic</Option>
+                                    <Option value="PaidAttraction">PaidAttraction</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -395,12 +510,16 @@ const TourTemplateManagement: React.FC = () => {
                         name="images"
                         label="Hình ảnh tour"
                         rules={[{ required: true, message: 'Vui lòng tải lên ít nhất 1 hình ảnh' }]}
+                        valuePropName="fileList"
+                        getValueFromEvent={e => (Array.isArray(e) ? e : e && e.fileList)}
                     >
                         <Upload
                             listType="picture-card"
                             multiple
                             maxCount={10}
                             beforeUpload={() => false}
+                            fileList={uploadFileList}
+                            onChange={({ fileList }) => setUploadFileList(fileList)}
                         >
                             <div>
                                 <PlusOutlined />

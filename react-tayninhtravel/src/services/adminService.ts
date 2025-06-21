@@ -5,55 +5,22 @@ import { TicketStatus, AdminBlogPost, AdminSupportTicket } from '../types';
 // Re-export types for convenience
 export type { AdminBlogPost, SupportTicket, AdminSupportTicket } from '../types';
 
-// Blog Management Interfaces
-export interface GetBlogsParams {
-    pageIndex?: number;
-    pageSize?: number;
-    textSearch?: string;
-    status?: 0 | 1 | 2;
-    sortField?: string;
-    sortOrder?: 'asc' | 'desc';
-}
-
-export interface GetBlogsResponse {
-    blogs: AdminBlogPost[];
-    totalCount: number;
-    pageIndex: number;
-    pageSize: number;
-    totalPages: number;
-}
-
-export interface UpdateBlogStatusPayload {
-    status: 0 | 1 | 2;
-    commentOfAdmin?: string;
-}
-
-// Interfaces
-export interface GetUsersParams {
-    page: number;
-    pageSize: number;
-    search?: string;
-    status?: boolean;
-    sortField?: string;
-    sortOrder?: 'asc' | 'desc';
-}
-
-export interface ApiUser {
-    id: string;
-    email: string;
-    name: string;
-    phoneNumber: string;
-    avatar: string;
-    isVerified: boolean;
-    isActive: boolean;
-    role?: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
 class AdminService {
     // Blog Management Methods
-    async getAllBlogs(params: GetBlogsParams = {}): Promise<GetBlogsResponse> {
+    async getAllBlogs(params: {
+        pageIndex?: number;
+        pageSize?: number;
+        textSearch?: string;
+        status?: 0 | 1 | 2;
+        sortField?: string;
+        sortOrder?: 'asc' | 'desc';
+    } = {}): Promise<{
+        blogs: AdminBlogPost[];
+        totalCount: number;
+        pageIndex: number;
+        pageSize: number;
+        totalPages: number;
+    }> {
         try {
             const {
                 pageIndex = 1,
@@ -102,7 +69,8 @@ class AdminService {
                 totalPages: 0
             };
         }
-    } async getCmsBlogs(params: {
+    }
+    async getCmsBlogs(params: {
         pageIndex?: number;
         pageSize?: number;
         textSearch?: string;
@@ -156,7 +124,12 @@ class AdminService {
                 totalPages: 0
             };
         }
-    } async updateBlogStatus(blogId: string, payload: UpdateBlogStatusPayload): Promise<void> {
+    }
+
+    async updateBlogStatus(blogId: string, payload: {
+        status: 0 | 1 | 2;
+        commentOfAdmin?: string;
+    }): Promise<void> {
         try {
             if (!blogId) {
                 throw new Error('Blog ID is required');
