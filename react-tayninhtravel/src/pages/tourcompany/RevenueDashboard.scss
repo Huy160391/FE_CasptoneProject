@@ -1,0 +1,321 @@
+.revenue-dashboard {
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+
+        .ant-typography {
+            margin-bottom: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+    }
+
+    .stats-cards {
+        .ant-card {
+            .ant-statistic {
+                .ant-statistic-title {
+                    color: #666;
+                    font-weight: 500;
+                }
+
+                .ant-statistic-content {
+                    color: #1890ff;
+                }
+            }
+
+            .growth-indicator {
+                margin-top: 8px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 12px;
+            }
+        }
+    }
+
+    .revenue-chart {
+        .chart-placeholder {
+            padding: 20px 0;
+
+            .revenue-bar {
+                margin-bottom: 16px;
+
+                .month-label {
+                    display: block;
+                    margin-bottom: 4px;
+                    font-weight: 500;
+                    color: #333;
+                }
+
+                .bar-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+
+                    .ant-progress {
+                        flex: 1;
+                        margin-bottom: 0;
+                    }
+
+                    .booking-count {
+                        min-width: 80px;
+                        color: #666;
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+    }
+
+    .monthly-analysis {
+        .analysis-item {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+
+            &:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+            }
+
+            h4 {
+                margin-bottom: 8px;
+                color: #333;
+                font-size: 14px;
+            }
+
+            p {
+                margin-bottom: 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .amount {
+                    color: #52c41a;
+                    font-weight: bold;
+                }
+
+                .count {
+                    color: #1890ff;
+                    font-weight: bold;
+                }
+
+                .price {
+                    color: #faad14;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+
+    .tour-revenue {
+        .ant-table {
+            .ant-table-thead > tr > th {
+                background-color: #fafafa;
+                font-weight: 600;
+            }
+
+            .ant-table-tbody > tr:hover > td {
+                background-color: #f0f9ff;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+
+            .header-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+        }
+
+        .stats-cards {
+            .ant-col {
+                margin-bottom: 16px;
+            }
+        }
+
+        .revenue-chart {
+            .chart-placeholder {
+                .revenue-bar {
+                    .bar-container {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 4px;
+
+                        .booking-count {
+                            min-width: auto;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /* Dark mode styles */
+    .dark-mode & {
+        .page-header {
+            .ant-typography {
+                color: #ffffff;
+            }
+        }
+
+        .filters {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+            }
+
+            .ant-select,
+            .ant-picker {
+                background-color: #1f1f1f;
+                border-color: #404040;
+                color: #ffffff;
+
+                &:hover {
+                    border-color: #79eac0;
+                }
+
+                &:focus {
+                    border-color: #79eac0;
+                    box-shadow: 0 0 0 2px rgba(121, 234, 192, 0.2);
+                }
+            }
+
+            .ant-btn {
+                background-color: #79eac0;
+                border-color: #79eac0;
+                color: #000000;
+
+                &:hover {
+                    background-color: #52c49c;
+                    border-color: #52c49c;
+                }
+            }
+        }
+
+        .revenue-stats {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+
+                .stat-item {
+                    .stat-label {
+                        color: #a0a0a0;
+                    }
+
+                    .stat-value {
+                        color: #ffffff;
+
+                        &.total-revenue {
+                            color: #52c41a;
+                        }
+
+                        &.monthly-revenue {
+                            color: #79eac0;
+                        }
+
+                        &.commission {
+                            color: #faad14;
+                        }
+
+                        &.booking-count {
+                            color: #1890ff;
+                        }
+                    }
+                }
+            }
+        }
+
+        .revenue-chart {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+
+                .ant-card-head-title {
+                    color: #ffffff;
+                }
+            }
+
+            .chart-placeholder {
+                color: #a0a0a0;
+            }
+
+            .revenue-bar {
+                .month-label {
+                    color: #ffffff;
+                }
+
+                .amount-label {
+                    color: #52c41a;
+                }
+            }
+        }
+
+        .top-tours {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+
+                .ant-card-head-title {
+                    color: #ffffff;
+                }
+            }
+
+            .ant-list {
+                .ant-list-item {
+                    border-bottom: 1px solid #404040;
+
+                    .ant-list-item-meta {
+                        .ant-list-item-meta-title {
+                            color: #ffffff;
+                        }
+
+                        .ant-list-item-meta-description {
+                            color: #a0a0a0;
+                        }
+                    }
+
+                    .revenue-amount {
+                        color: #52c41a;
+                    }
+                }
+            }
+        }
+
+        .revenue-breakdown {
+            .ant-card {
+                background-color: #262626;
+                border-color: #404040;
+
+                .ant-card-head-title {
+                    color: #ffffff;
+                }
+            }
+
+            .breakdown-item {
+                .breakdown-label {
+                    color: #a0a0a0;
+                }
+
+                .breakdown-value {
+                    color: #ffffff;
+                }
+
+                .breakdown-percentage {
+                    color: #79eac0;
+                }
+            }
+        }
+    }
+}

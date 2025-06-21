@@ -1,10 +1,10 @@
 import { RouteObject } from 'react-router-dom';
-
-// Temporary placeholder components - sẽ được thay thế sau
-const TourCompanyDashboard = () => <div>Tour Company Dashboard</div>;
-const TourManagement = () => <div>Tour Management</div>;
-const BookingManagement = () => <div>Booking Management</div>;
-const Statistics = () => <div>Statistics</div>;
+import TourCompanyDashboard from '@/pages/tourcompany/TourCompanyDashboard';
+import TourTemplateManagement from '@/pages/tourcompany/TourTemplateManagement';
+import TourManagement from '@/pages/tourcompany/TourManagement';
+import TransactionHistory from '@/pages/tourcompany/TransactionHistory';
+import ReviewHistory from '@/pages/tourcompany/ReviewHistory';
+import RevenueDashboard from '@/pages/tourcompany/RevenueDashboard';
 
 export const tourCompanyRoutes: RouteObject[] = [
     {
@@ -15,16 +15,24 @@ export const tourCompanyRoutes: RouteObject[] = [
                 element: <TourCompanyDashboard />,
             },
             {
+                path: 'tour-templates',
+                element: <TourTemplateManagement />,
+            },
+            {
                 path: 'tours',
                 element: <TourManagement />,
             },
             {
-                path: 'bookings',
-                element: <BookingManagement />,
+                path: 'transactions',
+                element: <TransactionHistory />,
             },
             {
-                path: 'statistics',
-                element: <Statistics />,
+                path: 'reviews',
+                element: <ReviewHistory />,
+            },
+            {
+                path: 'revenue',
+                element: <RevenueDashboard />,
             },
         ],
     },

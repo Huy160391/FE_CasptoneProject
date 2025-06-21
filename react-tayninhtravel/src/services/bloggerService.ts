@@ -1,76 +1,5 @@
 import axiosInstance from '@/config/axios';
-
-// API response interfaces for Blogger endpoints
-export interface ApiBlogPost {
-    id: string;
-    title: string;
-    content: string;
-    authorName: string;
-    commentOfAdmin?: string;
-    status: 0 | 1 | 2; // 0=pending, 1=accepted, 2=rejected
-    imageUrl?: string[];
-    totalLikes: number;
-    totalDislikes: number;
-    totalComments: number;
-}
-
-export interface ApiGetBlogsResponse {
-    statusCode: number;
-    message: string | null;
-    data: ApiBlogPost[];
-    totalPages: number;
-    totalRecord: number;
-    totalCount: number | null;
-    pageIndex: number | null;
-    pageSize: number | null;
-}
-
-// Application interfaces
-export interface BlogPost {
-    id: string;
-    title: string;
-    excerpt: string;
-    content?: string;
-    category?: string;
-    tags?: string[];
-    featuredImage?: string;
-    status: 0 | 1 | 2; // 0=pending, 1=accepted, 2=rejected
-    likes: number;
-    comments: number;
-    createdAt: string;
-    updatedAt: string;
-    authorId?: string;
-    authorName?: string;
-}
-
-export interface GetBlogsParams {
-    pageIndex?: number;
-    pageSize?: number;
-    textSearch?: string;
-    status?: boolean;
-    category?: string;
-}
-
-export interface GetBlogsResponse {
-    blogs: BlogPost[];
-    totalCount: number;
-    pageIndex: number;
-    pageSize: number;
-    totalPages: number;
-}
-
-export interface CreateBlogPayload {
-    title: string;
-    content: string;
-    files?: File[];
-}
-
-export interface UpdateBlogPayload {
-    id: string;
-    title: string;
-    content: string;
-    files?: File[];
-}
+import { BlogPost, ApiBlogPost, ApiGetBlogsResponse, GetBlogsParams, GetBloggerBlogsResponse, CreateBlogPayload, UpdateBlogPayload } from '@/types';
 
 /**
  * Service handling blogger-specific API operations
@@ -101,7 +30,7 @@ export const bloggerService = {
     /**
      * Get blogger's blog posts with pagination and filtering
      */
-    async getMyBlogs(params: GetBlogsParams = {}): Promise<GetBlogsResponse> {
+    async getMyBlogs(params: GetBlogsParams = {}): Promise<GetBloggerBlogsResponse> {
         try {
             const {
                 pageIndex = 1,

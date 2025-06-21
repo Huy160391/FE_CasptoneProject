@@ -48,6 +48,8 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         // Redirect based on role
         if (response.user.role === 'Admin') {
           navigate('/admin/dashboard')
+        } else if (response.user.role === 'Tour Company') {
+          navigate('/tour-company/dashboard')
         } else {
           // Return to previous page or home
           navigate(-1)

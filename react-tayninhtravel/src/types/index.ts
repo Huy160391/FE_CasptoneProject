@@ -48,6 +48,43 @@ export interface TourItinerary {
     accommodation?: string;
 }
 
+// Tour Company Management Types
+export type TemplateType = 1 | 2; // 1: FreeScenic, 2: PaidAttraction
+
+export interface TourTemplate {
+    id: string;
+    title: string;
+    templateType: TemplateType;
+    startLocation: string;
+    endLocation: string;
+    isActive: boolean;
+    createdAt: string;
+    month: number;
+    year: number;
+    images: string[];
+}
+
+export interface ItineraryItem {
+    id: string;
+    checkpoint: string; // time like "08:00"
+    activity: string;
+}
+
+export interface TourManagement {
+    id: string;
+    name: string;
+    templateId: string;
+    templateName: string;
+    maxGroupSize: number;
+    currentBookings: number;
+    price: number;
+    tourDate: string;
+    description: string;
+    guideInfo: string;
+    itinerary: ItineraryItem[];
+    createdAt: string;
+}
+
 export interface Booking {
     id: string;
     tourId: string;
@@ -551,4 +588,116 @@ export interface UserSupportTicket {
         url: string;
     }[];
     response?: string;
+}
+
+// Blogger Service Types
+export interface ApiBlogPost {
+    id: string;
+    title: string;
+    content: string;
+    authorName: string;
+    commentOfAdmin?: string;
+    status: 0 | 1 | 2; // 0=pending, 1=accepted, 2=rejected
+    imageUrl?: string[];
+    totalLikes: number;
+    totalDislikes: number;
+    totalComments: number;
+}
+
+export interface ApiGetBlogsResponse {
+    statusCode: number;
+    message: string | null;
+    data: ApiBlogPost[];
+    totalPages: number;
+    totalRecord: number;
+    totalCount: number | null;
+    pageIndex: number | null;
+    pageSize: number | null;
+}
+
+export interface BlogPost {
+    id: string;
+    title: string;
+    excerpt: string;
+    content?: string;
+    category?: string;
+    tags?: string[];
+    featuredImage?: string;
+    status: 0 | 1 | 2; // 0=pending, 1=accepted, 2=rejected
+    likes: number;
+    comments: number;
+    createdAt: string;
+    updatedAt: string;
+    authorId?: string;
+    authorName?: string;
+}
+
+export interface GetBlogsParams {
+    pageIndex?: number;
+    pageSize?: number;
+    textSearch?: string;
+    status?: 0 | 1 | 2;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetBloggerBlogsResponse {
+    blogs: BlogPost[];
+    totalCount: number;
+    pageIndex: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export interface GetUsersParams {
+    page: number;
+    pageSize: number;
+    search?: string;
+    status?: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+}
+
+export interface ApiUser {
+    id: string;
+    email: string;
+    name: string;
+    phoneNumber: string;
+    avatar: string;
+    isVerified: boolean;
+    isActive: boolean;
+    role?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// Tour Company Service Types
+export interface GetTourTemplatesParams {
+    pageIndex?: number;
+    pageSize?: number;
+    textSearch?: string;
+    templateType?: string;
+    startLocation?: string;
+    includeInactive?: boolean;
+}
+
+export interface GetTourTemplatesResponse {
+    data: TourTemplate[];
+    totalRecord: number;
+    totalPages: number;
+    statusCode: number;
+    message: string;
+}
+
+export interface CreateBlogPayload {
+    title: string;
+    content: string;
+    files?: File[];
+}
+
+export interface UpdateBlogPayload {
+    id: string;
+    title: string;
+    content: string;
+    files?: File[];
 }

@@ -742,5 +742,287 @@
             "personalInfo": "Thông tin cá nhân",
             "changePassword": "Đổi mật khẩu"
         }
+    },
+    "tourCompany": {
+        "sidebar": {
+            "dashboard": "Dashboard",
+            "tourTemplates": "Quản lý Tour Template",
+            "tours": "Quản lý Tour",
+            "transactions": "Lịch sử giao dịch",
+            "reviews": "Lịch sử đánh giá",
+            "revenue": "Dashboard doanh thu",
+            "profile": "Thông tin cá nhân",
+            "backToSite": "Về trang chủ",
+            "logout": "Đăng xuất"
+        },
+        "dashboard": {
+            "title": "Tour Company Dashboard",
+            "overview": "Tổng quan hoạt động công ty du lịch",
+            "stats": {
+                "totalTours": "Tổng số tour",
+                "totalBookings": "Tổng đặt chỗ",
+                "totalRevenue": "Tổng doanh thu",
+                "avgRating": "Đánh giá trung bình"
+            },
+            "charts": {
+                "revenueTitle": "Doanh thu theo tháng",
+                "popularToursTitle": "Tour phổ biến"
+            },
+            "recentActivities": {
+                "title": "Hoạt động gần đây",
+                "newBooking": "Đặt chỗ mới",
+                "newReview": "Đánh giá mới",
+                "tourCreated": "Tạo tour mới"
+            }
+        },
+        "tourTemplates": {
+            "title": "Quản lý Tour Template",
+            "searchPlaceholder": "Tìm kiếm theo tên, loại tour",
+            "addButton": "Thêm Template Mới",
+            "columns": {
+                "name": "Tên template",
+                "tourType": "Loại tour",
+                "route": "Tuyến đường",
+                "ticketQuantity": "Số vé",
+                "usageCount": "Số lần sử dụng",
+                "actions": "Thao tác"
+            },
+            "actions": {
+                "view": "Xem",
+                "edit": "Sửa",
+                "delete": "Xóa"
+            },
+            "form": {
+                "addTitle": "Thêm Template Mới",
+                "editTitle": "Sửa Template",
+                "basicInfo": "Thông tin cơ bản",
+                "timeAvailable": "Thời gian có sẵn",
+                "images": "Hình ảnh",
+                "itinerary": "Lịch trình",
+                "additionalInfo": "Thông tin bổ sung",
+                "fields": {
+                    "name": {
+                        "label": "Tên template",
+                        "placeholder": "Nhập tên template tour",
+                        "required": "Vui lòng nhập tên template"
+                    },
+                    "startLocation": {
+                        "label": "Điểm bắt đầu",
+                        "placeholder": "VD: TP. Hồ Chí Minh",
+                        "required": "Vui lòng nhập điểm bắt đầu"
+                    },
+                    "endLocation": {
+                        "label": "Điểm kết thúc",
+                        "placeholder": "VD: Núi Bà Đen, Tây Ninh",
+                        "required": "Vui lòng nhập điểm kết thúc"
+                    },
+                    "tourType": {
+                        "label": "Loại tour",
+                        "placeholder": "Chọn loại tour",
+                        "required": "Vui lòng chọn loại tour",
+                        "options": {
+                            "mountain": "Núi non",
+                            "spiritual": "Tâm linh",
+                            "cultural": "Văn hóa",
+                            "ecological": "Sinh thái",
+                            "historical": "Lịch sử",
+                            "experience": "Du lịch trải nghiệm"
+                        }
+                    },
+                    "ticketQuantity": {
+                        "label": "Số lượng vé",
+                        "placeholder": "Số lượng vé có sẵn",
+                        "required": "Vui lòng nhập số lượng vé"
+                    },
+                    "availableDays": {
+                        "label": "Thứ trong tuần",
+                        "required": "Vui lòng chọn ít nhất 1 thứ",
+                        "options": {
+                            "monday": "Thứ 2",
+                            "tuesday": "Thứ 3",
+                            "wednesday": "Thứ 4",
+                            "thursday": "Thứ 5",
+                            "friday": "Thứ 6",
+                            "saturday": "Thứ 7",
+                            "sunday": "Chủ nhật"
+                        }
+                    },
+                    "availableDates": {
+                        "label": "Ngày trong tháng",
+                        "placeholder": "Chọn ngày trong tháng",
+                        "required": "Vui lòng chọn ít nhất 1 ngày"
+                    },
+                    "availableMonths": {
+                        "label": "Tháng trong năm",
+                        "placeholder": "Chọn tháng trong năm",
+                        "required": "Vui lòng chọn ít nhất 1 tháng"
+                    },
+                    "images": {
+                        "label": "Hình ảnh tour",
+                        "uploadText": "Tải ảnh",
+                        "required": "Vui lòng tải lên ít nhất 1 hình ảnh"
+                    },
+                    "itinerary": {
+                        "label": "Lịch trình",
+                        "checkpoint": "Giờ",
+                        "activity": "Hoạt động",
+                        "checkpointPlaceholder": "Chọn giờ",
+                        "activityPlaceholder": "Mô tả hoạt động tại thời điểm này",
+                        "checkpointRequired": "Chọn giờ",
+                        "activityRequired": "Nhập hoạt động",
+                        "addButton": "Thêm điểm lịch trình"
+                    },
+                    "description": {
+                        "label": "Mô tả tour",
+                        "placeholder": "Mô tả chi tiết về tour, điểm đến, trải nghiệm...",
+                        "required": "Vui lòng nhập mô tả tour"
+                    },
+                    "guideInfo": {
+                        "label": "Thông tin hướng dẫn viên",
+                        "placeholder": "Thông tin về hướng dẫn viên: kinh nghiệm, chuyên môn, ngôn ngữ...",
+                        "required": "Vui lòng nhập thông tin hướng dẫn viên"
+                    }
+                },
+                "buttons": {
+                    "add": "Thêm",
+                    "update": "Cập nhật",
+                    "cancel": "Hủy"
+                }
+            },
+            "messages": {
+                "deleteConfirm": "Bạn có chắc chắn muốn xóa template này?",
+                "deleteSuccess": "Xóa template thành công",
+                "addSuccess": "Thêm template thành công",
+                "updateSuccess": "Cập nhật template thành công"
+            },
+            "view": {
+                "startLocation": "Điểm bắt đầu",
+                "endLocation": "Điểm kết thúc",
+                "tourType": "Loại tour",
+                "ticketQuantity": "Số lượng vé",
+                "timeAvailable": "Thời gian có sẵn",
+                "days": "Thứ",
+                "dates": "Ngày",
+                "months": "Tháng",
+                "itinerary": "Lịch trình",
+                "description": "Mô tả",
+                "guideInfo": "Thông tin hướng dẫn viên"
+            }
+        },
+        "tours": {
+            "title": "Quản lý Tour",
+            "searchPlaceholder": "Tìm kiếm theo tên tour",
+            "addButton": "Thêm Tour Mới",
+            "columns": {
+                "name": "Tên tour",
+                "template": "Template",
+                "date": "Ngày khởi hành",
+                "price": "Giá",
+                "available": "Còn lại",
+                "status": "Trạng thái",
+                "actions": "Thao tác"
+            },
+            "status": {
+                "active": "Hoạt động",
+                "full": "Đã đầy",
+                "cancelled": "Đã hủy"
+            }
+        },
+        "transactions": {
+            "title": "Lịch sử giao dịch",
+            "searchPlaceholder": "Tìm kiếm theo mã giao dịch",
+            "columns": {
+                "transactionId": "Mã giao dịch",
+                "customerName": "Tên khách hàng",
+                "tourName": "Tên tour",
+                "amount": "Số tiền",
+                "commission": "Hoa hồng",
+                "date": "Ngày giao dịch",
+                "status": "Trạng thái"
+            },
+            "status": {
+                "completed": "Hoàn thành",
+                "pending": "Đang xử lý",
+                "cancelled": "Đã hủy"
+            },
+            "summary": {
+                "title": "Tổng kết",
+                "totalRevenue": "Tổng doanh thu",
+                "totalCommission": "Tổng hoa hồng",
+                "totalTransactions": "Tổng giao dịch"
+            }
+        },
+        "reviews": {
+            "title": "Lịch sử đánh giá",
+            "searchPlaceholder": "Tìm kiếm theo tên tour, khách hàng",
+            "columns": {
+                "customerName": "Tên khách hàng",
+                "tourName": "Tên tour",
+                "rating": "Đánh giá",
+                "comment": "Nhận xét",
+                "date": "Ngày đánh giá",
+                "actions": "Thao tác"
+            },
+            "actions": {
+                "reply": "Trả lời",
+                "view": "Xem chi tiết"
+            },
+            "stats": {
+                "title": "Thống kê đánh giá",
+                "averageRating": "Đánh giá trung bình",
+                "totalReviews": "Tổng số đánh giá",
+                "fiveStars": "5 sao",
+                "fourStars": "4 sao",
+                "threeStars": "3 sao",
+                "twoStars": "2 sao",
+                "oneStar": "1 sao"
+            }
+        },
+        "revenue": {
+            "title": "Dashboard doanh thu",
+            "stats": {
+                "totalRevenue": "Tổng doanh thu",
+                "monthlyRevenue": "Doanh thu tháng",
+                "commission": "Hoa hồng",
+                "bookingCount": "Số lượng đặt chỗ"
+            },
+            "charts": {
+                "revenueChart": "Biểu đồ doanh thu",
+                "topTours": "Tour hàng đầu",
+                "revenueBreakdown": "Phân tích doanh thu"
+            }
+        },
+        "common": {
+            "actions": {
+                "add": "Thêm",
+                "edit": "Sửa",
+                "delete": "Xóa",
+                "view": "Xem",
+                "search": "Tìm kiếm",
+                "filter": "Lọc",
+                "export": "Xuất",
+                "import": "Nhập",
+                "save": "Lưu",
+                "cancel": "Hủy",
+                "confirm": "Xác nhận",
+                "yes": "Có",
+                "no": "Không"
+            },
+            "status": {
+                "active": "Hoạt động",
+                "inactive": "Không hoạt động",
+                "pending": "Đang chờ",
+                "completed": "Hoàn thành",
+                "cancelled": "Đã hủy"
+            },
+            "time": {
+                "today": "Hôm nay",
+                "yesterday": "Hôm qua",
+                "thisWeek": "Tuần này",
+                "thisMonth": "Tháng này",
+                "thisYear": "Năm này",
+                "allTime": "Tất cả"
+            }
+        }
     }
 }

@@ -109,6 +109,46 @@ export const publicService = {
             console.error('Error fetching related blogs:', error);
             return [];
         }
+    },
+    /**
+     * Upload image file to server, return url string
+     * Sử dụng đúng tên trường 'files' theo yêu cầu backend
+     */
+    async uploadImage(file: File): Promise<string | null> {
+        try {
+            const formData = new FormData();
+            formData.append('files', file); // Đúng tên trường
+            const response = await axiosInstance.post<any>('Image/Upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            // API trả về { urls: string[] }
+            if (response.data?.urls && Array.isArray(response.data.urls) && response.data.urls.length > 0) {
+                return response.data.urls[0];
+            }
+            return null;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            return null;
+        }
+    },
+    /**
+     * Upload nhiều file ảnh, trả về mảng url string
+     */
+    async uploadImages(files: File[]): Promise<string[]> {
+        try {
+            const formData = new FormData();
+            files.forEach(file => formData.append('files', file));
+            const response = await axiosInstance.post<any>('Image/Upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            if (response.data?.urls && Array.isArray(response.data.urls)) {
+                return response.data.urls;
+            }
+            return [];
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            return [];
+        }
     }
 };
 
