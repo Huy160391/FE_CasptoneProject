@@ -51,16 +51,15 @@ export interface TourItinerary {
 // Tour Company Management Types
 export interface TourTemplate {
     id: string;
-    name: string;
+    title: string;
+    templateType: string;
     startLocation: string;
     endLocation: string;
-    tourType: string;
-    availableDays: string[]; // ['monday', 'tuesday', etc.]
-    availableMonths: number[]; // [1, 2, 3, ..., 12]
-    images: string[];
+    isActive: boolean;
     createdAt: string;
-    usageCount: number;
-    availableTourDates?: string[]; // Ngày đi cụ thể cho template
+    month: number;
+    year: number;
+    images: string[];
 }
 
 export interface ItineraryItem {

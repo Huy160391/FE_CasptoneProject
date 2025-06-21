@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TourTemplate } from '../../types';
+import { getTourTemplates } from '../../services/tourcompanyService';
 import {
     Table,
     Button,
     Modal,
     Form,
     Input,
-    InputNumber,
     Select,
     Upload,
     Space,
@@ -33,108 +33,122 @@ const { Title } = Typography;
 const { Option } = Select;
 
 const TourTemplateManagement: React.FC = () => {
-    const [templates, setTemplates] = useState<TourTemplate[]>([
-        {
-            id: '1',
-            name: 'Template Tour Núi Bà Đen',
-            startLocation: 'TP. Hồ Chí Minh',
-            endLocation: 'Núi Bà Đen, Tây Ninh',
-            tourType: 'Núi non',
-            availableDays: ['saturday', 'sunday'],
-            availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            images: ['/images/tours/nui-ba-den.jpg'],
-            createdAt: '2024-01-15',
-            usageCount: 12
-        },
-        {
-            id: '2',
-            name: 'Template Tour Tòa Thánh Cao Đài',
-            startLocation: 'TP. Hồ Chí Minh',
-            endLocation: 'Tòa Thánh Cao Đài, Tây Ninh',
-            tourType: 'Tâm linh',
-            availableDays: ['monday', 'wednesday', 'friday', 'sunday'],
-            availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            images: ['/images/tours/toa-thanh-cao-dai.jpg'],
-            createdAt: '2024-01-10',
-            usageCount: 8
-        }
-    ]);
-
+    const [templates, setTemplates] = useState<TourTemplate[]>([]);
+    const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingTemplate, setEditingTemplate] = useState<TourTemplate | null>(null);
     const [form] = Form.useForm(); const [searchText, setSearchText] = useState('');
 
-    const columns = [{
-        title: 'Tên template',
-        dataIndex: 'name',
-        key: 'name',
-        filteredValue: searchText ? [searchText] : null, onFilter: (value: any, record: TourTemplate) =>
-            record.name.toLowerCase().includes(value.toString().toLowerCase()) ||
-            record.tourType.toLowerCase().includes(value.toString().toLowerCase()),
-    }, {
-        title: 'Loại tour',
-        dataIndex: 'tourType',
-        key: 'tourType',
-        render: (tourType: string) => <Tag color="blue">{tourType}</Tag>
-    },
-    {
-        title: 'Tuyến đường',
-        key: 'route',
-        render: (_: any, record: TourTemplate) => (
-            <span>{record.startLocation} → {record.endLocation}</span>
-        ),
-    },
-    {
-        title: 'Số lần sử dụng',
-        dataIndex: 'usageCount',
-        key: 'usageCount',
-        render: (count: number) => <Tag color="green">{count} lần</Tag>
-    },
-    {
-        title: 'Thao tác',
-        key: 'action',
-        render: (_: any, record: TourTemplate) => (
-            <Space size="middle">
-                <Button
-                    icon={<EyeOutlined />}
-                    size="small"
-                    onClick={() => handleView(record)}
-                >
-                    Xem
-                </Button>
-                <Button
-                    type="primary"
-                    icon={<EditOutlined />}
-                    size="small"
-                    onClick={() => handleEdit(record)}
-                >
-                    Sửa
-                </Button>
-                <Button
-                    icon={<PlusOutlined />}
-                    size="small"
-                    onClick={() => handleCreateTour(record)}
-                >
-                    Tạo tour
-                </Button>
-                <Popconfirm
-                    title="Bạn có chắc muốn xóa template này?"
-                    onConfirm={() => handleDelete(record.id)}
-                    okText="Xóa"
-                    cancelText="Hủy"
-                >
+    const columns = [
+        {
+            title: 'Tên template',
+            dataIndex: 'title',
+            key: 'title',
+            filteredValue: searchText ? [searchText] : null,
+            onFilter: (value: any, record: TourTemplate) =>
+                record.title.toLowerCase().includes(value.toString().toLowerCase()) ||
+                record.templateType.toLowerCase().includes(value.toString().toLowerCase()),
+        },
+        {
+            title: 'Loại tour',
+            dataIndex: 'templateType',
+            key: 'templateType',
+            render: (templateType: string) => <Tag color="blue">{templateType}</Tag>
+        },
+        {
+            title: 'Điểm bắt đầu',
+            dataIndex: 'startLocation',
+            key: 'startLocation',
+        },
+        {
+            title: 'Điểm kết thúc',
+            dataIndex: 'endLocation',
+            key: 'endLocation',
+        },
+        {
+            title: 'Tháng',
+            dataIndex: 'month',
+            key: 'month',
+            render: (month: number) => `Tháng ${month}`
+        },
+        {
+            title: 'Năm',
+            dataIndex: 'year',
+            key: 'year',
+        },
+        {
+            title: 'Kích hoạt',
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive: boolean) => isActive ? <Tag color="green">Đang hoạt động</Tag> : <Tag color="red">Ngừng hoạt động</Tag>
+        },
+        {
+            title: 'Ngày tạo',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+        },
+        {
+            title: 'Thao tác',
+            key: 'action',
+            render: (_: any, record: TourTemplate) => (
+                <Space size="middle">
                     <Button
-                        danger
-                        icon={<DeleteOutlined />}
+                        icon={<EyeOutlined />}
                         size="small"
+                        onClick={() => handleView(record)}
                     >
-                        Xóa
+                        Xem
                     </Button>
-                </Popconfirm>
-            </Space>
-        ),
-    },
+                    <Button
+                        type="primary"
+                        icon={<EditOutlined />}
+                        size="small"
+                        onClick={() => handleEdit(record)}
+                    >
+                        Sửa
+                    </Button>
+                    <Button
+                        icon={<PlusOutlined />}
+                        size="small"
+                        onClick={() => handleCreateTour(record)}
+                    >
+                        Tạo tour
+                    </Button>
+                    <Popconfirm
+                        title="Bạn có chắc muốn xóa template này?"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="Xóa"
+                        cancelText="Hủy"
+                    >
+                        <Button
+                            danger
+                            icon={<DeleteOutlined />}
+                            size="small"
+                        >
+                            Xóa
+                        </Button>
+                    </Popconfirm>
+                </Space>
+            ),
+        },
     ];
+
+    useEffect(() => {
+        const fetchTemplates = async () => {
+            setLoading(true);
+            try {
+                // TODO: Lấy token từ localStorage hoặc context nếu cần
+                const token = localStorage.getItem('token') || undefined;
+                const res = await getTourTemplates({}, token);
+                setTemplates(res.data || []);
+            } catch (err) {
+                message.error('Không thể tải danh sách template');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTemplates();
+    }, []);
 
     const handleAdd = () => {
         setEditingTemplate(null);
@@ -148,25 +162,16 @@ const TourTemplateManagement: React.FC = () => {
         setIsModalVisible(true);
     }; const handleView = (template: TourTemplate) => {
         Modal.info({
-            title: template.name,
+            title: template.title,
             width: 800,
             content: (
                 <div className="template-view">
                     <p><strong>Điểm bắt đầu:</strong> {template.startLocation}</p>
                     <p><strong>Điểm kết thúc:</strong> {template.endLocation}</p>
-                    <p><strong>Loại tour:</strong> {template.tourType}</p>
-
-                    <p><strong>Thời gian có sẵn:</strong></p>
-                    <ul>
-                        <li>Thứ: {template.availableDays.map(day => {
-                            const dayNames: { [key: string]: string } = {
-                                'monday': 'Thứ 2', 'tuesday': 'Thứ 3', 'wednesday': 'Thứ 4',
-                                'thursday': 'Thứ 5', 'friday': 'Thứ 6', 'saturday': 'Thứ 7', 'sunday': 'Chủ nhật'
-                            };
-                            return dayNames[day];
-                        }).join(', ')}</li>
-                        <li>Tháng: {template.availableMonths.join(', ')}</li>
-                    </ul>
+                    <p><strong>Loại tour:</strong> {template.templateType}</p>
+                    <p><strong>Tháng:</strong> {template.month}</p>
+                    <p><strong>Năm:</strong> {template.year}</p>
+                    <p><strong>Trạng thái:</strong> {template.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</p>
                 </div>
             ),
         });
@@ -218,7 +223,7 @@ const TourTemplateManagement: React.FC = () => {
     // Thêm hàm xử lý tạo tour từ template
     const handleCreateTour = (template: TourTemplate) => {
         // TODO: Mở modal tạo tour, hoặc chuyển sang trang tạo tour với template đã chọn
-        message.info(`Tạo tour từ template: ${template.name}`);
+        message.info(`Tạo tour từ template: ${template.title}`);
     };
 
     return (
@@ -243,12 +248,14 @@ const TourTemplateManagement: React.FC = () => {
                 </div>
             </div>
 
-            <Card>                <Table
-                dataSource={templates}
-                columns={columns}
-                rowKey="id"
-                pagination={{ pageSize: 10 }}
-            />
+            <Card>
+                <Table
+                    dataSource={templates}
+                    columns={columns}
+                    rowKey="id"
+                    pagination={{ pageSize: 10 }}
+                    loading={loading}
+                />
             </Card>
 
             <Modal
@@ -275,7 +282,7 @@ const TourTemplateManagement: React.FC = () => {
                     <Row gutter={16}>
                         <Col span={24}>
                             <Form.Item
-                                name="name"
+                                name="title"
                                 label="Tên template"
                                 rules={[{ required: true, message: 'Vui lòng nhập tên template' }]}
                             >
@@ -307,7 +314,7 @@ const TourTemplateManagement: React.FC = () => {
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
-                                name="tourType"
+                                name="templateType"
                                 label="Loại tour"
                                 rules={[{ required: true, message: 'Vui lòng chọn loại tour' }]}
                             >
