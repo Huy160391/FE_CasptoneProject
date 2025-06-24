@@ -5,9 +5,9 @@ import Orders from '@/pages/admin/Orders';
 import Tours from '@/pages/admin/Tours';
 import Reviews from '@/pages/admin/Reviews';
 import Blogs from '@/pages/admin/Blogs';
-import MyInfo from '@/pages/admin/MyInfo';
 import CVManagement from '@/pages/admin/CVManagement';
 import SupportTickets from '@/pages/admin/SupportTickets';
+import ShopRegistrationManagement from '@/pages/admin/ShopRegistrationManagement';
 
 export const adminRoutes: RouteObject[] = [
     {
@@ -34,10 +34,6 @@ export const adminRoutes: RouteObject[] = [
             }, {
                 path: 'blogs',
                 element: <Blogs />,
-            },
-            {
-                path: 'my-info',
-                element: <MyInfo />,
             }, {
                 path: 'CVManagement',
                 element: <CVManagement />,
@@ -45,6 +41,10 @@ export const adminRoutes: RouteObject[] = [
             {
                 path: 'support-tickets',
                 element: <SupportTickets />,
+            },
+            {
+                path: 'shop-registrations',
+                element: <ShopRegistrationManagement />,
             },
         ],
     },

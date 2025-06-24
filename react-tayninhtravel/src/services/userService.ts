@@ -97,7 +97,7 @@ export const userService = {
             email: userData.email,
             phoneNumber: userData.phone,
             role: userData.role,
-            status: userData.status
+            status: userData.isActive // Sửa ở đây
         };
 
         const response = await axios.put<ApiUser>(`/Cms/user/${id}`, apiPayload);
@@ -133,7 +133,7 @@ export const userService = {
             email: userData.email,
             phoneNumber: userData.phone,
             role: userData.role,
-            status: userData.status,
+            status: userData.isActive, // Sửa ở đây
             password: userData.password
         };
 
@@ -537,7 +537,58 @@ export const userService = {
             console.error('Error toggling blog reaction:', error);
             throw error;
         }
-    }
+    },
+
+    /**
+     * Submit shop registration
+     * @param data Shop registration data (fields + files)
+     * @returns Promise with operation result
+     */
+    submitShopRegistration: async (data: {
+        shopName: string;
+        representativeName: string;
+        website?: string;
+        shopType: string;
+        location: string;
+        email: string;
+        logo: File;
+        businessLicense: File;
+    }): Promise<any> => {
+        const formData = new FormData();
+        formData.append('ShopName', data.shopName);
+        formData.append('RepresentativeName', data.representativeName);
+        if (data.website) formData.append('Website', data.website);
+        formData.append('ShopType', data.shopType);
+        formData.append('Location', data.location);
+        formData.append('Email', data.email);
+        formData.append('Logo', data.logo);
+        formData.append('BusinessLicense', data.businessLicense);
+
+        const response = await axios.post('/Account/shop-application', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+
+    /**
+     * Lấy danh sách các đơn đăng ký làm hướng dẫn viên đã gửi (của user hiện tại)
+     * @returns Promise với danh sách đơn đăng ký
+     */
+    getMyTourGuideApplications: async (): Promise<CV[]> => {
+        const response = await axios.get<CV[]>('/Account/my-tourguide-applications');
+        return response.data;
+    },
+
+    /**
+     * Lấy danh sách các đơn đăng ký shop đã gửi (của user hiện tại)
+     * @returns Promise với danh sách đơn đăng ký shop
+     */
+    getMyShopApplications: async (): Promise<any[]> => {
+        const response = await axios.get<any[]>('/Account/my-shop-applications');
+        return response.data;
+    },
 };
 
 // Also export as default

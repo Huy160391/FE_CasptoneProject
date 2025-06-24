@@ -8,7 +8,7 @@ export interface User {
     avatar?: string;
     phone?: string;
     address?: string;
-    status: boolean;
+    isActive: boolean; // Đổi từ status sang isActive
     isVerified: boolean;
     createdAt: string;
     updatedAt: string;
@@ -33,7 +33,7 @@ export interface UpdateUserPayload {
     email?: string;
     phone?: string;
     role?: string;
-    status?: boolean;
+    isActive?: boolean;
 }
 
 export interface CreateUserPayload extends UpdateUserPayload {

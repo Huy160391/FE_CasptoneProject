@@ -323,6 +323,95 @@
             "submissionSuccessTitle": "Application Submitted Successfully",
             "submissionSuccessContent": "Thank you for applying! We've received your application and will review it shortly. If your qualifications match our requirements, we will contact you for the next steps.",
             "loginRequired": "Please log in to submit your application."
+        },
+        "shopRegistration": {
+            "title": "Shop Registration",
+            "subtitle": "Become a Partner Shop with Tay Ninh Travel",
+            "info": {
+                "title": "Shop Information",
+                "description": "Join our network of partner shops to reach more customers and grow your business with Tay Ninh Travel. We offer a professional, transparent, and mutually beneficial cooperation model.",
+                "modelTitle": "Cooperation Model",
+                "modelContent": "We connect your shop with tourists and local customers through our platform. You manage your products and services, while we help you reach a wider audience.",
+                "benefits": "Benefits",
+                "benefitsList": [
+                    "Expand your customer base through our tourism platform",
+                    "Professional support and transparent cooperation",
+                    "Flexible business model, suitable for various shop types",
+                    "Brand promotion and marketing support",
+                    "Opportunity to participate in tourism events and programs"
+                ],
+                "descriptionTitle": "Description"
+            },
+            "requirements": {
+                "title": "Shop Requirements",
+                "legal": {
+                    "title": "Legal Business License",
+                    "content": "Your shop must have a valid business license and operate legally."
+                },
+                "location": {
+                    "title": "Physical Location",
+                    "content": "Shops must have a clear address in Tay Ninh or nearby areas."
+                },
+                "quality": {
+                    "title": "Product/Service Quality",
+                    "content": "Commitment to providing quality products/services and good customer care."
+                },
+                "branding": {
+                    "title": "Brand Image",
+                    "content": "Shops should have a clear brand identity and professional image."
+                }
+            },
+            "form": {
+                "title": "Shop Registration Form",
+                "description": "Fill in the information below to register your shop as a partner with Tay Ninh Travel.",
+                "shopName": "Shop Name",
+                "shopNameRequired": "Please enter your shop name!",
+                "shopNamePlaceholder": "E.g. Tay Ninh Souvenir Shop",
+                "representativeName": "Representative Name",
+                "representativeNameRequired": "Please enter the representative's name!",
+                "representativeNamePlaceholder": "E.g. Nguyen Van A",
+                "website": "Website (optional)",
+                "websitePlaceholder": "https://yourshop.com",
+                "shopType": "Shop Type",
+                "shopTypeRequired": "Please select shop type!",
+                "shopTypePlaceholder": "E.g. Souvenir, Restaurant, Specialty Food...",
+                "location": "Location",
+                "locationRequired": "Please enter your shop's address!",
+                "locationPlaceholder": "Full address of your shop",
+                "logo": "Shop Logo",
+                "logoRequired": "Please upload your shop logo!",
+                "invalidLogoFormat": "Only .jpg, .jpeg, .png files are accepted!",
+                "logoTooLarge": "Logo size must be less than 5MB!",
+                "selectLogo": "Select Logo",
+                "businessLicense": "Business License",
+                "businessLicenseRequired": "Please upload your business license!",
+                "invalidLicenseFormat": "Only .pdf, .jpg, .jpeg, .png files are accepted!",
+                "licenseTooLarge": "File size must be less than 5MB!",
+                "selectLicense": "Select File",
+                "email": "Email",
+                "emailRequired": "Please enter your email!",
+                "emailInvalid": "Invalid email format!",
+                "emailPlaceholder": "example@gmail.com",
+                "fileHint": "Accept file formats: .pdf, .jpg, .jpeg, .png (max 5MB)",
+                "submit": "Submit Registration",
+                "successMessage": "Your shop registration has been submitted successfully! We will contact you soon.",
+                "errorMessage": "There was an error submitting your registration. Please try again later.",
+                "fileUploadSuccess": "has been uploaded successfully!",
+                "loginRequired": "Please log in to register your shop."
+            }
+        },
+        "registerHistory": {
+            "title": "Registration History",
+            "stt": "No.",
+            "type": "Registration Type",
+            "shop": "Shop Registration",
+            "tourGuide": "Tour Guide Registration",
+            "submittedAt": "Submitted At",
+            "status": "Status",
+            "status_approved": "Approved",
+            "status_pending": "Pending",
+            "status_rejected": "Rejected",
+            "response": "Response"
         }
     },
     "home": {
@@ -546,6 +635,19 @@
             "orderNumber": "No.",
             "responseFromTNDT": "Response from TNDT",
             "attachment": "Attachment"
+        },
+        "registerHistory": {
+            "title": "Registration History",
+            "stt": "No.",
+            "type": "Registration Type",
+            "shop": "Shop Registration",
+            "tourGuide": "Tour Guide Registration",
+            "submittedAt": "Submitted At",
+            "status": "Status",
+            "status_approved": "Approved",
+            "status_pending": "Pending",
+            "status_rejected": "Rejected",
+            "response": "Response"
         }
     },
     "footer": {

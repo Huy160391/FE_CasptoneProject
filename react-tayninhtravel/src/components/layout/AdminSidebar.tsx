@@ -9,7 +9,6 @@ import {
   FileTextOutlined,
   AppstoreOutlined,
   CommentOutlined,
-  IdcardOutlined,
   ReadOutlined,
   HomeOutlined,
   LogoutOutlined,
@@ -82,9 +81,9 @@ const AdminSidebar = () => {
       label: <Link to="/admin/support-tickets">{t('admin.sidebar.supportTickets')}</Link>,
     },
     {
-      key: '/admin/my-info',
-      icon: <IdcardOutlined />,
-      label: <Link to="/admin/my-info">{t('admin.sidebar.myInfo')}</Link>,
+      key: '/admin/shop-registrations',
+      icon: <AppstoreOutlined />,
+      label: <Link to="/admin/shop-registrations">{t('admin.sidebar.shopRegistrations')}</Link>,
     },
   ]
 
