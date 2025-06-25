@@ -1,6 +1,7 @@
 import { RouteObject } from 'react-router-dom';
 import TourCompanyDashboard from '@/pages/tourcompany/TourCompanyDashboard';
 import TourTemplateManagement from '@/pages/tourcompany/TourTemplateManagement';
+import TourDetailsManagement from '@/pages/tourcompany/TourDetailsManagement';
 import TourManagement from '@/pages/tourcompany/TourManagement';
 import TransactionHistory from '@/pages/tourcompany/TransactionHistory';
 import ReviewHistory from '@/pages/tourcompany/ReviewHistory';
@@ -17,6 +18,10 @@ export const tourCompanyRoutes: RouteObject[] = [
             {
                 path: 'tour-templates',
                 element: <TourTemplateManagement />,
+            },
+            {
+                path: 'tour-details',
+                element: <TourDetailsManagement />,
             },
             {
                 path: 'tours',

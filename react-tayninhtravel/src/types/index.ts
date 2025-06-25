@@ -362,3 +362,25 @@ export * from './blog';
 export * from './comment';
 export * from './support'; // Đảm bảo export AdminSupportTicket từ support.ts
 export * from './tour';
+
+// Export tour template specific types
+export type {
+    TourTemplate,
+    TourDetails,
+    TourSlot,
+    TimelineItem,
+    TourOperation,
+    SpecialtyShop,
+    CreateTourTemplateRequest,
+    UpdateTourTemplateRequest,
+    CreateTourDetailsRequest,
+    CreateTimelineItemRequest,
+    CreateTimelineItemsRequest,
+    TourTemplateType,
+    ScheduleDay,
+    TourSlotStatus,
+    TourDetailsStatus,
+    TourOperationStatus,
+    GetTourTemplatesParams,
+    GetTourTemplatesResponse
+} from './tour';

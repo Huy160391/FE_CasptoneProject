@@ -1,7 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { TourTemplate } from '../../types';
-import { getTourTemplates, createTourTemplate, getTourTemplateDetail, updateTourTemplate, deleteTourTemplate } from '../../services/tourcompanyService';
+import {
+    TourTemplate,
+    TourTemplateType,
+    ScheduleDay,
+    CreateTourTemplateRequest,
+    UpdateTourTemplateRequest
+} from '../../types/tour';
+import {
+    getTourTemplates,
+    createTourTemplate,
+    getTourTemplateDetail,
+    updateTourTemplate,
+    deleteTourTemplate,
+    handleApiError
+} from '../../services/tourcompanyService';
 import publicService from '../../services/publicService';
+import { useAuthStore } from '../../store/useAuthStore';
+import {
+    getTemplateTypeLabel,
+    getScheduleDayLabel,
+    validateTourTemplate,
+    TOUR_TEMPLATE_TYPE_LABELS,
+    SCHEDULE_DAY_LABELS
+} from '../../constants/tourTemplate';
 import {
     Table,
     Button,
@@ -30,6 +51,7 @@ import TourTemplateFormModal from './TourTemplateFormModal';
 const { Title } = Typography;
 
 const TourTemplateManagement: React.FC = () => {
+    const { token } = useAuthStore();
     const [templates, setTemplates] = useState<TourTemplate[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -157,9 +179,17 @@ const TourTemplateManagement: React.FC = () => {
     const handleAdd = () => {
         setEditingTemplate(null);
         form.resetFields();
+        setUploadFileList([]);
+        // Set default values
+        form.setFieldsValue({
+            templateType: TourTemplateType.FreeScenic,
+            scheduleDays: ScheduleDay.Saturday,
+            month: new Date().getMonth() + 1,
+            year: new Date().getFullYear(),
+            images: []
+        });
         setIsModalVisible(true);
     }; const handleEdit = (template: TourTemplate) => {
-        const templateTypeMap: Record<number, string> = { 1: 'FreeScenic', 2: 'PaidAttraction' };
         const fileList = Array.isArray(template.images)
             ? template.images.map((url, idx) => ({
                 uid: idx + '',
@@ -169,11 +199,14 @@ const TourTemplateManagement: React.FC = () => {
             }))
             : [];
         const formValues: any = {
-            ...template,
-            templateType: templateTypeMap[template.templateType] || 'FreeScenic',
+            title: template.title,
+            startLocation: template.startLocation,
+            endLocation: template.endLocation,
+            templateType: template.templateType, // Keep as number
+            scheduleDays: template.scheduleDays, // Keep as number
+            month: template.month,
+            year: template.year,
             images: fileList,
-            availableMonths: template.month ? [template.month] : [],
-            availableYears: template.year ? [template.year] : [],
         };
         setEditingTemplate(template);
         setUploadFileList(fileList); // set fileList cho Upload
@@ -287,30 +320,42 @@ const TourTemplateManagement: React.FC = () => {
             });
             let uploadedUrls: string[] = [];
             if (filesToUpload.length > 0) {
-                uploadedUrls = (await Promise.all(filesToUpload.map(file => publicService.uploadImage(file)))).filter(Boolean) as string[];
+                try {
+                    uploadedUrls = (await Promise.all(filesToUpload.map(file => publicService.uploadImage(file)))).filter(Boolean) as string[];
+                } catch (uploadError) {
+                    console.warn('Image upload failed, proceeding without images:', uploadError);
+                    // Continue without images for now
+                }
             }
             images = [...existedUrls, ...uploadedUrls];
             const processedValues = {
                 ...values,
                 images,
             };
-            const templateTypeMap: Record<string, number> = { FreeScenic: 1, PaidAttraction: 2 };
+            // Map form values to API format
             const apiBody = {
                 title: processedValues.title,
                 startLocation: processedValues.startLocation,
                 endLocation: processedValues.endLocation,
-                templateType: templateTypeMap[processedValues.templateType] || 1,
-                scheduleDays: 0,
+                templateType: processedValues.templateType, // Already a number from form
+                scheduleDays: processedValues.scheduleDays, // Get from form values
+                month: processedValues.month,
+                year: processedValues.year,
                 images: processedValues.images,
             };
             const token = localStorage.getItem('token') || undefined;
+
+            // Debug log to check values
+            console.log('Form values:', processedValues);
+            console.log('API body:', apiBody);
+
             if (editingTemplate) {
                 // EDIT: gọi updateTourTemplate
                 await updateTourTemplate(editingTemplate.id, apiBody, token);
                 message.success('Cập nhật template thành công');
             } else {
                 // CREATE: gọi createTourTemplate
-                await createTourTemplate({ ...apiBody, month: processedValues.month || (Array.isArray(processedValues.availableMonths) ? processedValues.availableMonths[0] : 1), year: processedValues.year || (Array.isArray(processedValues.availableYears) ? processedValues.availableYears[0] : new Date().getFullYear()) });
+                await createTourTemplate(apiBody);
                 message.success('Thêm template thành công');
             }
             setIsModalVisible(false);
