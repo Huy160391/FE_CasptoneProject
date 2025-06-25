@@ -57,9 +57,32 @@ export const VALIDATION_RULES = {
       maxLength: 255,
       message: "Hoạt động là bắt buộc và không quá 255 ký tự"
     },
-    sortOrder: {
+    location: {
+      required: false,
+      maxLength: 500,
+      message: "Địa điểm không được quá 500 ký tự"
+    },
+    orderIndex: {
       min: 1,
       message: "Thứ tự phải lớn hơn 0"
+    },
+    estimatedDuration: {
+      min: 1,
+      max: 1440, // 24 hours in minutes
+      message: "Thời gian ước tính phải từ 1 đến 1440 phút"
+    }
+  },
+  tourOperation: {
+    price: {
+      required: true,
+      min: 0,
+      message: "Giá tour phải lớn hơn hoặc bằng 0"
+    },
+    maxSeats: {
+      required: true,
+      min: 1,
+      max: 100,
+      message: "Số ghế tối đa phải từ 1 đến 100"
     }
   }
 };
@@ -193,9 +216,36 @@ export const validateTimelineItem = (data: any): string[] => {
     errors.push(rules.activity.message);
   }
 
-  // Sort order validation
-  if (data.sortOrder && data.sortOrder < rules.sortOrder.min) {
-    errors.push(rules.sortOrder.message);
+  // Location validation (optional)
+  if (data.location && data.location.length > rules.location.maxLength) {
+    errors.push(rules.location.message);
+  }
+
+  // Order index validation
+  if (data.orderIndex && data.orderIndex < rules.orderIndex.min) {
+    errors.push(rules.orderIndex.message);
+  }
+
+  // Estimated duration validation (optional)
+  if (data.estimatedDuration && (data.estimatedDuration < rules.estimatedDuration.min || data.estimatedDuration > rules.estimatedDuration.max)) {
+    errors.push(rules.estimatedDuration.message);
+  }
+
+  return errors;
+};
+
+export const validateTourOperation = (data: any): string[] => {
+  const errors: string[] = [];
+  const rules = VALIDATION_RULES.tourOperation;
+
+  // Price validation
+  if (data.price === undefined || data.price === null || data.price < rules.price.min) {
+    errors.push(rules.price.message);
+  }
+
+  // Max seats validation
+  if (!data.maxSeats || data.maxSeats < rules.maxSeats.min || data.maxSeats > rules.maxSeats.max) {
+    errors.push(rules.maxSeats.message);
   }
 
   return errors;

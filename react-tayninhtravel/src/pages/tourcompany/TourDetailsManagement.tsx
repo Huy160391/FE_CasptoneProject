@@ -15,30 +15,43 @@ import {
     Col,
     Descriptions,
     Timeline,
-    Divider
+    Divider,
+    Alert,
+    Tabs
 } from 'antd';
 import {
     PlusOutlined,
     EditOutlined,
     DeleteOutlined,
     EyeOutlined,
-    ClockCircleOutlined
+    ClockCircleOutlined,
+    ApiOutlined,
+    CheckCircleOutlined,
+    ExclamationCircleOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
     getTourDetailsList,
+    getTourDetailsByTemplate,
     createTourDetails,
     updateTourDetails,
     deleteTourDetails,
     getTourDetailsById,
     getTourTemplates,
+    getSpecialtyShops,
+    createTourOperation,
+    getTourOperationByDetailsId,
     handleApiError
 } from '../../services/tourcompanyService';
+import TourDetailsWizard from '../../components/tourcompany/TourDetailsWizard';
 import {
     TourDetails,
     CreateTourDetailsRequest,
     TourTemplate,
-    TourDetailsStatus
+    TourDetailsStatus,
+    SpecialtyShop,
+    TourOperation,
+    CreateTourOperationRequest
 } from '../../types/tour';
 import {
     getTourDetailsStatusLabel,
@@ -46,26 +59,49 @@ import {
     TOUR_DETAILS_STATUS_LABELS
 } from '../../constants/tourTemplate';
 import TimelineBuilder from '../../components/tourcompany/TimelineBuilder';
+import TourOperationManagement from '../../components/tourcompany/TourOperationManagement';
+import ApiTester from '../../components/debug/ApiTester';
 
 const { TextArea } = Input;
 const { Option } = Select;
+const { TabPane } = Tabs;
 
 const TourDetailsManagement: React.FC = () => {
     const { user, token } = useAuthStore();
     const [tourDetailsList, setTourDetailsList] = useState<TourDetails[]>([]);
     const [templates, setTemplates] = useState<TourTemplate[]>([]);
+    const [specialtyShops, setSpecialtyShops] = useState<SpecialtyShop[]>([]);
     const [loading, setLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+    const [wizardVisible, setWizardVisible] = useState(false);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const [operationModalVisible, setOperationModalVisible] = useState(false);
     const [editingDetails, setEditingDetails] = useState<TourDetails | null>(null);
     const [selectedDetails, setSelectedDetails] = useState<TourDetails | null>(null);
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+    const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+    const [apiError, setApiError] = useState<string>('');
+    const [activeTab, setActiveTab] = useState('tours');
     const [form] = Form.useForm();
+    const [operationForm] = Form.useForm();
 
     // Load data
     useEffect(() => {
-        loadTourDetailsList();
-        loadTemplates();
+        checkApiAndLoadData();
     }, []);
+
+    const checkApiAndLoadData = async () => {
+        try {
+            setApiStatus('checking');
+            await loadTourDetailsList();
+            await loadTemplates();
+            await loadSpecialtyShops();
+            setApiStatus('connected');
+        } catch (error) {
+            setApiStatus('error');
+            setApiError(handleApiError(error));
+        }
+    };
 
     const loadTourDetailsList = async () => {
         try {
@@ -83,12 +119,71 @@ const TourDetailsManagement: React.FC = () => {
 
     const loadTemplates = async () => {
         try {
+            console.log('🔍 Loading templates with token:', token ? 'Present' : 'Missing');
             const response = await getTourTemplates({}, token);
-            if (response.isSuccess && response.data) {
-                setTemplates(response.data.items || []);
+            console.log('📡 Templates API response:', response);
+            console.log('📡 Response structure:', {
+                hasIsSuccess: 'isSuccess' in response,
+                hasData: 'data' in response,
+                hasStatusCode: 'statusCode' in response,
+                statusCode: response.statusCode,
+                dataType: typeof response.data,
+                dataIsArray: Array.isArray(response.data)
+            });
+
+            // Check multiple possible response formats
+            let templateItems = [];
+
+            if (response.statusCode === 200 && response.data) {
+                // Format 1: Direct data array
+                if (Array.isArray(response.data)) {
+                    templateItems = response.data;
+                    console.log('✅ Format 1: Direct array, templates:', templateItems.length);
+                }
+                // Format 2: data.items
+                else if (response.data.items && Array.isArray(response.data.items)) {
+                    templateItems = response.data.items;
+                    console.log('✅ Format 2: data.items, templates:', templateItems.length);
+                }
+                // Format 3: isSuccess format
+                else if (response.isSuccess && response.data) {
+                    templateItems = response.data.items || response.data || [];
+                    console.log('✅ Format 3: isSuccess format, templates:', templateItems.length);
+                }
+
+                setTemplates(templateItems);
+                console.log('✅ Final templates set:', templateItems);
+            } else {
+                console.warn('⚠️ Templates API returned unsuccessful response:', response);
             }
         } catch (error) {
-            console.error('Error loading templates:', error);
+            console.error('❌ Error loading templates:', error);
+            message.error(`Lỗi tải templates: ${handleApiError(error)}`);
+        }
+    };
+
+    const loadSpecialtyShops = async () => {
+        try {
+            const response = await getSpecialtyShops(false, token);
+            if (response.isSuccess && response.data) {
+                setSpecialtyShops(response.data);
+            }
+        } catch (error) {
+            console.error('Error loading specialty shops:', error);
+        }
+    };
+
+    const loadTourDetailsByTemplate = async (templateId: string) => {
+        try {
+            setLoading(true);
+            const response = await getTourDetailsByTemplate(templateId, false, token);
+            if (response.isSuccess && response.data) {
+                setTourDetailsList(response.data);
+            }
+        } catch (error) {
+            message.error(handleApiError(error));
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -96,6 +191,17 @@ const TourDetailsManagement: React.FC = () => {
         setEditingDetails(null);
         setModalVisible(true);
         form.resetFields();
+    };
+
+    const handleCreateWithWizard = () => {
+        console.log('🧙‍♂️ Button clicked - Opening wizard...');
+        console.log('🧙‍♂️ Current wizardVisible state:', wizardVisible);
+        setWizardVisible(true);
+        console.log('🧙‍♂️ setWizardVisible(true) called');
+    };
+
+    const handleWizardSuccess = () => {
+        loadTourDetailsList();
     };
 
     const handleEdit = (record: TourDetails) => {
@@ -233,29 +339,113 @@ const TourDetailsManagement: React.FC = () => {
     return (
         <div>
             <Card>
-                <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-                    <h2>Quản lý Tour Details</h2>
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={handleCreate}
-                    >
-                        Tạo Tour Details
-                    </Button>
+                <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h2 style={{ margin: 0 }}>🎯 Tour Management System</h2>
+                        <p style={{ margin: '4px 0 0 0', color: '#666' }}>
+                            Quản lý tours với TourDetails APIs mới
+                        </p>
+                    </div>
+                    <Space>
+                        {/* API Status */}
+                        {apiStatus === 'checking' && <Tag icon={<ApiOutlined />} color="processing">Checking API...</Tag>}
+                        {apiStatus === 'connected' && (
+                            <Tag icon={<CheckCircleOutlined />} color="success">
+                                API Connected ({templates.length} templates)
+                            </Tag>
+                        )}
+                        {apiStatus === 'error' && (
+                            <Tag icon={<ExclamationCircleOutlined />} color="error" title={apiError}>
+                                API Error
+                            </Tag>
+                        )}
+
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => {
+                                console.log('🧙‍♂️ Button clicked - Opening wizard...');
+                                console.log('🧙‍♂️ Current wizardVisible state:', wizardVisible);
+                                setWizardVisible(true);
+                                console.log('🧙‍♂️ setWizardVisible(true) called');
+                            }}
+                            disabled={apiStatus !== 'connected'}
+                        >
+                            Tạo Tour (Wizard)
+                        </Button>
+
+                        <Button
+                            icon={<PlusOutlined />}
+                            onClick={handleCreate}
+                            disabled={apiStatus !== 'connected'}
+                        >
+                            Tạo Tour (Đơn giản)
+                        </Button>
+                    </Space>
                 </div>
 
-                <Table
-                    columns={columns}
-                    dataSource={tourDetailsList}
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{
-                        pageSize: 10,
-                        showSizeChanger: true,
-                        showQuickJumper: true,
-                        showTotal: (total) => `Tổng ${total} mục`,
-                    }}
-                />
+                {apiStatus === 'error' && (
+                    <Alert
+                        message="API Connection Error"
+                        description={`Không thể kết nối đến API: ${apiError}`}
+                        type="error"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                        action={
+                            <Space>
+                                <Button size="small" onClick={checkApiAndLoadData}>
+                                    Retry
+                                </Button>
+                                <Button size="small" onClick={loadTemplates}>
+                                    Test Templates API
+                                </Button>
+                                <Button size="small" onClick={() => console.log('Current templates state:', templates)}>
+                                    Log Templates State
+                                </Button>
+                            </Space>
+                        }
+                    />
+                )}
+
+                <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
+                    <TabPane
+                        tab={
+                            <span>
+                                <EyeOutlined />
+                                Tours List
+                            </span>
+                        }
+                        key="tours"
+                    >
+                        <div>
+
+                        <Table
+                            columns={columns}
+                            dataSource={tourDetailsList}
+                            rowKey="id"
+                            loading={loading}
+                            pagination={{
+                                pageSize: 10,
+                                showSizeChanger: true,
+                                showQuickJumper: true,
+                                showTotal: (total) => `Tổng ${total} tours`,
+                            }}
+                        />
+                        </div>
+                    </TabPane>
+
+                    <TabPane
+                        tab={
+                            <span>
+                                <ApiOutlined />
+                                API Tester
+                            </span>
+                        }
+                        key="api-test"
+                    >
+                        <ApiTester />
+                    </TabPane>
+                </Tabs>
             </Card>
 
             {/* Create/Edit Modal */}
@@ -273,13 +463,17 @@ const TourDetailsManagement: React.FC = () => {
                 >
                     <Form.Item
                         name="tourTemplateId"
-                        label="Template Tour"
+                        label={`Template Tour (${templates.length} available)`}
                         rules={[{ required: true, message: 'Vui lòng chọn template' }]}
                     >
-                        <Select placeholder="Chọn template tour">
+                        <Select
+                            placeholder={templates.length > 0 ? "Chọn template tour" : "Đang tải templates..."}
+                            loading={templates.length === 0}
+                            notFoundContent={templates.length === 0 ? "Đang tải..." : "Không có template nào"}
+                        >
                             {templates.map(template => (
                                 <Option key={template.id} value={template.id}>
-                                    {template.title}
+                                    {template.title} ({template.templateType === 1 ? 'Free' : 'Paid'})
                                 </Option>
                             ))}
                         </Select>
@@ -403,6 +597,13 @@ const TourDetailsManagement: React.FC = () => {
                     </div>
                 )}
             </Modal>
+
+            {/* Tour Details Wizard */}
+            <TourDetailsWizard
+                visible={wizardVisible}
+                onCancel={() => setWizardVisible(false)}
+                onSuccess={handleWizardSuccess}
+            />
         </div>
     );
 };

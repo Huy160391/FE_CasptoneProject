@@ -7,9 +7,12 @@ import {
     UpdateTourTemplateRequest,
     TourDetails,
     CreateTourDetailsRequest,
+    TourOperation,
+    CreateTourOperationRequest,
     TimelineItem,
     CreateTimelineItemRequest,
     CreateTimelineItemsRequest,
+    SpecialtyShop,
     ApiResponse
 } from '../types';
 
@@ -27,23 +30,45 @@ export const getTourTemplates = async (params: GetTourTemplatesParams = {}, toke
     const {
         pageIndex = 1,
         pageSize = 10,
-        textSearch = '',
-        templateType = '',
-        startLocation = '',
-        includeInactive = false
+        includeInactive = false,
+        textSearch,
+        templateType,
+        startLocation
     } = params;
 
+    // Chỉ truyền params có giá trị
     const queryParams: any = {
         pageIndex,
         pageSize,
-        textSearch,
-        templateType,
-        startLocation,
         includeInactive
     };
 
+    // Chỉ thêm optional params nếu có giá trị
+    if (textSearch && textSearch.trim()) {
+        queryParams.textSearch = textSearch.trim();
+    }
+    if (templateType !== undefined && templateType !== '') {
+        queryParams.templateType = templateType;
+    }
+    if (startLocation && startLocation.trim()) {
+        queryParams.startLocation = startLocation.trim();
+    }
+
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    console.log('🔍 Fetching templates from API...');
+    console.log('📡 Request URL:', `/TourCompany/template`);
+    console.log('📡 Query params:', queryParams);
+    console.log('📡 Headers:', headers);
+
     const response = await axios.get('/TourCompany/template', { params: queryParams, headers });
+    console.log('✅ Templates API response:', response.data);
+    console.log('✅ Response structure check:', {
+        statusCode: response.data.statusCode,
+        hasData: 'data' in response.data,
+        dataType: typeof response.data.data,
+        dataLength: Array.isArray(response.data.data) ? response.data.data.length : 'not array'
+    });
     return response.data;
 };
 
@@ -76,36 +101,91 @@ export const updateTourTemplate = async (id: string, data: UpdateTourTemplateReq
 // Tạo TourDetails từ Template
 export const createTourDetails = async (data: CreateTourDetailsRequest, token?: string): Promise<ApiResponse<TourDetails>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.post('/TourCompany/details', data, { headers });
+    const response = await axios.post('/TourDetails', data, { headers });
     return response.data;
 };
 
-// Lấy danh sách TourDetails
+// Lấy danh sách TourDetails theo Template
+export const getTourDetailsByTemplate = async (templateId: string, includeInactive = false, token?: string): Promise<ApiResponse<TourDetails[]>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const params = { includeInactive };
+    const response = await axios.get(`/TourDetails/template/${templateId}`, { params, headers });
+    return response.data;
+};
+
+// Lấy danh sách TourDetails (general)
 export const getTourDetailsList = async (params: any = {}, token?: string): Promise<ApiResponse<any>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.get('/TourCompany/details', { params, headers });
+    const response = await axios.get('/TourDetails', { params, headers });
     return response.data;
 };
 
 // Lấy chi tiết TourDetails
 export const getTourDetailsById = async (id: string, token?: string): Promise<ApiResponse<TourDetails>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.get(`/TourCompany/details/${id}`, { headers });
+    const response = await axios.get(`/TourDetails/${id}`, { headers });
     return response.data;
 };
 
 // Cập nhật TourDetails
 export const updateTourDetails = async (id: string, data: Partial<CreateTourDetailsRequest>, token?: string): Promise<ApiResponse<TourDetails>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.patch(`/TourCompany/details/${id}`, data, { headers });
+    const response = await axios.put(`/TourDetails/${id}`, data, { headers });
     return response.data;
 };
 
 // Xóa TourDetails
 export const deleteTourDetails = async (id: string, token?: string): Promise<ApiResponse<void>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.delete(`/TourCompany/details/${id}`, { headers });
+    const response = await axios.delete(`/TourDetails/${id}`, { headers });
     return response.data;
+};
+
+// ===== TOUR OPERATION APIs =====
+
+// Tạo TourOperation
+export const createTourOperation = async (data: CreateTourOperationRequest, token?: string): Promise<ApiResponse<TourOperation>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.post('/TourOperation', data, { headers });
+    return response.data;
+};
+
+// Lấy TourOperation theo TourDetails ID
+export const getTourOperationByDetailsId = async (tourDetailsId: string, token?: string): Promise<ApiResponse<TourOperation>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`/TourOperation/details/${tourDetailsId}`, { headers });
+    return response.data;
+};
+
+// Cập nhật TourOperation
+export const updateTourOperation = async (id: string, data: Partial<CreateTourOperationRequest>, token?: string): Promise<ApiResponse<TourOperation>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.put(`/TourOperation/${id}`, data, { headers });
+    return response.data;
+};
+
+// Xóa TourOperation
+export const deleteTourOperation = async (id: string, token?: string): Promise<ApiResponse<void>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.delete(`/TourOperation/${id}`, { headers });
+    return response.data;
+};
+
+// Kiểm tra capacity real-time
+export const checkTourCapacity = async (operationId: string, token?: string): Promise<ApiResponse<{ maxSeats: number; bookedSeats: number; availableSeats: number; isFullyBooked: boolean }>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`/TourOperation/${operationId}`, { headers });
+    const operation = response.data;
+
+    return {
+        ...response.data,
+        data: {
+            maxSeats: operation.maxSeats,
+            bookedSeats: operation.bookedSeats || operation.currentBookings,
+            availableSeats: operation.availableSeats,
+            isFullyBooked: (operation.bookedSeats || operation.currentBookings) >= operation.maxSeats
+        }
+    };
 };
 
 // ===== TIMELINE APIs =====
@@ -113,28 +193,52 @@ export const deleteTourDetails = async (id: string, token?: string): Promise<Api
 // Tạo Timeline Item
 export const createTimelineItem = async (data: CreateTimelineItemRequest, token?: string): Promise<ApiResponse<TimelineItem>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.post('/TourCompany/details/timeline', data, { headers });
+    const response = await axios.post('/TimelineItem', data, { headers });
     return response.data;
 };
 
 // Tạo nhiều Timeline Items
 export const createTimelineItems = async (data: CreateTimelineItemsRequest, token?: string): Promise<ApiResponse<{ createdCount: number; items: TimelineItem[] }>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.post('/TourCompany/details/timeline/batch', data, { headers });
+    const response = await axios.post('/TimelineItem/batch', data, { headers });
+    return response.data;
+};
+
+// Lấy Timeline Items theo TourDetails ID
+export const getTimelineItemsByDetailsId = async (tourDetailsId: string, token?: string): Promise<ApiResponse<TimelineItem[]>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`/TimelineItem/details/${tourDetailsId}`, { headers });
     return response.data;
 };
 
 // Cập nhật Timeline Item
 export const updateTimelineItem = async (id: string, data: Partial<CreateTimelineItemRequest>, token?: string): Promise<ApiResponse<TimelineItem>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.patch(`/TourCompany/details/timeline/${id}`, data, { headers });
+    const response = await axios.put(`/TimelineItem/${id}`, data, { headers });
     return response.data;
 };
 
 // Xóa Timeline Item
 export const deleteTimelineItem = async (id: string, token?: string): Promise<ApiResponse<void>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.delete(`/TourCompany/details/timeline/${id}`, { headers });
+    const response = await axios.delete(`/TimelineItem/${id}`, { headers });
+    return response.data;
+};
+
+// ===== SPECIALTY SHOP APIs =====
+
+// Lấy danh sách SpecialtyShops
+export const getSpecialtyShops = async (includeInactive = false, token?: string): Promise<ApiResponse<SpecialtyShop[]>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const params = { includeInactive };
+    const response = await axios.get('/SpecialtyShop', { params, headers });
+    return response.data;
+};
+
+// Lấy SpecialtyShop theo ID
+export const getSpecialtyShopById = async (id: string, token?: string): Promise<ApiResponse<SpecialtyShop>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`/SpecialtyShop/${id}`, { headers });
     return response.data;
 };
 
@@ -175,4 +279,25 @@ export const performanceTracker = {
             console.log(`${operation} completed in ${duration.toFixed(2)}ms`);
         }
     }
+};
+
+// ===== TOUR GUIDE APIs =====
+
+// Lấy danh sách TourGuides
+export const getTourGuides = async (includeInactive = false, token?: string): Promise<ApiResponse<TourGuide[]>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const params = { includeInactive };
+    const response = await axios.get('/Account/guides', { headers, params });
+    return response.data;
+};
+
+// Lấy danh sách TourGuides available cho ngày cụ thể
+export const getAvailableTourGuides = async (date: string, excludeOperationId?: string, token?: string): Promise<ApiResponse<TourGuide[]>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const params: any = { date };
+    if (excludeOperationId) {
+        params.excludeOperationId = excludeOperationId;
+    }
+    const response = await axios.get('/Account/guides/available', { headers, params });
+    return response.data;
 };

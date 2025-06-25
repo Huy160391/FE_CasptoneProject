@@ -9,19 +9,28 @@ import {
     getTourTemplateDetail,
     createTourDetails,
     getTourDetailsList,
+    getTourDetailsByTemplate,
     getTourDetailsById,
     updateTourDetails,
     deleteTourDetails,
+    createTourOperation,
+    getTourOperationByDetailsId,
+    updateTourOperation,
     createTimelineItems,
+    getTimelineItemsByDetailsId,
+    getSpecialtyShops,
     handleApiError,
     performanceTracker
 } from '../services/tourcompanyService';
 import {
     TourTemplate,
     TourDetails,
+    TourOperation,
+    SpecialtyShop,
     CreateTourTemplateRequest,
     UpdateTourTemplateRequest,
     CreateTourDetailsRequest,
+    CreateTourOperationRequest,
     GetTourTemplatesParams,
     TimelineItem,
     CreateTimelineItemsRequest

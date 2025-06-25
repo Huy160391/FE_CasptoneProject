@@ -51,8 +51,10 @@ interface TimelineFormItem {
     id?: string;
     checkInTime: string;
     activity: string;
+    location?: string;
     specialtyShopId?: string;
-    sortOrder: number;
+    orderIndex: number; // Changed from sortOrder to match API
+    estimatedDuration?: number; // in minutes
     isNew?: boolean;
 }
 
@@ -70,13 +72,15 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
     useEffect(() => {
         // Initialize items from existing timeline
         const initialItems: TimelineFormItem[] = timeline
-            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .sort((a, b) => a.orderIndex - b.orderIndex)
             .map(item => ({
                 id: item.id,
                 checkInTime: item.checkInTime,
                 activity: item.activity,
+                location: item.location,
                 specialtyShopId: item.specialtyShopId || undefined,
-                sortOrder: item.sortOrder,
+                orderIndex: item.orderIndex,
+                estimatedDuration: item.estimatedDuration,
                 isNew: false
             }));
         setItems(initialItems);
@@ -86,7 +90,9 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
         const newItem: TimelineFormItem = {
             checkInTime: '',
             activity: '',
-            sortOrder: items.length + 1,
+            location: '',
+            orderIndex: items.length + 1,
+            estimatedDuration: 30, // Default 30 minutes
             isNew: true
         };
         setItems([...items, newItem]);

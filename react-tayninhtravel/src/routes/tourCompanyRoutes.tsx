@@ -20,11 +20,11 @@ export const tourCompanyRoutes: RouteObject[] = [
                 element: <TourTemplateManagement />,
             },
             {
-                path: 'tour-details',
+                path: 'tours',
                 element: <TourDetailsManagement />,
             },
             {
-                path: 'tours',
+                path: 'tours-old',
                 element: <TourManagement />,
             },
             {

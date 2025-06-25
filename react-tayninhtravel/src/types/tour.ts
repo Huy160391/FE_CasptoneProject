@@ -37,6 +37,22 @@ export enum TourOperationStatus {
     PendingConfirmation = 6  // Operation đang chờ xác nhận từ guide
 }
 
+// TourGuide related types
+export interface TourGuide {
+    id: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    isActive: boolean;
+    isAvailable: boolean;
+    experienceYears: number;
+    specialization?: string;
+    averageRating?: number;
+    completedTours: number;
+    joinedDate: string;
+    currentStatus: string;
+}
+
 // Các params cho API lấy danh sách template tour
 export interface GetTourTemplatesParams {
     pageIndex?: number;
@@ -177,6 +193,7 @@ export interface TourDetails {
     tourOperation?: TourOperation;
     timeline?: TimelineItem[];
     assignedSlots?: TourSlot[];
+    assignedSlotsCount?: number;
     createdAt: string;
     updatedAt?: string | null;
 }
@@ -186,18 +203,40 @@ export interface CreateTourDetailsRequest {
     title: string;
     description: string;
     skillsRequired: string;
+    specialtyShopIds?: string[];
 }
 
 // TourOperation interfaces
 export interface TourOperation {
     id: string;
+    tourDetailsId: string;
     guideId?: string | null;
     price: number;
     maxSeats: number;
+    currentBookings: number;
+    bookedSeats: number;
+    availableSeats: number;
     status: TourOperationStatus;
     description?: string | null;
     notes?: string | null;
     isActive: boolean;
+    guide?: Guide | null;
+    createdAt: string;
+    updatedAt?: string | null;
+}
+
+export interface Guide {
+    id: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+}
+
+export interface CreateTourOperationRequest {
+    tourDetailsId: string;
+    price: number;
+    maxSeats: number;
+    guideId?: string | null;
 }
 
 // Timeline interfaces
@@ -206,8 +245,10 @@ export interface TimelineItem {
     tourDetailsId: string;
     checkInTime: string; // Format: "HH:mm"
     activity: string;
+    location?: string;
     specialtyShopId?: string | null;
-    sortOrder: number;
+    orderIndex: number; // Changed from sortOrder to match API
+    estimatedDuration?: number; // in minutes
     specialtyShop?: SpecialtyShop | null;
     createdAt: string;
     updatedAt?: string | null;
@@ -217,8 +258,10 @@ export interface CreateTimelineItemRequest {
     tourDetailsId: string;
     checkInTime: string;
     activity: string;
+    location?: string;
     specialtyShopId?: string | null;
-    sortOrder: number;
+    orderIndex: number; // Changed from sortOrder to match API
+    estimatedDuration?: number; // in minutes
 }
 
 export interface CreateTimelineItemsRequest {
