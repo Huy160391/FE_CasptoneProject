@@ -105,6 +105,21 @@ const ApiTester: React.FC = () => {
         }
     };
 
+    const testTourDetailsList = async () => {
+        setLoading(true);
+        try {
+            console.log('🧪 Testing Tour Details List API...');
+            const response = await getTourDetailsList({}, token);
+            console.log('🧪 Tour Details List Response:', response);
+            addResult('Tour Details List Test', response.isSuccess, response.data, response);
+        } catch (error) {
+            console.error('🧪 Tour Details List Error:', error);
+            addResult('Tour Details List Test', false, null, error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const testSpecialtyShops = async () => {
         setLoading(true);
         try {
@@ -193,13 +208,20 @@ const ApiTester: React.FC = () => {
                     >
                         Test TourTemplates
                     </Button>
-                    <Button 
+                    <Button
                         onClick={testTourDetails}
                         loading={loading}
                     >
                         Test TourDetails
                     </Button>
-                    <Button 
+                    <Button
+                        onClick={testTourDetailsList}
+                        loading={loading}
+                        type="default"
+                    >
+                        Test Tour Details List
+                    </Button>
+                    <Button
                         onClick={testSpecialtyShops}
                         loading={loading}
                     >

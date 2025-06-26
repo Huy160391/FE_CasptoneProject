@@ -27,9 +27,11 @@ import {
     ClockCircleOutlined,
     ApiOutlined,
     CheckCircleOutlined,
-    ExclamationCircleOutlined
+    ExclamationCircleOutlined,
+    BarChartOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { usePreloadWizardData } from '../../hooks/usePreloadWizardData';
 import {
     getTourDetailsList,
     getTourDetailsByTemplate,
@@ -44,6 +46,7 @@ import {
     handleApiError
 } from '../../services/tourcompanyService';
 import TourDetailsWizard from '../../components/tourcompany/TourDetailsWizard';
+import TourDetailsModal from '../../components/tourcompany/TourDetailsModal';
 import {
     TourDetails,
     CreateTourDetailsRequest,
@@ -61,6 +64,8 @@ import {
 import TimelineBuilder from '../../components/tourcompany/TimelineBuilder';
 import TourOperationManagement from '../../components/tourcompany/TourOperationManagement';
 import ApiTester from '../../components/debug/ApiTester';
+import CacheStatus from '../../components/debug/CacheStatus';
+import WizardTemplatesTester from '../../components/debug/WizardTemplatesTester';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -68,22 +73,42 @@ const { TabPane } = Tabs;
 
 const TourDetailsManagement: React.FC = () => {
     const { user, token } = useAuthStore();
+
+    // Preload wizard data when component mounts
+    const { isPreloaded, templatesCount, shopsCount, guidesCount } = usePreloadWizardData();
+
     const [tourDetailsList, setTourDetailsList] = useState<TourDetails[]>([]);
     const [templates, setTemplates] = useState<TourTemplate[]>([]);
     const [specialtyShops, setSpecialtyShops] = useState<SpecialtyShop[]>([]);
     const [loading, setLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [wizardVisible, setWizardVisible] = useState(false);
-    const [detailModalVisible, setDetailModalVisible] = useState(false);
     const [operationModalVisible, setOperationModalVisible] = useState(false);
     const [editingDetails, setEditingDetails] = useState<TourDetails | null>(null);
-    const [selectedDetails, setSelectedDetails] = useState<TourDetails | null>(null);
+    const [selectedTourDetailsId, setSelectedTourDetailsId] = useState<string | null>(null);
+    const [modalInitialTab, setModalInitialTab] = useState('details');
     const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
     const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
     const [apiError, setApiError] = useState<string>('');
     const [activeTab, setActiveTab] = useState('tours');
     const [form] = Form.useForm();
     const [operationForm] = Form.useForm();
+
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+
+    // Log preload status
+    useEffect(() => {
+        if (isPreloaded) {
+            console.log('✅ Wizard data preloaded:', {
+                templates: templatesCount,
+                shops: shopsCount,
+                guides: guidesCount
+            });
+        }
+    }, [isPreloaded, templatesCount, shopsCount, guidesCount]);
 
     // Load data
     useEffect(() => {
@@ -103,12 +128,21 @@ const TourDetailsManagement: React.FC = () => {
         }
     };
 
-    const loadTourDetailsList = async () => {
+    const loadTourDetailsList = async (page?: number, size?: number) => {
         try {
             setLoading(true);
-            const response = await getTourDetailsList({}, token);
+            const pageIndex = (page || currentPage) - 1; // Convert to 0-based index
+            const pageSizeToUse = size || pageSize;
+
+            const response = await getTourDetailsList({
+                pageIndex,
+                pageSize: pageSizeToUse,
+                includeInactive: false
+            }, token);
+
             if (response.isSuccess && response.data) {
-                setTourDetailsList(response.data.items || response.data);
+                setTourDetailsList(response.data);
+                setTotalCount(response.totalCount || 0);
             }
         } catch (error) {
             message.error(handleApiError(error));
@@ -204,6 +238,21 @@ const TourDetailsManagement: React.FC = () => {
         loadTourDetailsList();
     };
 
+    // Pagination handlers
+    const handlePageChange = (page: number, size?: number) => {
+        setCurrentPage(page);
+        if (size && size !== pageSize) {
+            setPageSize(size);
+        }
+        loadTourDetailsList(page, size);
+    };
+
+    const handlePageSizeChange = (current: number, size: number) => {
+        setCurrentPage(1); // Reset to first page when changing page size
+        setPageSize(size);
+        loadTourDetailsList(1, size);
+    };
+
     const handleEdit = (record: TourDetails) => {
         setEditingDetails(record);
         setModalVisible(true);
@@ -227,19 +276,16 @@ const TourDetailsManagement: React.FC = () => {
         }
     };
 
-    const handleViewDetails = async (record: TourDetails) => {
-        try {
-            setLoading(true);
-            const response = await getTourDetailsById(record.id, token);
-            if (response.isSuccess && response.data) {
-                setSelectedDetails(response.data);
-                setDetailModalVisible(true);
-            }
-        } catch (error) {
-            message.error(handleApiError(error));
-        } finally {
-            setLoading(false);
-        }
+    const handleViewDetails = (record: TourDetails) => {
+        setSelectedTourDetailsId(record.id);
+        setModalInitialTab('details');
+        // Don't set detailModalVisible - use TourDetailsModal instead
+    };
+
+    const handleCreateOperation = (record: TourDetails) => {
+        setSelectedTourDetailsId(record.id);
+        setModalInitialTab('operation');
+        setDetailModalVisible(true);
     };
 
     const handleSubmit = async (values: CreateTourDetailsRequest) => {
@@ -317,6 +363,16 @@ const TourDetailsManagement: React.FC = () => {
                     >
                         Sửa
                     </Button>
+                    {record.status === TourDetailsStatus.Approved && (
+                        <Button
+                            type="link"
+                            icon={<CheckCircleOutlined />}
+                            onClick={() => handleCreateOperation(record)}
+                            style={{ color: '#52c41a' }}
+                        >
+                            Vận hành
+                        </Button>
+                    )}
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xóa?"
                         onConfirm={() => handleDelete(record.id)}
@@ -425,10 +481,15 @@ const TourDetailsManagement: React.FC = () => {
                             rowKey="id"
                             loading={loading}
                             pagination={{
-                                pageSize: 10,
+                                current: currentPage,
+                                pageSize: pageSize,
+                                total: totalCount,
                                 showSizeChanger: true,
                                 showQuickJumper: true,
-                                showTotal: (total) => `Tổng ${total} tours`,
+                                showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} tours`,
+                                onChange: handlePageChange,
+                                onShowSizeChange: handlePageSizeChange,
+                                pageSizeOptions: ['10', '20', '50', '100'],
                             }}
                         />
                         </div>
@@ -444,6 +505,30 @@ const TourDetailsManagement: React.FC = () => {
                         key="api-test"
                     >
                         <ApiTester />
+                    </TabPane>
+
+                    <TabPane
+                        tab={
+                            <span>
+                                <BarChartOutlined />
+                                Cache Status
+                            </span>
+                        }
+                        key="cache-status"
+                    >
+                        <CacheStatus />
+                    </TabPane>
+
+                    <TabPane
+                        tab={
+                            <span>
+                                <ExclamationCircleOutlined />
+                                Wizard Templates Test
+                            </span>
+                        }
+                        key="wizard-test"
+                    >
+                        <WizardTemplatesTester />
                     </TabPane>
                 </Tabs>
             </Card>
@@ -522,87 +607,24 @@ const TourDetailsManagement: React.FC = () => {
                 </Form>
             </Modal>
 
-            {/* Detail View Modal */}
-            <Modal
-                title="Chi tiết Tour Details"
-                open={detailModalVisible}
-                onCancel={() => setDetailModalVisible(false)}
-                footer={null}
-                width={800}
-            >
-                {selectedDetails && (
-                    <div>
-                        <Descriptions bordered column={2}>
-                            <Descriptions.Item label="Tiêu đề" span={2}>
-                                {selectedDetails.title}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Trạng thái">
-                                <Tag color={getStatusColor(selectedDetails.status)}>
-                                    {getTourDetailsStatusLabel(selectedDetails.status)}
-                                </Tag>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Template">
-                                {selectedDetails.tourTemplate?.title}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Kỹ năng yêu cầu" span={2}>
-                                {selectedDetails.skillsRequired}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Mô tả" span={2}>
-                                {selectedDetails.description}
-                            </Descriptions.Item>
-                        </Descriptions>
 
-                        {selectedDetails.timeline && selectedDetails.timeline.length > 0 && (
-                            <>
-                                <Divider>Lịch trình</Divider>
-                                <Timeline>
-                                    {selectedDetails.timeline
-                                        .sort((a, b) => a.sortOrder - b.sortOrder)
-                                        .map(item => (
-                                            <Timeline.Item
-                                                key={item.id}
-                                                dot={<ClockCircleOutlined />}
-                                            >
-                                                <div>
-                                                    <strong>{item.checkInTime}</strong> - {item.activity}
-                                                    {item.specialtyShop && (
-                                                        <div style={{ marginTop: 4 }}>
-                                                            <Tag color="blue">
-                                                                {item.specialtyShop.shopName}
-                                                            </Tag>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </Timeline.Item>
-                                        ))}
-                                </Timeline>
-                            </>
-                        )}
-
-                        {selectedDetails.assignedSlots && selectedDetails.assignedSlots.length > 0 && (
-                            <>
-                                <Divider>Slots được gán</Divider>
-                                <Row gutter={[16, 16]}>
-                                    {selectedDetails.assignedSlots.map(slot => (
-                                        <Col span={8} key={slot.id}>
-                                            <Card size="small">
-                                                <div>Ngày: {new Date(slot.tourDate).toLocaleDateString('vi-VN')}</div>
-                                                <div>Trạng thái: <Tag color={getStatusColor(slot.status)}>{slot.status}</Tag></div>
-                                            </Card>
-                                        </Col>
-                                    ))}
-                                </Row>
-                            </>
-                        )}
-                    </div>
-                )}
-            </Modal>
 
             {/* Tour Details Wizard */}
             <TourDetailsWizard
                 visible={wizardVisible}
                 onCancel={() => setWizardVisible(false)}
                 onSuccess={handleWizardSuccess}
+            />
+
+            <TourDetailsModal
+                visible={!!selectedTourDetailsId}
+                tourDetailsId={selectedTourDetailsId}
+                initialTab={modalInitialTab}
+                onClose={() => {
+                    setSelectedTourDetailsId(null);
+                    setModalInitialTab('details');
+                }}
+                onUpdate={loadTourDetailsList}
             />
         </div>
     );

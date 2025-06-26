@@ -187,8 +187,9 @@ export interface TourDetails {
     description: string;
     status: TourDetailsStatus;
     commentApproved?: string | null;
-    skillsRequired: string;
+    skillsRequired?: string;
     tourTemplateId: string;
+    tourTemplateName?: string;
     tourTemplate?: TourTemplate;
     tourOperation?: TourOperation;
     timeline?: TimelineItem[];
@@ -266,7 +267,12 @@ export interface CreateTimelineItemRequest {
 
 export interface CreateTimelineItemsRequest {
     tourDetailsId: string;
-    timelineItems: Omit<CreateTimelineItemRequest, 'tourDetailsId'>[];
+    timelineItems: {
+        checkInTime: string;
+        activity: string;
+        shopId?: string | null;
+        sortOrder?: number;
+    }[];
 }
 
 // SpecialtyShop interface (basic)

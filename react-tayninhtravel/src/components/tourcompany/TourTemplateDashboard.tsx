@@ -22,6 +22,7 @@ import {
     BarChartOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { usePreloadWizardData } from '../../hooks/usePreloadWizardData';
 import { getTourTemplates, getTourDetailsList, handleApiError } from '../../services/tourcompanyService';
 import {
     TourTemplate,
@@ -53,6 +54,10 @@ interface DashboardStats {
 
 const TourTemplateDashboard: React.FC = () => {
     const { token } = useAuthStore();
+
+    // Preload wizard data when component mounts
+    usePreloadWizardData();
+
     const [loading, setLoading] = useState(false);
     const [stats, setStats] = useState<DashboardStats>({
         totalTemplates: 0,

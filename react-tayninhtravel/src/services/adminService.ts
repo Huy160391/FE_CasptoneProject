@@ -25,7 +25,7 @@ class AdminService {
     }> {
         try {
             const {
-                pageIndex = 1,
+                pageIndex = 0,
                 pageSize = 10,
                 textSearch = '',
                 status,
@@ -85,7 +85,7 @@ class AdminService {
     }> {
         try {
             const {
-                pageIndex = 1,
+                pageIndex = 0,
                 pageSize = 10,
                 textSearch = ''
             } = params;
@@ -293,7 +293,7 @@ class AdminService {
     }
 
     // User Management Methods
-    async getUsers(page: number = 1, pageSize: number = 10, searchText?: string, status?: boolean) {
+    async getUsers(page: number = 0, pageSize: number = 10, searchText?: string, status?: boolean) {
         const params: any = {
             pageIndex: page,
             pageSize,

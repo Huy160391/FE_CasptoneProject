@@ -28,7 +28,7 @@ export const createTourTemplate = async (data: CreateTourTemplateRequest, token?
 // Lấy danh sách template tour
 export const getTourTemplates = async (params: GetTourTemplatesParams = {}, token?: string): Promise<GetTourTemplatesResponse> => {
     const {
-        pageIndex = 1,
+        pageIndex = 0,
         pageSize = 10,
         includeInactive = false,
         textSearch,
@@ -113,10 +113,26 @@ export const getTourDetailsByTemplate = async (templateId: string, includeInacti
     return response.data;
 };
 
-// Lấy danh sách TourDetails (general)
+// Lấy danh sách TourDetails (general) - sử dụng endpoint paginated
 export const getTourDetailsList = async (params: any = {}, token?: string): Promise<ApiResponse<any>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.get('/TourDetails', { params, headers });
+
+    // Sử dụng endpoint paginated với 0-based indexing
+    // Backend đã được sửa để expect pageIndex bắt đầu từ 0
+    const queryParams = {
+        pageIndex: params.pageIndex || 0, // Use 0-based indexing directly
+        pageSize: params.pageSize || 10,
+        includeInactive: params.includeInactive || false,
+        ...params
+    };
+
+    console.log('🔍 Fetching tour details from API...');
+    console.log('📡 Request URL:', `/TourDetails/paginated`);
+    console.log('📡 Query params:', queryParams);
+    console.log('📡 Headers:', headers);
+
+    const response = await axios.get('/TourDetails/paginated', { params: queryParams, headers });
+    console.log('✅ Tour Details API response:', response.data);
     return response.data;
 };
 
@@ -193,35 +209,35 @@ export const checkTourCapacity = async (operationId: string, token?: string): Pr
 // Tạo Timeline Item
 export const createTimelineItem = async (data: CreateTimelineItemRequest, token?: string): Promise<ApiResponse<TimelineItem>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.post('/TimelineItem', data, { headers });
+    const response = await axios.post('/TourDetails/timeline/single', data, { headers });
     return response.data;
 };
 
 // Tạo nhiều Timeline Items
 export const createTimelineItems = async (data: CreateTimelineItemsRequest, token?: string): Promise<ApiResponse<{ createdCount: number; items: TimelineItem[] }>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.post('/TimelineItem/batch', data, { headers });
+    const response = await axios.post('/TourDetails/timeline', data, { headers });
     return response.data;
 };
 
 // Lấy Timeline Items theo TourDetails ID
 export const getTimelineItemsByDetailsId = async (tourDetailsId: string, token?: string): Promise<ApiResponse<TimelineItem[]>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.get(`/TimelineItem/details/${tourDetailsId}`, { headers });
+    const response = await axios.get(`/TourDetails/${tourDetailsId}/timeline`, { headers });
     return response.data;
 };
 
 // Cập nhật Timeline Item
 export const updateTimelineItem = async (id: string, data: Partial<CreateTimelineItemRequest>, token?: string): Promise<ApiResponse<TimelineItem>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.put(`/TimelineItem/${id}`, data, { headers });
+    const response = await axios.patch(`/TourDetails/timeline/${id}`, data, { headers });
     return response.data;
 };
 
 // Xóa Timeline Item
 export const deleteTimelineItem = async (id: string, token?: string): Promise<ApiResponse<void>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.delete(`/TimelineItem/${id}`, { headers });
+    const response = await axios.delete(`/TourDetails/timeline/${id}`, { headers });
     return response.data;
 };
 

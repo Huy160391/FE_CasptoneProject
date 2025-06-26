@@ -16,7 +16,8 @@ import {
     message,
     Divider,
     Tag,
-    Alert
+    Alert,
+    Spin
 } from 'antd';
 import {
     PlusOutlined,
@@ -28,10 +29,8 @@ import {
     CheckCircleOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useTourTemplateStore } from '../../store/useTourTemplateStore';
 import {
-    getTourTemplates,
-    getSpecialtyShops,
-    getTourGuides,
     createTourDetails,
     createTourOperation,
     createTimelineItems,
@@ -45,6 +44,8 @@ import {
     CreateTourOperationRequest,
     CreateTimelineItemRequest
 } from '../../types/tour';
+import SkillsSelector from '../common/SkillsSelector';
+import skillsService from '../../services/skillsService';
 import dayjs from 'dayjs';
 
 const { Option } = Select;
@@ -64,6 +65,7 @@ interface WizardData {
         title: string;
         description: string;
         skillsRequired: string;
+        selectedSkills: string[]; // Array of selected skill english names
     };
     // Step 2: Timeline
     timeline: CreateTimelineItemRequest[];
@@ -83,16 +85,28 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
     onSuccess
 }) => {
     const { token } = useAuthStore();
+    const {
+        getTemplates,
+        getShops,
+        getGuides,
+        templatesLoading,
+        shopsLoading,
+        guidesLoading,
+        templatesCache,
+        shopsCache,
+        guidesCache
+    } = useTourTemplateStore();
+
     const [currentStep, setCurrentStep] = useState(0);
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
 
     console.log('🧙‍♂️ Wizard render - visible:', visible, 'token:', token ? 'present' : 'missing');
-    
-    // Data states
-    const [templates, setTemplates] = useState<TourTemplate[]>([]);
-    const [specialtyShops, setSpecialtyShops] = useState<SpecialtyShop[]>([]);
-    const [tourGuides, setTourGuides] = useState<TourGuide[]>([]);
+
+    // Data states - now using cached data
+    const [templates, setTemplates] = useState<TourTemplate[]>(templatesCache?.data || []);
+    const [specialtyShops, setSpecialtyShops] = useState<SpecialtyShop[]>(shopsCache?.data || []);
+    const [tourGuides, setTourGuides] = useState<TourGuide[]>(guidesCache?.data || []);
     
     // Wizard data
     const [wizardData, setWizardData] = useState<WizardData>({
@@ -100,11 +114,12 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             tourTemplateId: '',
             title: '',
             description: '',
-            skillsRequired: ''
+            skillsRequired: '',
+            selectedSkills: []
         },
         timeline: [],
         operation: {
-            price: 0,
+            price: 1,
             maxSeats: 10
         }
     });
@@ -113,75 +128,84 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
     const [editingTimelineItem, setEditingTimelineItem] = useState<CreateTimelineItemRequest | null>(null);
     const [timelineForm] = Form.useForm();
 
+    // Update local state when cache changes
+    useEffect(() => {
+        if (templatesCache?.data) {
+            setTemplates(templatesCache.data);
+        }
+    }, [templatesCache]);
+
+    useEffect(() => {
+        if (shopsCache?.data) {
+            setSpecialtyShops(shopsCache.data);
+        }
+    }, [shopsCache]);
+
+    useEffect(() => {
+        if (guidesCache?.data) {
+            setTourGuides(guidesCache.data);
+        }
+    }, [guidesCache]);
+
     useEffect(() => {
         console.log('🧙‍♂️ Wizard visibility changed:', visible);
         if (visible && token) {
             console.log('🧙‍♂️ Loading wizard data...');
-            console.log('🧙‍♂️ Token available:', !!token);
-            console.log('🧙‍♂️ Templates state before load:', templates.length);
-            // Force reload data when wizard opens
-            setTemplates([]);
-            setSpecialtyShops([]);
-            setTourGuides([]);
             loadInitialData();
         }
-    }, [visible]);
+    }, [visible, token]);
 
     const loadInitialData = async () => {
         try {
-            setLoading(true);
-            const [templatesRes, shopsRes, guidesRes] = await Promise.all([
-                getTourTemplates({ pageIndex: 1, pageSize: 100 }, token),
-                getSpecialtyShops(false, token),
-                getTourGuides(false, token)
+            console.log('🔄 Loading wizard data from cache/API...');
+
+            // Use cached data or fetch fresh data
+            const [templatesData, shopsData, guidesData] = await Promise.all([
+                getTemplates({ pageIndex: 0, pageSize: 10000000, includeInactive: false }, token),
+                getShops(false, token),
+                getGuides(false, token)
             ]);
 
-            console.log('🔍 Wizard - Templates response:', templatesRes);
-            console.log('🔍 Wizard - Shops response:', shopsRes);
-            console.log('🔍 Wizard - Guides response:', guidesRes);
+            console.log('🔍 Wizard - Templates loaded:', templatesData.length);
+            console.log('🔍 Wizard - Shops loaded:', shopsData.length);
+            console.log('🔍 Wizard - Guides loaded:', guidesData.length);
 
-            // Handle templates response (GetTourTemplatesResponse format)
-            if (templatesRes && templatesRes.statusCode === 200 && templatesRes.data) {
-                console.log('✅ Setting templates:', templatesRes.data);
-                setTemplates(templatesRes.data);
-            } else {
-                console.log('❌ Templates response invalid:', templatesRes);
-            }
-
-            // Handle shops response (ApiResponse format)
-            if (shopsRes.isSuccess && shopsRes.data) {
-                console.log('✅ Setting shops:', shopsRes.data);
-                setSpecialtyShops(shopsRes.data);
-            } else {
-                console.log('❌ Shops response invalid:', shopsRes);
-            }
-
-            // Handle guides response (ApiResponse format)
-            if (guidesRes.isSuccess && guidesRes.data) {
-                console.log('✅ Setting guides:', guidesRes.data);
-                setTourGuides(guidesRes.data);
-            } else {
-                console.log('❌ Guides response invalid:', guidesRes);
-            }
+            // Update local state
+            setTemplates(templatesData);
+            setSpecialtyShops(shopsData);
+            setTourGuides(guidesData);
 
         } catch (error) {
             console.error('❌ Error loading wizard data:', error);
-            message.error(handleApiError(error));
-        } finally {
-            setLoading(false);
+            message.error('Không thể tải dữ liệu. Vui lòng thử lại.');
         }
     };
 
     const handleStepNext = async () => {
         try {
+            // Custom validation for skills selection in step 0
+            if (currentStep === 0) {
+                if (wizardData.basicInfo.selectedSkills.length === 0) {
+                    message.error('Vui lòng chọn ít nhất một kỹ năng yêu cầu');
+                    return;
+                }
+            }
+
             await form.validateFields();
             const values = form.getFieldsValue();
 
             // Save current step data
             if (currentStep === 0) {
+                // Convert selectedSkills array to skillsRequired string
+                const skillsString = skillsService.createSkillsString(wizardData.basicInfo.selectedSkills);
+
                 setWizardData(prev => ({
                     ...prev,
-                    basicInfo: values
+                    basicInfo: {
+                        ...values,
+                        skillsRequired: skillsString,
+                        selectedSkills: prev.basicInfo.selectedSkills
+                    }
                 }));
             } else if (currentStep === 2) {
                 setWizardData(prev => ({
@@ -207,6 +231,14 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
     };
 
     const handleCreateTourDetails = async () => {
+        console.log('🚀 handleCreateTourDetails started');
+        console.log('🚀 wizardData:', wizardData);
+
+        if (!token) {
+            message.error('Vui lòng đăng nhập lại');
+            return;
+        }
+
         try {
             setLoading(true);
 
@@ -214,34 +246,49 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             const tourDetailsRequest: CreateTourDetailsRequest = {
                 ...wizardData.basicInfo
             };
+            console.log('🚀 TourDetails request:', tourDetailsRequest);
 
             const tourDetailsRes = await createTourDetails(tourDetailsRequest, token);
-            if (!tourDetailsRes.isSuccess || !tourDetailsRes.data) {
-                throw new Error(tourDetailsRes.message);
+            console.log('🚀 TourDetails response:', tourDetailsRes);
+
+            if (!(tourDetailsRes as any).isSuccess || !tourDetailsRes.data) {
+                throw new Error(tourDetailsRes.message || 'Có lỗi xảy ra');
             }
 
             const tourDetailsId = tourDetailsRes.data.id;
+            console.log('🚀 TourDetails created with ID:', tourDetailsId);
 
             // Step 2: Create Timeline Items
+            console.log('🔄 Timeline data:', wizardData.timeline);
             if (wizardData.timeline.length > 0) {
-                const timelinePromises = wizardData.timeline.map(item => 
-                    createTimelineItems({
-                        ...item,
-                        tourDetailsId
-                    }, token)
-                );
-                await Promise.all(timelinePromises);
+                console.log('🔄 Creating timeline items...');
+                const timelineRequest = {
+                    tourDetailsId,
+                    timelineItems: wizardData.timeline.map((item, index) => ({
+                        checkInTime: item.checkInTime,
+                        activity: item.activity,
+                        shopId: item.specialtyShopId || null,
+                        sortOrder: index + 1
+                    }))
+                };
+                console.log('🔄 Timeline request:', timelineRequest);
+                await createTimelineItems(timelineRequest, token);
+                console.log('✅ Timeline items created');
+            } else {
+                console.log('⚠️ No timeline items to create');
             }
 
             // Step 3: Create TourOperation
+            console.log('🔄 Operation data:', wizardData.operation);
             const operationRequest: CreateTourOperationRequest = {
                 tourDetailsId,
                 ...wizardData.operation
             };
-
+            console.log('🔄 Operation request:', operationRequest);
             await createTourOperation(operationRequest, token);
+            console.log('✅ TourOperation created');
 
-            message.success('Tạo TourDetails thành công!');
+            message.success('Tạo TourDetails và TourOperation thành công!');
             onSuccess();
             handleCancel();
 
@@ -259,11 +306,12 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 tourTemplateId: '',
                 title: '',
                 description: '',
-                skillsRequired: ''
+                skillsRequired: '',
+                selectedSkills: []
             },
             timeline: [],
             operation: {
-                price: 0,
+                price: 1,
                 maxSeats: 10
             }
         });
@@ -341,8 +389,9 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 rules={[{ required: true, message: 'Vui lòng chọn template' }]}
             >
                 <Select
-                    placeholder="Chọn template tour"
-                    loading={loading}
+                    placeholder={templatesLoading ? "Đang tải templates..." : "Chọn template tour"}
+                    loading={templatesLoading}
+                    notFoundContent={templatesLoading ? <Spin size="small" /> : "Không có dữ liệu"}
                 >
                     {(() => {
                         console.log('🧙‍♂️ Rendering dropdown - templates count:', templates.length);
@@ -379,11 +428,27 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             </Form.Item>
 
             <Form.Item
-                name="skillsRequired"
                 label="Kỹ năng yêu cầu"
-                rules={[{ required: true, message: 'Vui lòng nhập kỹ năng yêu cầu' }]}
+                required
+                style={{ marginBottom: 0 }}
             >
-                <Input placeholder="VD: Tiếng Anh, Lịch sử địa phương" />
+                <SkillsSelector
+                    selectedSkills={wizardData.basicInfo.selectedSkills}
+                    onSkillsChange={(skills) => {
+                        setWizardData(prev => ({
+                            ...prev,
+                            basicInfo: {
+                                ...prev.basicInfo,
+                                selectedSkills: skills
+                            }
+                        }));
+                    }}
+                    required={true}
+                    placeholder="Chọn kỹ năng yêu cầu cho hướng dẫn viên..."
+                    allowMultiple={true}
+                    showCategories={true}
+                    size="middle"
+                />
             </Form.Item>
         </Form>
     );
@@ -570,8 +635,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
     const renderOperationStep = () => (
         <div>
             <Alert
-                message="Operation Configuration"
-                description="Cấu hình thông tin vận hành tour như giá cả, sức chứa và hướng dẫn viên."
+                message="Cấu hình vận hành"
+                description="Thiết lập thông tin vận hành cho tour. Hướng dẫn viên sẽ được mời tự động sau khi admin duyệt."
                 type="info"
                 style={{ marginBottom: 16 }}
             />
@@ -589,15 +654,15 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                                 label="Giá tour (VNĐ)"
                                 rules={[
                                     { required: true, message: 'Vui lòng nhập giá tour' },
-                                    { type: 'number', min: 0, message: 'Giá phải lớn hơn 0' }
+                                    { type: 'number', min: 1, message: 'Giá phải lớn hơn 0' }
                                 ]}
                             >
                                 <InputNumber
                                     style={{ width: '100%' }}
                                     formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                    parser={value => value!.replace(/\$\s?|(,*)/g, '')}
+                                    parser={value => Number(value!.replace(/\$\s?|(,*)/g, '')) as any}
                                     placeholder="500,000"
-                                    min={0}
+                                    min={1}
                                 />
                             </Form.Item>
                         </Col>
@@ -621,57 +686,22 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     </Row>
                 </Card>
 
-                <Card title="Hướng dẫn viên" style={{ marginBottom: 16 }}>
-                    <Form.Item
-                        name="guideId"
-                        label="Chọn hướng dẫn viên (Tùy chọn)"
-                        help="Bạn có thể chọn hướng dẫn viên ngay hoặc để trống và mời sau"
-                    >
-                        <Select
-                            placeholder="Chọn hướng dẫn viên"
-                            allowClear
-                            loading={loading}
-                            notFoundContent="Chưa có hướng dẫn viên nào"
-                        >
-                            {tourGuides.map(guide => (
-                                <Option key={guide.id} value={guide.id}>
-                                    <Space>
-                                        <UserOutlined />
-                                        {guide.fullName} - {guide.phone}
-                                    </Space>
-                                </Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
+                <Card title="Hướng dẫn viên">
+                    <Alert
+                        message="Hệ thống tự động mời hướng dẫn viên"
+                        description="Sau khi admin duyệt TourDetails, hệ thống sẽ tự động mời hướng dẫn viên phù hợp. Bạn có thể chọn hướng dẫn viên khác nếu invite không được chấp nhận sau 1 ngày."
+                        type="info"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                    />
 
-                    {tourGuides.length === 0 && (
-                        <Alert
-                            message="Chưa có hướng dẫn viên"
-                            description="Hiện tại chưa có hướng dẫn viên nào trong hệ thống. Bạn có thể tạo tour trước và mời hướng dẫn viên sau."
-                            type="warning"
-                            showIcon
-                        />
-                    )}
-                </Card>
-
-                <Card title="Thông tin bổ sung">
                     <Form.Item
                         name="description"
-                        label="Mô tả vận hành"
+                        label="Mô tả vận hành (Tùy chọn)"
                     >
                         <TextArea
                             rows={3}
                             placeholder="Mô tả thêm về cách vận hành tour này..."
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="notes"
-                        label="Ghi chú"
-                    >
-                        <TextArea
-                            rows={2}
-                            placeholder="Ghi chú nội bộ cho team..."
                         />
                     </Form.Item>
                 </Card>
@@ -721,8 +751,13 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             afterOpenChange={(open) => {
                 console.log('🧙‍♂️ Modal afterOpenChange:', open);
                 if (open && token) {
-                    console.log('🧙‍♂️ Force loading data after modal open...');
-                    loadInitialData();
+                    console.log('🧙‍♂️ Modal opened - data should already be cached');
+                    // Data should already be preloaded and cached
+                    // Only load if we don't have any data at all
+                    if (templates.length === 0) {
+                        console.log('🔄 No templates found, loading data...');
+                        loadInitialData();
+                    }
                 }
             }}
         >

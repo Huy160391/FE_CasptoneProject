@@ -25,7 +25,7 @@ const TemplatesTester: React.FC = () => {
             console.log('Token:', token ? 'Present' : 'Missing');
 
             const response = await getTourTemplates({
-                pageIndex: 1,
+                pageIndex: 0,
                 pageSize: 10,
                 includeInactive: false
             }, token);

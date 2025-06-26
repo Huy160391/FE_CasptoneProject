@@ -43,11 +43,13 @@ const { Option } = Select;
 interface TourOperationManagementProps {
     tourDetails: TourDetails;
     onOperationUpdate?: (operation: TourOperation) => void;
+    onOperationCreate?: (operation: TourOperation) => void;
 }
 
 const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
     tourDetails,
-    onOperationUpdate
+    onOperationUpdate,
+    onOperationCreate
 }) => {
     const { token } = useAuthStore();
     const [operation, setOperation] = useState<TourOperation | null>(null);
@@ -64,7 +66,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
         try {
             setLoading(true);
             const response = await getTourOperationByDetailsId(tourDetails.id, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setOperation(response.data);
                 form.setFieldsValue({
                     price: response.data.price,
@@ -85,7 +87,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
     const loadCapacityInfo = async (operationId: string) => {
         try {
             const response = await checkTourCapacity(operationId, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setCapacityInfo(response.data);
             }
         } catch (error) {
@@ -110,13 +112,13 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
             };
 
             const response = await createTourOperation(operationData, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setOperation(response.data);
                 setEditing(false);
                 message.success('Tạo tour operation thành công');
-                
-                if (onOperationUpdate) {
-                    onOperationUpdate(response.data);
+
+                if (onOperationCreate) {
+                    onOperationCreate(response.data);
                 }
             }
         } catch (error) {
@@ -140,7 +142,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
             }
 
             const response = await updateTourOperation(operation.id, values, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setOperation(response.data);
                 setEditing(false);
                 message.success('Cập nhật tour operation thành công');
