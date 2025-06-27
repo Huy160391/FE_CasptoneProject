@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Spin, Table, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
+import userService from '../services/userService';
 
 interface RegisterHistoryItem {
     id: string;
@@ -9,13 +11,47 @@ interface RegisterHistoryItem {
     response?: string;
 }
 
-interface RegisterHistoryProps {
-    data: Array<RegisterHistoryItem>;
-    loading?: boolean;
-}
+const mapRegisterHistoryData = (apiData: any, type: 'shop' | 'tourGuide') => {
+    const arr = Array.isArray(apiData) ? apiData : apiData?.data || [];
+    return arr.map((item: any) => ({
+        id: item.id,
+        type,
+        submittedAt: item.submittedAt || item.createdAt,
+        status:
+            item.status === 1
+                ? 'approved'
+                : item.status === 0
+                    ? 'pending'
+                    : 'rejected',
+        response: item.status === 0 ? '' : (item.response || ''),
+    }));
+};
 
-const RegisterHistory = ({ data, loading }: RegisterHistoryProps) => {
+const RegisterHistory = () => {
     const { t } = useTranslation();
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState<RegisterHistoryItem[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [tourGuide, shop] = await Promise.all([
+                    userService.getMyTourGuideApplications(),
+                    userService.getMyShopApplications(),
+                ]);
+                const tourGuideData = mapRegisterHistoryData(tourGuide, 'tourGuide');
+                const shopData = mapRegisterHistoryData(shop, 'shop');
+                const allData = [...tourGuideData, ...shopData];
+                setData(allData);
+            } catch (e) {
+                console.error('RegisterHistory fetch error:', e);
+                setData([]);
+            }
+            setLoading(false);
+        };
+        fetchData();
+    }, []);
 
     const columns = [
         {

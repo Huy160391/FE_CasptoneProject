@@ -540,31 +540,43 @@ export const userService = {
     },
 
     /**
-     * Submit shop registration
+     * Submit shop registration (specialty shop application)
      * @param data Shop registration data (fields + files)
      * @returns Promise with operation result
      */
     submitShopRegistration: async (data: {
         shopName: string;
         representativeName: string;
+        representativeNameOnPaper: string;
+        phone: string;
+        email: string;
         website?: string;
         shopType: string;
         location: string;
-        email: string;
-        logo: File;
-        businessLicense: File;
+        shopDescription?: string;
+        openingHour?: string; // Expecting HH:mm format or empty
+        closingHour?: string; // Expecting HH:mm format or empty
+        logo?: File; // Optional
+        businessLicense: File; // Required
+        businessCode: string;
     }): Promise<any> => {
         const formData = new FormData();
         formData.append('ShopName', data.shopName);
         formData.append('RepresentativeName', data.representativeName);
+        formData.append('RepresentativeNameOnPaper', data.representativeNameOnPaper);
+        formData.append('PhoneNumber', data.phone);
+        formData.append('Email', data.email);
         if (data.website) formData.append('Website', data.website);
         formData.append('ShopType', data.shopType);
         formData.append('Location', data.location);
-        formData.append('Email', data.email);
-        formData.append('Logo', data.logo);
-        formData.append('BusinessLicense', data.businessLicense);
+        if (data.shopDescription) formData.append('ShopDescription', data.shopDescription);
+        if (data.openingHour) formData.append('OpeningHours', data.openingHour);
+        if (data.closingHour) formData.append('CloseHours', data.closingHour);
+        if (data.logo) formData.append('Logo', data.logo);
+        formData.append('BusinessLicenseFile', data.businessLicense);
+        formData.append('BusinessLicense', data.businessCode);
 
-        const response = await axios.post('/Account/shop-application', formData, {
+        const response = await axios.post('/Account/specialty-shop-application', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -586,7 +598,7 @@ export const userService = {
      * @returns Promise với danh sách đơn đăng ký shop
      */
     getMyShopApplications: async (): Promise<any[]> => {
-        const response = await axios.get<any[]>('/Account/my-shop-applications');
+        const response = await axios.get<any[]>('/Account/my-specialty-shop-application');
         return response.data;
     },
 };

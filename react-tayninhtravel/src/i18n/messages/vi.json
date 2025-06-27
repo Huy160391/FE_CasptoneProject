@@ -704,7 +704,10 @@
             "responseFromTNDT": "Phản hồi từ TNDT",
             "attachment": "Tệp đính kèm"
         },
-        "registerHistory": "Lịch sử đăng ký"
+        "registerHistory": "Lịch sử đăng ký",
+        "createdAt": "Ngày tạo",
+        "updatedAt": "Ngày cập nhật",
+        "role": "Vai trò"
     },
     "contact": {
         "submitSuccess": "Cảm ơn bạn đã liên hệ với chúng tôi! Chúng tôi sẽ phản hồi trong thời gian sớm nhất."

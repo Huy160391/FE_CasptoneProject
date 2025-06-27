@@ -301,7 +301,17 @@ class AdminService {
         if (searchText) params.textSearch = searchText;
         if (status !== undefined) params.status = status;
         const response = await axios.get('/Cms/user', { params });
-        return response.data;
+        // Map phoneNumber -> phone cho từng user
+        const users = Array.isArray(response.data.data)
+            ? response.data.data.map((u: any) => ({
+                ...u,
+                phone: u.phoneNumber || '',
+            }))
+            : [];
+        return {
+            ...response.data,
+            data: users,
+        };
     }
 
     async getCVs(): Promise<CV[]> {

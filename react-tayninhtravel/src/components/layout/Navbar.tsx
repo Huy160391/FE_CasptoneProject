@@ -146,6 +146,12 @@ const Navbar = () => {
       icon: <DashboardOutlined />,
       onClick: () => navigate('/tour-company/dashboard'),
     }] : []),
+    ...(user?.role === 'Speciality shop' ? [{
+      key: 'speciality-shop',
+      label: 'Speciality Shop Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/speciality-shop'),
+    }] : []),
     {
       key: 'settings',
       label: t('common.settings'),
@@ -276,6 +282,11 @@ const Navbar = () => {
               {user?.role === 'Tour Company' && (
                 <Button type="primary" onClick={() => navigate('/tour-company/dashboard')}>
                   Tour Company Dashboard
+                </Button>
+              )}
+              {user?.role === 'Speciality shop' && (
+                <Button type="primary" onClick={() => navigate('/speciality-shop')}>
+                  Speciality Shop Dashboard
                 </Button>
               )}
               <Button type="primary" onClick={() => navigate('/profile')}>

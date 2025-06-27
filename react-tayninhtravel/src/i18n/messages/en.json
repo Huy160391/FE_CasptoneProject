@@ -648,7 +648,10 @@
             "status_pending": "Pending",
             "status_rejected": "Rejected",
             "response": "Response"
-        }
+        },
+        "createdAt": "Created At",
+        "updatedAt": "Updated At",
+        "role": "Role"
     },
     "footer": {
         "companyName": "Tay Ninh Tour",

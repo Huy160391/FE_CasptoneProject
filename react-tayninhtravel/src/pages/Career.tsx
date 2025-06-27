@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import { Row, Col, Form, Input, Button, Typography, Upload, Card, message, Modal, BackTop } from 'antd';
-import { UploadOutlined, EnvironmentOutlined, PhoneOutlined, TeamOutlined, TrophyOutlined, ArrowUpOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Typography, Card, message, Modal, BackTop } from 'antd';
+import type { RcFile, UploadFile } from 'antd/es/upload/interface';
+import Form from 'antd/es/form';
+import { EnvironmentOutlined, PhoneOutlined, TeamOutlined, TrophyOutlined, ArrowUpOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import './Career.scss';
-import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import { userService } from '@/services/userService';
 import { useAuthStore } from '@/store/useAuthStore';
 import LoginModal from '@/components/auth/LoginModal';
 import CareerImg from '@/assets/Career.jpg';
+import GuideApplicationForm from './GuideApplicationForm';
+import ShopApplicationForm from './ShopApplicationForm';
 
 const { Title, Paragraph } = Typography;
 
@@ -196,19 +199,25 @@ const Career = () => {
             // Lấy file từ UploadFile[]
             const logoFile = values.logo && values.logo[0]?.originFileObj;
             const licenseFile = values.businessLicense && values.businessLicense[0]?.originFileObj;
-            if (!logoFile || !licenseFile) {
-                message.error(t('jobs.applicationForm.fileRequired') || 'Vui lòng tải lên đầy đủ file!');
+            if (!licenseFile) {
+                message.error(t('jobs.applicationForm.fileRequired') || 'Vui lòng tải lên file giấy phép kinh doanh!');
                 return;
             }
             await userService.submitShopRegistration({
                 shopName: values.shopName,
                 representativeName: values.representativeName,
+                representativeNameOnPaper: values.representativeNameOnPaper,
+                phone: values.phone,
+                email: values.email,
                 website: values.website,
                 shopType: values.shopType,
                 location: values.location,
-                email: values.email,
+                shopDescription: values.shopDescription,
+                openingHour: values.openingHour,
+                closingHour: values.closingHour,
                 logo: logoFile,
-                businessLicense: licenseFile
+                businessLicense: licenseFile,
+                businessCode: values.businessCode,
             });
             message.success('Đăng ký shop thành công!');
             Modal.success({
@@ -325,84 +334,15 @@ const Career = () => {
                                 </div>
                             </Col>
                             <Col xs={24} lg={14}>
-                                <div className="job-application-form">
-                                    <Title level={2}>{t('jobs.applicationForm.title')}</Title>
-                                    <Paragraph>
-                                        {t('jobs.applicationForm.description')}
-                                    </Paragraph>
-                                    <Form
-                                        key="guide-form"
-                                        form={guideForm}
-                                        layout="vertical"
-                                        name="job_application_form"
-                                        onFinish={handleSubmit}
-                                        className="form"
-                                        validateTrigger="onSubmit"
-                                    >
-                                        <Form.Item
-                                            name="fullName"
-                                            label={t('jobs.applicationForm.fullName') || 'Họ tên'}
-                                            rules={[{ required: true, message: t('jobs.applicationForm.fullNameRequired') || 'Vui lòng nhập họ tên' }]}
-                                        >
-                                            <Input placeholder={t('jobs.applicationForm.fullName') || 'Nhập họ tên'} />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="phone"
-                                            label={t('jobs.applicationForm.phone') || 'Số điện thoại'}
-                                            rules={[{ required: true, message: t('jobs.applicationForm.phoneRequired') || 'Vui lòng nhập số điện thoại' }]}
-                                        >
-                                            <Input placeholder={t('jobs.applicationForm.phonePlaceholder') || 'Nhập số điện thoại'} />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="email"
-                                            label={t('jobs.applicationForm.email')}
-                                            rules={[
-                                                { required: true, message: t('jobs.applicationForm.emailRequired') },
-                                                { type: 'email', message: t('jobs.applicationForm.emailInvalid') }
-                                            ]}
-                                        >
-                                            <Input placeholder={t('jobs.applicationForm.emailPlaceholder')} />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="experience"
-                                            label={t('jobs.applicationForm.experience') || 'Kinh nghiệm'}
-                                            rules={[{ required: true, message: t('jobs.applicationForm.experienceRequired') || 'Vui lòng nhập kinh nghiệm' }]}
-                                        >
-                                            <Input placeholder={t('jobs.applicationForm.experiencePlaceholder') || 'Nhập kinh nghiệm'} />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="languages"
-                                            label={t('jobs.applicationForm.languages') || 'Ngoại ngữ'}
-                                            rules={[{ required: true, message: t('jobs.applicationForm.languagesRequired') || 'Vui lòng nhập ngoại ngữ' }]}
-                                        >
-                                            <Input placeholder={t('jobs.applicationForm.languagesPlaceholder') || 'Nhập ngoại ngữ'} />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="cvFile"
-                                            label={t('jobs.applicationForm.cv')}
-                                            rules={[{ required: true, message: t('jobs.applicationForm.cvRequired') }]}
-                                        >
-                                            <Upload
-                                                name="cv"
-                                                listType="picture"
-                                                fileList={cvFile}
-                                                beforeUpload={beforeCvUpload}
-                                                onChange={handleCvChange}
-                                                maxCount={1}
-                                            // Không truyền action để tránh upload tự động
-                                            >
-                                                <Button icon={<UploadOutlined />}>{t('jobs.applicationForm.selectFile')}</Button>
-                                                <span className="upload-hint"> PDF, Word, hoặc hình ảnh (tối đa 5MB)</span>
-                                            </Upload>
-                                        </Form.Item>
-
-                                        <Form.Item>
-                                            <Button type="primary" htmlType="submit" size="large" loading={submitting}>
-                                                {t('jobs.applicationForm.submit')}
-                                            </Button>
-                                        </Form.Item>
-                                    </Form>
-                                </div>
+                                <GuideApplicationForm
+                                    form={guideForm}
+                                    submitting={submitting}
+                                    cvFile={cvFile}
+                                    beforeCvUpload={beforeCvUpload}
+                                    handleCvChange={handleCvChange}
+                                    onFinish={handleSubmit}
+                                    t={t}
+                                />
                             </Col>
                         </>
                     )}
@@ -425,50 +365,14 @@ const Career = () => {
                                 </div>
                             </Col>
                             <Col xs={24} lg={14}>
-                                <div className="shop-application-form job-application-form">
-                                    <Title level={2}>{t('jobs.shopRegistration.form.title')}</Title>
-                                    <Paragraph>{t('jobs.shopRegistration.form.description')}</Paragraph>
-                                    <Form
-                                        key="shop-form"
-                                        form={shopForm}
-                                        layout="vertical"
-                                        name="shop_application_form"
-                                        onFinish={handleShopSubmit}
-                                        className="form"
-                                    >
-                                        <Form.Item name="shopName" label={t('jobs.shopRegistration.form.shopName')} rules={[{ required: true, message: t('jobs.shopRegistration.form.shopNameRequired') }]}><Input placeholder={t('jobs.shopRegistration.form.shopNamePlaceholder')} /></Form.Item>
-                                        <Form.Item name="representativeName" label={t('jobs.shopRegistration.form.representativeName')} rules={[{ required: true, message: t('jobs.shopRegistration.form.representativeNameRequired') }]}><Input placeholder={t('jobs.shopRegistration.form.representativeNamePlaceholder')} /></Form.Item>
-                                        <Form.Item name="website" label={t('jobs.shopRegistration.form.website')}><Input placeholder={t('jobs.shopRegistration.form.websitePlaceholder')} /></Form.Item>
-                                        <Form.Item name="shopType" label={t('jobs.shopRegistration.form.shopType')} rules={[{ required: true, message: t('jobs.shopRegistration.form.shopTypeRequired') }]}><Input placeholder={t('jobs.shopRegistration.form.shopTypePlaceholder')} /></Form.Item>
-                                        <Form.Item name="location" label={t('jobs.shopRegistration.form.location')} rules={[{ required: true, message: t('jobs.shopRegistration.form.locationRequired') }]}><Input placeholder={t('jobs.shopRegistration.form.locationPlaceholder')} /></Form.Item>
-                                        <Form.Item
-                                            name="logo"
-                                            label={t('jobs.shopRegistration.form.logo')}
-                                            rules={[{ required: true, message: t('jobs.shopRegistration.form.logoRequired') }]}
-                                            valuePropName="fileList"
-                                            getValueFromEvent={normFile}
-                                        >
-                                            <Upload name="logo" listType="picture" beforeUpload={beforeShopFileUpload} maxCount={1}>
-                                                <Button icon={<UploadOutlined />}>{t('jobs.shopRegistration.form.selectLogo')}</Button> <span className="upload-hint">{t('jobs.shopRegistration.form.fileHint')}</span>
-                                            </Upload>
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="businessLicense"
-                                            label={t('jobs.shopRegistration.form.businessLicense')}
-                                            rules={[{ required: true, message: t('jobs.shopRegistration.form.businessLicenseRequired') }]}
-                                            valuePropName="fileList"
-                                            getValueFromEvent={normFile}
-                                        >
-                                            <Upload name="businessLicense" listType="picture" beforeUpload={beforeShopFileUpload} maxCount={1}>
-                                                <Button icon={<UploadOutlined />}>{t('jobs.shopRegistration.form.selectLicense')}</Button> <span className="upload-hint">{t('jobs.shopRegistration.form.fileHint')}</span>
-                                            </Upload>
-                                        </Form.Item>
-                                        <Form.Item name="email" label={t('jobs.shopRegistration.form.email')} rules={[{ required: true, message: t('jobs.shopRegistration.form.emailRequired') }, { type: 'email', message: t('jobs.shopRegistration.form.emailInvalid') }]}><Input placeholder={t('jobs.shopRegistration.form.emailPlaceholder')} /></Form.Item>
-                                        <Form.Item>
-                                            <Button type="primary" htmlType="submit" size="large">{t('jobs.shopRegistration.form.submit')}</Button>
-                                        </Form.Item>
-                                    </Form>
-                                </div>
+                                <ShopApplicationForm
+                                    form={shopForm}
+                                    submitting={submitting}
+                                    beforeShopFileUpload={beforeShopFileUpload}
+                                    normFile={normFile}
+                                    onFinish={handleShopSubmit}
+                                    t={t}
+                                />
                             </Col>
                         </>
                     )}
