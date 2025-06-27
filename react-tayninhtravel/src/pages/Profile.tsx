@@ -170,7 +170,7 @@ const Profile = () => {
                                 label: (
                                     <span>
                                         <UserOutlined />
-                                        {t('profile.registerHistory.title', 'Register History')}
+                                        {t('profile.registerHistory.title')}
                                     </span>
                                 ),
                                 children: (

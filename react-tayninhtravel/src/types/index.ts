@@ -145,24 +145,6 @@ export interface ThingToDo {
     updatedAt: string;
 }
 
-export interface CV {
-    id: string;
-    fullName: string;
-    email: string;
-    phone: string;
-    position: string;
-    experience: string;
-    education: string;
-    skills: string[];
-    portfolio?: string;
-    resume?: string;
-    coverLetter?: string;
-    status: 'pending' | 'reviewing' | 'accepted' | 'rejected';
-    notes?: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
 // API Response Types
 export interface ApiResponse<T = any> {
     success: boolean;
@@ -362,3 +344,4 @@ export * from './blog';
 export * from './comment';
 export * from './support'; // Đảm bảo export AdminSupportTicket từ support.ts
 export * from './tour';
+export * from './application';

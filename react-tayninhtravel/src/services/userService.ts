@@ -4,11 +4,12 @@ import {
     CreateUserPayload,
     ProfileUpdatePayload,
     TourGuideApplication,
+    TourGuideApplicationForm,
+    ShopApplicationForm,
     UserComment,
     UserSupportTicket,
     Comment,
-    ApiUser,
-    CV
+    ApiUser
 } from '../types';
 
 // Re-export types for convenience
@@ -288,7 +289,7 @@ export const userService = {
      * @param application Tour guide application data
      * @returns Promise with operation result
      */
-    submitTourGuideApplication: async (application: TourGuideApplication): Promise<any> => {
+    submitTourGuideApplication: async (application: TourGuideApplicationForm): Promise<any> => {
         const formData = new FormData();
         formData.append('Email', application.email);
         formData.append('CurriculumVitae', application.curriculumVitae);
@@ -379,8 +380,8 @@ export const userService = {
      * Get all tour guide applications (admin)
      * @returns Promise with CV applications
      */
-    getTourGuideApplications: async (): Promise<CV[]> => {
-        const response = await axios.get<CV[]>('Cms/tour-guide-application');
+    getTourGuideApplications: async (): Promise<TourGuideApplication[]> => {
+        const response = await axios.get<TourGuideApplication[]>('Cms/tour-guide-application');
         return response.data;
     },
     /**
@@ -544,26 +545,11 @@ export const userService = {
      * @param data Shop registration data (fields + files)
      * @returns Promise with operation result
      */
-    submitShopRegistration: async (data: {
-        shopName: string;
-        representativeName: string;
-        representativeNameOnPaper: string;
-        phone: string;
-        email: string;
-        website?: string;
-        shopType: string;
-        location: string;
-        shopDescription?: string;
-        openingHour?: string; // Expecting HH:mm format or empty
-        closingHour?: string; // Expecting HH:mm format or empty
-        logo?: File; // Optional
-        businessLicense: File; // Required
-        businessCode: string;
-    }): Promise<any> => {
+    submitShopRegistration: async (data: ShopApplicationForm): Promise<any> => {
         const formData = new FormData();
         formData.append('ShopName', data.shopName);
         formData.append('RepresentativeName', data.representativeName);
-        formData.append('RepresentativeNameOnPaper', data.representativeNameOnPaper);
+        if (data.representativeNameOnPaper) formData.append('RepresentativeNameOnPaper', data.representativeNameOnPaper);
         formData.append('PhoneNumber', data.phone);
         formData.append('Email', data.email);
         if (data.website) formData.append('Website', data.website);
@@ -588,8 +574,8 @@ export const userService = {
      * Lấy danh sách các đơn đăng ký làm hướng dẫn viên đã gửi (của user hiện tại)
      * @returns Promise với danh sách đơn đăng ký
      */
-    getMyTourGuideApplications: async (): Promise<CV[]> => {
-        const response = await axios.get<CV[]>('/Account/my-tourguide-applications');
+    getMyTourGuideApplications: async (): Promise<TourGuideApplication[]> => {
+        const response = await axios.get<TourGuideApplication[]>('/Account/my-tourguide-applications');
         return response.data;
     },
 

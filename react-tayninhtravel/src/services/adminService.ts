@@ -2,7 +2,7 @@ import axios from '@/config/axios';
 // Import type definitions
 import { TicketStatus, AdminBlogPost, AdminSupportTicket } from '../types';
 import type { UpdateUserPayload, CreateUserPayload } from '@/types/user';
-import type { CV } from '@/types';
+import type { TourGuideApplication } from '@/types';
 
 // Re-export types for convenience
 export type { AdminBlogPost, SupportTicket, AdminSupportTicket } from '../types';
@@ -314,7 +314,7 @@ class AdminService {
         };
     }
 
-    async getCVs(): Promise<CV[]> {
+    async getCVs(): Promise<TourGuideApplication[]> {
         const response = await axios.get('Cms/tourguide-applications');
         // Đảm bảo luôn trả về mảng
         if (response.data && Array.isArray(response.data.data?.applications)) {
@@ -363,26 +363,44 @@ class AdminService {
         pageSize?: number;
         status?: string | number;
         searchTerm?: string;
-    } = {}): Promise<any[]> {
+    } = {}): Promise<any> {
         const params: any = { page, pageSize };
         if (status !== undefined) params.status = status;
         if (searchTerm) params.searchTerm = searchTerm;
+
         const response = await axios.get('SpecialtyShopApplication', { params });
-        if (response.data && Array.isArray(response.data.data?.items)) {
-            return response.data.data.items;
+
+        // Log để debug
+        console.log('Shop registrations API response:', response.data);
+
+        // Xử lý các cấu trúc response khác nhau
+        if (response.data) {
+            // Nếu có structure như tour guide (data.applications)
+            if (response.data.data && Array.isArray(response.data.data.applications)) {
+                return response.data;
+            }
+            // Nếu có structure items
+            if (response.data.data && Array.isArray(response.data.data.items)) {
+                return response.data.data.items;
+            }
+            // Nếu data trực tiếp là array
+            if (Array.isArray(response.data)) {
+                return response.data;
+            }
         }
+
         return [];
     }
 
     // Duyệt đơn đăng ký shop
-    async approveShopRegistration(shopId: string): Promise<any> {
-        const response = await axios.put(`Cms/${shopId}/approve-shop-registration`);
+    async approveShopRegistration(applicationId: string): Promise<any> {
+        const response = await axios.post(`SpecialtyShopApplication/${applicationId}/approve`);
         return response.data;
     }
 
     // Từ chối đơn đăng ký shop
-    async rejectShopRegistration(shopId: string, reason: string): Promise<any> {
-        const response = await axios.put(`Cms/${shopId}/reject-shop-registration`, { reason });
+    async rejectShopRegistration(applicationId: string, reason: string): Promise<any> {
+        const response = await axios.post(`SpecialtyShopApplication/${applicationId}/reject`, { rejectionReason: reason });
         return response.data;
     }
 }
