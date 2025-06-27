@@ -10,7 +10,6 @@ export type {
     Comment,
     SupportTicket,
     ThingToDo,
-    CV,
     ApiResponse,
     PaginationParams,
     Theme,

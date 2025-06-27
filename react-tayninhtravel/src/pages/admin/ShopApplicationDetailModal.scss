@@ -1,0 +1,125 @@
+.shop-application-detail-modal {
+    .ant-modal-body {
+        padding: 16px;
+    }
+
+    .ant-descriptions-item-label {
+        background-color: #fafafa;
+        color: #262626;
+        font-weight: 600;
+    }
+
+    .ant-descriptions-item-content {
+        background-color: #ffffff;
+    }
+
+    .shop-images {
+        margin-top: 16px;
+        
+        h4 {
+            margin-bottom: 8px;
+            color: #262626;
+            font-weight: 600;
+        }
+        
+        .ant-image {
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+    }
+
+    .rejection-reason {
+        background: #fff2f0;
+        border: 1px solid #ffccc7;
+        border-radius: 6px;
+        padding: 12px;
+        white-space: pre-wrap;
+        color: #cf1322;
+        
+        &::before {
+            content: "⚠️ ";
+            margin-right: 4px;
+        }
+    }
+
+    .approval-info {
+        background: #f6ffed;
+        border: 1px solid #b7eb8f;
+        border-radius: 6px;
+        padding: 12px;
+        color: #389e0d;
+        
+        &::before {
+            content: "✅ ";
+            margin-right: 4px;
+        }
+    }
+
+}
+
+/* Dark mode styles for shop application detail modal */
+body.dark-mode {
+    .shop-application-detail-modal {
+        .ant-descriptions-item-label {
+            background-color: #262626;
+            color: #ffffff;
+        }
+
+        .ant-descriptions-item-content {
+            background-color: #1f1f1f;
+            color: #ffffff;
+        }
+
+        .shop-images h4 {
+            color: #ffffff;
+        }
+
+        .rejection-reason {
+            background: #2a1e1e;
+            border: 1px solid #6a3a3a;
+            color: #ff7875;
+        }
+
+        .approval-info {
+            background: #1f2a1a;
+            border: 1px solid #4a6a4a;
+            color: #52c41a;
+        }
+    }
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .shop-application-detail-modal {
+        .ant-modal {
+            margin: 0;
+            max-width: 100vw;
+            width: 100vw !important;
+            height: 100vh;
+            
+            .ant-modal-content {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .ant-modal-body {
+                flex: 1;
+                overflow-y: auto;
+            }
+        }
+        
+        .ant-descriptions {
+            .ant-descriptions-item {
+                padding: 8px;
+            }
+        }
+        
+        .shop-images {
+            .ant-image {
+                width: 100%;
+                max-width: 280px;
+            }
+        }
+    }
+}

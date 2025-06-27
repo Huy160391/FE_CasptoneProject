@@ -341,7 +341,6 @@ const Career = () => {
                                     beforeCvUpload={beforeCvUpload}
                                     handleCvChange={handleCvChange}
                                     onFinish={handleSubmit}
-                                    t={t}
                                 />
                             </Col>
                         </>
@@ -371,7 +370,6 @@ const Career = () => {
                                     beforeShopFileUpload={beforeShopFileUpload}
                                     normFile={normFile}
                                     onFinish={handleShopSubmit}
-                                    t={t}
                                 />
                             </Col>
                         </>

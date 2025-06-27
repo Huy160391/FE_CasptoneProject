@@ -44,8 +44,3 @@ export interface ProfileUpdatePayload {
     name: string;
     phoneNumber: string;
 }
-
-export interface TourGuideApplication {
-    email: string;
-    curriculumVitae: File;
-}
