@@ -9,6 +9,8 @@ import { bloggerRoutes } from './bloggerRoutes';
 import TourCompanyLayout from '@/components/layout/TourCompanyLayout';
 import { tourCompanyRoutes } from './tourCompanyRoutes';
 import ProtectedRoute from './ProtectedRoute';
+import SpecialityShopLayout from '@/components/layout/SpecialityShopLayout';
+import { specialityShopRoutes } from './specialityShopRoutes';
 
 const routes: RouteObject[] = [
   {
@@ -57,6 +59,20 @@ const routes: RouteObject[] = [
         ...(tourCompanyRoutes[0].children || []),
       ],
     }
+    ],
+  },
+  {
+    path: '/speciality-shop',
+    element: <ProtectedRoute requiredRole="Speciality shop" />,
+    children: [
+      {
+        path: '',
+        element: <SpecialityShopLayout />,
+        children: [
+          { path: '', element: <Navigate to="/speciality-shop/products" /> },
+          ...(specialityShopRoutes[0].children || []),
+        ],
+      }
     ],
   },
 ];

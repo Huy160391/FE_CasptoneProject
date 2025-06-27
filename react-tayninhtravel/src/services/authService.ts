@@ -46,13 +46,15 @@ export const authService = {
                 }
 
                 // Lấy role từ token
-                let userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];                // Đảm bảo role là 'Admin', 'Blogger' hoặc 'user'
+                let userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
                 if (userRole && (userRole.toLowerCase() === 'admin' || userRole === 'Admin')) {
                     userRole = 'Admin';
                 } else if (userRole && (userRole.toLowerCase() === 'blogger' || userRole === 'Blogger')) {
                     userRole = 'Blogger';
                 } else if (userRole && (userRole.toLowerCase() === 'tour company' || userRole === 'Tour Company')) {
                     userRole = 'Tour Company';
+                } else if (userRole && (userRole.toLowerCase() === 'speciality shop' || userRole === 'Speciality shop')) {
+                    userRole = 'Speciality shop';
                 } else {
                     userRole = 'user';
                 }
@@ -65,7 +67,7 @@ export const authService = {
                     role: userRole as User['role'],
                     phone: data.phoneNumber,
                     avatar: data.avatar || 'https://i.imgur.com/4AiXzf8.jpg',
-                    status: true, // default true, hoặc lấy từ API nếu có
+                    isActive: true, // default true, hoặc lấy từ API nếu có
                     isVerified: true, // default true, hoặc lấy từ API nếu có
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()

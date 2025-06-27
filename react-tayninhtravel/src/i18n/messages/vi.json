@@ -23,7 +23,8 @@
             "blogs": "Quản lý bài viết",
             "cvManagement": "Quản lý CV",
             "supportTickets": "Hỗ trợ khách hàng",
-            "myInfo": "Thông tin cá nhân"
+            "myInfo": "Thông tin cá nhân",
+            "shopRegistrations": "Quản lý đăng ký shop"
         },
         "users": {
             "title": "Quản lý người dùng",
@@ -184,6 +185,63 @@
             "yourResponse": "Phản hồi của bạn",
             "responseHint": "Nhập phản hồi của bạn cho yêu cầu này...",
             "downloadAttachment": "Tải tệp đính kèm"
+        },
+        "shopManagement": {
+            "title": "Quản lý đăng ký shop",
+            "searchPlaceholder": "Tìm kiếm theo tên shop",
+            "columns": {
+                "index": "STT",
+                "shopName": "Tên shop",
+                "ownerEmail": "Email chủ shop",
+                "submitDate": "Ngày đăng ký",
+                "status": "Trạng thái",
+                "actions": "Thao tác"
+            },
+            "status": {
+                "pending": "Đang xử lý",
+                "approved": "Đã duyệt",
+                "rejected": "Từ chối"
+            },
+            "actions": {
+                "approve": "Duyệt",
+                "reject": "Từ chối"
+            },
+            "confirmations": {
+                "approve": {
+                    "title": "Xác nhận duyệt shop",
+                    "content": "Bạn có chắc chắn muốn duyệt shop này không?"
+                },
+                "reject": {
+                    "title": "Từ chối shop",
+                    "label": "Lý do từ chối",
+                    "placeholder": "Nhập lý do từ chối...",
+                    "required": "Vui lòng nhập lý do từ chối"
+                }
+            },
+            "messages": {
+                "success": {
+                    "approved": "Shop đã được duyệt",
+                    "rejected": "Shop đã bị từ chối"
+                },
+                "error": {
+                    "approve": "Không thể duyệt shop. Vui lòng thử lại sau.",
+                    "reject": "Không thể từ chối shop. Vui lòng thử lại sau.",
+                    "auth": "Vui lòng đăng nhập để tiếp tục"
+                }
+            }
+        },
+        "registerHistory": {
+            "title": "Lịch sử đăng ký",
+            "stt": "STT",
+            "type": "Loại đăng ký",
+            "shop": "Đăng ký Shop",
+            "tourGuide": "Đăng ký Hướng dẫn viên",
+            "submittedAt": "Ngày gửi",
+            "status": "Trạng thái",
+            "status_approved": "Đã duyệt",
+            "status_pending": "Đang chờ",
+            "status_rejected": "Từ chối",
+            "response": "Phản hồi"
         }
     },
     "tours": {
@@ -323,6 +381,82 @@
             "submissionSuccessTitle": "Nộp đơn thành công",
             "submissionSuccessContent": "Cảm ơn bạn đã ứng tuyển! Chúng tôi đã nhận được đơn đăng ký của bạn và sẽ xem xét trong thời gian sớm nhất. Nếu hồ sơ của bạn phù hợp với yêu cầu của chúng tôi, chúng tôi sẽ liên hệ với bạn cho các bước tiếp theo.",
             "loginRequired": "Vui lòng đăng nhập để gửi đơn ứng tuyển của bạn."
+        },
+        "shopRegistration": {
+            "title": "Đăng ký shop bán hàng",
+            "subtitle": "Trở thành đối tác shop cùng Tay Ninh Travel",
+            "info": {
+                "title": "Thông tin shop",
+                "description": "Tham gia mạng lưới đối tác shop để tiếp cận nhiều khách hàng hơn và phát triển kinh doanh cùng Tay Ninh Travel. Chúng tôi mang đến mô hình hợp tác chuyên nghiệp, minh bạch và cùng có lợi.",
+                "modelTitle": "Mô hình hợp tác",
+                "modelContent": "Chúng tôi kết nối shop của bạn với du khách và khách hàng địa phương qua nền tảng. Bạn chủ động quản lý sản phẩm/dịch vụ, chúng tôi giúp bạn mở rộng tệp khách hàng.",
+                "benefits": "Lợi ích",
+                "benefitsList": [
+                    "Mở rộng tệp khách hàng qua nền tảng du lịch của chúng tôi",
+                    "Hỗ trợ chuyên nghiệp, hợp tác minh bạch",
+                    "Mô hình kinh doanh linh hoạt, phù hợp nhiều loại shop",
+                    "Quảng bá thương hiệu, hỗ trợ marketing",
+                    "Cơ hội tham gia các sự kiện, chương trình du lịch"
+                ],
+                "descriptionTitle": "Mô tả"
+            },
+            "requirements": {
+                "title": "Yêu cầu đối với shop",
+                "legal": {
+                    "title": "Giấy phép kinh doanh hợp pháp",
+                    "content": "Shop phải có giấy phép kinh doanh hợp lệ và hoạt động đúng pháp luật."
+                },
+                "location": {
+                    "title": "Địa chỉ rõ ràng",
+                    "content": "Shop cần có địa chỉ cụ thể tại Tây Ninh hoặc khu vực lân cận."
+                },
+                "quality": {
+                    "title": "Chất lượng sản phẩm/dịch vụ",
+                    "content": "Cam kết cung cấp sản phẩm/dịch vụ chất lượng, chăm sóc khách hàng tốt."
+                },
+                "branding": {
+                    "title": "Hình ảnh thương hiệu",
+                    "content": "Shop cần có nhận diện thương hiệu rõ ràng, hình ảnh chuyên nghiệp."
+                }
+            },
+            "form": {
+                "title": "Form đăng ký shop",
+                "description": "Vui lòng điền thông tin bên dưới để đăng ký shop đối tác cùng Tay Ninh Travel.",
+                "shopName": "Tên shop",
+                "shopNameRequired": "Vui lòng nhập tên shop!",
+                "shopNamePlaceholder": "VD: Shop đặc sản Tây Ninh",
+                "representativeName": "Tên người đại diện",
+                "representativeNameRequired": "Vui lòng nhập tên người đại diện!",
+                "representativeNamePlaceholder": "VD: Nguyễn Văn A",
+                "website": "Website (tuỳ chọn)",
+                "websitePlaceholder": "https://yourshop.com",
+                "shopType": "Loại hình shop",
+                "shopTypeRequired": "Vui lòng chọn loại hình shop!",
+                "shopTypePlaceholder": "VD: Đặc sản, Nhà hàng, Quà lưu niệm...",
+                "location": "Địa chỉ",
+                "locationRequired": "Vui lòng nhập địa chỉ shop!",
+                "locationPlaceholder": "Địa chỉ đầy đủ của shop",
+                "logo": "Logo shop",
+                "logoRequired": "Vui lòng tải lên logo shop!",
+                "invalidLogoFormat": "Chỉ chấp nhận file .jpg, .jpeg, .png!",
+                "logoTooLarge": "Logo tối đa 5MB!",
+                "selectLogo": "Chọn logo",
+                "businessLicense": "Giấy phép kinh doanh",
+                "businessLicenseRequired": "Vui lòng tải lên giấy phép kinh doanh!",
+                "invalidLicenseFormat": "Chỉ chấp nhận file .pdf, .jpg, .jpeg, .png!",
+                "licenseTooLarge": "File tối đa 5MB!",
+                "selectLicense": "Chọn file",
+                "email": "Email",
+                "emailRequired": "Vui lòng nhập email!",
+                "emailInvalid": "Email không hợp lệ!",
+                "emailPlaceholder": "example@gmail.com",
+                "fileHint": "Chấp nhận: .pdf, .jpg, .jpeg, .png (tối đa 5MB)",
+                "submit": "Đăng ký shop",
+                "successMessage": "Đăng ký shop thành công! Chúng tôi sẽ liên hệ bạn sớm nhất.",
+                "errorMessage": "Có lỗi khi gửi đăng ký. Vui lòng thử lại sau.",
+                "fileUploadSuccess": "đã tải lên thành công!",
+                "loginRequired": "Vui lòng đăng nhập để đăng ký shop."
+            }
         }
     },
     "home": {
@@ -569,7 +703,11 @@
             "orderNumber": "STT",
             "responseFromTNDT": "Phản hồi từ TNDT",
             "attachment": "Tệp đính kèm"
-        }
+        },
+        "registerHistory": "Lịch sử đăng ký",
+        "createdAt": "Ngày tạo",
+        "updatedAt": "Ngày cập nhật",
+        "role": "Vai trò"
     },
     "contact": {
         "submitSuccess": "Cảm ơn bạn đã liên hệ với chúng tôi! Chúng tôi sẽ phản hồi trong thời gian sớm nhất."

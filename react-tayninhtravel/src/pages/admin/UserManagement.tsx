@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Input, Space, Tag, Modal, Form, Select, message, Spin } from 'antd'
+import { Table, Button, Input, Space, Tag, Modal, message, Spin, Form as AntForm } from 'antd'
 import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useNavigate } from 'react-router-dom'
@@ -8,8 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { adminService } from '@/services/adminService'
 import type { User } from '@/types/user'
 import './UserManagement.scss'
-
-const { Option } = Select
+import UserModal from './UserModal'
 
 const UserManagement = () => {
     const navigate = useNavigate()
@@ -17,7 +16,7 @@ const UserManagement = () => {
     const { t } = useTranslation()
     const [searchText, setSearchText] = useState('')
     const [isModalVisible, setIsModalVisible] = useState(false)
-    const [form] = Form.useForm()
+    const [form] = AntForm.useForm()
     const [editingUser, setEditingUser] = useState<User | null>(null)
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState(false)
@@ -27,6 +26,10 @@ const UserManagement = () => {
         total: 0
     })
     const [statusFilter, setStatusFilter] = useState<boolean | undefined>(undefined)
+
+    // Modal hiển thị thông tin chi tiết user
+    const [viewUser, setViewUser] = useState<User | null>(null)
+    const [isViewModalVisible, setIsViewModalVisible] = useState(false)
 
     // Tải danh sách người dùng từ API
     const fetchUsers = async () => {
@@ -54,19 +57,6 @@ const UserManagement = () => {
 
     // Gọi API khi component được mount hoặc khi các điều kiện tìm kiếm thay đổi
     useEffect(() => {
-        // Kiểm tra xác thực
-        if (!isAuthenticated || !user) {
-            message.error(t('admin.users.messages.error.auth'))
-            navigate('/login')
-            return
-        }
-
-        if (user.role !== 'Admin') {
-            message.error(t('admin.users.messages.error.permission'))
-            navigate('/unauthorized')
-            return
-        }
-
         fetchUsers()
     }, [pagination.current, pagination.pageSize, statusFilter, isAuthenticated, user, navigate, t])
 
@@ -81,11 +71,7 @@ const UserManagement = () => {
         }, 500)
 
         return () => clearTimeout(timer)
-    }, [searchText])    // Hàm xử lý filter theo trạng thái
-    const handleStatusFilterChange = (status: boolean | undefined) => {
-        setStatusFilter(status);
-        setPagination(prev => ({ ...prev, current: 1 }));
-    }
+    }, [searchText])
 
     const handleTableChange = (newPagination: any, filters: any) => {
         // Chỉ xử lý pagination và filters, không xử lý sorter vì đã sort phía client
@@ -118,7 +104,7 @@ const UserManagement = () => {
             name: user.name,
             email: user.email,
             phone: user.phone,
-            status: user.status,
+            isActive: user.isActive,
         })
         setIsModalVisible(true)
     }
@@ -186,7 +172,7 @@ const UserManagement = () => {
                         name: values.name,
                         email: values.email,
                         phone: values.phone,
-                        status: values.status,
+                        isActive: values.isActive,
                     })
                     message.success(t('admin.users.messages.success.updated'))
                 } else {
@@ -195,7 +181,7 @@ const UserManagement = () => {
                         name: values.name,
                         email: values.email,
                         phone: values.phone,
-                        status: values.status,
+                        isActive: values.isActive,
                         password: values.password,
                     })
                     message.success(t('admin.users.messages.success.created'))
@@ -215,6 +201,11 @@ const UserManagement = () => {
 
     const handleModalCancel = () => {
         setIsModalVisible(false)
+    }
+
+    const handleRowClick = (record: User) => {
+        setViewUser(record)
+        setIsViewModalVisible(true)
     }
 
     const columns: ColumnsType<User> = [
@@ -244,11 +235,11 @@ const UserManagement = () => {
         },
         {
             title: t('admin.users.columns.status'),
-            dataIndex: 'status',
-            key: 'status',
-            render: (status: boolean) => {
-                const color = status ? 'success' : 'error'
-                const text = status ? t('admin.users.status.active') : t('admin.users.status.inactive')
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive: boolean) => {
+                const color = isActive ? 'success' : 'error'
+                const text = isActive ? t('admin.users.status.active') : t('admin.users.status.inactive')
 
                 return <Tag color={color}>{text}</Tag>
             },
@@ -257,7 +248,7 @@ const UserManagement = () => {
                 { text: t('admin.users.status.inactive'), value: false },
             ],
             onFilter: (value: any, record: User) =>
-                record.status === value,
+                record.isActive === value,
         },
         {
             title: t('admin.users.columns.actions'),
@@ -272,7 +263,7 @@ const UserManagement = () => {
                     >
                         {t('common.edit')}
                     </Button>
-                    {record.status ? (
+                    {record.isActive ? (
                         <Button
                             icon={<StopOutlined />}
                             danger
@@ -330,16 +321,6 @@ const UserManagement = () => {
                         allowClear
                         value={searchText}
                     />
-                    <Select
-                        placeholder={t('admin.users.filters.all') || 'Tất cả người dùng'}
-                        onChange={handleStatusFilterChange}
-                        allowClear
-                        style={{ width: 150 }}
-                        value={statusFilter}
-                    >
-                        <Option value={true}>{t('admin.users.status.active')}</Option>
-                        <Option value={false}>{t('admin.users.status.inactive')}</Option>
-                    </Select>
                 </Space>
             </div>
 
@@ -355,96 +336,43 @@ const UserManagement = () => {
                     }}
                     onChange={handleTableChange}
                     className="users-table"
+                    onRow={record => ({
+                        onClick: () => handleRowClick(record)
+                    })}
                 />
             </Spin>
 
-            <Modal
-                title={editingUser ? t('admin.users.modal.edit') : t('admin.users.modal.add')}
-                open={isModalVisible}
+            <UserModal
+                visible={isModalVisible}
                 onOk={handleModalOk}
                 onCancel={handleModalCancel}
-                okText={editingUser ? t('common.save') : t('common.add')}
-                cancelText={t('common.cancel')}
+                form={form}
+                editingUser={editingUser}
+            />
+
+            {/* Modal xem thông tin user */}
+            <Modal
+                open={isViewModalVisible}
+                title={t('admin.users.modal.view')}
+                onCancel={() => setIsViewModalVisible(false)}
+                footer={null}
             >
-                <Form
-                    form={form}
-                    layout="vertical"
-                >
-                    <Form.Item
-                        name="name"
-                        label={t('profile.name')}
-                        rules={[{ required: true, message: t('profile.nameRequired') }]}
-                    >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="email"
-                        label={t('profile.email')}
-                        rules={[
-                            { required: true, message: t('profile.emailRequired') },
-                            { type: 'email', message: t('profile.emailInvalid') },
-                        ]}
-                    >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="phone"
-                        label={t('profile.phone')}
-                        rules={[
-                            { required: true, message: t('profile.phoneRequired') },
-                            { pattern: /^[0-9]{10}$/, message: t('auth.phoneInvalid') },
-                        ]}
-                    >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="status"
-                        label={t('admin.users.columns.status')}
-                        rules={[{ required: true, message: t('admin.users.validation.statusRequired') }]}
-                    >
-                        <Select>
-                            <Option value={true}>{t('admin.users.status.active')}</Option>
-                            <Option value={false}>{t('admin.users.status.inactive')}</Option>
-                        </Select>
-                    </Form.Item>
-
-                    {!editingUser && (
-                        <>
-                            <Form.Item
-                                name="password"
-                                label={t('auth.password')}
-                                rules={[
-                                    { required: true, message: t('auth.passwordRequired') },
-                                    { min: 6, message: t('auth.passwordInvalid') },
-                                ]}
-                            >
-                                <Input.Password />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="confirmPassword"
-                                label={t('auth.confirmPassword')}
-                                dependencies={['password']}
-                                rules={[
-                                    { required: true, message: t('auth.confirmPasswordRequired') },
-                                    ({ getFieldValue }) => ({
-                                        validator(_, value) {
-                                            if (!value || getFieldValue('password') === value) {
-                                                return Promise.resolve()
-                                            }
-                                            return Promise.reject(new Error(t('auth.passwordMismatch')))
-                                        },
-                                    }),
-                                ]}
-                            >
-                                <Input.Password />
-                            </Form.Item>
-                        </>
-                    )}
-                </Form>
+                {viewUser && (
+                    <div style={{ textAlign: 'center' }}>
+                        <img
+                            src={viewUser.avatar || 'https://static-00.iconduck.com/assets.00/avatar-default-icon-2048x2048-h6w375ur.png'}
+                            alt="avatar"
+                            style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', marginBottom: 16 }}
+                        />
+                        <div><b>{t('profile.name')}:</b> {viewUser.name}</div>
+                        <div><b>{t('profile.email')}:</b> {viewUser.email}</div>
+                        <div><b>{t('profile.phone')}:</b> {viewUser.phone}</div>
+                        <div><b>{t('admin.users.columns.status')}:</b> {viewUser.isActive ? t('admin.users.status.active') : t('admin.users.status.inactive')}</div>
+                        <div><b>{t('profile.role')}:</b> {viewUser.role}</div>
+                        <div><b>{t('profile.createdAt')}:</b> {viewUser.createdAt}</div>
+                        <div><b>{t('profile.updatedAt')}:</b> {viewUser.updatedAt}</div>
+                    </div>
+                )}
             </Modal>
         </div>
     )

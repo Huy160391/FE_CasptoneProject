@@ -301,7 +301,17 @@ class AdminService {
         if (searchText) params.textSearch = searchText;
         if (status !== undefined) params.status = status;
         const response = await axios.get('/Cms/user', { params });
-        return response.data;
+        // Map phoneNumber -> phone cho từng user
+        const users = Array.isArray(response.data.data)
+            ? response.data.data.map((u: any) => ({
+                ...u,
+                phone: u.phoneNumber || '',
+            }))
+            : [];
+        return {
+            ...response.data,
+            data: users,
+        };
     }
 
     async getCVs(): Promise<CV[]> {
@@ -319,7 +329,7 @@ class AdminService {
     }
 
     async updateUser(id: string, payload: UpdateUserPayload) {
-        const response = await axios.put(`/Cms/user/${id}`, payload);
+        const response = await axios.patch(`/Cms/user/${id}`, payload);
         return response.data;
     }
 
@@ -328,7 +338,8 @@ class AdminService {
     }
 
     async toggleUserStatus(id: string, status: boolean) {
-        const response = await axios.patch(`/Cms/user/${id}/status`, { status });
+        // Sử dụng cùng endpoint với updateUser, chỉ khác payload
+        const response = await axios.patch(`/Cms/user/${id}`, { status });
         return response.data;
     }
 
@@ -338,6 +349,40 @@ class AdminService {
     }
     async rejectTourGuideApplication(cvId: string, reason: string): Promise<any> {
         const response = await axios.put(`Cms/${cvId}/reject-application`, { reason });
+        return response.data;
+    }
+
+    // Lấy danh sách đơn đăng ký shop
+    async getShopRegistrations({
+        page = 0,
+        pageSize = 10,
+        status,
+        searchTerm
+    }: {
+        page?: number;
+        pageSize?: number;
+        status?: string | number;
+        searchTerm?: string;
+    } = {}): Promise<any[]> {
+        const params: any = { page, pageSize };
+        if (status !== undefined) params.status = status;
+        if (searchTerm) params.searchTerm = searchTerm;
+        const response = await axios.get('SpecialtyShopApplication', { params });
+        if (response.data && Array.isArray(response.data.data?.items)) {
+            return response.data.data.items;
+        }
+        return [];
+    }
+
+    // Duyệt đơn đăng ký shop
+    async approveShopRegistration(shopId: string): Promise<any> {
+        const response = await axios.put(`Cms/${shopId}/approve-shop-registration`);
+        return response.data;
+    }
+
+    // Từ chối đơn đăng ký shop
+    async rejectShopRegistration(shopId: string, reason: string): Promise<any> {
+        const response = await axios.put(`Cms/${shopId}/reject-shop-registration`, { reason });
         return response.data;
     }
 }

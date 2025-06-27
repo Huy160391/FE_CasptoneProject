@@ -62,7 +62,7 @@ body {
 /* Layout styles */
 .main-content {
   min-height: calc(100vh - 64px - 200px); /* Subtract header and footer heights */
-  padding: 24px 0;
+  padding: 0 0 24px 0; /* Xóa padding-top */
 }
 
 /* Responsive styles */

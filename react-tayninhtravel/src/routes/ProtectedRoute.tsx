@@ -5,7 +5,7 @@ import { message } from 'antd';
 
 interface ProtectedRouteProps {
     children?: React.ReactNode;
-    requiredRole?: 'Admin' | 'Blogger' | 'Tour Company';
+    requiredRole?: 'Admin' | 'Blogger' | 'Tour Company' | 'Speciality shop';
     requireAuth?: boolean;
 }
 
