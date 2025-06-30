@@ -1,0 +1,17 @@
+.specialityshop-header {
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  height: 64px;
+  justify-content: space-between;
+  .specialityshop-header-title {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .specialityshop-header-user {
+    font-size: 16px;
+    color: #888;
+  }
+}

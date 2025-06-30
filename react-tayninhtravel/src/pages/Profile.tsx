@@ -17,10 +17,6 @@ const Profile = () => {
     const { t } = useTranslation();
     const { user, updateUser } = useAuthStore();
     const [ticketsLoading, setTicketsLoading] = useState(false);
-    const [registerHistory, setRegisterHistory] = useState<any[]>([]);
-    const [registerLoading, setRegisterLoading] = useState(false);
-
-    // State cho support tickets
     const [supportTickets, setSupportTickets] = useState<UserSupportTicket[]>([]);
 
     // Mock data - sẽ được thay thế bằng API call thực tế
@@ -94,29 +90,6 @@ const Profile = () => {
 
         fetchSupportTickets();
     }, [user, t]);
-
-    // Fetch register history (shop & tour guide applications)
-    useEffect(() => {
-        const fetchRegisterHistory = async () => {
-            if (!user) return;
-            try {
-                setRegisterLoading(true);
-                const [shop, guide] = await Promise.all([
-                    userService.getMyShopApplications(),
-                    userService.getMyTourGuideApplications()
-                ]);
-                setRegisterHistory([
-                    ...shop.map((item: any) => ({ ...item, type: 'shop' })),
-                    ...guide.map((item: any) => ({ ...item, type: 'guide' }))
-                ]);
-            } catch (error) {
-                // handle error if needed
-            } finally {
-                setRegisterLoading(false);
-            }
-        };
-        fetchRegisterHistory();
-    }, [user]);
 
     if (!user) {
         return null;
@@ -197,11 +170,11 @@ const Profile = () => {
                                 label: (
                                     <span>
                                         <UserOutlined />
-                                        {t('profile.registerHistory')}
+                                        {t('profile.registerHistory.title')}
                                     </span>
                                 ),
                                 children: (
-                                    <RegisterHistory data={registerHistory} loading={registerLoading} />
+                                    <RegisterHistory />
                                 )
                             }
                         ]}

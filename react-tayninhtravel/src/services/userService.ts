@@ -4,11 +4,12 @@ import {
     CreateUserPayload,
     ProfileUpdatePayload,
     TourGuideApplication,
+    TourGuideApplicationForm,
+    ShopApplicationForm,
     UserComment,
     UserSupportTicket,
     Comment,
-    ApiUser,
-    CV
+    ApiUser
 } from '../types';
 
 // Re-export types for convenience
@@ -288,7 +289,7 @@ export const userService = {
      * @param application Tour guide application data
      * @returns Promise with operation result
      */
-    submitTourGuideApplication: async (application: TourGuideApplication): Promise<any> => {
+    submitTourGuideApplication: async (application: TourGuideApplicationForm): Promise<any> => {
         const formData = new FormData();
         formData.append('Email', application.email);
         formData.append('CurriculumVitae', application.curriculumVitae);
@@ -379,8 +380,8 @@ export const userService = {
      * Get all tour guide applications (admin)
      * @returns Promise with CV applications
      */
-    getTourGuideApplications: async (): Promise<CV[]> => {
-        const response = await axios.get<CV[]>('Cms/tour-guide-application');
+    getTourGuideApplications: async (): Promise<TourGuideApplication[]> => {
+        const response = await axios.get<TourGuideApplication[]>('Cms/tour-guide-application');
         return response.data;
     },
     /**
@@ -540,31 +541,28 @@ export const userService = {
     },
 
     /**
-     * Submit shop registration
+     * Submit shop registration (specialty shop application)
      * @param data Shop registration data (fields + files)
      * @returns Promise with operation result
      */
-    submitShopRegistration: async (data: {
-        shopName: string;
-        representativeName: string;
-        website?: string;
-        shopType: string;
-        location: string;
-        email: string;
-        logo: File;
-        businessLicense: File;
-    }): Promise<any> => {
+    submitShopRegistration: async (data: ShopApplicationForm): Promise<any> => {
         const formData = new FormData();
         formData.append('ShopName', data.shopName);
         formData.append('RepresentativeName', data.representativeName);
+        if (data.representativeNameOnPaper) formData.append('RepresentativeNameOnPaper', data.representativeNameOnPaper);
+        formData.append('PhoneNumber', data.phone);
+        formData.append('Email', data.email);
         if (data.website) formData.append('Website', data.website);
         formData.append('ShopType', data.shopType);
         formData.append('Location', data.location);
-        formData.append('Email', data.email);
-        formData.append('Logo', data.logo);
-        formData.append('BusinessLicense', data.businessLicense);
+        if (data.shopDescription) formData.append('ShopDescription', data.shopDescription);
+        if (data.openingHour) formData.append('OpeningHours', data.openingHour);
+        if (data.closingHour) formData.append('CloseHours', data.closingHour);
+        if (data.logo) formData.append('Logo', data.logo);
+        formData.append('BusinessLicenseFile', data.businessLicense);
+        formData.append('BusinessLicense', data.businessCode);
 
-        const response = await axios.post('/Account/shop-application', formData, {
+        const response = await axios.post('/Account/specialty-shop-application', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -576,8 +574,8 @@ export const userService = {
      * Lấy danh sách các đơn đăng ký làm hướng dẫn viên đã gửi (của user hiện tại)
      * @returns Promise với danh sách đơn đăng ký
      */
-    getMyTourGuideApplications: async (): Promise<CV[]> => {
-        const response = await axios.get<CV[]>('/Account/my-tourguide-applications');
+    getMyTourGuideApplications: async (): Promise<TourGuideApplication[]> => {
+        const response = await axios.get<TourGuideApplication[]>('/Account/my-tourguide-applications');
         return response.data;
     },
 
@@ -586,7 +584,7 @@ export const userService = {
      * @returns Promise với danh sách đơn đăng ký shop
      */
     getMyShopApplications: async (): Promise<any[]> => {
-        const response = await axios.get<any[]>('/Account/my-shop-applications');
+        const response = await axios.get<any[]>('/Account/my-specialty-shop-application');
         return response.data;
     },
 };

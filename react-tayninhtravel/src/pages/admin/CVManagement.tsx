@@ -18,10 +18,14 @@ import './CVManagement.scss'
 // Đổi tên interface CV thành AdminCV để tránh xung đột với type CV global
 interface AdminCV {
     id: string;
-    email: string;
-    curriculumVitae: string;
+    fullName: string;
+    userEmail: string;
+    phoneNumber: string;
+    experience: string;
+    curriculumVitae?: string;
     status: number;
-    createdAt: string;
+    submittedAt: string;
+    userName: string;
     reason?: string;
 }
 
@@ -46,10 +50,14 @@ const CVManagement = () => {
             const apiCVs = await adminService.getCVs();
             const mappedCVs: AdminCV[] = apiCVs.map((cv: any) => ({
                 id: cv.id,
-                email: cv.email,
+                fullName: cv.fullName,
+                userEmail: cv.userEmail,
+                phoneNumber: cv.phoneNumber,
+                experience: cv.experience,
                 curriculumVitae: cv.curriculumVitae,
                 status: typeof cv.status === 'number' ? cv.status : 0,
-                createdAt: cv.createdAt,
+                submittedAt: cv.submittedAt,
+                userName: cv.userName,
                 reason: cv.rejectionReason || undefined
             }))
             setCvs(mappedCVs)
@@ -88,50 +96,86 @@ const CVManagement = () => {
         },
         {
             title: t('admin.cvManagement.columns.email'),
-            dataIndex: 'email',
-            key: 'email',
-            width: '30%',
+            dataIndex: 'userEmail',
+            key: 'userEmail',
+            width: '20%',
             filteredValue: searchText ? [searchText] : null,
             onFilter: (value: boolean | Key, record: AdminCV) => {
                 const searchValue = value.toString().toLowerCase()
-                return record.email.toLowerCase().includes(searchValue)
+                return record.userEmail.toLowerCase().includes(searchValue) ||
+                    record.fullName.toLowerCase().includes(searchValue)
             },
         },
         {
-            title: t('admin.cvManagement.columns.submitDate'),
-            dataIndex: 'createdAt',
-            key: 'createdAt',
+            title: 'Họ tên',
+            dataIndex: 'fullName',
+            key: 'fullName',
             width: '15%',
-            render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
-            sorter: (a: AdminCV, b: AdminCV) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        },
+        {
+            title: 'Số điện thoại',
+            dataIndex: 'phoneNumber',
+            key: 'phoneNumber',
+            width: '12%',
+        },
+        {
+            title: 'Kinh nghiệm',
+            dataIndex: 'experience',
+            key: 'experience',
+            width: '10%',
+            render: (exp: string) => `${exp} năm`,
+        },
+        {
+            title: t('admin.cvManagement.columns.submitDate'),
+            dataIndex: 'submittedAt',
+            key: 'submittedAt',
+            width: '12%',
+            render: (date: string) => {
+                if (!date) return 'N/A';
+                try {
+                    return new Date(date).toLocaleDateString('vi-VN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } catch (error) {
+                    return 'Invalid Date';
+                }
+            },
+            sorter: (a: AdminCV, b: AdminCV) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime(),
         },
         {
             title: t('admin.cvManagement.columns.attachment'),
             dataIndex: 'curriculumVitae',
             key: 'curriculumVitae',
-            width: '20%',
-            render: (file: string) => (
-                <Space>
-                    <FileOutlined />
-                    <a href={file} target="_blank" rel="noopener noreferrer">
-                        {t('admin.cvManagement.actions.viewCV')}
-                    </a>
-                    <Button
-                        icon={<DownloadOutlined />}
-                        size="small"
-                        type="text"
-                        onClick={() => {
-                            window.open(file, '_blank')
-                        }}
-                    />
-                </Space>
-            )
+            width: '15%',
+            render: (file: string) => {
+                if (!file) return 'N/A';
+                return (
+                    <Space>
+                        <FileOutlined />
+                        <a href={file} target="_blank" rel="noopener noreferrer">
+                            {t('admin.cvManagement.actions.viewCV')}
+                        </a>
+                        <Button
+                            icon={<DownloadOutlined />}
+                            size="small"
+                            type="text"
+                            onClick={() => {
+                                window.open(file, '_blank')
+                            }}
+                        />
+                    </Space>
+                );
+            }
         },
         {
             title: t('admin.cvManagement.columns.status'),
             dataIndex: 'status',
             key: 'status',
-            width: '12%',
+            width: '10%',
             render: (status: number) => {
                 let color = 'gold'
                 let text = t('admin.cvManagement.status.pending')
@@ -156,7 +200,7 @@ const CVManagement = () => {
         {
             title: t('admin.cvManagement.columns.actions'),
             key: 'actions',
-            width: '15%',
+            width: '16%',
             render: (_, record: AdminCV) => (
                 <Space>                    {record.status === 0 && (
                     <>

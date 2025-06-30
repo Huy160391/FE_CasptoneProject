@@ -57,19 +57,6 @@ const UserManagement = () => {
 
     // Gọi API khi component được mount hoặc khi các điều kiện tìm kiếm thay đổi
     useEffect(() => {
-        // Kiểm tra xác thực
-        if (!isAuthenticated || !user) {
-            message.error(t('admin.users.messages.error.auth'))
-            navigate('/login')
-            return
-        }
-
-        if (user.role !== 'Admin') {
-            message.error(t('admin.users.messages.error.permission'))
-            navigate('/unauthorized')
-            return
-        }
-
         fetchUsers()
     }, [pagination.current, pagination.pageSize, statusFilter, isAuthenticated, user, navigate, t])
 
