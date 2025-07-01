@@ -158,6 +158,54 @@
         gap: 15px;
         margin-bottom: 20px;
         
+        .quantity-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          .quantity-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1890ff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            
+            &:hover:not(:disabled) {
+              color: #40a9ff;
+              background: rgba(24, 144, 255, 0.1);
+              border-radius: 4px;
+            }
+            
+            &:disabled {
+              color: #d9d9d9;
+              cursor: not-allowed;
+            }
+            
+            .anticon {
+              font-size: 14px;
+            }
+          }
+          
+          .quantity-display {
+            min-width: 40px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            padding: 6px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: #fff;
+          }
+        }
+        
         .stock-info {
           color: #666;
           margin-left: 10px;
@@ -606,6 +654,33 @@ body.dark-mode {
       
       &:hover {
         background-color: #5dc9a0;
+      }
+    }
+    
+    .quantity-selector {
+      .quantity-controls {
+        .quantity-btn {
+          color: #79eac0;
+          
+          &:hover:not(:disabled) {
+            color: #52c41a;
+            background: rgba(121, 234, 192, 0.1);
+          }
+          
+          &:disabled {
+            color: #434343;
+          }
+        }
+        
+        .quantity-display {
+          background: #1f1f1f;
+          border-color: #434343;
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      
+      .stock-info {
+        color: rgba(255, 255, 255, 0.65);
       }
     }
   }

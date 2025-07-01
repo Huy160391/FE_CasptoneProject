@@ -1,17 +1,93 @@
 .specialityshop-header {
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  height: 64px;
-  justify-content: space-between;
-  .specialityshop-header-title {
-    font-size: 20px;
+  background-color: #fff;
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 24px;
+  }
+  
+  .page-title {
+    font-size: 18px;
     font-weight: 600;
   }
-  .specialityshop-header-user {
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .notification-btn {
+    color: #666;
     font-size: 16px;
-    color: #888;
+    
+    &:hover {
+      color: #1890ff;
+      background: rgba(24, 144, 255, 0.1);
+    }
+  }
+  
+  .user-dropdown {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.3s;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    
+    .username {
+      margin-left: 8px;
+      
+      @media (max-width: 576px) {
+        display: none;
+      }
+    }
+  }
+}
+
+/* Dark mode styles for speciality shop header */
+body.dark-mode {
+  .specialityshop-header {
+    background-color: #141414;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    
+    .page-title {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .notification-btn {
+      color: rgba(255, 255, 255, 0.65);
+      
+      &:hover {
+        color: #79eac0;
+        background: rgba(121, 234, 192, 0.1);
+      }
+    }
+    
+    .user-dropdown {
+      .username {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+    }
   }
 }

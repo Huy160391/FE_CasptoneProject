@@ -7,6 +7,7 @@ const HeroSection = () => {
 
   // Chỉ sử dụng một ảnh cố định làm background
   const mainBackground = 'https://toptayninh.vn/wp-content/uploads/2023/10/Nui-ba-den-Tay-Ninh.jpg'
+  const heroTitle = t('home.hero.title')
 
   return (
     <div
@@ -16,7 +17,7 @@ const HeroSection = () => {
       }}
     >
       <div className="hero-content">
-        <h1>{t('home.hero.title')}</h1>
+        <h1 data-text={heroTitle}>{heroTitle}</h1>
         <p>{t('home.hero.subtitle')}</p>
         <SearchBar />
       </div>

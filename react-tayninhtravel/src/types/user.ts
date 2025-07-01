@@ -1,10 +1,11 @@
-export type UserRole = 'user' | 'Admin' | 'Blogger' | 'Tour Company' | 'Speciality shop';
+export type UserRole = 'user' | 'Admin' | 'Blogger' | 'Tour Company' | 'Specialty Shop';
 
 export interface User {
     id: string;
     name: string;
     email: string;
-    role: UserRole;
+    role: string;
+    roleName?: string; // Role của user dưới dạng string từ API
     avatar?: string;
     phone?: string;
     address?: string;
@@ -21,6 +22,7 @@ export interface ApiUser {
     email: string;
     phoneNumber?: string;
     role?: string;
+    roleName?: string; // Role của user dưới dạng string
     isActive: boolean;
     avatar?: string;
     isVerified: boolean;

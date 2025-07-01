@@ -1,26 +1,11 @@
 import axiosInstance from '@/config/axios';
-import { Blog as GlobalBlog } from '../types';
-
-export interface BlogImage {
-    id: string;
-    url: string;
-}
-
-// Extend global Blog interface for specific API response
-export interface Blog extends Omit<GlobalBlog, 'authorId' | 'author'> {
-    authorName: string;
-    imageUrl?: string[];
-    totalLikes?: number;
-    totalDislikes?: number;
-    totalComments?: number;
-}
-
-export interface GetBlogsResponse {
-    data: Blog[];
-    totalRecords: number;
-    currentPage: number;
-    pageSize: number;
-}
+import {
+    Product,
+    GetBlogsResponse,
+    GetProductsResponse,
+    GetProductsParams,
+    PublicBlog
+} from '../types';
 
 export const publicService = {
     async getPublicBlogs(
@@ -68,7 +53,7 @@ export const publicService = {
                 pageSize
             };
         }
-    }, async getBlogById(id: string): Promise<Blog | null> {
+    }, async getBlogById(id: string): Promise<PublicBlog | null> {
         try {
             const response = await axiosInstance.get<any>(`Blogger/blog/${id}`);
 
@@ -90,7 +75,7 @@ export const publicService = {
             console.error(`Error fetching blog with ID ${id}:`, error);
             return null;
         }
-    }, async getRelatedBlogs(blogId: string, limit: number = 3): Promise<Blog[]> {
+    }, async getRelatedBlogs(blogId: string, limit: number = 3): Promise<PublicBlog[]> {
         try {
             const response = await axiosInstance.get<any>(`Blogger/Blog-User/${blogId}/related`, {
                 params: { limit }
@@ -149,7 +134,61 @@ export const publicService = {
             console.error('Error uploading images:', error);
             return [];
         }
-    }
+    },
+    async getPublicProducts(
+        params: GetProductsParams = {}
+    ): Promise<GetProductsResponse> {
+        try {
+            const {
+                pageIndex = 1,
+                pageSize = 10,
+                textSearch = '',
+                status
+            } = params;
+
+            const queryParams: any = {
+                pageIndex,
+                pageSize,
+                textSearch
+            };
+
+            // Thêm status nếu có giá trị
+            if (status !== undefined) queryParams.status = status;
+
+            const response = await axiosInstance.get<any>('Product/Product', { params: queryParams });
+
+            return {
+                data: response.data.data || [],
+                totalRecords: response.data.totalRecords || 0,
+                pageIndex: response.data.pageIndex || pageIndex,
+                pageSize: response.data.pageSize || pageSize,
+                totalPages: response.data.totalPages || 0
+            };
+        } catch (error) {
+            console.error('Error fetching public products:', error);
+            return {
+                data: [],
+                totalRecords: 0,
+                pageIndex: params.pageIndex || 1,
+                pageSize: params.pageSize || 10,
+                totalPages: 0
+            };
+        }
+    },
+
+    async getPublicProductById(id: string): Promise<Product | null> {
+        try {
+            const response = await axiosInstance.get<any>(`Product/Product/${id}`);
+
+            if (response.data && response.data.data) {
+                return response.data.data;
+            }
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching product with ID ${id}:`, error);
+            return null;
+        }
+    },
 };
 
 export default publicService;

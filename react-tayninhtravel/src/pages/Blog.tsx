@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { Card, Input, Select, Pagination, Empty, Spin, Row, Col } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
-import { publicService, type Blog } from '@/services/publicService'
+import { publicService } from '@/services/publicService'
+import { type PublicBlog } from '@/types'
 import './Blog.scss'
 
 const { Option } = Select
@@ -18,7 +19,7 @@ const Blog = () => {
   const [searchText, setSearchText] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [currentPage, setCurrentPage] = useState(1)
-  const [originalBlogs, setOriginalBlogs] = useState<Blog[]>([])
+  const [originalBlogs, setOriginalBlogs] = useState<PublicBlog[]>([])
   const [totalBlogs, setTotalBlogs] = useState(0)
   const [loading, setLoading] = useState(false)
   const pageSize = 6
@@ -29,7 +30,7 @@ const Blog = () => {
       setLoading(true)
       try {
         const response = await publicService.getPublicBlogs(currentPage, pageSize, searchText)
-        setOriginalBlogs(response.data)
+        setOriginalBlogs(response.data as unknown as PublicBlog[])
         setTotalBlogs(response.totalRecords)
       } catch (error) {
         console.error('Error fetching blogs:', error)
@@ -117,7 +118,7 @@ const Blog = () => {
         ) : sortedBlogs.length > 0 ? (
           <>
             <Row gutter={[24, 24]} className="blog-list">
-              {sortedBlogs.map((blog: Blog) => (
+              {sortedBlogs.map((blog: PublicBlog) => (
                 <Col xs={24} md={12} key={blog.id}>
                   <Link to={`/blog/post/${blog.id}`} className="blog-link">
                     <Card
