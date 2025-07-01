@@ -32,6 +32,10 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
       })
 
       if (response.user && response.token) {
+        // Debug: Log user object
+        console.log('Login response user:', response.user);
+        console.log('User role:', response.user.role);
+
         login(response.user, response.token)
         message.success(t('common.loginSuccess'))
         form.resetFields()
@@ -46,12 +50,16 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         localStorage.setItem('lastLoginTime', new Date().toISOString())
 
         // Redirect based on role
+        console.log('Redirecting based on role:', response.user.role);
         if (response.user.role === 'Admin') {
           navigate('/admin/dashboard')
         } else if (response.user.role === 'Tour Company') {
           navigate('/tour-company/dashboard')
-        } else if (response.user.role === 'Speciality shop') {
+        } else if (response.user.role === 'Specialty Shop') {
+          console.log('Navigating to speciality shop dashboard');
           navigate('/speciality-shop')
+        } else if (response.user.role === 'Blogger') {
+          navigate('/blogger/dashboard')
         } else {
           // Return to previous page or home
           navigate(-1)

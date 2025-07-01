@@ -1,8 +1,8 @@
-import { Drawer, List, Button, InputNumber, Empty, Typography, Divider } from 'antd'
-import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons'
+import { Drawer, List, Button, Empty, Typography, Divider } from 'antd'
+import { DeleteOutlined, ShoppingCartOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons'
 import { useCartStore } from '@/store/useCartStore'
-// import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Link, useNavigate } from 'react-router-dom'
 import './CartDrawer.scss'
 
 const { Text } = Typography
@@ -15,7 +15,8 @@ interface CartDrawerProps {
 }
 
 const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
-  // const { t } = useTranslation()
+  const { t } = useTranslation()
+  const navigate = useNavigate()
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore()
   const handleQuantityChange = (id: string | number, type: 'product' | 'tour', quantity: number) => {
     updateQuantity(id, type, quantity)
@@ -29,12 +30,22 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
     return `${price.toLocaleString()}VND`
   }
 
+  const handleCheckout = () => {
+    onClose() // Đóng drawer trước
+    navigate('/checkout') // Navigate đến trang checkout
+  }
+
+  const handleContinueShopping = () => {
+    onClose() // Đóng drawer trước
+    navigate('/shop') // Navigate đến trang shop
+  }
+
   return (
     <Drawer
       title={
         <div className="cart-drawer-title">
           <ShoppingCartOutlined />
-          <span>Giỏ hàng ({getTotalItems()})</span>
+          <span>{t('cart.title')} ({getTotalItems()})</span>
         </div>
       }
       placement="right"
@@ -46,11 +57,11 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
         items.length > 0 ? (
           <div className="cart-footer">
             <div className="cart-total">
-              <Text strong>Tổng cộng:</Text>
+              <Text strong>{t('cart.total')}:</Text>
               <Text strong className="total-price">{formatPrice(getTotalPrice())}</Text>
             </div>
-            <Button type="primary" size="large" block>
-              Thanh toán
+            <Button type="primary" size="large" block onClick={handleCheckout}>
+              {t('cart.checkout')}
             </Button>
           </div>
         ) : null
@@ -83,12 +94,25 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
                 </div>
                 <div className="item-price">{formatPrice(item.price)}</div>
                 <div className="item-quantity">
-                  <InputNumber
-                    min={1}
-                    max={99}
-                    value={item.quantity}
-                    onChange={(value) => handleQuantityChange(item.id, item.type, value || 1)}
-                  />
+                  <div className="quantity-controls">
+                    <Button
+                      type="text"
+                      icon={<MinusOutlined />}
+                      onClick={() => handleQuantityChange(item.id, item.type, Math.max(1, item.quantity - 1))}
+                      disabled={item.quantity <= 1}
+                      className="quantity-btn minus-btn"
+                      size="small"
+                    />
+                    <span className="quantity-display">{item.quantity}</span>
+                    <Button
+                      type="text"
+                      icon={<PlusOutlined />}
+                      onClick={() => handleQuantityChange(item.id, item.type, item.quantity + 1)}
+                      disabled={item.quantity >= 99}
+                      className="quantity-btn plus-btn"
+                      size="small"
+                    />
+                  </div>
                 </div>
               </div>
             </List.Item>
@@ -98,10 +122,10 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
         <div className="empty-cart">
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="Giỏ hàng của bạn đang trống"
+            description={t('cart.emptyDescription')}
           />
-          <Button type="primary" onClick={onClose}>
-            Tiếp tục mua sắm
+          <Button type="primary" onClick={handleContinueShopping}>
+            {t('cart.continueShopping')}
           </Button>
         </div>
       )}
@@ -110,7 +134,7 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
         <div className="cart-actions">
           <Divider />
           <Link to="/cart" onClick={onClose}>
-            <Button block>Xem chi tiết giỏ hàng</Button>
+            <Button block>{t('cart.title')} - {t('common.viewDetails')}</Button>
           </Link>
         </div>
       )}

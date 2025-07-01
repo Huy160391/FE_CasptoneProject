@@ -146,7 +146,7 @@ const Navbar = () => {
       icon: <DashboardOutlined />,
       onClick: () => navigate('/tour-company/dashboard'),
     }] : []),
-    ...(user?.role === 'Speciality shop' ? [{
+    ...(user?.role === 'Specialty Shop' ? [{
       key: 'speciality-shop',
       label: 'Speciality Shop Dashboard',
       icon: <DashboardOutlined />,
@@ -284,7 +284,7 @@ const Navbar = () => {
                   Tour Company Dashboard
                 </Button>
               )}
-              {user?.role === 'Speciality shop' && (
+              {user?.role === 'Specialty Shop' && (
                 <Button type="primary" onClick={() => navigate('/speciality-shop')}>
                   Speciality Shop Dashboard
                 </Button>

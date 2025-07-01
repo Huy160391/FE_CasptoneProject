@@ -234,6 +234,42 @@ const UserManagement = () => {
             sorter: (a: User, b: User) => (a.phone || '').localeCompare(b.phone || ''),
         },
         {
+            title: t('admin.users.columns.role'),
+            dataIndex: 'roleName',
+            key: 'roleName',
+            render: (roleName: string, record: User) => {
+                const roleDisplay = roleName || record.role || 'N/A';
+                let color = 'default';
+
+                switch (roleDisplay.toLowerCase()) {
+                    case 'admin':
+                        color = 'red';
+                        break;
+                    case 'blogger':
+                        color = 'blue';
+                        break;
+                    case 'tour company':
+                        color = 'green';
+                        break;
+                    case 'specialty shop':
+                        color = 'orange';
+                        break;
+                    case 'user':
+                        color = 'purple';
+                        break;
+                    default:
+                        color = 'default';
+                }
+
+                return <Tag color={color}>{roleDisplay}</Tag>;
+            },
+            sorter: (a: User, b: User) => {
+                const roleA = a.roleName || a.role || '';
+                const roleB = b.roleName || b.role || '';
+                return roleA.localeCompare(roleB);
+            },
+        },
+        {
             title: t('admin.users.columns.status'),
             dataIndex: 'isActive',
             key: 'isActive',
@@ -253,44 +289,50 @@ const UserManagement = () => {
         {
             title: t('admin.users.columns.actions'),
             key: 'action',
+            width: 200,
+            fixed: 'right',
             render: (_, record: User) => (
-                <Space size="middle">
+                <Space size="small" wrap>
                     <Button
                         type="primary"
                         icon={<EditOutlined />}
                         size="small"
-                        onClick={() => handleEdit(record)}
-                    >
-                        {t('common.edit')}
-                    </Button>
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(record);
+                        }}
+                    />
                     {record.isActive ? (
                         <Button
                             icon={<StopOutlined />}
                             danger
                             size="small"
-                            onClick={() => handleToggleStatus(record, false)}
-                        >
-                            {t('admin.users.actions.deactivate')}
-                        </Button>
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleStatus(record, false);
+                            }}
+                        />
                     ) : (
                         <Button
                             icon={<CheckCircleOutlined />}
                             type="primary"
                             size="small"
                             className="activate-btn"
-                            onClick={() => handleToggleStatus(record, true)}
-                        >
-                            {t('admin.users.actions.activate')}
-                        </Button>
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleStatus(record, true);
+                            }}
+                        />
                     )}
                     <Button
                         danger
                         icon={<DeleteOutlined />}
                         size="small"
-                        onClick={() => handleDelete(record)}
-                    >
-                        {t('common.delete')}
-                    </Button>
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(record);
+                        }}
+                    />
                 </Space>
             ),
         },
@@ -368,7 +410,7 @@ const UserManagement = () => {
                         <div><b>{t('profile.email')}:</b> {viewUser.email}</div>
                         <div><b>{t('profile.phone')}:</b> {viewUser.phone}</div>
                         <div><b>{t('admin.users.columns.status')}:</b> {viewUser.isActive ? t('admin.users.status.active') : t('admin.users.status.inactive')}</div>
-                        <div><b>{t('profile.role')}:</b> {viewUser.role}</div>
+                        <div><b>{t('profile.role')}:</b> {viewUser.roleName || viewUser.role}</div>
                         <div><b>{t('profile.createdAt')}:</b> {viewUser.createdAt}</div>
                         <div><b>{t('profile.updatedAt')}:</b> {viewUser.updatedAt}</div>
                     </div>

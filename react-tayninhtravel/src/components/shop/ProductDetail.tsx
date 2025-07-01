@@ -8,7 +8,6 @@ import {
   Button,
   Tabs,
   Rate,
-  InputNumber,
   Divider,
   Tag,
   Space,
@@ -26,10 +25,12 @@ import {
   TagOutlined,
   HeartFilled,
   LeftOutlined,
-  RightOutlined
+  RightOutlined,
+  PlusOutlined,
+  MinusOutlined
 } from '@ant-design/icons'
 import './ProductDetail.scss'
-import { useCartStore } from '@/store/useCartStore'
+import { useProductCart } from '@/hooks/useCart'
 import { useTranslation } from 'react-i18next'
 // CheckCircleOutlined, of import ant-design/icons
 const { Title, Text, Paragraph } = Typography
@@ -93,6 +94,40 @@ const mockProducts = [
     category: 'Thời Trang',
     tags: ['áo thun', 'thời trang', 'quà lưu niệm'],
     isSale: true,
+  },
+  {
+    id: 6,
+    name: 'Nón lá Tây Ninh',
+    price: 150000,
+    discountPrice: 125000,
+    image: 'https://placehold.co/400x400',
+    rating: 4.5,
+    reviews: 23,
+    category: 'Đồ lưu niệm',
+    tags: ['nón lá', 'thủ công', 'truyền thống'],
+    isSale: true,
+  },
+  {
+    id: 7,
+    name: 'Bánh tráng Tây Ninh',
+    price: 85000,
+    image: 'https://placehold.co/400x400',
+    rating: 4.3,
+    reviews: 18,
+    category: 'Đặc sản',
+    tags: ['bánh tráng', 'đặc sản', 'truyền thống'],
+  },
+  {
+    id: 8,
+    name: 'Khăn rằn Tây Ninh',
+    price: 120000,
+    discountPrice: 96000,
+    image: 'https://placehold.co/400x400',
+    rating: 4.0,
+    reviews: 9,
+    category: 'Phụ kiện',
+    tags: ['khăn rằn', 'truyền thống', 'phụ kiện'],
+    isSale: true,
   }
 ]
 
@@ -143,7 +178,8 @@ const ProductDetail = () => {
   const [imageModalVisible, setImageModalVisible] = useState<boolean>(false)
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
 
-  const addToCart = useCartStore(state => state.addItem)
+  // Use cart hook instead of direct store access
+  const productCart = useProductCart(String(productId) || '')
   const { t } = useTranslation()
 
   // Fetch product data
@@ -209,27 +245,27 @@ const ProductDetail = () => {
     fetchProduct()
   }, [productId])
 
-  const handleQuantityChange = (value: number | null) => {
-    if (value !== null) {
-      setQuantity(value)
+  const increaseQuantity = () => {
+    if (product && quantity < product.stock) {
+      setQuantity(prev => prev + 1)
+    }
+  }
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1)
     }
   }
 
   const handleAddToCart = () => {
-    if (!product) return addToCart({
-      id: product!.id,
-      productId: String(product!.id),
-      name: product!.name,
-      price: product!.discountPrice || product!.price,
-      image: product!.image,
-      type: 'product',
-      quantity: quantity
-    })
+    if (!product) return
 
-    notification.success({
-      message: t('common.addToCartSuccess'),
-      description: t('common.addToCartDescription', { quantity, name: product.name }),
-      icon: <ShoppingCartOutlined style={{ color: '#52c41a' }} />,
+    productCart.addToCart({
+      productId: String(product.id),
+      name: product.name,
+      image: product.image,
+      price: product.discountPrice || product.price,
+      quantity: quantity
     })
   }
 
@@ -471,12 +507,23 @@ const ProductDetail = () => {
             <div className="product-actions">
               <div className="quantity-selector">
                 <Text>Số lượng:</Text>
-                <InputNumber
-                  min={1}
-                  max={product.stock}
-                  defaultValue={1}
-                  onChange={handleQuantityChange}
-                />
+                <div className="quantity-controls">
+                  <Button
+                    type="text"
+                    icon={<MinusOutlined />}
+                    onClick={decreaseQuantity}
+                    disabled={quantity <= 1}
+                    className="quantity-btn minus-btn"
+                  />
+                  <span className="quantity-display">{quantity}</span>
+                  <Button
+                    type="text"
+                    icon={<PlusOutlined />}
+                    onClick={increaseQuantity}
+                    disabled={quantity >= product.stock}
+                    className="quantity-btn plus-btn"
+                  />
+                </div>
                 <Text className="stock-info">
                   <InfoCircleOutlined /> Còn {product.stock} sản phẩm
                 </Text>
@@ -488,15 +535,20 @@ const ProductDetail = () => {
                   size="large"
                   icon={<ShoppingCartOutlined />}
                   onClick={handleAddToCart}
+                  loading={productCart.loading}
                   className="add-to-cart-btn"
                 >
-                  Thêm vào giỏ hàng
+                  {productCart.isInCart
+                    ? t('cart.inCart') + ` (${productCart.quantity})`
+                    : t('cart.addToCart')
+                  }
                 </Button>
                 <Button
                   type="default"
                   size="large"
                   onClick={handleBuyNow}
                   className="buy-now-btn"
+                  disabled={productCart.loading}
                 >
                   Mua ngay
                 </Button>
