@@ -1,44 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     Row,
     Col,
     Card,
-    Form,
-    Input,
     Button,
     Radio,
     Divider,
     Typography,
     notification,
-    Steps,
+    Steps as AntdSteps,
     Breadcrumb,
     Table,
     Image,
     Tag,
     Alert,
-    Checkbox
+    Checkbox,
+    Form,
+    Input
 } from 'antd'
 import {
     ShoppingCartOutlined,
     HomeOutlined,
     BankOutlined,
-    CarOutlined,
     ShopOutlined,
-    UserOutlined,
-    PhoneOutlined,
-    EnvironmentOutlined,
-    CheckCircleOutlined,
-    DollarOutlined
+    CheckCircleOutlined
 } from '@ant-design/icons'
 import { useCartStore } from '@/store/useCartStore'
+import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import BankTransferConfirmModal, { type BankTransferData } from './BankTransferConfirmModal'
+import LoginModal from '../auth/LoginModal'
+import RegisterModal from '../auth/RegisterModal'
 import './Checkout.scss'
 
 const { Title, Text } = Typography
-const { TextArea } = Input
 
 interface DeliveryInfo {
     fullName: string
@@ -70,8 +67,8 @@ interface ShippingMethod {
 const Checkout = () => {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const [form] = Form.useForm()
     const { items, getTotalItems, getTotalPrice, clearCart } = useCartStore()
+    const { isAuthenticated, user } = useAuthStore()
 
     const [currentStep, setCurrentStep] = useState(0)
     const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
@@ -83,21 +80,37 @@ const Checkout = () => {
         district: '',
         ward: ''
     })
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod')
-    const [selectedShippingMethod, setSelectedShippingMethod] = useState('ship_cod')
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank_transfer')
+    const [selectedShippingMethod, setSelectedShippingMethod] = useState('pickup')
     const [agreeTerms, setAgreeTerms] = useState(false)
     const [loading, setLoading] = useState(false)
     const [bankTransferModalVisible, setBankTransferModalVisible] = useState(false)
     const [orderId] = useState(`TN-${Date.now()}`) // Generate order ID
 
+    // Authentication modal states
+    const [loginModalVisible, setLoginModalVisible] = useState(false)
+    const [registerModalVisible, setRegisterModalVisible] = useState(false)
+
+    // Check authentication on component mount
+    useEffect(() => {
+        if (!isAuthenticated) {
+            notification.warning({
+                message: t('Bạn cần đăng nhập để tiếp tục'),
+                description: t('Vui lòng đăng nhập để sử dụng chức năng thanh toán.')
+            })
+        }
+        if (user && isAuthenticated) {
+            setDeliveryInfo(prevInfo => ({
+                ...prevInfo,
+                fullName: user.name || '',
+                phone: user.phone || '',
+                email: user.email || ''
+            }))
+        }
+    }, [])
+
     // Payment methods
     const paymentMethods: PaymentMethod[] = [
-        {
-            id: 'cod',
-            name: t('checkout.payment.cod'),
-            description: t('checkout.payment.codDescription'),
-            icon: <DollarOutlined />
-        },
         {
             id: 'bank_transfer',
             name: t('checkout.payment.bankTransfer'),
@@ -114,7 +127,7 @@ const Checkout = () => {
             description: t('checkout.shipping.shipCodDescription'),
             price: 30000,
             estimatedDays: '2-3',
-            icon: <CarOutlined />
+            icon: <ShopOutlined />
         },
         {
             id: 'pickup',
@@ -187,33 +200,19 @@ const Checkout = () => {
         }
     ]
 
-    const steps = [
-        {
-            title: t('checkout.steps.deliveryInfo'),
-            description: t('checkout.steps.deliveryInfoDesc')
-        },
-        {
-            title: t('checkout.steps.paymentShipping'),
-            description: t('checkout.steps.paymentShippingDesc')
-        },
-        {
-            title: t('checkout.steps.confirmation'),
-            description: t('checkout.steps.confirmationDesc')
-        }
-    ]
-
     const handleNextStep = () => {
         if (currentStep === 0) {
-            form.validateFields().then((values) => {
-                setDeliveryInfo(values)
-                setCurrentStep(1)
-            }).catch(() => {
-                notification.error({
-                    message: t('checkout.error'),
-                    description: t('checkout.fillRequiredFields')
-                })
-            })
+            setCurrentStep(1)
         } else if (currentStep === 1) {
+            // Check authentication before proceeding to final step
+            if (!isAuthenticated) {
+                notification.warning({
+                    message: t('checkout.loginRequired'),
+                    description: t('checkout.loginRequiredDescription')
+                })
+                setLoginModalVisible(true)
+                return
+            }
             setCurrentStep(2)
         }
     }
@@ -222,7 +221,27 @@ const Checkout = () => {
         setCurrentStep(currentStep - 1)
     }
 
+    const handleLoginSuccess = () => {
+        setLoginModalVisible(false)
+        // After login, proceed to next step
+        setCurrentStep(2)
+        notification.success({
+            message: t('checkout.loginSuccess'),
+            description: t('checkout.canNowProceed')
+        })
+    }
+
     const handlePlaceOrder = async () => {
+        // Double-check authentication before placing order
+        if (!isAuthenticated) {
+            notification.warning({
+                message: t('checkout.loginRequired'),
+                description: t('checkout.loginRequiredDescription')
+            })
+            setLoginModalVisible(true)
+            return
+        }
+
         if (!agreeTerms) {
             notification.error({
                 message: t('checkout.error'),
@@ -302,6 +321,27 @@ const Checkout = () => {
         }
     }
 
+    // Nếu chưa đăng nhập, chỉ render modal login
+    if (!isAuthenticated) {
+        return (
+            <>
+                <LoginModal
+                    isVisible={true}
+                    onClose={() => navigate(-1)}
+                    onRegisterClick={() => setRegisterModalVisible(true)}
+                    onLoginSuccess={() => setLoginModalVisible(false)}
+                />
+                <RegisterModal
+                    isVisible={registerModalVisible}
+                    onClose={() => setRegisterModalVisible(false)}
+                    onLoginClick={() => {
+                        setRegisterModalVisible(false)
+                    }}
+                />
+            </>
+        )
+    }
+
     if (items.length === 0) {
         return (
             <div className="checkout-wrapper">
@@ -362,140 +402,49 @@ const Checkout = () => {
                     <Title level={2}>
                         <ShoppingCartOutlined /> {t('checkout.title')}
                     </Title>
-                    <Steps
-                        current={currentStep}
-                        items={steps}
-                        className="checkout-steps"
-                    />
+                    <AntdSteps current={currentStep} className="checkout-steps">
+                        <AntdSteps.Step title={t('checkout.steps.shippingMethod')} description={t('checkout.steps.shippingMethodDesc')} />
+                        <AntdSteps.Step title={t('checkout.steps.paymentShipping')} description={t('checkout.steps.paymentShippingDesc')} />
+                    </AntdSteps>
                 </div>
-
                 <Row gutter={24}>
                     <Col xs={24} lg={14}>
-                        {/* Step 1: Delivery Information */}
+                        {/* Step 1: Shipping Method */}
                         {currentStep === 0 && (
-                            <Card title={t('checkout.deliveryInfo')} className="step-card">
-                                <Form
-                                    form={form}
-                                    layout="vertical"
-                                    initialValues={deliveryInfo}
-                                    onFinish={handleNextStep}
+                            <Card title={t('checkout.shippingMethod')} className="step-card">
+                                <Radio.Group
+                                    value={selectedShippingMethod}
+                                    onChange={(e) => setSelectedShippingMethod(e.target.value)}
+                                    className="shipping-methods"
                                 >
-                                    <Row gutter={16}>
-                                        <Col xs={24} md={12}>
-                                            <Form.Item
-                                                name="fullName"
-                                                label={t('checkout.fullName')}
-                                                rules={[{ required: true, message: t('checkout.fullNameRequired') }]}
-                                            >
-                                                <Input prefix={<UserOutlined />} placeholder={t('checkout.enterFullName')} />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col xs={24} md={12}>
-                                            <Form.Item
-                                                name="phone"
-                                                label={t('checkout.phone')}
-                                                rules={[
-                                                    { required: true, message: t('checkout.phoneRequired') },
-                                                    { pattern: /^[0-9]{10,11}$/, message: t('checkout.phoneInvalid') }
-                                                ]}
-                                            >
-                                                <Input prefix={<PhoneOutlined />} placeholder={t('checkout.enterPhone')} />
-                                            </Form.Item>
-                                        </Col>
-                                    </Row>
-
-                                    <Form.Item
-                                        name="email"
-                                        label={t('checkout.email')}
-                                        rules={[
-                                            { required: true, message: t('checkout.emailRequired') },
-                                            { type: 'email', message: t('checkout.emailInvalid') }
-                                        ]}
-                                    >
-                                        <Input placeholder={t('checkout.enterEmail')} />
-                                    </Form.Item>
-
-                                    <Form.Item
-                                        name="address"
-                                        label={t('checkout.address')}
-                                        rules={[{ required: true, message: t('checkout.addressRequired') }]}
-                                    >
-                                        <Input prefix={<EnvironmentOutlined />} placeholder={t('checkout.enterAddress')} />
-                                    </Form.Item>
-
-                                    <Row gutter={16}>
-                                        <Col xs={24} md={8}>
-                                            <Form.Item
-                                                name="city"
-                                                label={t('checkout.city')}
-                                                rules={[{ required: true, message: t('checkout.cityRequired') }]}
-                                            >
-                                                <Input placeholder={t('checkout.enterCity')} />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col xs={24} md={8}>
-                                            <Form.Item
-                                                name="district"
-                                                label={t('checkout.district')}
-                                                rules={[{ required: true, message: t('checkout.districtRequired') }]}
-                                            >
-                                                <Input placeholder={t('checkout.enterDistrict')} />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col xs={24} md={8}>
-                                            <Form.Item
-                                                name="ward"
-                                                label={t('checkout.ward')}
-                                                rules={[{ required: true, message: t('checkout.wardRequired') }]}
-                                            >
-                                                <Input placeholder={t('checkout.enterWard')} />
-                                            </Form.Item>
-                                        </Col>
-                                    </Row>
-
-                                    <Form.Item name="note" label={t('checkout.note')}>
-                                        <TextArea rows={3} placeholder={t('checkout.enterNote')} />
-                                    </Form.Item>
-                                </Form>
+                                    {shippingMethods.map(method => (
+                                        <Radio key={method.id} value={method.id} className="shipping-method">
+                                            <div className="method-content">
+                                                <div className="method-header">
+                                                    {method.icon}
+                                                    <div className="method-info">
+                                                        <div className="method-name">{method.name}</div>
+                                                        <div className="method-description">{method.description}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="method-details">
+                                                    <div className="method-price">
+                                                        {t('checkout.free')}
+                                                    </div>
+                                                    <div className="method-time">
+                                                        {t('checkout.immediate')}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Radio>
+                                    ))}
+                                </Radio.Group>
                             </Card>
                         )}
 
-                        {/* Step 2: Payment & Shipping */}
+                        {/* Step 2: Payment & Confirmation */}
                         {currentStep === 1 && (
                             <div>
-                                <Card title={t('checkout.shippingMethod')} className="step-card">
-                                    <Radio.Group
-                                        value={selectedShippingMethod}
-                                        onChange={(e) => setSelectedShippingMethod(e.target.value)}
-                                        className="shipping-methods"
-                                    >
-                                        {shippingMethods.map(method => (
-                                            <Radio key={method.id} value={method.id} className="shipping-method">
-                                                <div className="method-content">
-                                                    <div className="method-header">
-                                                        {method.icon}
-                                                        <div className="method-info">
-                                                            <div className="method-name">{method.name}</div>
-                                                            <div className="method-description">{method.description}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="method-details">
-                                                        <div className="method-price">
-                                                            {method.price === 0 ? t('checkout.free') : formatPrice(method.price)}
-                                                        </div>
-                                                        <div className="method-time">
-                                                            {method.estimatedDays === '0'
-                                                                ? t('checkout.immediate')
-                                                                : `${method.estimatedDays} ${t('checkout.days')}`
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </Radio>
-                                        ))}
-                                    </Radio.Group>
-                                </Card>
-
                                 <Card title={t('checkout.paymentMethod')} className="step-card">
                                     <Radio.Group
                                         value={selectedPaymentMethod}
@@ -516,57 +465,145 @@ const Checkout = () => {
                                             </Radio>
                                         ))}
                                     </Radio.Group>
-
-                                    {selectedPaymentMethod === 'bank_transfer' && (
-                                        <Alert
-                                            type="info"
-                                            message={t('checkout.bankTransferInfo')}
-                                            description={
-                                                <div>
-                                                    <p><strong>{t('checkout.bankName')}:</strong> Ngân hàng TMCP Á Châu (ACB)</p>
-                                                    <p><strong>{t('checkout.accountNumber')}:</strong> 123456789</p>
-                                                    <p><strong>{t('checkout.accountName')}:</strong> CONG TY TNHH TAY NINH TRAVEL</p>
-                                                    <p><strong>{t('checkout.transferContent')}:</strong> [Mã đơn hàng] - [Số điện thoại]</p>
-                                                </div>
-                                            }
-                                            style={{ marginTop: 16 }}
-                                        />
-                                    )}
+                                    <Alert
+                                        type="info"
+                                        message={t('checkout.bankTransferInfo')}
+                                        description={
+                                            <div>
+                                                <p><strong>{t('checkout.bankName')}:</strong> Ngân hàng TMCP Á Châu (ACB)</p>
+                                                <p><strong>{t('checkout.accountNumber')}:</strong> 123456789</p>
+                                                <p><strong>{t('checkout.accountName')}:</strong> CONG TY TNHH TAY NINH TRAVEL</p>
+                                                <p><strong>{t('checkout.transferContent')}:</strong> [Mã đơn hàng] - [Số điện thoại]</p>
+                                            </div>
+                                        }
+                                        style={{ marginTop: 16 }}
+                                    />
                                 </Card>
+
+                                {/* Form nhập địa chỉ khi chọn giao hàng tận nhà (ship_cod) */}
+                                {currentStep === 1 && selectedShippingMethod === 'ship_cod' && (
+                                    <Card title={t('checkout.deliveryInfo')} className="step-card">
+                                        <Form
+                                            layout="vertical"
+                                            initialValues={deliveryInfo}
+                                            onFinish={() => setCurrentStep(2)}
+                                        >
+                                            <Row gutter={16}>
+                                                <Col xs={24} md={12}>
+                                                    <Form.Item
+                                                        name="fullName"
+                                                        label={t('checkout.fullName')}
+                                                        rules={[{ required: true, message: t('checkout.fullNameRequired') }]}
+                                                    >
+                                                        <Input placeholder={t('checkout.enterFullName')} />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col xs={24} md={12}>
+                                                    <Form.Item
+                                                        name="phone"
+                                                        label={t('checkout.phone')}
+                                                        rules={[
+                                                            { required: true, message: t('checkout.phoneRequired') },
+                                                            { pattern: /^[0-9]{10,11}$/, message: t('checkout.phoneInvalid') }
+                                                        ]}
+                                                    >
+                                                        <Input placeholder={t('checkout.enterPhone')} />
+                                                    </Form.Item>
+                                                </Col>
+                                            </Row>
+                                            <Form.Item
+                                                name="email"
+                                                label={t('checkout.email')}
+                                                rules={[
+                                                    { required: true, message: t('checkout.emailRequired') },
+                                                    { type: 'email', message: t('checkout.emailInvalid') }
+                                                ]}
+                                            >
+                                                <Input placeholder={t('checkout.enterEmail')} />
+                                            </Form.Item>
+                                            <Form.Item
+                                                name="address"
+                                                label={t('checkout.address')}
+                                                rules={[{ required: true, message: t('checkout.addressRequired') }]}
+                                            >
+                                                <Input placeholder={t('checkout.enterAddress')} />
+                                            </Form.Item>
+                                            <Row gutter={16}>
+                                                <Col xs={24} md={8}>
+                                                    <Form.Item
+                                                        name="city"
+                                                        label={t('checkout.city')}
+                                                        rules={[{ required: true, message: t('checkout.cityRequired') }]}
+                                                    >
+                                                        <Input placeholder={t('checkout.enterCity')} />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col xs={24} md={8}>
+                                                    <Form.Item
+                                                        name="district"
+                                                        label={t('checkout.district')}
+                                                        rules={[{ required: true, message: t('checkout.districtRequired') }]}
+                                                    >
+                                                        <Input placeholder={t('checkout.enterDistrict')} />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col xs={24} md={8}>
+                                                    <Form.Item
+                                                        name="ward"
+                                                        label={t('checkout.ward')}
+                                                        rules={[{ required: true, message: t('checkout.wardRequired') }]}
+                                                    >
+                                                        <Input placeholder={t('checkout.enterWard')} />
+                                                    </Form.Item>
+                                                </Col>
+                                            </Row>
+                                            <Form.Item name="note" label={t('checkout.note')}>
+                                                <Input.TextArea rows={3} placeholder={t('checkout.enterNote')} />
+                                            </Form.Item>
+                                            <Button type="primary" htmlType="submit">{t('checkout.next')}</Button>
+                                        </Form>
+                                    </Card>
+                                )}
                             </div>
                         )}
 
-                        {/* Step 3: Confirmation */}
+                        {/* Step 3: Order Confirmation */}
                         {currentStep === 2 && (
                             <Card title={t('checkout.orderConfirmation')} className="step-card">
                                 <div className="confirmation-section">
                                     <Title level={4}>{t('checkout.deliveryInfo')}</Title>
-                                    <div className="info-row">
-                                        <Text strong>{t('checkout.fullName')}:</Text>
-                                        <Text>{deliveryInfo.fullName}</Text>
-                                    </div>
-                                    <div className="info-row">
-                                        <Text strong>{t('checkout.phone')}:</Text>
-                                        <Text>{deliveryInfo.phone}</Text>
-                                    </div>
-                                    <div className="info-row">
-                                        <Text strong>{t('checkout.email')}:</Text>
-                                        <Text>{deliveryInfo.email}</Text>
-                                    </div>
-                                    <div className="info-row">
-                                        <Text strong>{t('checkout.address')}:</Text>
-                                        <Text>{`${deliveryInfo.address}, ${deliveryInfo.ward}, ${deliveryInfo.district}, ${deliveryInfo.city}`}</Text>
-                                    </div>
-                                    {deliveryInfo.note && (
+                                    {selectedShippingMethod === 'ship_cod' ? (
+                                        <>
+                                            <div className="info-row">
+                                                <Text strong>{t('checkout.fullName')}:</Text>
+                                                <Text>{deliveryInfo.fullName}</Text>
+                                            </div>
+                                            <div className="info-row">
+                                                <Text strong>{t('checkout.phone')}:</Text>
+                                                <Text>{deliveryInfo.phone}</Text>
+                                            </div>
+                                            <div className="info-row">
+                                                <Text strong>{t('checkout.email')}:</Text>
+                                                <Text>{deliveryInfo.email}</Text>
+                                            </div>
+                                            <div className="info-row">
+                                                <Text strong>{t('checkout.address')}:</Text>
+                                                <Text>{`${deliveryInfo.address}, ${deliveryInfo.ward}, ${deliveryInfo.district}, ${deliveryInfo.city}`}</Text>
+                                            </div>
+                                            {deliveryInfo.note && (
+                                                <div className="info-row">
+                                                    <Text strong>{t('checkout.note')}:</Text>
+                                                    <Text>{deliveryInfo.note}</Text>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
                                         <div className="info-row">
-                                            <Text strong>{t('checkout.note')}:</Text>
-                                            <Text>{deliveryInfo.note}</Text>
+                                            <Text>{t('checkout.pickupNote')}</Text>
                                         </div>
                                     )}
                                 </div>
-
                                 <Divider />
-
                                 <div className="confirmation-section">
                                     <Title level={4}>{t('checkout.shippingPaymentInfo')}</Title>
                                     <div className="info-row">
@@ -575,12 +612,10 @@ const Checkout = () => {
                                     </div>
                                     <div className="info-row">
                                         <Text strong>{t('checkout.paymentMethod')}:</Text>
-                                        <Text>{paymentMethods.find(m => m.id === selectedPaymentMethod)?.name}</Text>
+                                        <Text>{paymentMethods[0].name}</Text>
                                     </div>
                                 </div>
-
                                 <Divider />
-
                                 <Checkbox
                                     checked={agreeTerms}
                                     onChange={(e) => setAgreeTerms(e.target.checked)}
@@ -658,6 +693,26 @@ const Checkout = () => {
                     onConfirm={handleBankTransferConfirm}
                     orderTotal={getTotalWithShipping()}
                     orderId={orderId}
+                />
+
+                {/* Authentication Modals */}
+                <LoginModal
+                    isVisible={loginModalVisible}
+                    onClose={() => setLoginModalVisible(false)}
+                    onRegisterClick={() => {
+                        setLoginModalVisible(false)
+                        setRegisterModalVisible(true)
+                    }}
+                    onLoginSuccess={handleLoginSuccess}
+                />
+
+                <RegisterModal
+                    isVisible={registerModalVisible}
+                    onClose={() => setRegisterModalVisible(false)}
+                    onLoginClick={() => {
+                        setRegisterModalVisible(false)
+                        setLoginModalVisible(true)
+                    }}
                 />
             </div>
         </div>

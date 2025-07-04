@@ -542,6 +542,7 @@
             "confirmation": "Order Confirmation",
             "confirmationDesc": "Review information and complete order"
         },
+        "pickupNote": "You have chosen in-store pickup. No delivery address required.",
         "deliveryInfo": "Delivery Information",
         "fullName": "Full Name",
         "fullNameRequired": "Please enter your full name",
@@ -599,7 +600,7 @@
         "subtotal": "Subtotal",
         "shippingFee": "Shipping Fee",
         "free": "Free",
-        "immediate": "Immediate",
+        "immediate": "During tour",
         "days": "days",
         "agreeTerms": "I agree to the",
         "termsAndConditions": "Terms and Conditions",
@@ -627,16 +628,24 @@
             "priceHigh": "Price: High - Low"
         },
         "categories": {
-            "all": "All",
+            "all": "All categories",
             "souvenirs": "Souvenirs",
             "clothing": "Clothing",
             "accessories": "Accessories",
-            "specialties": "Specialties"
+            "specialties": "Specialties",
+            "handicraft": "Handicraft",
+            "select": "Select category",
+            "title": "Category"
         },
+        "searchButton": "Search",
         "noProductsFound": "No products found",
         "productDetails": "Product Details",
         "inStock": "In Stock",
-        "outOfStock": "Out of Stock"
+        "outOfStock": "Out of Stock",
+        "soldCount": "Sold {{count}}",
+        "loading": "Loading products...",
+        "priceRange": "Price Range",
+        "inStockOnly": "Show in-stock only"
     },
     "common": {
         "actions": "Actions",

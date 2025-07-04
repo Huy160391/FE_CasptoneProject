@@ -1,9 +1,9 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { CheckCircleFilled } from '@ant-design/icons';
+import { CloseCircleFilled } from '@ant-design/icons';
 import { useThemeStore } from '@/store/useThemeStore';
 
-const PaymentSuccess: React.FC = () => {
+const PaymentCancel: React.FC = () => {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const orderId = params.get('orderId');
@@ -23,23 +23,13 @@ const PaymentSuccess: React.FC = () => {
                 border: isDarkMode ? '1px solid #333' : 'none',
             }}
         >
-            <CheckCircleFilled style={{ fontSize: 48, color: '#52c41a', marginBottom: 16 }} />
-            <h2 style={{ fontWeight: 700, marginBottom: 12 }}>Thanh toán thành công</h2>
+            <CloseCircleFilled style={{ fontSize: 48, color: isDarkMode ? '#ff7875' : '#cf1322', marginBottom: 16 }} />
+            <h2 style={{ fontWeight: 700, marginBottom: 12, color: isDarkMode ? '#ff7875' : '#cf1322' }}>Thanh toán thất bại hoặc đã bị hủy!</h2>
             <div style={{ marginBottom: 8 }}>
-                Mã số đơn hàng của bạn là <b style={{ color: '#1890ff', fontSize: 18 }}>{orderId}</b>.
+                Mã đơn hàng: <b style={{ color: '#1890ff', fontSize: 18 }}>{orderId}</b>
             </div>
             <div style={{ marginBottom: 32 }}>
-                Bạn có thể xem chi tiết trong <Link
-                    to="/profile?tab=orders"
-                    style={{
-                        color: isDarkMode ? '#79eac0' : '#1890ff',
-                        textDecoration: 'underline',
-                        fontWeight: 500,
-                        transition: 'color 0.2s',
-                    }}
-                >
-                    đơn hàng của tôi
-                </Link>.
+                Vui lòng thử lại hoặc <Link to="/support" style={{ color: isDarkMode ? '#79eac0' : '#1890ff', textDecoration: 'underline' }}>liên hệ hỗ trợ</Link> nếu cần thiết.
             </div>
             <Link to="/shop">
                 <button
@@ -57,11 +47,11 @@ const PaymentSuccess: React.FC = () => {
                         transition: 'background 0.2s',
                     }}
                 >
-                    TIẾP TỤC MUA HÀNG
+                    Quay lại mua hàng
                 </button>
             </Link>
         </div>
     );
 };
 
-export default PaymentSuccess;
+export default PaymentCancel;

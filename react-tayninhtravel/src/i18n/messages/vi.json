@@ -580,13 +580,16 @@
         "emptyCart": "Giỏ hàng trống",
         "emptyCartDescription": "Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán",
         "steps": {
+            "shippingMethod": "Phương thức nhận hàng",
+            "shippingMethodDesc": "Chọn cách bạn muốn nhận hàng",
             "deliveryInfo": "Thông tin giao hàng",
-            "deliveryInfoDesc": "Nhập địa chỉ và thông tin liên hệ",
-            "paymentShipping": "Thanh toán & Vận chuyển",
-            "paymentShippingDesc": "Chọn phương thức thanh toán và vận chuyển",
-            "confirmation": "Xác nhận đơn hàng",
-            "confirmationDesc": "Kiểm tra thông tin và hoàn tất đơn hàng"
+            "deliveryInfoDesc": "Nhập thông tin giao hàng (nếu giao tận nơi)",
+            "paymentShipping": "Thanh toán & Xác nhận",
+            "paymentShippingDesc": "Chọn phương thức thanh toán và xác nhận đơn hàng",
+            "confirmation": "Hoàn tất",
+            "confirmationDesc": "Xác nhận và hoàn tất đơn hàng"
         },
+        "pickupNote": "Nếu bạn chọn nhận hàng tại cửa hàng, vui lòng đến địa chỉ cửa hàng để nhận",
         "deliveryInfo": "Thông tin giao hàng",
         "fullName": "Họ và tên",
         "fullNameRequired": "Vui lòng nhập họ và tên",
@@ -644,7 +647,7 @@
         "subtotal": "Tạm tính",
         "shippingFee": "Phí vận chuyển",
         "free": "Miễn phí",
-        "immediate": "Ngay lập tức",
+        "immediate": "Nhận trong tour",
         "days": "ngày",
         "agreeTerms": "Tôi đồng ý với",
         "termsAndConditions": "Điều khoản và Điều kiện",
@@ -662,7 +665,18 @@
     "shop": {
         "title": "Cửa hàng lưu niệm",
         "subtitle": "Khám phá các sản phẩm đặc trưng của Tây Ninh",
+        "categories": {
+            "all": "Tất cả danh mục",
+            "souvenirs": "Đồ lưu niệm",
+            "clothing": "Quần áo",
+            "accessories": "Phụ kiện",
+            "specialties": "Đặc sản",
+            "handicraft": "Thủ công mỹ nghệ",
+            "select": "Chọn danh mục",
+            "title": "Danh mục"
+        },
         "searchPlaceholder": "Tìm kiếm sản phẩm...",
+        "searchButton": "Tìm kiếm",
         "sortBy": "Sắp xếp theo",
         "filters": "Bộ lọc",
         "sortOptions": {
@@ -671,17 +685,14 @@
             "priceLow": "Giá: Thấp - Cao",
             "priceHigh": "Giá: Cao - Thấp"
         },
-        "categories": {
-            "all": "Tất cả",
-            "souvenirs": "Đồ lưu niệm",
-            "clothing": "Quần áo",
-            "accessories": "Phụ kiện",
-            "specialties": "Đặc sản"
-        },
         "noProductsFound": "Không tìm thấy sản phẩm nào",
         "productDetails": "Chi tiết sản phẩm",
         "inStock": "Còn hàng",
-        "outOfStock": "Hết hàng"
+        "outOfStock": "Hết hàng",
+        "soldCount": "Đã bán {{count}}",
+        "loading": "Đang tải sản phẩm...",
+        "priceRange": "Khoảng giá",
+        "inStockOnly": "Chỉ hiển thị hàng có sẵn"
     },
     "common": {
         "actions": "Thao tác",

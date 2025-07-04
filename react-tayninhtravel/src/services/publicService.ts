@@ -140,35 +140,34 @@ export const publicService = {
     ): Promise<GetProductsResponse> {
         try {
             const {
-                pageIndex = 1,
-                pageSize = 10,
-                textSearch = '',
+                pageIndex,
+                pageSize,
+                textSearch,
                 status
             } = params;
 
-            const queryParams: any = {
-                pageIndex,
-                pageSize,
-                textSearch
-            };
+            const queryParams: any = {};
 
-            // Thêm status nếu có giá trị
+            // Chỉ thêm các param khi có giá trị
+            if (pageIndex !== undefined) queryParams.pageIndex = pageIndex;
+            if (pageSize !== undefined) queryParams.pageSize = pageSize;
+            if (textSearch) queryParams.textSearch = textSearch;
             if (status !== undefined) queryParams.status = status;
 
             const response = await axiosInstance.get<any>('Product/Product', { params: queryParams });
 
             return {
                 data: response.data.data || [],
-                totalRecords: response.data.totalRecords || 0,
-                pageIndex: response.data.pageIndex || pageIndex,
-                pageSize: response.data.pageSize || pageSize,
+                totalRecord: response.data.totalRecord || 0,
+                pageIndex: response.data.pageIndex || pageIndex || 1,
+                pageSize: response.data.pageSize || pageSize || 10,
                 totalPages: response.data.totalPages || 0
             };
         } catch (error) {
             console.error('Error fetching public products:', error);
             return {
                 data: [],
-                totalRecords: 0,
+                totalRecord: 0,
                 pageIndex: params.pageIndex || 1,
                 pageSize: params.pageSize || 10,
                 totalPages: 0
