@@ -35,14 +35,14 @@ export interface Product {
     id: string;
     shopId: string;
     name: string;
-    description: string;
+    description: string | null;
     price: number;
     quantityInStock: number;
     imageUrl: string[];
     category: string;
-    isActive: boolean;
-    isSale: boolean;
-    salePercent: number;
+    isSale?: boolean;
+    soldCount: number;
+    salePercent?: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -149,7 +149,7 @@ export interface GetBlogsResponse {
 
 export interface GetProductsResponse {
     data: Product[];
-    totalRecords: number;
+    totalRecord: number;
     pageIndex: number;
     pageSize: number;
     totalPages: number;

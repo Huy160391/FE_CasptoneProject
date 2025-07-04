@@ -14,6 +14,8 @@ import Checkout from '@/components/payment/Checkout';
 import OrderSuccess from '@/pages/OrderSuccess';
 import NotFound from '@/pages/NotFound';
 import Unauthorized from '@/pages/Unauthorized';
+import PaymentSuccess from '@/components/payment/PaymentSuccess';
+import PaymentCancel from '@/components/payment/PaymentCancel';
 
 export const publicRoutes: RouteObject[] = [
     {
@@ -72,6 +74,14 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/unauthorized',
         element: <Unauthorized />,
+    },
+    {
+        path: '/payment-success',
+        element: <PaymentSuccess />,
+    },
+    {
+        path: '/payment-cancel',
+        element: <PaymentCancel />,
     },
     {
         path: '*',

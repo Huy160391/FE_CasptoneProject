@@ -4,6 +4,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, SearchOutlined
 import type { ColumnsType } from 'antd/es/table';
 import { publicService } from '@/services/publicService';
 import type { Product } from '@/types';
+import { getCategoryString } from '@/utils/categoryUtils';
 import './Products.scss';
 
 const { Search } = Input;
@@ -33,10 +34,18 @@ const SpecialityShopProducts = () => {
                 status: selectedCategory === 'all' ? undefined : selectedCategory === 'active'
             });
 
-            setProducts(response.data);
+            const transformedProducts = response.data.map(product => ({
+                ...product,
+                // Convert numeric category to string for display
+                category: typeof product.category === 'number' ?
+                    getCategoryString(product.category) :
+                    product.category
+            }));
+
+            setProducts(transformedProducts);
             setPagination(prev => ({
                 ...prev,
-                total: response.totalRecords
+                total: response.totalRecord
             }));
         } catch (error) {
             console.error('Error fetching products:', error);

@@ -1,6 +1,7 @@
 import { Input, Select, Button } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ShopSearchBar.scss';
 
 const { Option } = Select;
@@ -8,35 +9,24 @@ const { Option } = Select;
 interface ShopSearchBarProps {
     onSearch: (searchText: string) => void;
     onCategoryChange: (categories: string[]) => void;
-    onSortChange: (sortBy: string) => void;
     searchText: string;
-    sortBy: string;
 }
 
 const ShopSearchBar = ({
     onSearch,
     onCategoryChange,
-    onSortChange,
-    searchText,
-    sortBy
+    searchText
 }: ShopSearchBarProps) => {
+    const { t } = useTranslation();
     const [localSearchText, setLocalSearchText] = useState(searchText);
 
     const categories = [
-        { value: 'all', label: 'Tất cả danh mục' },
-        { value: 'đồ-lưu-niệm', label: 'Đồ lưu niệm' },
-        { value: 'quần-áo', label: 'Quần áo' },
-        { value: 'phụ-kiện', label: 'Phụ kiện' },
-        { value: 'đặc-sản', label: 'Đặc sản' },
-        { value: 'thủ-công-mỹ-nghệ', label: 'Thủ công mỹ nghệ' }
-    ];
-
-    const sortOptions = [
-        { value: 'popularity', label: 'Phổ biến nhất' },
-        { value: 'price-low-high', label: 'Giá: Thấp đến cao' },
-        { value: 'price-high-low', label: 'Giá: Cao đến thấp' },
-        { value: 'rating', label: 'Đánh giá cao nhất' },
-        { value: 'newest', label: 'Mới nhất' }
+        { value: 'all', label: t('shop.categories.all') },
+        { value: 'đồ-lưu-niệm', label: t('shop.categories.souvenirs') },
+        { value: 'quần-áo', label: t('shop.categories.clothing') },
+        { value: 'phụ-kiện', label: t('shop.categories.accessories') },
+        { value: 'đặc-sản', label: t('shop.categories.specialties') },
+        { value: 'thủ-công-mỹ-nghệ', label: t('shop.categories.handicraft') }
     ];
 
     const handleSearch = () => {
@@ -54,7 +44,7 @@ const ShopSearchBar = ({
             <div className="search-container">
                 <div className="search-item category">
                     <Select
-                        placeholder="Chọn danh mục"
+                        placeholder={t('shop.categories.select')}
                         className="category-select"
                         suffixIcon={<FilterOutlined />}
                         defaultValue="all"
@@ -68,23 +58,8 @@ const ShopSearchBar = ({
                     </Select>
                 </div>
 
-                <div className="search-item sort">
-                    <Select
-                        placeholder="Sắp xếp theo"
-                        className="sort-select"
-                        value={sortBy}
-                        onChange={onSortChange}
-                    >
-                        {sortOptions.map(option => (
-                            <Option key={option.value} value={option.value}>
-                                {option.label}
-                            </Option>
-                        ))}
-                    </Select>
-                </div>
-
                 <Input
-                    placeholder="Tìm kiếm sản phẩm..."
+                    placeholder={t('shop.searchPlaceholder')}
                     prefix={<SearchOutlined />}
                     className="keyword-input"
                     style={{ height: '42px' }}
@@ -94,7 +69,7 @@ const ShopSearchBar = ({
                 />
 
                 <Button type="primary" className="search-button" onClick={handleSearch}>
-                    Tìm kiếm
+                    {t('shop.searchButton')}
                 </Button>
             </div>
         </div>
