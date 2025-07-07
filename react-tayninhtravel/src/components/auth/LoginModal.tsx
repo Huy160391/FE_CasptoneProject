@@ -50,6 +50,8 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
           navigate('/admin/dashboard')
         } else if (response.user.role === 'Tour Company') {
           navigate('/tour-company/dashboard')
+        } else if (response.user.role === 'Speciality shop') {
+          navigate('/speciality-shop')
         } else {
           // Return to previous page or home
           navigate(-1)

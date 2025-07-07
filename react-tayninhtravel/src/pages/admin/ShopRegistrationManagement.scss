@@ -34,6 +34,21 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     padding: 16px;
     transition: background 0.2s;
+
+    // Clickable rows styling
+    .ant-table-tbody > tr {
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: #f5f5f5 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
   }
 
   // Dark mode
@@ -50,6 +65,14 @@
       background: #242526;
       color: #fff;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+
+      // Dark mode clickable rows styling
+      .ant-table-tbody > tr {
+        &:hover {
+          background-color: #3a3b3c !important;
+          box-shadow: 0 2px 8px rgba(255,255,255,0.1);
+        }
+      }
     }
   }
 }

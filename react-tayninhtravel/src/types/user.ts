@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'Admin' | 'Blogger' | 'Tour Company';
+export type UserRole = 'user' | 'Admin' | 'Blogger' | 'Tour Company' | 'Speciality shop';
 
 export interface User {
     id: string;
@@ -43,9 +43,4 @@ export interface CreateUserPayload extends UpdateUserPayload {
 export interface ProfileUpdatePayload {
     name: string;
     phoneNumber: string;
-}
-
-export interface TourGuideApplication {
-    email: string;
-    curriculumVitae: File;
 }
