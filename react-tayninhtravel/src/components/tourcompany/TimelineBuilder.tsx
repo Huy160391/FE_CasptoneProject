@@ -112,7 +112,7 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
             try {
                 setLoading(true);
                 const response = await deleteTimelineItem(item.id, token);
-                if (response.isSuccess) {
+                if (response.success) {
                     message.success('Xóa timeline item thành công');
                 }
             } catch (error) {
@@ -187,7 +187,7 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
                 };
 
                 const response = await createTimelineItems(createRequest, token);
-                if (response.isSuccess) {
+                if (response.success) {
                     message.success(`Tạo ${response.data?.createdCount || newItems.length} timeline items thành công`);
                 }
             }

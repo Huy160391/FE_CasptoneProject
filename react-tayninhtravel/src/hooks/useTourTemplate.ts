@@ -76,7 +76,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             performanceTracker.start('Load Templates');
             
             const response = await getTourTemplates(params, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setTemplates(response.data.items || []);
             }
             
@@ -94,7 +94,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             performanceTracker.start('Create Template');
             
             const response = await createTourTemplate(data, token);
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success(response.message || 'Tạo template thành công');
                 await loadTemplates(); // Refresh list
                 performanceTracker.end('Create Template');
@@ -113,7 +113,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             performanceTracker.start('Update Template');
             
             const response = await updateTourTemplate(id, data, token);
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success('Cập nhật template thành công');
                 await loadTemplates(); // Refresh list
                 performanceTracker.end('Update Template');
@@ -130,7 +130,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
     const deleteTemplate = useCallback(async (id: string): Promise<boolean> => {
         try {
             const response = await deleteTourTemplate(id, token);
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success('Xóa template thành công');
                 await loadTemplates(); // Refresh list
                 return true;
@@ -159,7 +159,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             performanceTracker.start('Load Tour Details');
             
             const response = await getTourDetailsList(params, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setTourDetails(response.data.items || response.data);
             }
             
@@ -177,7 +177,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             performanceTracker.start('Create Tour Details');
             
             const response = await createTourDetails(data, token);
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success(response.message || 'Tạo tour details thành công');
                 await loadTourDetails(); // Refresh list
                 performanceTracker.end('Create Tour Details');
@@ -196,7 +196,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             performanceTracker.start('Update Tour Details');
             
             const response = await updateTourDetails(id, data, token);
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success('Cập nhật tour details thành công');
                 await loadTourDetails(); // Refresh list
                 performanceTracker.end('Update Tour Details');
@@ -213,7 +213,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
     const deleteDetails = useCallback(async (id: string): Promise<boolean> => {
         try {
             const response = await deleteTourDetails(id, token);
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success('Xóa tour details thành công');
                 await loadTourDetails(); // Refresh list
                 return true;
@@ -229,7 +229,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
     const getDetailsById = useCallback(async (id: string): Promise<TourDetails | null> => {
         try {
             const response = await getTourDetailsById(id, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 return response.data;
             }
             return null;
@@ -245,7 +245,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             performanceTracker.start('Create Timeline');
             
             const response = await createTimelineItems(data, token);
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success(`Tạo ${response.data?.createdCount || data.timelineItems.length} timeline items thành công`);
                 performanceTracker.end('Create Timeline');
                 return true;

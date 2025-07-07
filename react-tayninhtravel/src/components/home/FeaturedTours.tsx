@@ -36,7 +36,7 @@ const FeaturedTours = () => {
       setLoading(true)
       const response = await getFeaturedTourDetails(6)
 
-      if (response.isSuccess && response.data) {
+      if (response.success && response.data) {
         // Filter only approved tours (status 4)
         const approvedTours = response.data.filter((tour: TourDetail) => tour.status === 4)
         setTours(approvedTours.slice(0, 3)) // Show only 3 tours

@@ -260,6 +260,8 @@ export const getStatusColor = (status: TourDetailsStatus | TourSlotStatus | Tour
     case TourSlotStatus.Available:
     case TourOperationStatus.Scheduled:
       return 'green';
+    case TourDetailsStatus.Public:
+      return 'green';
     case TourDetailsStatus.Pending:
     case TourDetailsStatus.AwaitingAdminApproval:
     case TourOperationStatus.PendingConfirmation:
@@ -276,8 +278,6 @@ export const getStatusColor = (status: TourDetailsStatus | TourSlotStatus | Tour
       return 'purple';
     case TourDetailsStatus.WaitToPublic:
       return 'geekblue';
-    case TourDetailsStatus.Public:
-      return 'lime';
     case TourSlotStatus.FullyBooked:
     case TourSlotStatus.Completed:
     case TourOperationStatus.Completed:

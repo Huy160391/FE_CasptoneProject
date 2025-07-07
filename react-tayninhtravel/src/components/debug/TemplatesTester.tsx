@@ -41,7 +41,7 @@ const TemplatesTester: React.FC = () => {
                     templateItems = response.data;
                 } else if (response.data.items) {
                     templateItems = response.data.items;
-                } else if (response.isSuccess && response.data) {
+                } else if (response.success && response.data) {
                     templateItems = response.data.items || response.data || [];
                 }
 
@@ -193,7 +193,7 @@ const TemplatesTester: React.FC = () => {
                         <Text strong>Expected Response Format:</Text>
                         <pre style={{ fontSize: 11, background: '#f9f9f9', padding: 4 }}>
 {`{
-  "isSuccess": true,
+  "success": true,
   "data": {
     "items": [
       {

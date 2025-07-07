@@ -69,7 +69,7 @@ export interface GetTourTemplatesParams {
 export interface GetTourTemplatesResponse {
     statusCode: number;
     message: string;
-    isSuccess: boolean;
+    success: boolean;
     data: {
         items: TourTemplate[];
         totalCount: number;
@@ -119,7 +119,7 @@ export interface TourItinerary {
 export interface ApiResponse<T> {
     statusCode: number;
     message: string;
-    isSuccess: boolean;
+    success: boolean;
     data?: T;
     totalCount?: number; // For paginated responses
     pageIndex?: number;  // For paginated responses
@@ -230,6 +230,8 @@ export interface TourOperation {
     id: string;
     tourDetailsId: string;
     guideId?: string | null;
+    guideName?: string | null;
+    guidePhone?: string | null;
     price: number;
     maxSeats: number;
     currentBookings: number;
@@ -239,7 +241,7 @@ export interface TourOperation {
     description?: string | null;
     notes?: string | null;
     isActive: boolean;
-    guide?: Guide | null;
+    guide?: Guide | null; // Keep for backward compatibility
     createdAt: string;
     updatedAt?: string | null;
 }
@@ -366,7 +368,7 @@ export interface TourGuideInvitationsResponse {
     statistics: InvitationStatistics;
     statusCode: number;
     message: string;
-    isSuccess: boolean;
+    success: boolean;
 }
 
 // Capacity interfaces

@@ -73,7 +73,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                     maxSeats: response.data.maxSeats,
                     guideId: response.data.guideId
                 });
-                
+
                 // Load capacity info
                 await loadCapacityInfo(response.data.id);
             }
@@ -146,7 +146,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                 setOperation(response.data);
                 setEditing(false);
                 message.success('Cập nhật tour operation thành công');
-                
+
                 if (onOperationUpdate) {
                     onOperationUpdate(response.data);
                 }
@@ -206,7 +206,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                         <Descriptions.Item label="Hướng dẫn viên">
                             <Space>
                                 <UserOutlined />
-                                {operation.guide?.fullName || 'Chưa phân công'}
+                                {operation.guideName || 'Chưa phân công'}
                             </Space>
                         </Descriptions.Item>
                         <Descriptions.Item label="Trạng thái">

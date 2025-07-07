@@ -350,7 +350,7 @@ Content-Type: application/json
 **Response (200 OK):**
 ```json
 {
-  "isSuccess": true,
+  "success": true,
   "message": "Tạo tour operation thành công",
   "operation": {
     "id": "operation-uuid",

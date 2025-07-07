@@ -208,18 +208,21 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     }
                 }));
             } else if (currentStep === 2) {
-                setWizardData(prev => ({
-                    ...prev,
+                // Save operation values and pass them directly to avoid state timing issues
+                const updatedWizardData = {
+                    ...wizardData,
                     operation: values
-                }));
+                };
+                setWizardData(updatedWizardData);
+
+                // Pass the updated data directly to avoid React state timing issues
+                await handleCreateTourDetails(updatedWizardData);
+                return;
             }
 
             if (currentStep < 2) {
                 setCurrentStep(currentStep + 1);
                 form.resetFields();
-            } else {
-                // Final step - create everything
-                await handleCreateTourDetails();
             }
         } catch (error) {
             console.error('Validation failed:', error);
@@ -230,9 +233,10 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         setCurrentStep(currentStep - 1);
     };
 
-    const handleCreateTourDetails = async () => {
+    const handleCreateTourDetails = async (dataToUse?: WizardData) => {
+        const currentWizardData = dataToUse || wizardData;
         console.log('🚀 handleCreateTourDetails started');
-        console.log('🚀 wizardData:', wizardData);
+        console.log('🚀 wizardData:', currentWizardData);
 
         if (!token) {
             message.error('Vui lòng đăng nhập lại');
@@ -244,14 +248,14 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
             // Step 1: Create TourDetails
             const tourDetailsRequest: CreateTourDetailsRequest = {
-                ...wizardData.basicInfo
+                ...currentWizardData.basicInfo
             };
             console.log('🚀 TourDetails request:', tourDetailsRequest);
 
             const tourDetailsRes = await createTourDetails(tourDetailsRequest, token);
             console.log('🚀 TourDetails response:', tourDetailsRes);
 
-            if (!(tourDetailsRes as any).isSuccess || !tourDetailsRes.data) {
+            if (!(tourDetailsRes as any).success || !tourDetailsRes.data) {
                 throw new Error(tourDetailsRes.message || 'Có lỗi xảy ra');
             }
 
@@ -259,12 +263,12 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             console.log('🚀 TourDetails created with ID:', tourDetailsId);
 
             // Step 2: Create Timeline Items
-            console.log('🔄 Timeline data:', wizardData.timeline);
-            if (wizardData.timeline.length > 0) {
+            console.log('🔄 Timeline data:', currentWizardData.timeline);
+            if (currentWizardData.timeline.length > 0) {
                 console.log('🔄 Creating timeline items...');
                 const timelineRequest = {
                     tourDetailsId,
-                    timelineItems: wizardData.timeline.map((item, index) => ({
+                    timelineItems: currentWizardData.timeline.map((item, index) => ({
                         checkInTime: item.checkInTime,
                         activity: item.activity,
                         specialtyShopId: item.specialtyShopId || null,
@@ -279,10 +283,10 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             }
 
             // Step 3: Create TourOperation
-            console.log('🔄 Operation data:', wizardData.operation);
+            console.log('🔄 Operation data:', currentWizardData.operation);
             const operationRequest: CreateTourOperationRequest = {
                 tourDetailsId,
-                ...wizardData.operation
+                ...currentWizardData.operation
             };
             console.log('🔄 Operation request:', operationRequest);
             await createTourOperation(operationRequest, token);

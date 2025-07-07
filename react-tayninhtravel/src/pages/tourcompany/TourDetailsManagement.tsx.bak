@@ -71,7 +71,6 @@ import WizardTemplatesTester from '../../components/debug/WizardTemplatesTester'
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { TabPane } = Tabs;
 
 const TourDetailsManagement: React.FC = () => {
     const { user, token } = useAuthStore();
@@ -145,7 +144,7 @@ const TourDetailsManagement: React.FC = () => {
             console.log('📊 TourDetails API Response:', response);
 
             // Backend trả về ResponseGetTourDetailsPaginatedDto
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setTourDetailsList(response.data);
                 setTotalCount(response.totalCount || 0);
 
@@ -174,7 +173,7 @@ const TourDetailsManagement: React.FC = () => {
             const response = await getTourTemplates({}, token);
             console.log('📡 Templates API response:', response);
             console.log('📡 Response structure:', {
-                hasIsSuccess: 'isSuccess' in response,
+                hassuccess: 'success' in response,
                 hasData: 'data' in response,
                 hasStatusCode: 'statusCode' in response,
                 statusCode: response.statusCode,
@@ -196,10 +195,10 @@ const TourDetailsManagement: React.FC = () => {
                     templateItems = response.data.items;
                     console.log('✅ Format 2: data.items, templates:', templateItems.length);
                 }
-                // Format 3: isSuccess format
-                else if (response.isSuccess && response.data) {
+                // Format 3: success format
+                else if (response.success && response.data) {
                     templateItems = response.data.items || response.data || [];
-                    console.log('✅ Format 3: isSuccess format, templates:', templateItems.length);
+                    console.log('✅ Format 3: success format, templates:', templateItems.length);
                 }
 
                 setTemplates(templateItems);
@@ -216,7 +215,7 @@ const TourDetailsManagement: React.FC = () => {
     const loadSpecialtyShops = async () => {
         try {
             const response = await getSpecialtyShops(false, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setSpecialtyShops(response.data);
             }
         } catch (error) {
@@ -228,7 +227,7 @@ const TourDetailsManagement: React.FC = () => {
         try {
             setLoading(true);
             const response = await getTourDetailsByTemplate(templateId, false, token);
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setTourDetailsList(response.data);
             }
         } catch (error) {
@@ -284,7 +283,7 @@ const TourDetailsManagement: React.FC = () => {
     const handleDelete = async (id: string) => {
         try {
             const response = await deleteTourDetails(id, token);
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success('Xóa tour details thành công');
                 loadTourDetailsList();
             }
@@ -302,7 +301,6 @@ const TourDetailsManagement: React.FC = () => {
     const handleCreateOperation = (record: TourDetails) => {
         setSelectedTourDetailsId(record.id);
         setModalInitialTab('operation');
-        setDetailModalVisible(true);
     };
 
     const handleSubmit = async (values: CreateTourDetailsRequest) => {
@@ -316,7 +314,7 @@ const TourDetailsManagement: React.FC = () => {
                 response = await createTourDetails(values, token);
             }
 
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success(
                     editingDetails 
                         ? 'Cập nhật tour details thành công' 
@@ -337,7 +335,7 @@ const TourDetailsManagement: React.FC = () => {
             setLoading(true);
             const response = await activatePublicTourDetails(tourDetailsId, token);
 
-            if (response.isSuccess) {
+            if (response.success) {
                 message.success('Đã kích hoạt public cho TourDetails thành công! Khách hàng có thể booking tour này.');
                 loadTourDetailsList(); // Reload để cập nhật status
             } else {
@@ -513,74 +511,73 @@ const TourDetailsManagement: React.FC = () => {
                     />
                 )}
 
-                <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
-                    <TabPane
-                        tab={
-                            <span>
-                                <EyeOutlined />
-                                Tours List
-                            </span>
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={setActiveTab}
+                    type="card"
+                    items={[
+                        {
+                            key: 'tours',
+                            label: (
+                                <span>
+                                    <EyeOutlined />
+                                    Tours List
+                                </span>
+                            ),
+                            children: (
+                                <div>
+                                    <Table
+                                        columns={columns}
+                                        dataSource={tourDetailsList}
+                                        rowKey="id"
+                                        loading={loading}
+                                        pagination={{
+                                            current: currentPage,
+                                            pageSize: pageSize,
+                                            total: totalCount,
+                                            showSizeChanger: true,
+                                            showQuickJumper: true,
+                                            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} tours`,
+                                            onChange: handlePageChange,
+                                            onShowSizeChange: handlePageSizeChange,
+                                            pageSizeOptions: ['10', '20', '50', '100'],
+                                        }}
+                                    />
+                                </div>
+                            )
+                        },
+                        {
+                            key: 'api-test',
+                            label: (
+                                <span>
+                                    <ApiOutlined />
+                                    API Tester
+                                </span>
+                            ),
+                            children: <ApiTester />
+                        },
+                        {
+                            key: 'cache-status',
+                            label: (
+                                <span>
+                                    <BarChartOutlined />
+                                    Cache Status
+                                </span>
+                            ),
+                            children: <CacheStatus />
+                        },
+                        {
+                            key: 'wizard-test',
+                            label: (
+                                <span>
+                                    <ExclamationCircleOutlined />
+                                    Wizard Templates Test
+                                </span>
+                            ),
+                            children: <WizardTemplatesTester />
                         }
-                        key="tours"
-                    >
-                        <div>
-
-                        <Table
-                            columns={columns}
-                            dataSource={tourDetailsList}
-                            rowKey="id"
-                            loading={loading}
-                            pagination={{
-                                current: currentPage,
-                                pageSize: pageSize,
-                                total: totalCount,
-                                showSizeChanger: true,
-                                showQuickJumper: true,
-                                showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} tours`,
-                                onChange: handlePageChange,
-                                onShowSizeChange: handlePageSizeChange,
-                                pageSizeOptions: ['10', '20', '50', '100'],
-                            }}
-                        />
-                        </div>
-                    </TabPane>
-
-                    <TabPane
-                        tab={
-                            <span>
-                                <ApiOutlined />
-                                API Tester
-                            </span>
-                        }
-                        key="api-test"
-                    >
-                        <ApiTester />
-                    </TabPane>
-
-                    <TabPane
-                        tab={
-                            <span>
-                                <BarChartOutlined />
-                                Cache Status
-                            </span>
-                        }
-                        key="cache-status"
-                    >
-                        <CacheStatus />
-                    </TabPane>
-
-                    <TabPane
-                        tab={
-                            <span>
-                                <ExclamationCircleOutlined />
-                                Wizard Templates Test
-                            </span>
-                        }
-                        key="wizard-test"
-                    >
-                        <WizardTemplatesTester />
-                    </TabPane>
-                </Tabs>
+                    ]}
+                />
             </Card>
 
             {/* Create/Edit Modal */}

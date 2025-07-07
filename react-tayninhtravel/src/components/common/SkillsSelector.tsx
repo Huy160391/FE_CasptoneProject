@@ -69,7 +69,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
             
             const response = await skillsService.getSkillsCategories();
             
-            if (response.isSuccess && response.data) {
+            if (response.success && response.data) {
                 setSkillsCategories(response.data);
             } else {
                 setError(response.message || 'Không thể tải danh sách kỹ năng');

@@ -27,10 +27,10 @@
     <script>
         const API_BASE = 'http://localhost:5267/api';
         
-        function addResult(title, content, isSuccess = true) {
+        function addResult(title, content, success = true) {
             const results = document.getElementById('results');
             const div = document.createElement('div');
-            div.className = `result ${isSuccess ? 'success' : 'error'}`;
+            div.className = `result ${success ? 'success' : 'error'}`;
             div.innerHTML = `<h3>${title}</h3><pre>${content}</pre>`;
             results.appendChild(div);
         }

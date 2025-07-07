@@ -175,6 +175,23 @@ export const createTourOperation = async (data: CreateTourOperationRequest, toke
 export const getTourOperationByDetailsId = async (tourDetailsId: string, token?: string): Promise<ApiResponse<TourOperation>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.get(`/TourOperation/details/${tourDetailsId}`, { headers });
+
+    // Handle both ApiResponse format and direct TourOperation format
+    if (response.data && typeof response.data === 'object') {
+        // Check if it's ApiResponse format
+        if ('data' in response.data && 'isSuccess' in response.data) {
+            return response.data as ApiResponse<TourOperation>;
+        } else {
+            // Direct TourOperation format - wrap it in ApiResponse
+            return {
+                isSuccess: true,
+                message: 'Success',
+                statusCode: 200,
+                data: response.data as TourOperation
+            } as ApiResponse<TourOperation>;
+        }
+    }
+
     return response.data;
 };
 
@@ -359,5 +376,14 @@ export const getAvailableTourGuides = async (date: string, excludeOperationId?: 
         params.excludeOperationId = excludeOperationId;
     }
     const response = await axios.get('/Account/guides/available', { headers, params });
+    return response.data;
+};
+
+// ===== TOUR DETAILS STATUS MANAGEMENT =====
+
+// Kích hoạt public cho TourDetails (chuyển từ WaitToPublic sang Public)
+export const activatePublicTourDetails = async (tourDetailsId: string, token?: string): Promise<ApiResponse<any>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.post(`/TourCompany/tourdetails/${tourDetailsId}/activate-public`, {}, { headers });
     return response.data;
 };

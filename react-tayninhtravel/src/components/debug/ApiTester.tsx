@@ -63,7 +63,7 @@ const ApiTester: React.FC = () => {
         try {
             await testTourTemplateEndpoints();
             const response = await getTourTemplates({}, token);
-            addResult('TourTemplate Endpoints', response.isSuccess, response.data, response);
+            addResult('TourTemplate Endpoints', response.success, response.data, response);
         } catch (error) {
             addResult('TourTemplate Endpoints', false, null, error);
         } finally {
@@ -76,7 +76,7 @@ const ApiTester: React.FC = () => {
         try {
             // First get templates to use one for creating details
             const templatesResponse = await getTourTemplates({}, token);
-            if (!templatesResponse.isSuccess || !templatesResponse.data?.items?.length) {
+            if (!templatesResponse.success || !templatesResponse.data?.items?.length) {
                 addResult('TourDetails Test', false, null, 'No templates available for testing');
                 return;
             }
@@ -92,11 +92,11 @@ const ApiTester: React.FC = () => {
             };
 
             const createResponse = await createTourDetails(createData, token);
-            addResult('Create TourDetails', createResponse.isSuccess, createResponse.data, createResponse);
+            addResult('Create TourDetails', createResponse.success, createResponse.data, createResponse);
 
             // Test get tour details list
             const listResponse = await getTourDetailsList({}, token);
-            addResult('Get TourDetails List', listResponse.isSuccess, listResponse.data, listResponse);
+            addResult('Get TourDetails List', listResponse.success, listResponse.data, listResponse);
 
         } catch (error) {
             addResult('TourDetails Test', false, null, error);
@@ -111,7 +111,7 @@ const ApiTester: React.FC = () => {
             console.log('🧪 Testing Tour Details List API...');
             const response = await getTourDetailsList({}, token);
             console.log('🧪 Tour Details List Response:', response);
-            addResult('Tour Details List Test', response.isSuccess, response.data, response);
+            addResult('Tour Details List Test', response.success, response.data, response);
         } catch (error) {
             console.error('🧪 Tour Details List Error:', error);
             addResult('Tour Details List Test', false, null, error);
@@ -124,7 +124,7 @@ const ApiTester: React.FC = () => {
         setLoading(true);
         try {
             const response = await getSpecialtyShops(false, token);
-            addResult('SpecialtyShops Test', response.isSuccess, response.data, response);
+            addResult('SpecialtyShops Test', response.success, response.data, response);
         } catch (error) {
             addResult('SpecialtyShops Test', false, null, error);
         } finally {
@@ -137,7 +137,7 @@ const ApiTester: React.FC = () => {
         try {
             // First get tour details to use one for creating timeline
             const detailsResponse = await getTourDetailsList({}, token);
-            if (!detailsResponse.isSuccess || !detailsResponse.data?.items?.length) {
+            if (!detailsResponse.success || !detailsResponse.data?.items?.length) {
                 addResult('Timeline Test', false, null, 'No tour details available for testing');
                 return;
             }
@@ -166,7 +166,7 @@ const ApiTester: React.FC = () => {
             };
 
             const response = await createTimelineItems(timelineData, token);
-            addResult('Timeline Test', response.isSuccess, response.data, response);
+            addResult('Timeline Test', response.success, response.data, response);
 
         } catch (error) {
             addResult('Timeline Test', false, null, error);

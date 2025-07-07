@@ -86,7 +86,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
             // Load tour details (includes timeline)
             const detailsResponse = await getTourDetailsById(tourDetailsId, token);
-            if (detailsResponse.isSuccess && detailsResponse.data) {
+            if (detailsResponse.success && detailsResponse.data) {
                 setTourDetails(detailsResponse.data);
                 // Set timeline from tour details data
                 if (detailsResponse.data.timeline) {
@@ -97,7 +97,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
             // Load tour operation (if exists)
             try {
                 const operationResponse = await getTourOperationByDetailsId(tourDetailsId, token);
-                if (operationResponse.isSuccess && operationResponse.data) {
+                if (operationResponse.success && operationResponse.data) {
                     setTourOperation(operationResponse.data);
                 }
             } catch (error) {
@@ -108,7 +108,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
             // Load tour guide invitations
             try {
                 const invitationsResponse = await getTourGuideInvitations(tourDetailsId, token);
-                if (invitationsResponse.isSuccess) {
+                if (invitationsResponse.success) {
                     setInvitations(invitationsResponse);
                 }
             } catch (error) {
@@ -263,7 +263,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
     const renderOperationTab = () => (
         <div>
-            {tourDetails?.status === TourDetailsStatus.Approved ? (
+            {tourOperation ? (
                 <TourOperationManagement
                     tourDetails={tourDetails}
                     onOperationUpdate={handleOperationUpdate}
@@ -271,9 +271,9 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                 />
             ) : (
                 <Alert
-                    message="TourDetails chưa được duyệt"
-                    description="TourOperation chỉ có thể tạo sau khi TourDetails được admin duyệt."
-                    type="warning"
+                    message="Chưa có TourOperation"
+                    description="TourDetails này chưa có TourOperation. TourOperation thường được tạo tự động trong quá trình tạo TourDetails."
+                    type="info"
                     showIcon
                 />
             )}
