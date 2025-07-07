@@ -53,7 +53,7 @@ interface TimelineFormItem {
     activity: string;
     location?: string;
     specialtyShopId?: string;
-    orderIndex: number; // Changed from sortOrder to match API
+    sortOrder: number; // Use sortOrder to match API
     estimatedDuration?: number; // in minutes
     isNew?: boolean;
 }
@@ -72,14 +72,14 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
     useEffect(() => {
         // Initialize items from existing timeline
         const initialItems: TimelineFormItem[] = timeline
-            .sort((a, b) => a.orderIndex - b.orderIndex)
+            .sort((a, b) => (a.orderIndex || a.sortOrder || 0) - (b.orderIndex || b.sortOrder || 0))
             .map(item => ({
                 id: item.id,
                 checkInTime: item.checkInTime,
                 activity: item.activity,
                 location: item.location,
                 specialtyShopId: item.specialtyShopId || undefined,
-                orderIndex: item.orderIndex,
+                sortOrder: item.orderIndex || item.sortOrder || 1,
                 estimatedDuration: item.estimatedDuration,
                 isNew: false
             }));

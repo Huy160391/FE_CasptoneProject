@@ -77,7 +77,9 @@ const TourTemplateDashboard: React.FC = () => {
             [TourDetailsStatus.Suspended]: 0,
             [TourDetailsStatus.AwaitingGuideAssignment]: 0,
             [TourDetailsStatus.Cancelled]: 0,
-            [TourDetailsStatus.AwaitingAdminApproval]: 0
+            [TourDetailsStatus.AwaitingAdminApproval]: 0,
+            [TourDetailsStatus.WaitToPublic]: 0,
+            [TourDetailsStatus.Public]: 0
         }
     });
     const [recentTemplates, setRecentTemplates] = useState<TourTemplate[]>([]);

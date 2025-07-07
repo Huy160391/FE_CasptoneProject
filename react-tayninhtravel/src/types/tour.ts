@@ -25,7 +25,9 @@ export enum TourDetailsStatus {
     Suspended = 3,                  // Tạm ngưng
     AwaitingGuideAssignment = 4,    // Chờ phân công hướng dẫn viên
     Cancelled = 5,                  // Đã hủy
-    AwaitingAdminApproval = 6       // Chờ admin duyệt
+    AwaitingAdminApproval = 6,      // Chờ admin duyệt
+    WaitToPublic = 7,               // Chờ công khai
+    Public = 8                      // Đã công khai (có thể booking)
 }
 
 export enum TourOperationStatus {
@@ -119,6 +121,10 @@ export interface ApiResponse<T> {
     message: string;
     isSuccess: boolean;
     data?: T;
+    totalCount?: number; // For paginated responses
+    pageIndex?: number;  // For paginated responses
+    pageSize?: number;   // For paginated responses
+    totalPages?: number; // For paginated responses
     validationErrors?: string[];
     fieldErrors?: Record<string, string[]>;
 }
@@ -180,23 +186,35 @@ export interface TourSlot {
     updatedAt?: string | null;
 }
 
-// TourDetails interfaces
+// TourDetails interfaces - Updated to match backend TourDetailDto
 export interface TourDetails {
     id: string;
-    title: string;
-    description: string;
-    status: TourDetailsStatus;
-    commentApproved?: string | null;
-    skillsRequired?: string;
     tourTemplateId: string;
-    tourTemplateName?: string;
-    tourTemplate?: TourTemplate;
+    tourTemplateName: string;
+    title: string;
+    description?: string;
+    status: TourDetailsStatus;
+    commentApproved?: string;
+    skillsRequired?: string;
+    timeline: TimelineItem[];
     tourOperation?: TourOperation;
-    timeline?: TimelineItem[];
-    assignedSlots?: TourSlot[];
-    assignedSlotsCount?: number;
+    timelineItemsCount: number;
+    assignedSlotsCount: number;
+    invitedSpecialtyShops: TourDetailsSpecialtyShop[];
+    invitedShopsCount: number;
+    isActive: boolean;
     createdAt: string;
-    updatedAt?: string | null;
+    updatedAt?: string;
+}
+
+// TourDetailsSpecialtyShop interface for invited shops
+export interface TourDetailsSpecialtyShop {
+    id: string;
+    tourDetailsId: string;
+    specialtyShopId: string;
+    specialtyShop: SpecialtyShop;
+    invitedAt: string;
+    status: string; // "Pending", "Accepted", "Rejected"
 }
 
 export interface CreateTourDetailsRequest {
@@ -270,7 +288,7 @@ export interface CreateTimelineItemsRequest {
     timelineItems: {
         checkInTime: string;
         activity: string;
-        shopId?: string | null;
+        specialtyShopId?: string | null;
         sortOrder?: number;
     }[];
 }
@@ -303,4 +321,67 @@ export interface TourManagement {
     guideInfo: string;
     itinerary: ItineraryItem[];
     createdAt: string;
+}
+
+// Tour Guide Invitation interfaces
+export interface TourGuideInvitation {
+    id: string;
+    tourDetails: {
+        id: string;
+        title: string;
+    };
+    guide: {
+        id: string;
+        name: string;
+        email: string;
+    };
+    createdBy: {
+        id: string;
+        name: string;
+    };
+    invitationType: string; // "Automatic" | "Manual"
+    status: string; // "Pending" | "Accepted" | "Rejected" | "Expired"
+    invitedAt: string;
+    expiresAt: string;
+    respondedAt?: string | null;
+    rejectionReason?: string | null;
+}
+
+export interface InvitationStatistics {
+    totalInvitations: number;
+    pendingInvitations: number;
+    acceptedInvitations: number;
+    rejectedInvitations: number;
+    expiredInvitations: number;
+    acceptanceRate: number;
+    rejectionRate: number;
+}
+
+export interface TourGuideInvitationsResponse {
+    tourDetails: {
+        id: string;
+        title: string;
+    };
+    invitations: TourGuideInvitation[];
+    statistics: InvitationStatistics;
+    statusCode: number;
+    message: string;
+    isSuccess: boolean;
+}
+
+// Capacity interfaces
+export interface TourCapacityInfo {
+    maxSeats: number;
+    bookedSeats: number;
+    availableSeats: number;
+    isFullyBooked: boolean;
+}
+
+// Remove duplicate ApiResponse interface - using the one above
+
+export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+    totalCount: number;
+    pageIndex: number;
+    pageSize: number;
+    totalPages: number;
 }

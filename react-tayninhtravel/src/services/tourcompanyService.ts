@@ -114,7 +114,7 @@ export const getTourDetailsByTemplate = async (templateId: string, includeInacti
 };
 
 // Lấy danh sách TourDetails (general) - sử dụng endpoint paginated
-export const getTourDetailsList = async (params: any = {}, token?: string): Promise<ApiResponse<any>> => {
+export const getTourDetailsList = async (params: any = {}, token?: string): Promise<ApiResponse<TourDetails[]>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     // Sử dụng endpoint paginated với 0-based indexing
@@ -123,6 +123,8 @@ export const getTourDetailsList = async (params: any = {}, token?: string): Prom
         pageIndex: params.pageIndex || 0, // Use 0-based indexing directly
         pageSize: params.pageSize || 10,
         includeInactive: params.includeInactive || false,
+        templateId: params.templateId, // Thêm filter theo template
+        titleFilter: params.titleFilter, // Thêm filter theo title
         ...params
     };
 
@@ -133,6 +135,9 @@ export const getTourDetailsList = async (params: any = {}, token?: string): Prom
 
     const response = await axios.get('/TourDetails/paginated', { params: queryParams, headers });
     console.log('✅ Tour Details API response:', response.data);
+
+    // Backend trả về ResponseGetTourDetailsPaginatedDto với structure mới
+    // Data, TotalCount, PageIndex, PageSize, TotalPages, StatusCode, Message, IsSuccess
     return response.data;
 };
 
@@ -241,6 +246,36 @@ export const deleteTimelineItem = async (id: string, token?: string): Promise<Ap
     return response.data;
 };
 
+// ===== PUBLIC TOUR DETAILS APIs =====
+
+// Lấy danh sách tour details công khai (cho homepage)
+export const getPublicTourDetails = async (params: {
+    pageIndex?: number;
+    pageSize?: number;
+    includeInactive?: boolean;
+} = {}): Promise<ApiResponse<any>> => {
+    const queryParams = {
+        pageIndex: params.pageIndex || 0,
+        pageSize: params.pageSize || 10,
+        includeInactive: params.includeInactive || false
+    };
+
+    const response = await axios.get('/TourDetails/paginated', { params: queryParams });
+    return response.data;
+};
+
+// Lấy tour details nổi bật (featured tours)
+export const getFeaturedTourDetails = async (limit = 6): Promise<ApiResponse<any>> => {
+    const response = await axios.get('/TourDetails/paginated', {
+        params: {
+            pageIndex: 0,
+            pageSize: limit,
+            includeInactive: false
+        }
+    });
+    return response.data;
+};
+
 // ===== SPECIALTY SHOP APIs =====
 
 // Lấy danh sách SpecialtyShops
@@ -304,6 +339,15 @@ export const getTourGuides = async (includeInactive = false, token?: string): Pr
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const params = { includeInactive };
     const response = await axios.get('/Account/guides', { headers, params });
+    return response.data;
+};
+
+// ===== TOUR GUIDE INVITATION APIs =====
+
+// Lấy danh sách invitations cho một TourDetails
+export const getTourGuideInvitations = async (tourDetailsId: string, token?: string): Promise<ApiResponse<any>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`/TourGuideInvitation/tourdetails/${tourDetailsId}`, { headers });
     return response.data;
 };
 

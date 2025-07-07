@@ -267,7 +267,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     timelineItems: wizardData.timeline.map((item, index) => ({
                         checkInTime: item.checkInTime,
                         activity: item.activity,
-                        shopId: item.specialtyShopId || null,
+                        specialtyShopId: item.specialtyShopId || null,
                         sortOrder: index + 1
                     }))
                 };

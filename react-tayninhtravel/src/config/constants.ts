@@ -3,8 +3,10 @@ const isDevelopment = import.meta.env.DEV;
 const PRODUCTION_API_URL = 'https://api.tayninhour.com';
 const DEVELOPMENT_API_URL = 'http://localhost:5267/api';
 
-// Force production API for testing
-export const API_BASE_URL = PRODUCTION_API_URL;
+// Automatically use appropriate URL based on environment
+// For now, force local development API
+export const API_BASE_URL = DEVELOPMENT_API_URL;
+// export const API_BASE_URL = isDevelopment ? DEVELOPMENT_API_URL : PRODUCTION_API_URL;
 
 // Social Media URLs
 export const FACEBOOK_URL = 'https://facebook.com/your-page'

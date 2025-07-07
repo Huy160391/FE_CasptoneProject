@@ -13,7 +13,8 @@ import {
     Alert,
     Spin,
     message,
-    Tabs
+    Tabs,
+    Statistic
 } from 'antd';
 import {
     ClockCircleOutlined,
@@ -29,13 +30,15 @@ import { useAuthStore } from '../../store/useAuthStore';
 import {
     getTourDetailsById,
     getTourOperationByDetailsId,
+    getTourGuideInvitations,
     handleApiError
 } from '../../services/tourcompanyService';
 import {
     TourDetails,
     TourOperation,
     TimelineItem,
-    TourDetailsStatus
+    TourDetailsStatus,
+    TourGuideInvitationsResponse
 } from '../../types/tour';
 import {
     getTourDetailsStatusLabel,
@@ -67,6 +70,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const [tourOperation, setTourOperation] = useState<TourOperation | null>(null);
     const [timeline, setTimeline] = useState<TimelineItem[]>([]);
     const [activeTab, setActiveTab] = useState(initialTab);
+    const [invitations, setInvitations] = useState<TourGuideInvitationsResponse | null>(null);
 
     useEffect(() => {
         if (visible && tourDetailsId && token) {
@@ -99,6 +103,17 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
             } catch (error) {
                 // Operation might not exist yet, that's ok
                 setTourOperation(null);
+            }
+
+            // Load tour guide invitations
+            try {
+                const invitationsResponse = await getTourGuideInvitations(tourDetailsId, token);
+                if (invitationsResponse.isSuccess) {
+                    setInvitations(invitationsResponse);
+                }
+            } catch (error) {
+                console.log('No invitations found or error loading invitations:', error);
+                setInvitations(null);
             }
 
         } catch (error) {
@@ -265,6 +280,128 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
         </div>
     );
 
+    const renderInvitationsTab = () => (
+        <div>
+            {invitations ? (
+                <div>
+                    {/* Statistics Cards */}
+                    <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                        <Col span={6}>
+                            <Card>
+                                <Statistic
+                                    title="Tổng lời mời"
+                                    value={invitations.statistics.totalInvitations}
+                                    prefix={<TeamOutlined />}
+                                />
+                            </Card>
+                        </Col>
+                        <Col span={6}>
+                            <Card>
+                                <Statistic
+                                    title="Đang chờ"
+                                    value={invitations.statistics.pendingInvitations}
+                                    valueStyle={{ color: '#faad14' }}
+                                    prefix={<ClockCircleOutlined />}
+                                />
+                            </Card>
+                        </Col>
+                        <Col span={6}>
+                            <Card>
+                                <Statistic
+                                    title="Đã chấp nhận"
+                                    value={invitations.statistics.acceptedInvitations}
+                                    valueStyle={{ color: '#52c41a' }}
+                                    prefix={<CheckCircleOutlined />}
+                                />
+                            </Card>
+                        </Col>
+                        <Col span={6}>
+                            <Card>
+                                <Statistic
+                                    title="Tỷ lệ chấp nhận"
+                                    value={invitations.statistics.acceptanceRate}
+                                    precision={1}
+                                    suffix="%"
+                                    valueStyle={{ color: '#52c41a' }}
+                                />
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    {/* Invitations List */}
+                    {invitations.invitations.length > 0 ? (
+                        <Card title="Danh sách lời mời hướng dẫn viên">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {invitations.invitations.map((invitation) => (
+                                    <Card key={invitation.id} size="small" style={{ border: '1px solid #f0f0f0' }}>
+                                        <Row gutter={16} align="middle">
+                                            <Col span={6}>
+                                                <div>
+                                                    <div style={{ fontWeight: 'bold' }}>{invitation.guide.name}</div>
+                                                    <div style={{ color: '#666', fontSize: '12px' }}>{invitation.guide.email}</div>
+                                                </div>
+                                            </Col>
+                                            <Col span={3}>
+                                                <Tag color={invitation.invitationType === 'Automatic' ? 'blue' : 'green'}>
+                                                    {invitation.invitationType === 'Automatic' ? 'Tự động' : 'Thủ công'}
+                                                </Tag>
+                                            </Col>
+                                            <Col span={3}>
+                                                <Tag color={
+                                                    invitation.status === 'Pending' ? 'orange' :
+                                                    invitation.status === 'Accepted' ? 'green' :
+                                                    invitation.status === 'Rejected' ? 'red' : 'gray'
+                                                }>
+                                                    {invitation.status === 'Pending' ? 'Chờ phản hồi' :
+                                                     invitation.status === 'Accepted' ? 'Đã chấp nhận' :
+                                                     invitation.status === 'Rejected' ? 'Đã từ chối' : 'Hết hạn'}
+                                                </Tag>
+                                            </Col>
+                                            <Col span={4}>
+                                                <div style={{ fontSize: '12px', color: '#666' }}>
+                                                    <div>Mời: {new Date(invitation.invitedAt).toLocaleDateString('vi-VN')}</div>
+                                                    <div>Hết hạn: {new Date(invitation.expiresAt).toLocaleDateString('vi-VN')}</div>
+                                                </div>
+                                            </Col>
+                                            <Col span={4}>
+                                                {invitation.respondedAt && (
+                                                    <div style={{ fontSize: '12px', color: '#666' }}>
+                                                        Phản hồi: {new Date(invitation.respondedAt).toLocaleDateString('vi-VN')}
+                                                    </div>
+                                                )}
+                                            </Col>
+                                            <Col span={4}>
+                                                {invitation.rejectionReason && (
+                                                    <div style={{ fontSize: '12px', color: '#ff4d4f' }}>
+                                                        Lý do từ chối: {invitation.rejectionReason}
+                                                    </div>
+                                                )}
+                                            </Col>
+                                        </Row>
+                                    </Card>
+                                ))}
+                            </div>
+                        </Card>
+                    ) : (
+                        <Alert
+                            message="Chưa có lời mời nào"
+                            description="Chưa có hướng dẫn viên nào được mời cho tour này."
+                            type="info"
+                            showIcon
+                        />
+                    )}
+                </div>
+            ) : (
+                <Alert
+                    message="Không thể tải thông tin lời mời"
+                    description="Có lỗi xảy ra khi tải thông tin lời mời hướng dẫn viên."
+                    type="warning"
+                    showIcon
+                />
+            )}
+        </div>
+    );
+
     return (
         <Modal
             title={`Chi tiết TourDetails${tourDetails ? ` - ${tourDetails.title}` : ''}`}
@@ -314,6 +451,20 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                         key="operation"
                     >
                         {renderOperationTab()}
+                    </TabPane>
+
+                    <TabPane
+                        tab={
+                            <span>
+                                <UserOutlined />
+                                Hướng dẫn viên ({invitations?.statistics.totalInvitations || 0})
+                                {invitations?.statistics.acceptedInvitations > 0 &&
+                                    <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
+                            </span>
+                        }
+                        key="invitations"
+                    >
+                        {renderInvitationsTab()}
                     </TabPane>
                 </Tabs>
             </Spin>

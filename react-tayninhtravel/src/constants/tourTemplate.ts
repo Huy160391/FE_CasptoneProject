@@ -113,7 +113,9 @@ export const TOUR_DETAILS_STATUS_LABELS = {
   [TourDetailsStatus.Suspended]: 'Tạm ngưng',
   [TourDetailsStatus.AwaitingGuideAssignment]: 'Chờ phân công HDV',
   [TourDetailsStatus.Cancelled]: 'Đã hủy',
-  [TourDetailsStatus.AwaitingAdminApproval]: 'Chờ admin duyệt'
+  [TourDetailsStatus.AwaitingAdminApproval]: 'Chờ admin duyệt',
+  [TourDetailsStatus.WaitToPublic]: 'Chờ công khai',
+  [TourDetailsStatus.Public]: 'Đã công khai'
 };
 
 export const TOUR_OPERATION_STATUS_LABELS = {
@@ -259,6 +261,7 @@ export const getStatusColor = (status: TourDetailsStatus | TourSlotStatus | Tour
     case TourOperationStatus.Scheduled:
       return 'green';
     case TourDetailsStatus.Pending:
+    case TourDetailsStatus.AwaitingAdminApproval:
     case TourOperationStatus.PendingConfirmation:
       return 'orange';
     case TourDetailsStatus.Rejected:
@@ -269,6 +272,12 @@ export const getStatusColor = (status: TourDetailsStatus | TourSlotStatus | Tour
     case TourDetailsStatus.Suspended:
     case TourOperationStatus.Postponed:
       return 'volcano';
+    case TourDetailsStatus.AwaitingGuideAssignment:
+      return 'purple';
+    case TourDetailsStatus.WaitToPublic:
+      return 'geekblue';
+    case TourDetailsStatus.Public:
+      return 'lime';
     case TourSlotStatus.FullyBooked:
     case TourSlotStatus.Completed:
     case TourOperationStatus.Completed:
