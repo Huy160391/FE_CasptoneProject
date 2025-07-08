@@ -3,22 +3,58 @@ import { Product, GetProductsParams, GetProductsResponse } from '../types';
 
 // Interface cho dữ liệu tạo/cập nhật sản phẩm
 export interface CreateProductData {
-    name: string;
-    description: string;
-    price: number;
-    quantityInStock: number;
-    imageUrl: string[];
-    category: string;
+    Name: string;
+    Description: string;
+    Price: number;
+    QuantityInStock: number;
+    Files: string[];
+    Category: string;
+    IsSale?: boolean;
+    SalePercent?: number;
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> {
     // Có thể cập nhật các field khác nếu cần
 }
 
-// Thêm sản phẩm mới
-export const createProduct = async (data: CreateProductData, token?: string) => {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.post('/Product/Product', data, { headers });
+// Thêm sản phẩm mới - luôn sử dụng FormData theo yêu cầu của API
+export const createProduct = async (data: FormData | CreateProductData, token?: string) => {
+    // Thêm Content-Type: multipart/form-data vào header
+    const headers: any = token ? { Authorization: `Bearer ${token}` } : {};
+    // Không thêm Content-Type khi dùng FormData, axios sẽ tự thêm với boundary đúng
+
+    // Nếu data không phải là FormData, chuyển đổi nó thành FormData
+    if (!(data instanceof FormData)) {
+        const formData = new FormData();
+
+        // Thêm các trường dữ liệu từ đối tượng JSON vào FormData
+        formData.append('Name', data.Name || '');
+        formData.append('Description', data.Description || '');
+        formData.append('Price', String(data.Price || 0));
+        formData.append('QuantityInStock', String(data.QuantityInStock || 0));
+        formData.append('Category', String(data.Category || ''));
+        formData.append('IsSale', String(data.IsSale || false));
+
+        if (data.IsSale && data.SalePercent) {
+            formData.append('SalePercent', String(data.SalePercent));
+        }
+
+        // Files phải là mảng các URL hoặc mảng rỗng
+        if (data.Files && Array.isArray(data.Files)) {
+            data.Files.forEach(fileUrl => {
+                formData.append('ExistingImageUrls', fileUrl);
+            });
+        }
+
+        data = formData;
+    }
+
+    // Log trước khi gửi
+    console.log("Creating product with FormData");
+
+    const response = await axios.post('/Product/Product', data, {
+        headers,
+    });
     return response.data;
 };
 
@@ -60,17 +96,46 @@ export const getProductById = async (id: string, token?: string): Promise<Produc
     }
 };
 
-// Cập nhật sản phẩm
-export const updateProduct = async (id: string, data: UpdateProductData, token?: string) => {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.patch(`/Product/Product/${id}`, data, { headers });
-    return response.data;
-};
+// Cập nhật sản phẩm - luôn sử dụng FormData theo yêu cầu của API
+export const updateProduct = async (id: string, data: FormData | UpdateProductData, token?: string) => {
+    // Thêm Content-Type: multipart/form-data vào header
+    const headers: any = token ? { Authorization: `Bearer ${token}` } : {};
+    // Không thêm Content-Type khi dùng FormData, axios sẽ tự thêm với boundary đúng
 
-// Xóa sản phẩm
-export const deleteProduct = async (id: string, token?: string) => {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.delete(`/Product/Product/${id}`, { headers });
+    // Nếu data không phải là FormData, chuyển đổi nó thành FormData
+    if (!(data instanceof FormData)) {
+        const formData = new FormData();
+
+        // Thêm ID vào FormData
+        formData.append('Id', id);
+
+        // Thêm các trường dữ liệu từ đối tượng JSON vào FormData
+        if (data.Name !== undefined) formData.append('Name', data.Name);
+        if (data.Description !== undefined) formData.append('Description', data.Description);
+        if (data.Price !== undefined) formData.append('Price', String(data.Price));
+        if (data.QuantityInStock !== undefined) formData.append('QuantityInStock', String(data.QuantityInStock));
+        if (data.Category !== undefined) formData.append('Category', String(data.Category));
+
+        // Boolean cần chuyển sang string "true"/"false"
+        if (data.IsSale !== undefined) formData.append('IsSale', String(data.IsSale));
+        if (data.SalePercent !== undefined) formData.append('SalePercent', String(data.SalePercent));
+
+        // Files phải là mảng các URL hoặc mảng rỗng
+        if (data.Files && Array.isArray(data.Files)) {
+            data.Files.forEach(fileUrl => {
+                formData.append('ExistingImageUrls', fileUrl);
+            });
+        }
+
+        data = formData;
+    }
+
+    // Log trước khi gửi
+    console.log("Updating product with FormData, ID:", id);
+
+    const response = await axios.patch(`/Product/Product/${id}`, data, {
+        headers,
+    });
     return response.data;
 };
 
@@ -101,4 +166,11 @@ export const getFeaturedProducts = async (limit: number = 10, token?: string): P
 // Tìm kiếm sản phẩm
 export const searchProducts = async (searchTerm: string, params: GetProductsParams = {}, token?: string): Promise<GetProductsResponse> => {
     return getProducts({ ...params, textSearch: searchTerm }, token);
+};
+
+// Xóa sản phẩm
+export const deleteProduct = async (id: string, token?: string) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.delete(`/Product/Product/${id}`, { headers });
+    return response.data;
 };

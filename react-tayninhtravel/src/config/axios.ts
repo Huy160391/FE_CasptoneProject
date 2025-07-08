@@ -19,6 +19,13 @@ axiosInstance.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // Nếu là FormData, không thiết lập header Content-Type
+        // Để axios tự thêm boundary đúng (quan trọng cho multipart/form-data)
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
+
         return config;
     },
     (error) => {

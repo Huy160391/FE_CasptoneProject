@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { authService } from '@/services/authService'
+import { syncCartOnLogin } from '@/services/cartService'
 import ForgotPasswordModal from './ForgotPasswordModal'
 import './AuthModal.scss'
 
@@ -40,6 +41,16 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         message.success(t('common.loginSuccess'))
         form.resetFields()
         onClose()
+
+        // Đồng bộ cart sau khi login thành công
+        const syncedCart = await syncCartOnLogin(response.token)
+        // Cập nhật Zustand store trực tiếp (không import động)
+        if (syncedCart && Array.isArray(syncedCart.items)) {
+          const { useCartStore } = await import('@/store/useCartStore');
+          if (useCartStore?.setState) {
+            useCartStore.setState({ items: syncedCart.items });
+          }
+        }
 
         // Call callback if provided
         if (onLoginSuccess) {

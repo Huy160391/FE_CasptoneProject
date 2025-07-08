@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { useProductCart } from '@/hooks/useCart'
 import { Product } from '@/types'
 import { publicService } from '@/services/publicService'
-import { getCategoryString } from '@/utils/categoryUtils'
 import ShopSearchBar from '@/components/shop/ShopSearchBar'
+import { getCategoryViLabel } from '@/utils/categoryViLabels'
 import './Shop.scss'
 
 const { Meta } = Card
@@ -33,7 +33,7 @@ const Shop = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [totalRecords, setTotalRecords] = useState(0)
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const pageSize = 6
 
@@ -60,12 +60,9 @@ const Shop = () => {
       // Transform API data to ShopProduct format
       const transformedProducts: ShopProduct[] = response.data.map(product => ({
         ...product,
-        // Convert numeric category to string for display
-        category: typeof product.category === 'number' ?
-          getCategoryString(product.category) :
-          product.category,
+        category: product.category, // Đã là string, không cần kiểm tra kiểu số nữa
         // Add UI-specific fields with default values
-        rating: 4.5, // Default rating - you can calculate this later
+        rating: 4.5, // Default rating - bạn có thể tính toán lại sau
         reviews: Math.floor(Math.random() * 50) + 1, // Random reviews for now
         soldCount: product.soldCount || 0, // lấy đúng từ API
         isActive: true,
@@ -83,12 +80,13 @@ const Shop = () => {
     }
   }
 
+  // Category filter options (hiển thị tiếng Việt nếu đang ở ngôn ngữ 'vi')
   const categories = [
     { label: t('shop.categories.all'), value: 'all' },
-    { label: 'Souvenir', value: 'Souvenir' },
-    { label: 'Jewelry', value: 'Jewelry' },
-    { label: 'Food', value: 'Food' },
-    { label: 'Clothing', value: 'Clothing' },
+    { label: i18n.language === 'vi' ? getCategoryViLabel('souvenir') : 'Souvenir', value: 'souvenir' },
+    { label: i18n.language === 'vi' ? getCategoryViLabel('jewelry') : 'Jewelry', value: 'jewelry' },
+    { label: i18n.language === 'vi' ? getCategoryViLabel('food') : 'Food', value: 'food' },
+    { label: i18n.language === 'vi' ? getCategoryViLabel('clothing') : 'Clothing', value: 'clothing' },
   ]
 
   const handleSearch = (value: string) => {
@@ -122,9 +120,10 @@ const Shop = () => {
   // Enhanced filter logic for client-side filtering
   const filteredProducts = products.filter(product => {
     // Category filter
-    const matchesCategory = selectedCategories.length === 0 ||
+    const matchesCategory =
+      selectedCategories.length === 0 ||
       selectedCategories.includes('all') ||
-      selectedCategories.includes(product.category)
+      selectedCategories.some(cat => cat.toLowerCase() === product.category.toLowerCase())
 
     // Price range filter
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1]
@@ -181,7 +180,10 @@ const Shop = () => {
           }
           className="product-card"
         >
-          <Meta title={product.name} description={t(`shop.categories.${product.category}`) || product.category} />
+          <Meta
+            title={product.name}
+            description={i18n.language === 'vi' ? getCategoryViLabel(product.category.toLowerCase()) : product.category}
+          />
 
           <div className="product-rating">
             <Space>
