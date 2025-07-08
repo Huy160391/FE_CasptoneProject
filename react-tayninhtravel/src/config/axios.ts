@@ -1,15 +1,23 @@
 import axios from 'axios';
 import { API_BASE_URL } from './constants';
 
+// Development logging
+const isDevelopment = import.meta.env.DEV;
+
 // Tạo instance axios với cấu hình mặc định
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 60000, // 30 giây
+    timeout: 60000, // 60 giây
     headers: {
         'Content-Type': 'application/json',
         'accept': 'text/plain',
     },
 });
+
+// Development logging
+if (isDevelopment) {
+    console.log('🌐 API Base URL:', API_BASE_URL);
+}
 
 // Request interceptor
 axiosInstance.interceptors.request.use(
@@ -19,24 +27,68 @@ axiosInstance.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // Nếu là FormData, không thiết lập header Content-Type
+        // Để axios tự thêm boundary đúng (quan trọng cho multipart/form-data)
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
+
+        // Development logging
+        if (isDevelopment) {
+            console.log('🚀 API Request:', {
+                method: config.method?.toUpperCase(),
+                url: config.url,
+                baseURL: config.baseURL,
+                fullURL: `${config.baseURL}${config.url}`,
+                data: config.data,
+                headers: config.headers
+            });
+        }
+
         return config;
     },
     (error) => {
+        if (isDevelopment) {
+            console.error('❌ Request Error:', error);
+        }
         return Promise.reject(error);
     }
 );
 
+
 // Response interceptor
 axiosInstance.interceptors.response.use(
     (response) => {
+        // Development logging
+        if (isDevelopment) {
+            console.log('✅ API Response:', {
+                status: response.status,
+                statusText: response.statusText,
+                url: response.config.url,
+                data: response.data
+            });
+        }
         return response;
     },
     (error) => {
+        // Development logging
+        if (isDevelopment) {
+            console.error('❌ API Error:', {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                url: error.config?.url,
+                data: error.response?.data
+            });
+        }
+
         if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
             // Xử lý lỗi timeout
             console.error('Yêu cầu đã hết thời gian chờ. Vui lòng thử lại sau.');
-            // Hiển thị thông báo cho người dùng
-            // Có thể sử dụng notification của Ant Design hoặc toast từ thư viện khác
+        } else if (error.code === 'ERR_NETWORK') {
+            // Xử lý lỗi network (không kết nối được server)
+            console.error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng hoặc server có đang chạy không.');
         } else if (error.response) {
             // Xử lý các lỗi từ server
             switch (error.response.status) {

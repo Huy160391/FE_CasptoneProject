@@ -35,7 +35,7 @@ import { useTranslation } from 'react-i18next'
 import { Product } from '@/types'
 import ShopInfo from './ShopInfo'
 import { publicService } from '@/services/publicService'
-import { getCategoryString } from '@/utils/categoryUtils'
+import { getCategoryViLabel } from '@/utils/categoryViLabels'
 
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
@@ -76,7 +76,7 @@ const ProductDetail = () => {
 
   // Use cart hook instead of direct store access
   const productCart = useProductCart(productId)
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   // Fetch product data
   useEffect(() => {
@@ -88,10 +88,7 @@ const ProductDetail = () => {
           // Create enhanced product with additional UI data
           const enhancedProduct: EnhancedProduct = {
             ...productData,
-            // Convert numeric category to string for display
-            category: typeof productData.category === 'number' ?
-              getCategoryString(productData.category) :
-              productData.category,
+            category: productData.category, // Đã là string, không cần kiểm tra kiểu số nữa
             rating: 4.5,
             reviews: 28,
             tags: ['đặc sản', 'quà tặng', 'truyền thống'],
@@ -259,13 +256,7 @@ const ProductDetail = () => {
           const filteredProducts = response.data
             .filter(p => p.id !== currentProductId)
             .slice(0, 4)
-            .map(product => ({
-              ...product,
-              // Convert numeric category to string for display
-              category: typeof product.category === 'number' ?
-                getCategoryString(product.category) :
-                product.category
-            }))
+          // Không cần ép kiểu category nữa, luôn là string
 
           setRelatedProducts(filteredProducts)
         } catch (error) {
@@ -380,7 +371,7 @@ const ProductDetail = () => {
         items={[
           { title: <Link to="/">Trang Chủ</Link> },
           { title: <Link to="/shop">Cửa Hàng</Link> },
-          { title: <Link to={`/shop?category=${product.category}`}>{product.category}</Link> },
+          { title: <Link to={`/shop?category=${product.category}`}>{i18n.language === 'vi' ? getCategoryViLabel(product.category.toLowerCase()) : product.category}</Link> },
           { title: product.name },
         ]}
       />
@@ -529,7 +520,7 @@ const ProductDetail = () => {
             <div className="product-category">
               <Space>
                 <Text>Danh mục:</Text>
-                <Link to={`/shop?category=${product.category}`}>{product.category}</Link>
+                <Link to={`/shop?category=${product.category}`}>{i18n.language === 'vi' ? getCategoryViLabel(product.category.toLowerCase()) : product.category}</Link>
               </Space>
             </div>
 

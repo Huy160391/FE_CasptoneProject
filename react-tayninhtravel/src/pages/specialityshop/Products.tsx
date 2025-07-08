@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Input, Space, Tag, Modal, message, Select, Popconfirm, Spin } from 'antd';
+import { Table, Card, Button, Input, Space, Tag, message, Select, Popconfirm, Spin } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { publicService } from '@/services/publicService';
 import type { Product } from '@/types';
-import { getCategoryString } from '@/utils/categoryUtils';
+import { CATEGORY_VI_LABELS, getCategoryViLabel } from '@/utils/categoryViLabels'
+import CustomProductModal from './CustomProductModal';
+import ViewProductModal from './ViewProductModal';
+import { createProduct, updateProduct, deleteProduct } from '@/services/specialtyShopService';
+import { useAuthStore } from '@/store/useAuthStore';
 import './Products.scss';
 
 const { Search } = Input;
@@ -14,9 +18,12 @@ const SpecialityShopProducts = () => {
     const [searchText, setSearchText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isProductModalVisible, setIsProductModalVisible] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
+    const { token } = useAuthStore();
+    const accessToken = token || undefined; // Make sure it's a string or undefined, not null
     const [pagination, setPagination] = useState({
         current: 1,
         pageSize: 10,
@@ -27,22 +34,26 @@ const SpecialityShopProducts = () => {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const response = await publicService.getPublicProducts({
+            // Chỉ gửi các params API hỗ trợ
+            const params: any = {
                 pageIndex: pagination.current,
                 pageSize: pagination.pageSize,
                 textSearch: searchText || undefined,
-                status: selectedCategory === 'all' ? undefined : selectedCategory === 'active'
-            });
+                status: undefined // hoặc true/false nếu muốn lọc trạng thái
+            };
+            const response = await publicService.getPublicProducts(params);
 
             const transformedProducts = response.data.map(product => ({
                 ...product,
-                // Convert numeric category to string for display
-                category: typeof product.category === 'number' ?
-                    getCategoryString(product.category) :
-                    product.category
+                category: product.category // Đã là string, không cần kiểm tra kiểu số nữa
             }));
 
-            setProducts(transformedProducts);
+            // Filter FE theo category nếu có chọn
+            const filteredProducts = selectedCategory === 'all'
+                ? transformedProducts
+                : transformedProducts.filter(p => p.category && p.category.toLowerCase() === selectedCategory);
+
+            setProducts(filteredProducts);
             setPagination(prev => ({
                 ...prev,
                 total: response.totalRecord
@@ -86,15 +97,57 @@ const SpecialityShopProducts = () => {
     };
 
     const handleEdit = (product: Product) => {
-        message.info(`Sửa sản phẩm: ${product.name}`);
-    };
-
-    const handleDelete = (product: Product) => {
-        message.success(`Đã xóa sản phẩm: ${product.name}`);
+        setSelectedProduct(product);
+        setIsProductModalVisible(true);
     };
 
     const handleAdd = () => {
-        message.info('Thêm sản phẩm mới');
+        setSelectedProduct(null);
+        setIsProductModalVisible(true);
+    };
+
+    const handleDelete = async (product: Product) => {
+        try {
+            setLoading(true);
+            await deleteProduct(product.id, accessToken);
+            message.success(`Đã xóa sản phẩm: ${product.name}`);
+            fetchProducts();
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            message.error('Không thể xóa sản phẩm');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleProductSubmit = async (values: FormData | any) => {
+        try {
+            setLoading(true);
+            if (selectedProduct) {
+                // Edit mode
+                await updateProduct(selectedProduct.id, values, accessToken);
+                message.success('Cập nhật sản phẩm thành công!');
+            } else {
+                // Add mode
+                await createProduct(values, accessToken);
+                message.success('Thêm sản phẩm thành công!');
+            }
+            fetchProducts();
+            return Promise.resolve();
+        } catch (error: any) {
+            console.error('Error saving product:', error);
+
+            // Hiển thị thông báo lỗi cụ thể từ API nếu có
+            if (error.response?.data?.message) {
+                message.error(`Lỗi: ${error.response.data.message}`);
+            } else {
+                message.error('Lỗi khi lưu sản phẩm');
+            }
+
+            return Promise.reject(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const columns: ColumnsType<Product> = [
@@ -121,7 +174,7 @@ const SpecialityShopProducts = () => {
             title: 'Danh mục',
             dataIndex: 'category',
             key: 'category',
-            render: (category: string) => <Tag color="blue">{category}</Tag>,
+            render: (category: string) => <Tag color="blue">{getCategoryViLabel(category.toLowerCase())}</Tag>,
         },
         {
             title: 'Giá',
@@ -212,9 +265,9 @@ const SpecialityShopProducts = () => {
                             style={{ width: 150 }}
                         >
                             <Option value="all">Tất cả danh mục</Option>
-                            <Option value="Bánh kẹo">Bánh kẹo</Option>
-                            <Option value="Gia vị">Gia vị</Option>
-                            <Option value="Thực phẩm">Thực phẩm</Option>
+                            {Object.keys(CATEGORY_VI_LABELS).map(key => (
+                                <Option key={key} value={key}>{CATEGORY_VI_LABELS[key]}</Option>
+                            ))}
                         </Select>
                         <Button
                             type="primary"
@@ -248,41 +301,21 @@ const SpecialityShopProducts = () => {
                 </Spin>
             </Card>
 
-            <Modal
-                title="Chi tiết sản phẩm"
-                open={isModalVisible}
+            {/* Modal chi tiết sản phẩm */}
+            <ViewProductModal
+                visible={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
-                footer={null}
-                width={600}
-            >
-                {selectedProduct && (
-                    <div className="product-detail">
-                        <div className="product-image">
-                            {selectedProduct.imageUrl && selectedProduct.imageUrl.length > 0 ? (
-                                <img src={selectedProduct.imageUrl[0]} alt={selectedProduct.name} />
-                            ) : (
-                                <div className="no-image">Không có hình ảnh</div>
-                            )}
-                        </div>
-                        <div className="product-info">
-                            <h3>{selectedProduct.name}</h3>
-                            <p><strong>ID:</strong> {selectedProduct.id}</p>
-                            <p><strong>Shop ID:</strong> {selectedProduct.shopId}</p>
-                            <p><strong>Danh mục:</strong> {selectedProduct.category}</p>
-                            <p><strong>Giá:</strong> {selectedProduct.price.toLocaleString()} ₫</p>
-                            <p><strong>Tồn kho:</strong> {selectedProduct.quantityInStock}</p>
-                            <p><strong>Trạng thái:</strong>
-                                <Tag color={selectedProduct.quantityInStock > 0 ? 'green' : 'red'}>
-                                    {selectedProduct.quantityInStock > 0 ? 'Có sẵn' : 'Hết hàng'}
-                                </Tag>
-                            </p>
-                            <p><strong>Mô tả:</strong> {selectedProduct.description}</p>
-                            <p><strong>Ngày tạo:</strong> {new Date(selectedProduct.createdAt).toLocaleDateString('vi-VN')}</p>
-                            <p><strong>Cập nhật:</strong> {new Date(selectedProduct.updatedAt).toLocaleDateString('vi-VN')}</p>
-                        </div>
-                    </div>
-                )}
-            </Modal>
+                product={selectedProduct}
+            />
+
+            {/* Modal thêm/sửa sản phẩm */}
+            <CustomProductModal
+                visible={isProductModalVisible}
+                onCancel={() => setIsProductModalVisible(false)}
+                onSubmit={handleProductSubmit}
+                initialValues={selectedProduct}
+                title={selectedProduct ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới'}
+            />
         </div>
     );
 };

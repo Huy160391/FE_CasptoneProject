@@ -9,7 +9,7 @@ import {
 
 export const publicService = {
     async getPublicBlogs(
-        page: number = 1,
+        page: number = 0,
         pageSize: number = 10,
         searchText?: string,
         limit?: number

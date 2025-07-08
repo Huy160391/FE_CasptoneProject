@@ -1,6 +1,14 @@
 import React from 'react';
-import { Modal, Form, Input, Select, Row, Col, Checkbox, Divider, Upload } from 'antd';
+import { Modal, Form, Input, Select, Row, Col, InputNumber, Divider, Upload } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import {
+    TourTemplateType,
+    ScheduleDay
+} from '../../types/tour';
+import {
+    TOUR_TEMPLATE_TYPE_LABELS,
+    SCHEDULE_DAY_LABELS
+} from '../../constants/tourTemplate';
 
 const { Option } = Select;
 
@@ -25,25 +33,39 @@ const TourTemplateFormModal: React.FC<TourTemplateFormModalProps> = ({
     editingTemplate,
     loading
 }) => {
+    const handleFormSubmit = () => {
+        form.validateFields()
+            .then((values: any) => {
+                console.log('Form values before submit:', values);
+                console.log('scheduleDays value:', values.scheduleDays, 'type:', typeof values.scheduleDays);
+                console.log('templateType value:', values.templateType, 'type:', typeof values.templateType);
+                onOk();
+            })
+            .catch((info: any) => {
+                console.log('Validate Failed:', info);
+            });
+    };
+
     return (
         <Modal
-            title={editingTemplate ? 'Sửa Template' : 'Thêm Template Mới'}
+            title={editingTemplate ? 'Cập nhật Template' : 'Tạo Template Mới'}
             open={visible}
-            onOk={onOk}
+            onOk={handleFormSubmit}
             onCancel={onCancel}
-            okText={editingTemplate ? 'Cập nhật' : 'Thêm'}
+            okText={editingTemplate ? 'Cập nhật' : 'Tạo mới'}
             cancelText="Hủy"
-            width={1000}
+            width={800}
             confirmLoading={loading}
         >
             <Form
                 form={form}
                 layout="vertical"
                 initialValues={{
-                    tourType: 'Núi non',
-                    availableDays: ['saturday', 'sunday'],
-                    availableMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                    availableTourDates: []
+                    templateType: TourTemplateType.FreeScenic,
+                    scheduleDays: ScheduleDay.Saturday,
+                    month: new Date().getMonth() + 1,
+                    year: new Date().getFullYear(),
+                    images: []
                 }}
             >
                 {/* Thông tin cơ bản */}
@@ -87,67 +109,72 @@ const TourTemplateFormModal: React.FC<TourTemplateFormModalProps> = ({
                             rules={[{ required: true, message: 'Vui lòng chọn loại tour' }]}
                         >
                             <Select placeholder="Chọn loại tour">
-                                <Option value="FreeScenic">FreeScenic</Option>
-                                <Option value="PaidAttraction">PaidAttraction</Option>
+                                <Option value={TourTemplateType.FreeScenic}>
+                                    {TOUR_TEMPLATE_TYPE_LABELS[TourTemplateType.FreeScenic]}
+                                </Option>
+                                <Option value={TourTemplateType.PaidAttraction}>
+                                    {TOUR_TEMPLATE_TYPE_LABELS[TourTemplateType.PaidAttraction]}
+                                </Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item
+                            name="scheduleDays"
+                            label="Ngày trong tuần"
+                            rules={[{ required: true, message: 'Vui lòng chọn ngày (chỉ Thứ 7 hoặc Chủ nhật)' }]}
+                        >
+                            <Select
+                                placeholder="Chọn ngày trong tuần"
+                                onChange={(value) => console.log('Schedule day changed:', value)}
+                            >
+                                <Option value={ScheduleDay.Saturday}>
+                                    {SCHEDULE_DAY_LABELS[ScheduleDay.Saturday]} (Giá trị: {ScheduleDay.Saturday})
+                                </Option>
+                                <Option value={ScheduleDay.Sunday}>
+                                    {SCHEDULE_DAY_LABELS[ScheduleDay.Sunday]} (Giá trị: {ScheduleDay.Sunday})
+                                </Option>
                             </Select>
                         </Form.Item>
                     </Col>
                 </Row>
-                {/* Thời gian có sẵn */}
-                <Divider orientation="left">Thời gian có sẵn</Divider>
+
+                {/* Thời gian */}
+                <Divider orientation="left">Thời gian</Divider>
                 <Row gutter={16}>
-                    <Col span={8}>
+                    <Col span={12}>
                         <Form.Item
-                            name="availableDays"
-                            label="Thứ trong tuần"
-                            rules={[{ required: true, message: 'Vui lòng chọn ít nhất 1 thứ' }]}
+                            name="month"
+                            label="Tháng"
+                            rules={[
+                                { required: true, message: 'Vui lòng chọn tháng' },
+                                { type: 'number', min: 1, max: 12, message: 'Tháng phải từ 1 đến 12' }
+                            ]}
                         >
-                            <Checkbox.Group
-                                options={[
-                                    { label: 'Thứ 7', value: 'saturday' },
-                                    { label: 'Chủ nhật', value: 'sunday' }
-                                ]}
-                            />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item
-                            name="availableMonths"
-                            label="Tháng trong năm"
-                            rules={[{ required: true, message: 'Vui lòng chọn ít nhất 1 tháng' }]}
-                        >
-                            <Select
-                                mode="multiple"
-                                placeholder="Chọn tháng trong năm"
-                                style={{ width: '100%' }}
-                            >
-                                {[
-                                    'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4',
-                                    'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8',
-                                    'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
-                                ].map((month, index) => (
-                                    <Option key={index + 1} value={index + 1}>
-                                        {month}
+                            <Select placeholder="Chọn tháng">
+                                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                                    <Option key={month} value={month}>
+                                        Tháng {month}
                                     </Option>
                                 ))}
                             </Select>
                         </Form.Item>
                     </Col>
-                    <Col span={8}>
+                    <Col span={12}>
                         <Form.Item
-                            name="availableYears"
+                            name="year"
                             label="Năm"
-                            rules={[{ required: true, message: 'Vui lòng chọn ít nhất 1 năm' }]}
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập năm' },
+                                { type: 'number', min: 2024, max: 2030, message: 'Năm phải từ 2024 đến 2030' }
+                            ]}
                         >
-                            <Select
-                                mode="multiple"
-                                placeholder="Chọn năm"
+                            <InputNumber
+                                min={2024}
+                                max={2030}
+                                placeholder="Nhập năm"
                                 style={{ width: '100%' }}
-                            >
-                                {[2024, 2025, 2026, 2027, 2028].map(year => (
-                                    <Option key={year} value={year}>{year}</Option>
-                                ))}
-                            </Select>
+                            />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -155,8 +182,7 @@ const TourTemplateFormModal: React.FC<TourTemplateFormModalProps> = ({
                 <Divider orientation="left">Hình ảnh</Divider>
                 <Form.Item
                     name="images"
-                    label="Hình ảnh tour"
-                    rules={[{ required: true, message: 'Vui lòng tải lên ít nhất 1 hình ảnh' }]}
+                    label="Hình ảnh tour (tùy chọn)"
                     valuePropName="fileList"
                     getValueFromEvent={e => (Array.isArray(e) ? e : e && e.fileList)}
                 >
