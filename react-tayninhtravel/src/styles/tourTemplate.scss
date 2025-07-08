@@ -1,0 +1,431 @@
+// Tour Template Management Styles
+
+.tour-template-management {
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    h2 {
+      margin: 0;
+      color: #1890ff;
+    }
+  }
+
+  .filters {
+    margin-bottom: 16px;
+    
+    .ant-row {
+      align-items: flex-end;
+    }
+  }
+
+  .template-card {
+    margin-bottom: 16px;
+    
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .template-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #262626;
+      }
+      
+      .template-type {
+        .ant-tag {
+          font-size: 12px;
+        }
+      }
+    }
+    
+    .template-info {
+      margin-top: 12px;
+      
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        
+        .label {
+          color: #8c8c8c;
+          font-size: 14px;
+        }
+        
+        .value {
+          color: #262626;
+          font-size: 14px;
+          font-weight: 500;
+        }
+      }
+    }
+    
+    .template-actions {
+      margin-top: 16px;
+      text-align: right;
+      
+      .ant-btn {
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+// Tour Details Management Styles
+.tour-details-management {
+  .details-card {
+    margin-bottom: 16px;
+    
+    .details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      
+      .details-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 8px;
+      }
+      
+      .details-status {
+        .ant-tag {
+          font-size: 12px;
+        }
+      }
+    }
+    
+    .details-meta {
+      color: #8c8c8c;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    
+    .details-description {
+      color: #595959;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    
+    .details-timeline {
+      .timeline-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        
+        .time {
+          font-weight: 600;
+          color: #1890ff;
+          margin-right: 12px;
+          min-width: 60px;
+        }
+        
+        .activity {
+          color: #262626;
+          flex: 1;
+        }
+        
+        .shop-tag {
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+}
+
+// Timeline Builder Styles
+.timeline-builder {
+  .timeline-item-form {
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: #fafafa;
+    
+    &:hover {
+      border-color: #40a9ff;
+      background: #f6ffed;
+    }
+    
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      
+      .item-number {
+        font-weight: 600;
+        color: #1890ff;
+      }
+      
+      .item-actions {
+        .ant-btn {
+          margin-left: 4px;
+        }
+      }
+    }
+    
+    .form-row {
+      .ant-col {
+        padding: 0 4px;
+      }
+    }
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 0;
+    color: #8c8c8c;
+    
+    .ant-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      color: #d9d9d9;
+    }
+    
+    .empty-title {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    
+    .empty-description {
+      font-size: 14px;
+    }
+  }
+}
+
+// Tour Slots List Styles
+.tour-slots-list {
+  .stats-row {
+    margin-bottom: 24px;
+    
+    .ant-card {
+      text-align: center;
+      
+      .ant-statistic-title {
+        font-size: 14px;
+        color: #8c8c8c;
+      }
+      
+      .ant-statistic-content {
+        font-size: 24px;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  .filters-card {
+    margin-bottom: 16px;
+    
+    .ant-card-body {
+      padding: 16px;
+    }
+  }
+  
+  .slot-date {
+    display: flex;
+    align-items: center;
+    
+    .ant-icon {
+      margin-right: 8px;
+      color: #1890ff;
+    }
+  }
+  
+  .slot-status {
+    .ant-tag {
+      font-size: 12px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// Dashboard Styles
+.tour-template-dashboard {
+  .dashboard-stats {
+    margin-bottom: 24px;
+    
+    .ant-card {
+      text-align: center;
+      
+      .ant-statistic {
+        .ant-statistic-title {
+          font-size: 14px;
+          color: #8c8c8c;
+          margin-bottom: 8px;
+        }
+        
+        .ant-statistic-content {
+          font-size: 28px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+  
+  .progress-card {
+    .progress-item {
+      margin-bottom: 16px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        
+        .progress-label {
+          color: #262626;
+          font-size: 14px;
+        }
+        
+        .progress-value {
+          color: #1890ff;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+  
+  .recent-data {
+    .ant-table-small {
+      .ant-table-tbody > tr > td {
+        padding: 8px;
+      }
+    }
+  }
+}
+
+// Form Modal Styles
+.tour-template-form-modal {
+  .ant-modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .form-section {
+    margin-bottom: 24px;
+    
+    .ant-divider {
+      margin: 16px 0;
+      
+      .ant-divider-inner-text {
+        font-weight: 600;
+        color: #1890ff;
+      }
+    }
+  }
+  
+  .upload-area {
+    .ant-upload-select-picture-card {
+      width: 104px;
+      height: 104px;
+    }
+    
+    .ant-upload-list-picture-card {
+      .ant-upload-list-item {
+        width: 104px;
+        height: 104px;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .tour-template-management,
+  .tour-details-management {
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      
+      h2 {
+        margin-bottom: 16px;
+      }
+    }
+  }
+  
+  .timeline-builder {
+    .timeline-item-form {
+      .item-header {
+        flex-direction: column;
+        align-items: flex-start;
+        
+        .item-actions {
+          margin-top: 8px;
+        }
+      }
+    }
+  }
+  
+  .tour-slots-list {
+    .stats-row {
+      .ant-col {
+        margin-bottom: 16px;
+      }
+    }
+  }
+}
+
+// Animation and Transitions
+.tour-template-card,
+.tour-details-card,
+.timeline-item-form {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.ant-table-row {
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: #f0f9ff !important;
+  }
+}
+
+// Status Colors
+.status-pending {
+  color: #fa8c16;
+  background-color: #fff7e6;
+  border-color: #ffd591;
+}
+
+.status-approved {
+  color: #52c41a;
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.status-rejected {
+  color: #f5222d;
+  background-color: #fff2f0;
+  border-color: #ffccc7;
+}
+
+.status-available {
+  color: #52c41a;
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.status-fully-booked {
+  color: #1890ff;
+  background-color: #f0f9ff;
+  border-color: #91d5ff;
+}
+
+.status-cancelled {
+  color: #f5222d;
+  background-color: #fff2f0;
+  border-color: #ffccc7;
+}

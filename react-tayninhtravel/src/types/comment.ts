@@ -27,7 +27,7 @@ export interface UserComment {
     replies?: UserComment[];
     statusCode?: number;
     message?: string | null;
-    isSuccess?: boolean;
+    success?: boolean;
     validationErrors?: any[];
 }
 
