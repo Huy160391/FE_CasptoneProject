@@ -28,6 +28,7 @@ export { useThemeStore } from './store/useThemeStore';
 // Export hooks
 export { useBlogs, useBlog } from './hooks/useBlogs';
 export { useTours, useTour } from './hooks/useTours';
+export { useCart, useProductCart, useTourCart } from './hooks/useCart';
 
 // Export common utilities
 export { default as axiosInstance } from './config/axios';

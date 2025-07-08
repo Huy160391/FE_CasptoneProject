@@ -49,8 +49,43 @@
         }
         
         .item-quantity {
-          .ant-input-number {
-            width: 80px;
+          .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            
+            .quantity-btn {
+              width: 24px;
+              height: 24px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: 1px solid #d9d9d9;
+              border-radius: 4px;
+              padding: 0;
+              transition: all 0.2s;
+              
+              &:hover:not(:disabled) {
+                border-color: #1677ff;
+                color: #1677ff;
+              }
+              
+              &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+              }
+              
+              .anticon {
+                font-size: 12px;
+              }
+            }
+            
+            .quantity-display {
+              min-width: 30px;
+              text-align: center;
+              font-weight: 500;
+              color: rgba(0, 0, 0, 0.85);
+            }
           }
         }
       }
@@ -114,6 +149,24 @@ body.dark-mode {
           
           .item-price {
             color: #79eac0;
+          }
+          
+          .item-quantity {
+            .quantity-controls {
+              .quantity-btn {
+                border-color: #434343;
+                color: rgba(255, 255, 255, 0.65);
+                
+                &:hover:not(:disabled) {
+                  border-color: #79eac0;
+                  color: #79eac0;
+                }
+              }
+              
+              .quantity-display {
+                color: rgba(255, 255, 255, 0.85);
+              }
+            }
           }
         }
       }

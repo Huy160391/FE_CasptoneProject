@@ -28,6 +28,12 @@ axiosInstance.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
+        // Nếu là FormData, không thiết lập header Content-Type
+        // Để axios tự thêm boundary đúng (quan trọng cho multipart/form-data)
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
+
         // Development logging
         if (isDevelopment) {
             console.log('🚀 API Request:', {
@@ -49,6 +55,7 @@ axiosInstance.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+
 
 // Response interceptor
 axiosInstance.interceptors.response.use(

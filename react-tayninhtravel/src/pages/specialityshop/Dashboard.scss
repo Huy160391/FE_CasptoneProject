@@ -1,0 +1,157 @@
+.specialityshop-dashboard-page {
+  .page-title {
+    margin-bottom: 24px;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  
+  .stat-card {
+    height: 100%;
+    
+    .stat-icon {
+      float: right;
+      width: 48px;
+      height: 48px;
+      padding: 12px;
+      border-radius: 50%;
+      font-size: 24px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  
+  .dashboard-row {
+    margin-top: 16px;
+  }
+  
+  .recent-orders-card, .top-products-card {
+    height: 100%;
+  }
+  
+  .status-tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    
+    &.success {
+      background-color: #f6ffed;
+      border: 1px solid #b7eb8f;
+      color: #52c41a;
+    }
+    
+    &.processing {
+      background-color: #e6f7ff;
+      border: 1px solid #91d5ff;
+      color: #1677ff;
+    }
+    
+    &.error {
+      background-color: #fff2f0;
+      border: 1px solid #ffccc7;
+      color: #f5222d;
+    }
+  }
+  
+  .top-products-card {
+    .product-item {
+      margin-bottom: 16px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .product-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        
+        .product-name {
+          font-weight: 500;
+        }
+        
+        .product-sold {
+          color: rgba(0, 0, 0, 0.45);
+        }
+      }
+    }
+  }
+}
+
+/* Dark mode styles for speciality shop dashboard */
+body.dark-mode {
+  .specialityshop-dashboard-page {
+    .page-title {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .stat-card {
+      background-color: #141414;
+      
+      .stat-title {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      
+      .stat-value {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .stat-icon {
+        background-color: #1f1f1f;
+      }
+    }
+    
+    .recent-orders-card, 
+    .top-products-card {
+      background-color: #141414;
+      
+      .ant-card-head {
+        border-bottom-color: #303030;
+        
+        .ant-card-head-title {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+    }
+    
+    .status-tag {
+      &.success {
+        background-color: rgba(82, 196, 26, 0.2);
+        color: #52c41a;
+        border-color: rgba(82, 196, 26, 0.4);
+      }
+      
+      &.processing {
+        background-color: rgba(22, 119, 255, 0.2);
+        color: #1677ff;
+        border-color: rgba(22, 119, 255, 0.4);
+      }
+      
+      &.error {
+        background-color: rgba(245, 34, 45, 0.2);
+        color: #ff4d4f;
+        border-color: rgba(245, 34, 45, 0.4);
+      }
+    }
+    
+    .top-products-card {
+      .product-item {
+        border-bottom-color: #303030;
+        
+        .product-info {
+          .product-name {
+            color: rgba(255, 255, 255, 0.85);
+          }
+          
+          .product-sold {
+            color: rgba(255, 255, 255, 0.45);
+          }
+        }
+      }
+    }
+    
+    .chart-card {
+      background-color: #141414;
+    }
+  }
+}

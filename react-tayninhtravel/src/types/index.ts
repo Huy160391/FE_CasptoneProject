@@ -32,23 +32,17 @@ export interface CustomerInfo {
 }
 
 export interface Product {
-    id: string | number;
+    id: string;
+    shopId: string;
     name: string;
-    description: string;
+    description: string | null;
     price: number;
-    originalPrice?: number;
+    quantityInStock: number;
+    imageUrl: string[];
     category: string;
-    images: string[];
-    thumbnail?: string;
-    inStock: boolean;
-    stockQuantity?: number;
-    weight?: number;
-    dimensions?: string;
-    rating: number;
-    reviewCount: number;
-    tags?: string[];
-    isActive: boolean;
-    featured?: boolean;
+    isSale?: boolean;
+    soldCount: number;
+    salePercent?: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -143,6 +137,43 @@ export interface ThingToDo {
     website?: string;
     createdAt: string;
     updatedAt: string;
+}
+
+// API Response Types cho Services
+export interface GetBlogsResponse {
+    data: Blog[];
+    totalRecords: number;
+    currentPage: number;
+    pageSize: number;
+}
+
+export interface GetProductsResponse {
+    data: Product[];
+    totalRecord: number;
+    pageIndex: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export interface GetProductsParams {
+    pageIndex?: number;
+    pageSize?: number;
+    textSearch?: string;
+    status?: boolean;
+}
+
+// Extend global Blog interface for specific API response
+export interface PublicBlog extends Omit<Blog, 'authorId' | 'author'> {
+    authorName: string;
+    imageUrl?: string[];
+    totalLikes?: number;
+    totalDislikes?: number;
+    totalComments?: number;
+}
+
+export interface BlogImage {
+    id: string;
+    url: string;
 }
 
 // API Response Types

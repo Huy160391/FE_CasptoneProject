@@ -9,8 +9,13 @@ import ThingsToDoDetail from '@/pages/ThingsToDoDetail';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import Career from '@/pages/Career';
+import CartDetail from '@/components/cart/CartDetail';
+import Checkout from '@/components/payment/Checkout';
+import OrderSuccess from '@/pages/OrderSuccess';
 import NotFound from '@/pages/NotFound';
 import Unauthorized from '@/pages/Unauthorized';
+import PaymentSuccess from '@/components/payment/PaymentSuccess';
+import PaymentCancel from '@/components/payment/PaymentCancel';
 
 export const publicRoutes: RouteObject[] = [
     {
@@ -32,6 +37,18 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/shop/product/:id',
         element: <ProductDetail />,
+    },
+    {
+        path: '/cart',
+        element: <CartDetail />,
+    },
+    {
+        path: '/checkout',
+        element: <Checkout />,
+    },
+    {
+        path: '/order-success',
+        element: <OrderSuccess />,
     },
     {
         path: '/things-to-do',
@@ -57,6 +74,14 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/unauthorized',
         element: <Unauthorized />,
+    },
+    {
+        path: '/payment-success',
+        element: <PaymentSuccess />,
+    },
+    {
+        path: '/payment-cancel',
+        element: <PaymentCancel />,
     },
     {
         path: '*',

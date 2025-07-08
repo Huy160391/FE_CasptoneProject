@@ -45,19 +45,23 @@ export const authService = {
                     throw new Error('Invalid token format');
                 }
 
-                // Lấy role từ token
-                let userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+                // Lấy role từ token - thử nhiều cách khác nhau
+                let userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+                    || decoded['role'];
+
+
                 if (userRole && (userRole.toLowerCase() === 'admin' || userRole === 'Admin')) {
                     userRole = 'Admin';
                 } else if (userRole && (userRole.toLowerCase() === 'blogger' || userRole === 'Blogger')) {
                     userRole = 'Blogger';
                 } else if (userRole && (userRole.toLowerCase() === 'tour company' || userRole === 'Tour Company')) {
                     userRole = 'Tour Company';
-                } else if (userRole && (userRole.toLowerCase() === 'speciality shop' || userRole === 'Speciality shop')) {
-                    userRole = 'Speciality shop';
+                } else if (userRole && (userRole.toLowerCase() === 'specialty shop' || userRole === 'Specialty Shop')) {
+                    userRole = 'Specialty Shop';
                 } else {
                     userRole = 'user';
                 }
+
 
                 // Tạo user info từ response API
                 const userInfo: User = {
