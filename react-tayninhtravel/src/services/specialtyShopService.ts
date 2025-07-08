@@ -133,7 +133,7 @@ export const updateProduct = async (id: string, data: FormData | UpdateProductDa
     // Log trước khi gửi
     console.log("Updating product with FormData, ID:", id);
 
-    const response = await axios.patch(`/Product/Product/${id}`, data, {
+    const response = await axios.put(`/Product/Product/${id}`, data, {
         headers,
     });
     return response.data;
