@@ -1,4 +1,4 @@
-import { Row, Col, Card, Button, Rate, Spin, Empty } from 'antd'
+import { Row, Col, Card, Button, Spin, Empty } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { getFeaturedTourDetails } from '../../services/tourcompanyService'

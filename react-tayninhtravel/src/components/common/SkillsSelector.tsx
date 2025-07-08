@@ -15,9 +15,7 @@ import {
     Button
 } from 'antd';
 import {
-    SearchOutlined,
     ClearOutlined,
-    CheckCircleOutlined,
     InfoCircleOutlined
 } from '@ant-design/icons';
 import skillsService from '../../services/skillsService';
@@ -43,7 +41,6 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
     onSkillsChange,
     disabled = false,
     required = false,
-    placeholder = "Chọn kỹ năng yêu cầu...",
     maxSelections,
     showCategories = true,
     allowMultiple = true,
@@ -95,7 +92,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
 
         Object.entries(skillsCategories).forEach(([category, skills]) => {
             const categoryKey = category as SkillCategoryName;
-            filtered[categoryKey] = skills.filter(skill =>
+            filtered[categoryKey] = skills.filter((skill: SkillInfoDto) =>
                 skill.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 skill.englishName.toLowerCase().includes(searchTerm.toLowerCase())
             );
@@ -137,7 +134,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
     };
 
     // Render skill item
-    const renderSkillItem = (skill: SkillInfoDto, categoryKey: SkillCategoryName) => {
+    const renderSkillItem = (skill: SkillInfoDto, _categoryKey: SkillCategoryName) => {
         const isSelected = selectedSkills.includes(skill.englishName);
         const isDisabled = disabled || (maxSelections && !isSelected && selectedSkills.length >= maxSelections);
 
@@ -145,7 +142,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
             <Col span={12} key={skill.englishName}>
                 <Checkbox
                     checked={isSelected}
-                    disabled={isDisabled}
+                    disabled={Boolean(isDisabled)}
                     onChange={() => handleSkillToggle(skill.englishName)}
                     style={{ width: '100%' }}
                 >
@@ -249,7 +246,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
                     </Button>
                 )
             }
-            size={size}
+            size={size as "small" | "default"}
         >
             {/* Search */}
             <div style={{ marginBottom: 16 }}>
@@ -314,7 +311,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
                         <div key={categoryKey} style={{ marginBottom: 16 }}>
                             <Title level={5}>{SKILL_CATEGORIES[categoryKey as SkillCategoryName]}</Title>
                             <Row gutter={[16, 8]}>
-                                {skills.map(skill => renderSkillItem(skill, categoryKey as SkillCategoryName))}
+                                {skills.map((skill: SkillInfoDto) => renderSkillItem(skill, categoryKey as SkillCategoryName))}
                             </Row>
                         </div>
                     ))}

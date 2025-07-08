@@ -55,7 +55,6 @@ import WizardTemplatesTester from '../../components/debug/WizardTemplatesTester'
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { TabPane } = Tabs;
 
 const TourDetailsManagement: React.FC = () => {
     const { token } = useAuthStore();
@@ -466,74 +465,73 @@ const TourDetailsManagement: React.FC = () => {
                     />
                 )}
 
-                <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
-                    <TabPane
-                        tab={
-                            <span>
-                                <EyeOutlined />
-                                Tours List
-                            </span>
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={setActiveTab}
+                    type="card"
+                    items={[
+                        {
+                            key: 'tours',
+                            label: (
+                                <span>
+                                    <EyeOutlined />
+                                    Tours List
+                                </span>
+                            ),
+                            children: (
+                                <div>
+                                    <Table
+                                        columns={columns}
+                                        dataSource={tourDetailsList}
+                                        rowKey="id"
+                                        loading={loading}
+                                        pagination={{
+                                            current: currentPage,
+                                            pageSize: pageSize,
+                                            total: totalCount,
+                                            showSizeChanger: true,
+                                            showQuickJumper: true,
+                                            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} tours`,
+                                            onChange: handlePageChange,
+                                            onShowSizeChange: handlePageSizeChange,
+                                            pageSizeOptions: ['10', '20', '50', '100'],
+                                        }}
+                                    />
+                                </div>
+                            )
+                        },
+                        {
+                            key: 'api-test',
+                            label: (
+                                <span>
+                                    <ApiOutlined />
+                                    API Tester
+                                </span>
+                            ),
+                            children: <ApiTester />
+                        },
+                        {
+                            key: 'cache-status',
+                            label: (
+                                <span>
+                                    <BarChartOutlined />
+                                    Cache Status
+                                </span>
+                            ),
+                            children: <CacheStatus />
+                        },
+                        {
+                            key: 'wizard-test',
+                            label: (
+                                <span>
+                                    <ExclamationCircleOutlined />
+                                    Wizard Templates Test
+                                </span>
+                            ),
+                            children: <WizardTemplatesTester />
                         }
-                        key="tours"
-                    >
-                        <div>
-
-                        <Table
-                            columns={columns}
-                            dataSource={tourDetailsList}
-                            rowKey="id"
-                            loading={loading}
-                            pagination={{
-                                current: currentPage,
-                                pageSize: pageSize,
-                                total: totalCount,
-                                showSizeChanger: true,
-                                showQuickJumper: true,
-                                showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} tours`,
-                                onChange: handlePageChange,
-                                onShowSizeChange: handlePageSizeChange,
-                                pageSizeOptions: ['10', '20', '50', '100'],
-                            }}
-                        />
-                        </div>
-                    </TabPane>
-
-                    <TabPane
-                        tab={
-                            <span>
-                                <ApiOutlined />
-                                API Tester
-                            </span>
-                        }
-                        key="api-test"
-                    >
-                        <ApiTester />
-                    </TabPane>
-
-                    <TabPane
-                        tab={
-                            <span>
-                                <BarChartOutlined />
-                                Cache Status
-                            </span>
-                        }
-                        key="cache-status"
-                    >
-                        <CacheStatus />
-                    </TabPane>
-
-                    <TabPane
-                        tab={
-                            <span>
-                                <ExclamationCircleOutlined />
-                                Wizard Templates Test
-                            </span>
-                        }
-                        key="wizard-test"
-                    >
-                        <WizardTemplatesTester />
-                    </TabPane>
-                </Tabs>
+                    ]}
+                />
             </Card>
 
             {/* Create/Edit Modal */}

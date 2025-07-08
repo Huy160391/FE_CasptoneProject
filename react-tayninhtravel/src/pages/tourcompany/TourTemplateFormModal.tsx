@@ -1,16 +1,13 @@
 import React from 'react';
-import { Modal, Form, Input, Select, Row, Col, InputNumber, Divider, Upload, message } from 'antd';
+import { Modal, Form, Input, Select, Row, Col, InputNumber, Divider, Upload } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import {
     TourTemplateType,
-    ScheduleDay,
-    CreateTourTemplateRequest,
-    UpdateTourTemplateRequest
+    ScheduleDay
 } from '../../types/tour';
 import {
     TOUR_TEMPLATE_TYPE_LABELS,
-    SCHEDULE_DAY_LABELS,
-    validateTourTemplate
+    SCHEDULE_DAY_LABELS
 } from '../../constants/tourTemplate';
 
 const { Option } = Select;

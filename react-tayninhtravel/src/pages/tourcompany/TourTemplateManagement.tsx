@@ -2,27 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
     TourTemplate,
     TourTemplateType,
-    ScheduleDay,
-    CreateTourTemplateRequest,
-    UpdateTourTemplateRequest
+    ScheduleDay
 } from '../../types/tour';
 import {
     getTourTemplates,
     createTourTemplate,
     getTourTemplateDetail,
     updateTourTemplate,
-    deleteTourTemplate,
-    handleApiError
+    deleteTourTemplate
 } from '../../services/tourcompanyService';
 import publicService from '../../services/publicService';
-import { useAuthStore } from '../../store/useAuthStore';
-import {
-    getTemplateTypeLabel,
-    getScheduleDayLabel,
-    validateTourTemplate,
-    TOUR_TEMPLATE_TYPE_LABELS,
-    SCHEDULE_DAY_LABELS
-} from '../../constants/tourTemplate';
+
+
 import {
     Table,
     Button,
@@ -51,7 +42,7 @@ import TourTemplateFormModal from './TourTemplateFormModal';
 const { Title } = Typography;
 
 const TourTemplateManagement: React.FC = () => {
-    const { token } = useAuthStore();
+
     const [templates, setTemplates] = useState<TourTemplate[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);

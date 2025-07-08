@@ -8,7 +8,6 @@ import {
     Row,
     Col,
     Button,
-    Space,
     Divider,
     Alert,
     Spin,
@@ -23,8 +22,7 @@ import {
     CheckCircleOutlined,
     ExclamationCircleOutlined,
     DollarOutlined,
-    TeamOutlined,
-    EditOutlined
+    TeamOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
@@ -42,8 +40,7 @@ import {
 } from '../../types/tour';
 import {
     getTourDetailsStatusLabel,
-    getStatusColor,
-    TOUR_DETAILS_STATUS_LABELS
+    getStatusColor
 } from '../../constants/tourTemplate';
 import TourOperationManagement from './TourOperationManagement';
 
@@ -109,7 +106,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
             try {
                 const invitationsResponse = await getTourGuideInvitations(tourDetailsId, token);
                 if (invitationsResponse.success) {
-                    setInvitations(invitationsResponse);
+                    setInvitations(invitationsResponse as unknown as TourGuideInvitationsResponse);
                 }
             } catch (error) {
                 console.log('No invitations found or error loading invitations:', error);
@@ -200,7 +197,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             <Col span={8}>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '24px', color: '#52c41a' }}>
-                                        {tourDetails.assignedSlots?.length || 0}
+                                        {(tourDetails as any).assignedSlots?.length || 0}
                                     </div>
                                     <div style={{ color: '#666' }}>Assigned Slots</div>
                                 </div>
@@ -225,8 +222,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
             {timeline.length > 0 ? (
                 <Timeline mode="left">
                     {timeline
-                        .sort((a, b) => a.orderIndex - b.orderIndex)
-                        .map((item, index) => (
+                        .sort((a, b) => (a.sortOrder || a.orderIndex || 0) - (b.sortOrder || b.orderIndex || 0))
+                        .map((item, _index) => (
                             <Timeline.Item
                                 key={item.id}
                                 dot={<ClockCircleOutlined style={{ fontSize: '16px' }} />}
@@ -265,7 +262,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
         <div>
             {tourOperation ? (
                 <TourOperationManagement
-                    tourDetails={tourDetails}
+                    tourDetails={tourDetails!}
                     onOperationUpdate={handleOperationUpdate}
                     onOperationCreate={handleOperationCreate}
                 />
@@ -458,7 +455,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             <span>
                                 <UserOutlined />
                                 Hướng dẫn viên ({invitations?.statistics.totalInvitations || 0})
-                                {invitations?.statistics.acceptedInvitations > 0 &&
+                                {(invitations?.statistics?.acceptedInvitations || 0) > 0 &&
                                     <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
                             </span>
                         }

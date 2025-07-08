@@ -29,7 +29,7 @@ const WizardTemplatesTester: React.FC = () => {
             // Test with pageIndex=0 (should work)
             const templates = await getTemplates(
                 { pageIndex: 0, pageSize: 100, includeInactive: false }, 
-                token, 
+                token ?? undefined,
                 true // force refresh
             );
             
@@ -45,7 +45,7 @@ const WizardTemplatesTester: React.FC = () => {
             console.error('❌ Error testing templates:', error);
             setTestResult({
                 success: false,
-                error: error.message || 'Unknown error'
+                error: error instanceof Error ? error.message : 'Unknown error'
             });
         } finally {
             setTesting(false);

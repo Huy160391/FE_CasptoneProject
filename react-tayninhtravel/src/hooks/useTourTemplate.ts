@@ -9,30 +9,20 @@ import {
     getTourTemplateDetail,
     createTourDetails,
     getTourDetailsList,
-    getTourDetailsByTemplate,
     getTourDetailsById,
     updateTourDetails,
     deleteTourDetails,
-    createTourOperation,
-    getTourOperationByDetailsId,
-    updateTourOperation,
     createTimelineItems,
-    getTimelineItemsByDetailsId,
-    getSpecialtyShops,
     handleApiError,
     performanceTracker
 } from '../services/tourcompanyService';
 import {
     TourTemplate,
     TourDetails,
-    TourOperation,
-    SpecialtyShop,
     CreateTourTemplateRequest,
     UpdateTourTemplateRequest,
     CreateTourDetailsRequest,
-    CreateTourOperationRequest,
     GetTourTemplatesParams,
-    TimelineItem,
     CreateTimelineItemsRequest
 } from '../types/tour';
 
@@ -75,9 +65,9 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             setTemplatesLoading(true);
             performanceTracker.start('Load Templates');
             
-            const response = await getTourTemplates(params, token);
-            if (response.success && response.data) {
-                setTemplates(response.data.items || []);
+            const response = await getTourTemplates(params, token ?? undefined);
+            if (response.statusCode === 200 && response.data) {
+                setTemplates(response.data || []);
             }
             
             performanceTracker.end('Load Templates');
@@ -93,7 +83,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
         try {
             performanceTracker.start('Create Template');
             
-            const response = await createTourTemplate(data, token);
+            const response = await createTourTemplate(data, token ?? undefined);
             if (response.success) {
                 message.success(response.message || 'Tạo template thành công');
                 await loadTemplates(); // Refresh list
@@ -112,7 +102,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
         try {
             performanceTracker.start('Update Template');
             
-            const response = await updateTourTemplate(id, data, token);
+            const response = await updateTourTemplate(id, data, token ?? undefined);
             if (response.success) {
                 message.success('Cập nhật template thành công');
                 await loadTemplates(); // Refresh list
@@ -129,7 +119,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
     // Delete template
     const deleteTemplate = useCallback(async (id: string): Promise<boolean> => {
         try {
-            const response = await deleteTourTemplate(id, token);
+            const response = await deleteTourTemplate(id, token ?? undefined);
             if (response.success) {
                 message.success('Xóa template thành công');
                 await loadTemplates(); // Refresh list
@@ -145,7 +135,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
     // Get template detail
     const getTemplateDetail = useCallback(async (id: string): Promise<TourTemplate | null> => {
         try {
-            return await getTourTemplateDetail(id, token || '');
+            return await getTourTemplateDetail(id, token ?? '');
         } catch (error) {
             message.error(handleApiError(error));
             return null;
@@ -158,9 +148,9 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
             setDetailsLoading(true);
             performanceTracker.start('Load Tour Details');
             
-            const response = await getTourDetailsList(params, token);
+            const response = await getTourDetailsList(params, token ?? undefined);
             if (response.success && response.data) {
-                setTourDetails(response.data.items || response.data);
+                setTourDetails(response.data || []);
             }
             
             performanceTracker.end('Load Tour Details');
@@ -176,7 +166,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
         try {
             performanceTracker.start('Create Tour Details');
             
-            const response = await createTourDetails(data, token);
+            const response = await createTourDetails(data, token ?? undefined);
             if (response.success) {
                 message.success(response.message || 'Tạo tour details thành công');
                 await loadTourDetails(); // Refresh list
@@ -195,7 +185,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
         try {
             performanceTracker.start('Update Tour Details');
             
-            const response = await updateTourDetails(id, data, token);
+            const response = await updateTourDetails(id, data, token ?? undefined);
             if (response.success) {
                 message.success('Cập nhật tour details thành công');
                 await loadTourDetails(); // Refresh list
@@ -212,7 +202,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
     // Delete tour details
     const deleteDetails = useCallback(async (id: string): Promise<boolean> => {
         try {
-            const response = await deleteTourDetails(id, token);
+            const response = await deleteTourDetails(id, token ?? undefined);
             if (response.success) {
                 message.success('Xóa tour details thành công');
                 await loadTourDetails(); // Refresh list
@@ -228,7 +218,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
     // Get tour details by ID
     const getDetailsById = useCallback(async (id: string): Promise<TourDetails | null> => {
         try {
-            const response = await getTourDetailsById(id, token);
+            const response = await getTourDetailsById(id, token ?? undefined);
             if (response.success && response.data) {
                 return response.data;
             }
@@ -244,7 +234,7 @@ export const useTourTemplate = (): UseTourTemplateReturn => {
         try {
             performanceTracker.start('Create Timeline');
             
-            const response = await createTimelineItems(data, token);
+            const response = await createTimelineItems(data, token ?? undefined);
             if (response.success) {
                 message.success(`Tạo ${response.data?.createdCount || data.timelineItems.length} timeline items thành công`);
                 performanceTracker.end('Create Timeline');

@@ -157,7 +157,7 @@ export const useTourTemplateStore = create<TourTemplateState>()(
           
           const response = await getSpecialtyShops(includeInactive, token);
           
-          if (response && response.statusCode === 200 && response.data) {
+          if (response && response.success && response.data) {
             const shops = response.data;
             
             // Update cache

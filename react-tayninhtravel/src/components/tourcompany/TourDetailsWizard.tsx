@@ -25,8 +25,7 @@ import {
     EditOutlined,
     ClockCircleOutlined,
     UserOutlined,
-    ShopOutlined,
-    CheckCircleOutlined
+    ShopOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useTourTemplateStore } from '../../store/useTourTemplateStore';
@@ -39,18 +38,17 @@ import {
 import {
     TourTemplate,
     SpecialtyShop,
-    TourGuide,
     CreateTourDetailsRequest,
     CreateTourOperationRequest,
     CreateTimelineItemRequest
 } from '../../types/tour';
 import SkillsSelector from '../common/SkillsSelector';
 import skillsService from '../../services/skillsService';
-import dayjs from 'dayjs';
+
 
 const { Option } = Select;
 const { TextArea } = Input;
-const { Step } = Steps;
+
 
 interface TourDetailsWizardProps {
     visible: boolean;
@@ -90,11 +88,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         getShops,
         getGuides,
         templatesLoading,
-        shopsLoading,
-        guidesLoading,
         templatesCache,
-        shopsCache,
-        guidesCache
+        shopsCache
     } = useTourTemplateStore();
 
     const [currentStep, setCurrentStep] = useState(0);
@@ -106,7 +101,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
     // Data states - now using cached data
     const [templates, setTemplates] = useState<TourTemplate[]>(templatesCache?.data || []);
     const [specialtyShops, setSpecialtyShops] = useState<SpecialtyShop[]>(shopsCache?.data || []);
-    const [tourGuides, setTourGuides] = useState<TourGuide[]>(guidesCache?.data || []);
+
     
     // Wizard data
     const [wizardData, setWizardData] = useState<WizardData>({
@@ -125,7 +120,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
     });
 
     // Timeline editing state
-    const [editingTimelineItem, setEditingTimelineItem] = useState<CreateTimelineItemRequest | null>(null);
+
     const [timelineForm] = Form.useForm();
 
     // Update local state when cache changes
@@ -141,11 +136,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         }
     }, [shopsCache]);
 
-    useEffect(() => {
-        if (guidesCache?.data) {
-            setTourGuides(guidesCache.data);
-        }
-    }, [guidesCache]);
+
 
     useEffect(() => {
         console.log('🧙‍♂️ Wizard visibility changed:', visible);
@@ -161,9 +152,9 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
             // Use cached data or fetch fresh data
             const [templatesData, shopsData, guidesData] = await Promise.all([
-                getTemplates({ pageIndex: 0, pageSize: 10000000, includeInactive: false }, token),
-                getShops(false, token),
-                getGuides(false, token)
+                getTemplates({ pageIndex: 0, pageSize: 10000000, includeInactive: false }, token ?? undefined),
+                getShops(false, token ?? undefined),
+                getGuides(false, token ?? undefined)
             ]);
 
             console.log('🔍 Wizard - Templates loaded:', templatesData.length);
@@ -173,7 +164,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             // Update local state
             setTemplates(templatesData);
             setSpecialtyShops(shopsData);
-            setTourGuides(guidesData);
+
 
         } catch (error) {
             console.error('❌ Error loading wizard data:', error);
@@ -332,7 +323,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 activity: values.activity,
                 location: values.location || '',
                 specialtyShopId: values.specialtyShopId || null,
-                orderIndex: wizardData.timeline.length + 1,
+                sortOrder: wizardData.timeline.length + 1,
                 estimatedDuration: values.estimatedDuration || 60
             };
 
@@ -560,13 +551,13 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     dataSource={wizardData.timeline}
                     pagination={false}
                     size="small"
-                    rowKey={(record, index) => index || 0}
+                    rowKey={(_record, index) => index || 0}
                     columns={[
                         {
                             title: 'Thứ tự',
                             dataIndex: 'orderIndex',
                             width: 80,
-                            render: (value, record, index) => (
+                            render: (_value, _record, index) => (
                                 <Tag color="blue">{index + 1}</Tag>
                             )
                         },
@@ -615,7 +606,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                         {
                             title: 'Thao tác',
                             width: 80,
-                            render: (_, record, index) => (
+                            render: (_, _record, index) => (
                                 <Button
                                     type="text"
                                     danger

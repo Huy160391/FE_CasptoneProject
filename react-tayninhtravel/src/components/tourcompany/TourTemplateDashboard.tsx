@@ -7,10 +7,7 @@ import {
     Progress,
     Table,
     Tag,
-    Space,
     Button,
-    DatePicker,
-    Select,
     Spin
 } from 'antd';
 import {
@@ -23,23 +20,20 @@ import {
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import { usePreloadWizardData } from '../../hooks/usePreloadWizardData';
-import { getTourTemplates, getTourDetailsList, handleApiError } from '../../services/tourcompanyService';
+import { getTourTemplates, getTourDetailsList } from '../../services/tourcompanyService';
 import {
     TourTemplate,
     TourDetails,
     TourTemplateType,
-    TourDetailsStatus,
-    TourSlotStatus
+    TourDetailsStatus
 } from '../../types/tour';
 import {
     getTemplateTypeLabel,
     getTourDetailsStatusLabel,
-    getStatusColor,
-    TOUR_TEMPLATE_TYPE_LABELS
+    getStatusColor
 } from '../../constants/tourTemplate';
 
-const { RangePicker } = DatePicker;
-const { Option } = Select;
+
 
 interface DashboardStats {
     totalTemplates: number;
@@ -94,12 +88,12 @@ const TourTemplateDashboard: React.FC = () => {
             setLoading(true);
             
             // Load templates
-            const templatesResponse = await getTourTemplates({ pageSize: 100 }, token);
-            const templates = templatesResponse.data?.items || [];
+            const templatesResponse = await getTourTemplates({ pageSize: 100 }, token ?? undefined);
+            const templates = templatesResponse.data || [];
             
             // Load details
-            const detailsResponse = await getTourDetailsList({ pageSize: 100 }, token);
-            const details = detailsResponse.data?.items || [];
+            const detailsResponse = await getTourDetailsList({ pageSize: 100 }, token ?? undefined);
+            const details = detailsResponse.data || [];
 
             // Calculate stats
             const newStats: DashboardStats = {
@@ -120,7 +114,9 @@ const TourTemplateDashboard: React.FC = () => {
                     [TourDetailsStatus.Suspended]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Suspended).length,
                     [TourDetailsStatus.AwaitingGuideAssignment]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.AwaitingGuideAssignment).length,
                     [TourDetailsStatus.Cancelled]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Cancelled).length,
-                    [TourDetailsStatus.AwaitingAdminApproval]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.AwaitingAdminApproval).length
+                    [TourDetailsStatus.AwaitingAdminApproval]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.AwaitingAdminApproval).length,
+                    [TourDetailsStatus.WaitToPublic]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.WaitToPublic).length,
+                    [TourDetailsStatus.Public]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Public).length
                 }
             };
 

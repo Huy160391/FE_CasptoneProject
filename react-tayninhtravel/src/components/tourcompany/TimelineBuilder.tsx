@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Card,
-    Form,
     Input,
-    TimePicker,
     Select,
     Button,
     Space,
@@ -12,8 +10,7 @@ import {
     Popconfirm,
     InputNumber,
     Row,
-    Col,
-    Divider
+    Col
 } from 'antd';
 import {
     PlusOutlined,
@@ -21,10 +18,9 @@ import {
     SaveOutlined,
     ClockCircleOutlined
 } from '@ant-design/icons';
-import dayjs from 'dayjs';
+
 import { useAuthStore } from '../../store/useAuthStore';
 import {
-    createTimelineItem,
     createTimelineItems,
     updateTimelineItem,
     deleteTimelineItem,
@@ -32,12 +28,11 @@ import {
 } from '../../services/tourcompanyService';
 import {
     TimelineItem,
-    CreateTimelineItemRequest,
     SpecialtyShop
 } from '../../types/tour';
 import { validateTimelineItem } from '../../constants/tourTemplate';
 
-const { TextArea } = Input;
+
 const { Option } = Select;
 
 interface TimelineBuilderProps {
@@ -67,19 +62,19 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
     const { token } = useAuthStore();
     const [items, setItems] = useState<TimelineFormItem[]>([]);
     const [loading, setLoading] = useState(false);
-    const [form] = Form.useForm();
+
 
     useEffect(() => {
         // Initialize items from existing timeline
         const initialItems: TimelineFormItem[] = timeline
-            .sort((a, b) => (a.orderIndex || a.sortOrder || 0) - (b.orderIndex || b.sortOrder || 0))
+            .sort((a, b) => (a.sortOrder || a.orderIndex || 0) - (b.sortOrder || b.orderIndex || 0))
             .map(item => ({
                 id: item.id,
                 checkInTime: item.checkInTime,
                 activity: item.activity,
                 location: item.location,
                 specialtyShopId: item.specialtyShopId || undefined,
-                sortOrder: item.orderIndex || item.sortOrder || 1,
+                sortOrder: item.sortOrder || item.orderIndex || 1,
                 estimatedDuration: item.estimatedDuration,
                 isNew: false
             }));
@@ -91,7 +86,7 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
             checkInTime: '',
             activity: '',
             location: '',
-            orderIndex: items.length + 1,
+            sortOrder: items.length + 1,
             estimatedDuration: 30, // Default 30 minutes
             isNew: true
         };
@@ -111,7 +106,7 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
             // Delete existing item from server
             try {
                 setLoading(true);
-                const response = await deleteTimelineItem(item.id, token);
+                const response = await deleteTimelineItem(item.id, token ?? undefined);
                 if (response.success) {
                     message.success('Xóa timeline item thành công');
                 }
@@ -186,7 +181,7 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
                     }))
                 };
 
-                const response = await createTimelineItems(createRequest, token);
+                const response = await createTimelineItems(createRequest, token ?? undefined);
                 if (response.success) {
                     message.success(`Tạo ${response.data?.createdCount || newItems.length} timeline items thành công`);
                 }
@@ -200,7 +195,7 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
                         activity: item.activity,
                         specialtyShopId: item.specialtyShopId || null,
                         sortOrder: item.sortOrder
-                    }, token);
+                    }, token ?? undefined);
                 }
             }
 

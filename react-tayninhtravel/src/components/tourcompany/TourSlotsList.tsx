@@ -10,7 +10,6 @@ import {
     Statistic,
     Select,
     DatePicker,
-    message,
     Modal,
     Descriptions
 } from 'antd';
@@ -22,7 +21,7 @@ import {
     EyeOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useAuthStore } from '../../store/useAuthStore';
+
 import {
     TourSlot,
     TourSlotStatus,
@@ -46,13 +45,9 @@ interface TourSlotsListProps {
 }
 
 const TourSlotsList: React.FC<TourSlotsListProps> = ({
-    templateId,
     template,
-    slots = [],
-    onSlotUpdate
+    slots = []
 }) => {
-    const { token } = useAuthStore();
-    const [loading, setLoading] = useState(false);
     const [filteredSlots, setFilteredSlots] = useState<TourSlot[]>(slots);
     const [selectedSlot, setSelectedSlot] = useState<TourSlot | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -90,7 +85,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
         setFilters(prev => ({ ...prev, status }));
     };
 
-    const handleDateRangeFilter = (dates: [dayjs.Dayjs, dayjs.Dayjs] | null) => {
+    const handleDateRangeFilter = (dates: any) => {
         setFilters(prev => ({ ...prev, dateRange: dates || undefined }));
     };
 
@@ -188,7 +183,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
         {
             title: 'Thao tác',
             key: 'actions',
-            render: (_, record: TourSlot) => (
+            render: (_: any, record: TourSlot) => (
                 <Space>
                     <Button
                         type="link"
@@ -290,7 +285,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
                     columns={columns}
                     dataSource={filteredSlots}
                     rowKey="id"
-                    loading={loading}
+                    loading={false}
                     pagination={{
                         pageSize: 10,
                         showSizeChanger: true,

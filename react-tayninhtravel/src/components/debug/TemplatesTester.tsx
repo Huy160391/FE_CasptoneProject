@@ -28,7 +28,7 @@ const TemplatesTester: React.FC = () => {
                 pageIndex: 0,
                 pageSize: 10,
                 includeInactive: false
-            }, token);
+            }, token ?? undefined);
             console.log('Raw response:', response);
 
             setLastResponse(response);
@@ -39,10 +39,10 @@ const TemplatesTester: React.FC = () => {
             if (response.statusCode === 200 && response.data) {
                 if (Array.isArray(response.data)) {
                     templateItems = response.data;
-                } else if (response.data.items) {
-                    templateItems = response.data.items;
+                } else if (response.data && (response.data as any).items) {
+                    templateItems = (response.data as any).items;
                 } else if (response.success && response.data) {
-                    templateItems = response.data.items || response.data || [];
+                    templateItems = (response.data as any).items || response.data || [];
                 }
 
                 setTemplates(templateItems);

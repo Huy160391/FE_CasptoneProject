@@ -7,8 +7,10 @@ import {
     UpdateTourTemplateRequest,
     TourDetails,
     CreateTourDetailsRequest,
+    GetTourDetailsListResponse,
     TourOperation,
     CreateTourOperationRequest,
+    TourGuide,
     TimelineItem,
     CreateTimelineItemRequest,
     CreateTimelineItemsRequest,
@@ -114,7 +116,7 @@ export const getTourDetailsByTemplate = async (templateId: string, includeInacti
 };
 
 // Lấy danh sách TourDetails (general) - sử dụng endpoint paginated
-export const getTourDetailsList = async (params: any = {}, token?: string): Promise<ApiResponse<TourDetails[]>> => {
+export const getTourDetailsList = async (params: any = {}, token?: string): Promise<GetTourDetailsListResponse> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     // Sử dụng endpoint paginated với 0-based indexing
@@ -184,9 +186,8 @@ export const getTourOperationByDetailsId = async (tourDetailsId: string, token?:
         } else {
             // Direct TourOperation format - wrap it in ApiResponse
             return {
-                isSuccess: true,
+                success: true,
                 message: 'Success',
-                statusCode: 200,
                 data: response.data as TourOperation
             } as ApiResponse<TourOperation>;
         }

@@ -1,5 +1,5 @@
 import axios from '../config/axios';
-import { ApiResponse } from '../types/common';
+import { ApiResponse } from '../types';
 
 // Skills Types
 export interface SkillInfoDto {

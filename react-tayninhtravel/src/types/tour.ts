@@ -65,17 +65,37 @@ export interface GetTourTemplatesParams {
     includeInactive?: boolean;
 }
 
+// Request params cho API lấy danh sách tour details
+export interface GetTourDetailsListParams {
+    pageIndex?: number;
+    pageSize?: number;
+    includeInactive?: boolean;
+    templateId?: string;
+    titleFilter?: string;
+}
+
 // Response cho API lấy danh sách template tour
 export interface GetTourTemplatesResponse {
     statusCode: number;
     message: string;
+    success?: boolean;
+    data: TourTemplate[]; // Backend returns array directly, not wrapped in items
+    totalRecord: number; // Backend uses totalRecord, not totalCount
+    totalPages: number;
+    pageIndex?: number;
+    pageSize?: number;
+}
+
+// Response cho API lấy danh sách tour details (paginated)
+export interface GetTourDetailsListResponse {
+    statusCode: number;
+    message: string;
     success: boolean;
-    data: {
-        items: TourTemplate[];
-        totalCount: number;
-        pageIndex: number;
-        pageSize: number;
-    };
+    data: TourDetails[]; // Backend returns array directly
+    totalCount: number;
+    pageIndex: number;
+    pageSize: number;
+    totalPages: number;
 }
 
 // Tour domain types
@@ -253,6 +273,27 @@ export interface Guide {
     email?: string;
 }
 
+// TourGuide interface for operational tour guides
+export interface TourGuide {
+    id: string;
+    userId: string;
+    applicationId: string;
+    fullName: string;
+    phoneNumber: string;
+    email: string;
+    experience: string;
+    skills: string;
+    isAvailable: boolean;
+    rating: number;
+    totalToursGuided: number;
+    approvedAt: string;
+    approvedById?: string;
+    createdAt: string;
+    createdById?: string;
+    updatedAt?: string;
+    updatedById?: string;
+}
+
 export interface CreateTourOperationRequest {
     tourDetailsId: string;
     price: number;
@@ -268,7 +309,8 @@ export interface TimelineItem {
     activity: string;
     location?: string;
     specialtyShopId?: string | null;
-    orderIndex: number; // Changed from sortOrder to match API
+    sortOrder: number; // Use sortOrder to match backend API
+    orderIndex?: number; // Keep for backward compatibility
     estimatedDuration?: number; // in minutes
     specialtyShop?: SpecialtyShop | null;
     createdAt: string;
@@ -281,7 +323,8 @@ export interface CreateTimelineItemRequest {
     activity: string;
     location?: string;
     specialtyShopId?: string | null;
-    orderIndex: number; // Changed from sortOrder to match API
+    sortOrder: number; // Use sortOrder to match backend API
+    orderIndex?: number; // Keep for backward compatibility
     estimatedDuration?: number; // in minutes
 }
 

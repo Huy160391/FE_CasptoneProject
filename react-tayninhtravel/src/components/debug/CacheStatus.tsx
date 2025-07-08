@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Tag, Space, Typography, Descriptions, Button } from 'antd';
-import { ReloadOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined } from '@ant-design/icons';
 import { useTourTemplateStore } from '../../store/useTourTemplateStore';
 
 const { Text } = Typography;
@@ -17,9 +17,7 @@ const CacheStatus: React.FC = () => {
     cacheTimeout
   } = useTourTemplateStore();
 
-  const formatTimestamp = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString('vi-VN');
-  };
+
 
   const getCacheAge = (timestamp: number) => {
     const ageMs = Date.now() - timestamp;

@@ -3,7 +3,6 @@ import {
     Card,
     Form,
     InputNumber,
-    Select,
     Button,
     Space,
     message,
@@ -33,12 +32,11 @@ import {
 import {
     TourOperation,
     CreateTourOperationRequest,
-    TourDetails,
-    Guide
+    TourDetails
 } from '../../types/tour';
 import { validateTourOperation } from '../../constants/tourTemplate';
 
-const { Option } = Select;
+
 
 interface TourOperationManagementProps {
     tourDetails: TourDetails;
@@ -65,7 +63,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
     const loadTourOperation = async () => {
         try {
             setLoading(true);
-            const response = await getTourOperationByDetailsId(tourDetails.id, token);
+            const response = await getTourOperationByDetailsId(tourDetails.id, token ?? undefined);
             if (response.success && response.data) {
                 setOperation(response.data);
                 form.setFieldsValue({
@@ -86,7 +84,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
 
     const loadCapacityInfo = async (operationId: string) => {
         try {
-            const response = await checkTourCapacity(operationId, token);
+            const response = await checkTourCapacity(operationId, token ?? undefined);
             if (response.success && response.data) {
                 setCapacityInfo(response.data);
             }
@@ -111,7 +109,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                 tourDetailsId: tourDetails.id
             };
 
-            const response = await createTourOperation(operationData, token);
+            const response = await createTourOperation(operationData, token ?? undefined);
             if (response.success && response.data) {
                 setOperation(response.data);
                 setEditing(false);
@@ -141,7 +139,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                 return;
             }
 
-            const response = await updateTourOperation(operation.id, values, token);
+            const response = await updateTourOperation(operation.id, values, token ?? undefined);
             if (response.success && response.data) {
                 setOperation(response.data);
                 setEditing(false);

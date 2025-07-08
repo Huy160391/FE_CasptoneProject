@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useThemeStore } from '../../store/useThemeStore';
-import { useAuthStore } from '../../store/useAuthStore';
+
 import {
     Table,
     Button,
@@ -33,26 +33,9 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import './TourManagement.scss';
-import {
-    getTourDetailsList,
-    getTourDetailsByTemplate,
-    getTourTemplates,
-    createTourDetails,
-    updateTourDetails,
-    deleteTourDetails,
-    getTourDetailsById,
-    handleApiError
-} from '../../services/tourcompanyService';
-import {
-    TourDetails,
-    TourTemplate,
-    TourDetailsStatus,
-    CreateTourDetailsRequest
-} from '../../types/tour';
-import {
-    getTourDetailsStatusLabel,
-    getStatusColor
-} from '../../constants/tourTemplate';
+
+
+
 
 const { Title } = Typography;
 const { TextArea } = Input;
