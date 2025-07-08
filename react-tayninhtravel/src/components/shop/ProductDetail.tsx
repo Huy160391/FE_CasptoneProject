@@ -8,7 +8,6 @@ import {
   Button,
   Tabs,
   Rate,
-  InputNumber,
   Divider,
   Tag,
   Space,
@@ -26,75 +25,20 @@ import {
   TagOutlined,
   HeartFilled,
   LeftOutlined,
-  RightOutlined
+  RightOutlined,
+  PlusOutlined,
+  MinusOutlined
 } from '@ant-design/icons'
 import './ProductDetail.scss'
-import { useCartStore } from '@/store/useCartStore'
+import { useProductCart } from '@/hooks/useCart'
 import { useTranslation } from 'react-i18next'
-// CheckCircleOutlined, of import ant-design/icons
+import { Product } from '@/types'
+import ShopInfo from './ShopInfo'
+import { publicService } from '@/services/publicService'
+import { getCategoryViLabel } from '@/utils/categoryViLabels'
+
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
-
-// Mock product data
-const mockProducts = [
-  {
-    id: 1,
-    name: 'Mứt Tây Ninh - Hộp Quà Tặng Truyền Thống',
-    price: 250000,
-    discountPrice: 200000,
-    image: 'https://placehold.co/400x400',
-    rating: 4.5,
-    reviews: 28,
-    category: 'Đặc Sản Địa Phương',
-    tags: ['đặc sản', 'quà tặng', 'mứt'],
-    isSale: true,
-  },
-  {
-    id: 2,
-    name: 'Túi Tote Canvas Tây Ninh Phong Cảnh',
-    price: 150000,
-    image: 'https://placehold.co/400x400',
-    rating: 4.7,
-    reviews: 42,
-    category: 'Thời Trang',
-    tags: ['túi', 'canvas', 'thời trang'],
-    isNew: true,
-  },
-  {
-    id: 3,
-    name: 'Mô Hình Thu Nhỏ Núi Bà Đen',
-    price: 350000,
-    discountPrice: 299000,
-    image: 'https://placehold.co/400x400',
-    rating: 4.8,
-    reviews: 15,
-    category: 'Quà Lưu Niệm',
-    tags: ['mô hình', 'núi bà đen', 'lưu niệm'],
-    isSale: true,
-  },
-  {
-    id: 4,
-    name: 'Trà Tây Ninh - Hộp Gỗ Cao Cấp 100g',
-    price: 180000,
-    image: 'https://placehold.co/400x400',
-    rating: 4.9,
-    reviews: 67,
-    category: 'Đặc Sản Địa Phương',
-    tags: ['trà', 'đặc sản', 'quà tặng'],
-  },
-  {
-    id: 5,
-    name: 'Áo Thun In Hình Địa Danh Tây Ninh',
-    price: 220000,
-    discountPrice: 180000,
-    image: 'https://placehold.co/400x400',
-    rating: 4.2,
-    reviews: 33,
-    category: 'Thời Trang',
-    tags: ['áo thun', 'thời trang', 'quà lưu niệm'],
-    isSale: true,
-  }
-]
 
 interface Review {
   id: number
@@ -104,35 +48,22 @@ interface Review {
   comment: string
 }
 
-interface Specification {
-  name: string
-  value: string
-}
-
-interface EnhancedProduct {
-  id: number
-  name: string
-  price: number
-  discountPrice?: number
-  image: string
+interface EnhancedProduct extends Product {
   rating: number
   reviews: number
-  category: string
   tags: string[]
   isNew?: boolean
-  isSale?: boolean
-  description: string
+  discountPrice?: number
   shortDescription: string
   stock: number
   sku: string
-  specifications: Specification[]
   additionalImages: string[]
   reviewsData: Review[]
 }
 
 const ProductDetail = () => {
   const { id } = useParams()
-  const productId = parseInt(id || '1')
+  const productId = id || '1'
 
   const [product, setProduct] = useState<EnhancedProduct | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
@@ -143,34 +74,37 @@ const ProductDetail = () => {
   const [imageModalVisible, setImageModalVisible] = useState<boolean>(false)
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
 
-  const addToCart = useCartStore(state => state.addItem)
-  const { t } = useTranslation()
+  // Use cart hook instead of direct store access
+  const productCart = useProductCart(productId)
+  const { t, i18n } = useTranslation()
 
   // Fetch product data
   useEffect(() => {
-    // Simulating API fetch
-    const fetchProduct = () => {
+    const fetchProduct = async () => {
       setLoading(true)
-      setTimeout(() => {
-        const foundProduct = mockProducts.find(p => p.id === productId)
-        if (foundProduct) {
-          // Create additional mock data for product detail
-          const enhancedProduct = {
-            ...foundProduct,
-            description:
-              'Sản phẩm đặc trưng của Tây Ninh, được làm thủ công bởi các nghệ nhân địa phương. Chất lượng cao và độc đáo, sẽ là món quà lưu niệm hoàn hảo cho chuyến du lịch của bạn.',
-            shortDescription: 'Sản phẩm đặc trưng từ Tây Ninh, chất lượng cao',
-            stock: 15,
-            sku: `TN-${foundProduct.id.toString().padStart(5, '0')}`,
-            specifications: [
-              { name: 'Xuất xứ', value: 'Tây Ninh' },
-              { name: 'Chất liệu', value: 'Thủ công' },
-              { name: 'Kích thước', value: '20 x 15 x 5 cm' },
-              { name: 'Trọng lượng', value: '250g' },
-              { name: 'Bảo quản', value: 'Nơi khô ráo, thoáng mát' },
-            ],
-            additionalImages: [
-              foundProduct.image,
+      try {
+        const productData = await publicService.getPublicProductById(productId)
+        if (productData) {
+          // Create enhanced product with additional UI data
+          const enhancedProduct: EnhancedProduct = {
+            ...productData,
+            category: productData.category, // Đã là string, không cần kiểm tra kiểu số nữa
+            rating: 4.5,
+            reviews: 28,
+            tags: ['đặc sản', 'quà tặng', 'truyền thống'],
+            isNew: false,
+            discountPrice: productData.isSale && productData.salePercent ?
+              productData.price * (1 - productData.salePercent / 100) : undefined,
+            shortDescription: productData.description || 'Sản phẩm đặc trưng từ Tây Ninh, chất lượng cao',
+            stock: productData.quantityInStock,
+            sku: `TN-${productData.id.toString().padStart(5, '0')}`,
+            additionalImages: productData.imageUrl && productData.imageUrl.length > 0 ? [
+              ...productData.imageUrl,
+              'https://placehold.co/400x400?text=Image+2',
+              'https://placehold.co/400x400?text=Image+3',
+              'https://placehold.co/400x400?text=Image+4',
+            ] : [
+              'https://placehold.co/400x400?text=No+Image',
               'https://placehold.co/400x400?text=Image+2',
               'https://placehold.co/400x400?text=Image+3',
               'https://placehold.co/400x400?text=Image+4',
@@ -198,38 +132,42 @@ const ProductDetail = () => {
                 comment: 'Quá tuyệt vời, mọi người nên mua thử.',
               },
             ],
+            soldCount: productData.soldCount || 0,
           }
           setProduct(enhancedProduct)
           setMainImage(enhancedProduct.additionalImages[0])
         }
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
         setLoading(false)
-      }, 800)
+      }
     }
 
     fetchProduct()
   }, [productId])
 
-  const handleQuantityChange = (value: number | null) => {
-    if (value !== null) {
-      setQuantity(value)
+  const increaseQuantity = () => {
+    if (product && quantity < product.stock) {
+      setQuantity(prev => prev + 1)
+    }
+  }
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1)
     }
   }
 
   const handleAddToCart = () => {
-    if (!product) return addToCart({
-      id: product!.id,
-      productId: String(product!.id),
-      name: product!.name,
-      price: product!.discountPrice || product!.price,
-      image: product!.image,
-      type: 'product',
-      quantity: quantity
-    })
+    if (!product) return
 
-    notification.success({
-      message: t('common.addToCartSuccess'),
-      description: t('common.addToCartDescription', { quantity, name: product.name }),
-      icon: <ShoppingCartOutlined style={{ color: '#52c41a' }} />,
+    productCart.addToCart({
+      productId: product.id,
+      name: product.name,
+      image: product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : 'https://placehold.co/400x400?text=No+Image',
+      price: product.discountPrice || product.price,
+      quantity: quantity
     })
   }
 
@@ -295,15 +233,58 @@ const ProductDetail = () => {
     category,
     tags
   }: {
-    currentProductId: number
+    currentProductId: string
     category: string
     tags: string[]
   }) => {
-    // Filter related products based on category and tags
-    const relatedProducts = mockProducts
-      .filter(p => p.id !== currentProductId)
-      .filter(p => p.category === category || p.tags.some(tag => tags.includes(tag)))
-      .slice(0, 4)
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+    const [relatedLoading, setRelatedLoading] = useState(true)
+
+    useEffect(() => {
+      const fetchRelatedProducts = async () => {
+        setRelatedLoading(true)
+        try {
+          // Fetch products from API with category filter
+          const response = await publicService.getPublicProducts({
+            pageIndex: 1,
+            pageSize: 4,
+            // Add category filter when API supports it
+            // category: category
+          })
+
+          // Filter out current product and limit to 4 items
+          const filteredProducts = response.data
+            .filter(p => p.id !== currentProductId)
+            .slice(0, 4)
+          // Không cần ép kiểu category nữa, luôn là string
+
+          setRelatedProducts(filteredProducts)
+        } catch (error) {
+          console.error('Error fetching related products:', error)
+          setRelatedProducts([])
+        } finally {
+          setRelatedLoading(false)
+        }
+      }
+
+      fetchRelatedProducts()
+    }, [currentProductId, category])
+
+    // Use tags parameter to avoid unused warning
+    console.debug('Product tags:', tags)
+
+    if (relatedLoading) {
+      return (
+        <Row gutter={[16, 16]}>
+          {[1, 2, 3, 4].map(index => (
+            <Col xs={24} sm={12} md={6} key={index}>
+              <Skeleton.Image style={{ width: '100%', height: 200 }} />
+              <Skeleton active paragraph={{ rows: 2 }} />
+            </Col>
+          ))}
+        </Row>
+      )
+    }
 
     return (
       <Row gutter={[16, 16]}>
@@ -312,24 +293,18 @@ const ProductDetail = () => {
             <Link to={`/shop/product/${product.id}`} className="related-product-link">
               <div className="related-product-card">
                 <div className="related-product-image">
-                  <img src={product.image} alt={product.name} />
-                  {(product.isNew || product.isSale) && (
-                    <div className={`product-badge ${product.isNew ? 'new-badge' : 'sale-badge'}`}>
-                      {product.isNew
-                        ? 'Mới'
-                        : `Giảm ${Math.round(
-                          ((product.price - (product.discountPrice || 0)) / product.price) * 100
-                        )}%`}
-                    </div>
-                  )}
+                  <img
+                    src={product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : 'https://placehold.co/400x400?text=No+Image'}
+                    alt={product.name}
+                  />
                 </div>
                 <div className="related-product-info">
                   <h4>{product.name}</h4>
                   <div className="related-product-price">
-                    {product.discountPrice ? (
+                    {product.isSale && product.salePercent ? (
                       <>
                         <span className="discount-price">
-                          {product.discountPrice.toLocaleString('vi-VN')}₫
+                          {(product.price * (1 - product.salePercent / 100)).toLocaleString('vi-VN')}₫
                         </span>
                         <span className="original-price">
                           {product.price.toLocaleString('vi-VN')}₫
@@ -396,7 +371,7 @@ const ProductDetail = () => {
         items={[
           { title: <Link to="/">Trang Chủ</Link> },
           { title: <Link to="/shop">Cửa Hàng</Link> },
-          { title: <Link to={`/shop?category=${product.category}`}>{product.category}</Link> },
+          { title: <Link to={`/shop?category=${product.category}`}>{i18n.language === 'vi' ? getCategoryViLabel(product.category.toLowerCase()) : product.category}</Link> },
           { title: product.name },
         ]}
       />
@@ -440,6 +415,9 @@ const ProductDetail = () => {
               <Rate disabled defaultValue={product.rating} />
               <Text className="review-count">({product.reviews} đánh giá)</Text>
               <Text className="sku">SKU: {product.sku}</Text>
+              <Text className="sold-count" style={{ marginLeft: 16, color: '#888' }}>
+                {t('shop.soldCount', { count: product.soldCount })}
+              </Text>
             </div>
 
             <div className="product-price">
@@ -471,12 +449,23 @@ const ProductDetail = () => {
             <div className="product-actions">
               <div className="quantity-selector">
                 <Text>Số lượng:</Text>
-                <InputNumber
-                  min={1}
-                  max={product.stock}
-                  defaultValue={1}
-                  onChange={handleQuantityChange}
-                />
+                <div className="quantity-controls">
+                  <Button
+                    type="text"
+                    icon={<MinusOutlined />}
+                    onClick={decreaseQuantity}
+                    disabled={quantity <= 1}
+                    className="quantity-btn minus-btn"
+                  />
+                  <span className="quantity-display">{quantity}</span>
+                  <Button
+                    type="text"
+                    icon={<PlusOutlined />}
+                    onClick={increaseQuantity}
+                    disabled={quantity >= product.stock}
+                    className="quantity-btn plus-btn"
+                  />
+                </div>
                 <Text className="stock-info">
                   <InfoCircleOutlined /> Còn {product.stock} sản phẩm
                 </Text>
@@ -488,15 +477,20 @@ const ProductDetail = () => {
                   size="large"
                   icon={<ShoppingCartOutlined />}
                   onClick={handleAddToCart}
+                  loading={productCart.loading}
                   className="add-to-cart-btn"
                 >
-                  Thêm vào giỏ hàng
+                  {productCart.isInCart
+                    ? t('cart.inCart') + ` (${productCart.quantity})`
+                    : t('cart.addToCart')
+                  }
                 </Button>
                 <Button
                   type="default"
                   size="large"
                   onClick={handleBuyNow}
                   className="buy-now-btn"
+                  disabled={productCart.loading}
                 >
                   Mua ngay
                 </Button>
@@ -526,7 +520,7 @@ const ProductDetail = () => {
             <div className="product-category">
               <Space>
                 <Text>Danh mục:</Text>
-                <Link to={`/shop?category=${product.category}`}>{product.category}</Link>
+                <Link to={`/shop?category=${product.category}`}>{i18n.language === 'vi' ? getCategoryViLabel(product.category.toLowerCase()) : product.category}</Link>
               </Space>
             </div>
 
@@ -547,29 +541,6 @@ const ProductDetail = () => {
           <TabPane tab="Mô tả sản phẩm" key="description">
             <div className="tab-content">
               <Paragraph>{product.description}</Paragraph>
-              <Paragraph>
-                Sản phẩm này là một phần của bộ sưu tập đặc biệt từ Tây Ninh, được thiết kế và sản
-                xuất bởi các nghệ nhân địa phương với kỹ thuật truyền thống kết hợp với công nghệ
-                hiện đại.
-              </Paragraph>
-              <Paragraph>
-                Mỗi sản phẩm đều là độc nhất và mang đậm bản sắc văn hóa của vùng đất Tây Ninh, là
-                món quà lưu niệm hoàn hảo cho bạn bè và người thân sau chuyến du lịch.
-              </Paragraph>
-            </div>
-          </TabPane>
-          <TabPane tab="Thông số kỹ thuật" key="specifications">
-            <div className="tab-content">
-              <table className="specifications-table">
-                <tbody>
-                  {product.specifications.map((spec, index) => (
-                    <tr key={index}>
-                      <td className="spec-name">{spec.name}</td>
-                      <td className="spec-value">{spec.value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           </TabPane>
           <TabPane tab={`Đánh giá (${product.reviews})`} key="reviews">
@@ -634,6 +605,11 @@ const ProductDetail = () => {
             </div>
           </TabPane>
         </Tabs>
+      </div>
+
+      {/* Shop Information */}
+      <div className="shop-info-section">
+        <ShopInfo shopId={product.shopId} />
       </div>
 
       {/* Related Products */}

@@ -15,9 +15,11 @@ import {
   HeartOutlined,
   HeartFilled
 } from '@ant-design/icons'
-import { publicService, type Blog } from '@/services/publicService'
+import { publicService } from '@/services/publicService'
 import { userService, type UserComment } from '@/services/userService'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useBlog } from '@/hooks/useBlogs'
+import { type PublicBlog } from '@/types'
 import LoginModal from '@/components/auth/LoginModal'
 import RegisterModal from '@/components/auth/RegisterModal'
 import './BlogPost.scss'
@@ -29,10 +31,12 @@ const BlogPost = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuthStore()
-  const [post, setPost] = useState<Blog | null>(null)
-  const [relatedPosts, setRelatedPosts] = useState<Blog[]>([])
-  const [recentBlogs, setRecentBlogs] = useState<Blog[]>([])
-  const [loading, setLoading] = useState(true)
+
+  // Use custom hook for blog data
+  const { blog: post, loading, error } = useBlog(id || '')
+
+  const [relatedPosts, setRelatedPosts] = useState<PublicBlog[]>([])
+  const [recentBlogs, setRecentBlogs] = useState<PublicBlog[]>([])
   const [comments, setComments] = useState<UserComment[]>([])
   const [commentContent, setCommentContent] = useState('')
   const [commentsLoading, setCommentsLoading] = useState(false)
@@ -42,7 +46,7 @@ const BlogPost = () => {
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false)
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
-  const [currentImageIndex, setCurrentImageIndex] = useState(0) // Bắt đầu với ảnh đầu tiên (index 0)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const commentListRef = useRef<HTMLDivElement>(null)
   // Hàm xử lý chuyển ảnh trước đó
@@ -71,37 +75,26 @@ const BlogPost = () => {
     })
   }
 
-  // Fetch blog post data
+  // Fetch related posts and recent blogs
   useEffect(() => {
-    const fetchBlogData = async () => {
-      if (!id) {
-        setLoading(false)
-        return
-      }
-      setLoading(true)
-      try {
-        // Fetch the blog post details
-        const blogData = await publicService.getBlogById(id)
-        setPost(blogData)
+    const fetchAdditionalData = async () => {
+      if (!id || !post) return
 
-        // Fetch related blog posts if we have a valid blog
-        if (blogData) {
-          const relatedData = await publicService.getRelatedBlogs(id)
-          setRelatedPosts(relatedData)
-        }
+      try {
+        // Fetch related blog posts
+        const relatedData = await publicService.getRelatedBlogs(id)
+        setRelatedPosts(relatedData)
+
         // Fetch recent blogs for the sidebar
         const recentBlogsData = await publicService.getPublicBlogs(1, 5)
-        setRecentBlogs(recentBlogsData.data)
-      } catch (error) {
-        console.error('Error fetching blog post:', error)
-        setPost(null)
-      } finally {
-        setLoading(false)
+        setRecentBlogs(recentBlogsData.data as unknown as PublicBlog[])
+      } catch (err) {
+        console.error('Error fetching additional data:', err)
       }
     }
 
-    fetchBlogData()
-  }, [id])
+    fetchAdditionalData()
+  }, [id, post])
 
   // Fetch comments
   useEffect(() => {
@@ -262,6 +255,22 @@ const BlogPost = () => {
           <Skeleton active paragraph={{ rows: 1 }} />
           <Skeleton.Image className="skeleton-image" />
           <Skeleton active paragraph={{ rows: 15 }} />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="blog-post-page">
+        <div className="container">
+          <div className="not-found">
+            <Title level={3}>Lỗi tải bài viết</Title>
+            <Text>{error}</Text>
+            <Button type="primary" onClick={handleGoBack}>
+              Quay lại
+            </Button>
+          </div>
         </div>
       </div>
     )

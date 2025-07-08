@@ -1,0 +1,332 @@
+.reviews-page {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      
+      @media (max-width: 768px) {
+        margin-bottom: 16px;
+      }
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 16px;
+      
+      @media (max-width: 576px) {
+        flex-direction: column;
+        width: 100%;
+      }
+    }
+  }
+
+  .reviews-summary {
+    margin-bottom: 24px;
+    
+    .rating-overview {
+      .ant-card-body {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        
+        @media (max-width: 768px) {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+      
+      .overall-rating {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 120px;
+        
+        .rating-score {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 8px;
+          
+          .score {
+            font-size: 36px;
+            font-weight: 600;
+            color: #faad14;
+          }
+          
+          .star-icon {
+            font-size: 24px;
+            color: #faad14;
+          }
+        }
+        
+        .rating-text {
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.65);
+          text-align: center;
+        }
+      }
+      
+      .rating-breakdown {
+        flex: 1;
+        
+        .rating-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          > span:first-child {
+            width: 40px;
+            font-size: 12px;
+          }
+          
+          .rating-bar {
+            flex: 1;
+            height: 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            
+            .rating-fill {
+              height: 100%;
+              background-color: #faad14;
+              transition: width 0.3s;
+            }
+          }
+          
+          > span:last-child {
+            width: 20px;
+            font-size: 12px;
+            text-align: right;
+          }
+        }
+      }
+    }
+  }
+
+  .reviews-table {
+    .product-name {
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.85);
+    }
+    
+    .customer-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .customer-name {
+        font-weight: 500;
+      }
+    }
+    
+    .rating-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .rating-number {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.45);
+      }
+    }
+    
+    .ant-table {
+      .ant-table-thead > tr > th {
+        background-color: #fafafa;
+        font-weight: 600;
+      }
+      
+      .ant-table-tbody > tr:hover > td {
+        background-color: #f0f9ff;
+      }
+    }
+  }
+
+  .review-detail {
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      
+      .customer-info {
+        display: flex;
+        gap: 12px;
+        
+        .customer-details {
+          .customer-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+          }
+          
+          .review-date {
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.45);
+          }
+        }
+      }
+    }
+    
+    .review-content {
+      .product-name {
+        margin-bottom: 16px;
+        
+        strong {
+          color: #333;
+        }
+      }
+      
+      .rating-section {
+        margin-bottom: 16px;
+        
+        strong {
+          color: #333;
+          display: block;
+          margin-bottom: 8px;
+        }
+        
+        .rating-display {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+      }
+      
+      .comment-section {
+        strong {
+          color: #333;
+          display: block;
+          margin-bottom: 8px;
+        }
+        
+        .comment-text {
+          background: #f8f9fa;
+          padding: 12px;
+          border-radius: 6px;
+          line-height: 1.6;
+          color: rgba(0, 0, 0, 0.85);
+        }
+      }
+    }
+  }
+}
+
+/* Dark mode styles for reviews page */
+body.dark-mode {
+  .reviews-page {
+    .page-header {
+      h1 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+    
+    .reviews-summary {
+      .rating-overview {
+        background-color: #141414;
+        
+        .overall-rating {
+          .rating-text {
+            color: rgba(255, 255, 255, 0.65);
+          }
+        }
+        
+        .rating-breakdown {
+          .rating-bar {
+            background-color: #262626;
+          }
+        }
+      }
+    }
+    
+    .reviews-table {
+      background-color: #141414;
+      
+      .product-name {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      
+      .customer-info {
+        .customer-name {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      
+      .rating-display {
+        .rating-number {
+          color: rgba(255, 255, 255, 0.45);
+        }
+      }
+      
+      .ant-table {
+        background-color: #141414;
+        
+        .ant-table-thead > tr > th {
+          background-color: #262626;
+          border-bottom-color: #303030;
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-table-tbody > tr > td {
+          background-color: #141414;
+          border-bottom-color: #303030;
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .ant-table-tbody > tr:hover > td {
+          background-color: #262626 !important;
+        }
+      }
+    }
+    
+    .review-detail {
+      .review-header {
+        border-bottom-color: #303030;
+        
+        .customer-details {
+          .customer-name {
+            color: rgba(255, 255, 255, 0.85);
+          }
+          
+          .review-date {
+            color: rgba(255, 255, 255, 0.45);
+          }
+        }
+      }
+      
+      .review-content {
+        .product-name,
+        .rating-section,
+        .comment-section {
+          strong {
+            color: rgba(255, 255, 255, 0.85);
+          }
+        }
+        
+        .comment-section {
+          .comment-text {
+            background: #262626;
+            color: rgba(255, 255, 255, 0.85);
+          }
+        }
+      }
+    }
+  }
+}

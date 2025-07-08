@@ -39,7 +39,7 @@ const Navbar = () => {
   const [isCartDrawerVisible, setIsCartDrawerVisible] = useState(false)
   const { t } = useTranslation()
   const location = useLocation()
-  const { getTotalItems } = useCartStore()
+  const { getTotalItems, clearCart } = useCartStore()
   const { isAuthenticated, user, logout } = useAuthStore()
   const { isDarkMode } = useThemeStore()
   const navigate = useNavigate()
@@ -76,11 +76,25 @@ const Navbar = () => {
     setIsCartDrawerVisible(false)
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Gửi cart hiện tại lên server trước khi logout (nếu có token)
+    const token = localStorage.getItem('token');
+    if (token) {
+      const items = useCartStore.getState().items;
+      if (items && items.length > 0) {
+        try {
+          await import('@/services/cartService').then(mod => mod.updateCart({ items }, token));
+        } catch (e) {
+          // Không cần báo lỗi cho user khi logout
+        }
+      }
+    }
     // Xóa thông tin từ localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-
+    localStorage.removeItem('cart');
+    // Xóa cart trong Zustand store
+    clearCart();
     // Cập nhật state trong useAuthStore
     logout();
 
@@ -146,7 +160,7 @@ const Navbar = () => {
       icon: <DashboardOutlined />,
       onClick: () => navigate('/tour-company/dashboard'),
     }] : []),
-    ...(user?.role === 'Speciality shop' ? [{
+    ...(user?.role === 'Specialty Shop' ? [{
       key: 'speciality-shop',
       label: 'Speciality Shop Dashboard',
       icon: <DashboardOutlined />,
@@ -284,7 +298,7 @@ const Navbar = () => {
                   Tour Company Dashboard
                 </Button>
               )}
-              {user?.role === 'Speciality shop' && (
+              {user?.role === 'Specialty Shop' && (
                 <Button type="primary" onClick={() => navigate('/speciality-shop')}>
                   Speciality Shop Dashboard
                 </Button>

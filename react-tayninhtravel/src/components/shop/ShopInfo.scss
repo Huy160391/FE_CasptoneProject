@@ -1,0 +1,194 @@
+.shop-info-card {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .shop-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .shop-avatar-section {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+
+      .shop-avatar {
+        border: 2px solid #f0f0f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .shop-basic-info {
+        flex: 1;
+
+        .shop-name-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 8px;
+
+          .shop-name {
+            margin-bottom: 0;
+            color: #1890ff;
+            font-weight: 600;
+          }
+
+          .verified-tag {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+        }
+
+        .shop-rating {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 12px;
+
+          .rating-text {
+            color: #666;
+            font-size: 14px;
+          }
+        }
+
+        .shop-stats {
+          .ant-space-item {
+            color: #666;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    .shop-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+
+      @media (max-width: 768px) {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .follow-btn {
+        background: #1890ff;
+        border-color: #1890ff;
+        
+        &:hover {
+          background: #40a9ff;
+          border-color: #40a9ff;
+        }
+      }
+
+      .contact-btn {
+        border-color: #1890ff;
+        color: #1890ff;
+        
+        &:hover {
+          border-color: #40a9ff;
+          color: #40a9ff;
+        }
+      }
+
+      .view-shop-btn {
+        border-color: #d9d9d9;
+        color: #666;
+        
+        &:hover {
+          border-color: #40a9ff;
+          color: #40a9ff;
+        }
+      }
+    }
+  }
+
+  .shop-info-details {
+    .shop-description {
+      color: #666;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .shop-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+
+      div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .icon {
+          color: #1890ff;
+          font-size: 14px;
+        }
+
+        .ant-typography {
+          color: #666;
+          font-size: 14px;
+        }
+      }
+    }
+
+    .shop-tags {
+      .ant-tag {
+        margin-bottom: 4px;
+        border-radius: 16px;
+        padding: 4px 12px;
+        font-size: 12px;
+        
+        &.ant-tag-geekblue {
+          background: #f0f5ff;
+          border-color: #adc6ff;
+          color: #2f54eb;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 576px) {
+  .shop-info-card {
+    .shop-info-header {
+      .shop-avatar-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .shop-actions {
+        flex-direction: column;
+        
+        .ant-btn {
+          width: 100%;
+        }
+      }
+    }
+
+    .shop-info-details {
+      .shop-meta {
+        align-items: center;
+        
+        div {
+          justify-content: center;
+        }
+      }
+    }
+  }
+}

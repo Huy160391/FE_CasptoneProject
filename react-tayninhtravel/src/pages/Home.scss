@@ -1,8 +1,26 @@
+@import '../styles/mixins';
+
 .home-page {
+  padding: 40px 0;
+
   .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 16px;
+    @include page-container;
+  }
+
+  // Page Header
+  .page-header {
+    @include page-header-style;
+    @include page-header-dark-mode;
+  }
+
+  // Hero Section (if exists)
+  .hero-section {
+    @include page-section;
+  }
+
+  // Other sections
+  .section {
+    @include page-section;
   }
 }
 

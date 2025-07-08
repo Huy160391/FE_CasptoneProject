@@ -5,7 +5,7 @@ import { message } from 'antd';
 
 interface ProtectedRouteProps {
     children?: React.ReactNode;
-    requiredRole?: 'Admin' | 'Blogger' | 'Tour Company' | 'Speciality shop';
+    requiredRole?: 'Admin' | 'Blogger' | 'Tour Company' | 'Specialty Shop';
     requireAuth?: boolean;
 }
 
@@ -33,6 +33,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             !location.pathname.startsWith('/tour-company') &&
             !requiredRole) {
             navigate('/tour-company/dashboard');
+        } else if (isAuthenticated && user && user.role === 'Specialty Shop' &&
+            location.pathname !== '/profile' &&
+            !location.pathname.startsWith('/speciality-shop') &&
+            !requiredRole) {
+            navigate('/speciality-shop');
         }
     }, [isAuthenticated, user, navigate, location, requiredRole]);
 

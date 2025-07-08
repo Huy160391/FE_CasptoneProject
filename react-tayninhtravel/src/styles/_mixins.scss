@@ -1,0 +1,70 @@
+// Common header styles mixin
+@mixin page-header-style {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 40px 0;
+
+  h1, h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-color);
+    background: linear-gradient(135deg, #1677ff, #79eac0);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    @media (max-width: 768px) {
+      font-size: 2rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1.8rem;
+    }
+  }
+
+  p {
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.65);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+
+    @media (max-width: 768px) {
+      font-size: 16px;
+      max-width: 90%;
+    }
+  }
+}
+
+// Dark mode header styles
+@mixin page-header-dark-mode {
+  body.dark-mode & {
+    h1, h2 {
+      background: linear-gradient(135deg, #79eac0, #1677ff);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.65);
+    }
+  }
+}
+
+// Common container styles
+@mixin page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+// Common section styles
+@mixin page-section {
+  margin-bottom: 60px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 40px;
+  }
+}

@@ -18,7 +18,8 @@ import {
   Avatar,
   Skeleton,
   notification,
-  Modal
+  Modal,
+  Space
 } from 'antd'
 import {
   ClockCircleOutlined,
@@ -31,11 +32,13 @@ import {
   StarOutlined,
   UserOutlined,
   HeartOutlined,
-  ShareAltOutlined
+  ShareAltOutlined,
+  ShoppingCartOutlined
 } from '@ant-design/icons'
 import './ThingsToDoDetail.scss'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useTourCart } from '@/hooks/useCart'
 import LoginModal from '@/components/auth/LoginModal'
 import RegisterModal from '@/components/auth/RegisterModal'
 
@@ -244,6 +247,7 @@ const ThingsToDoDetail = () => {
 
   const { t } = useTranslation()
   const { isAuthenticated } = useAuthStore()
+  const tourCart = useTourCart(id || '0')
 
   useEffect(() => {
     // Simulate API fetch
@@ -287,6 +291,27 @@ const ThingsToDoDetail = () => {
       state: {
         tourData: tour,
         bookingDetails: values
+      }
+    })
+  }
+
+  // Handle add to cart
+  const handleAddToCart = () => {
+    if (!tour) return
+
+    const formValues = form.getFieldsValue()
+    const participants = formValues.participants || 1
+    const selectedDate = formValues.date
+
+    tourCart.addToCart({
+      productId: String(tour.id),
+      name: tour.title,
+      image: tour.images[0],
+      price: tour.discountPrice || tour.price,
+      quantity: participants,
+      selectedOptions: {
+        date: selectedDate?.format('YYYY-MM-DD') || '',
+        participants: participants
       }
     })
   }
@@ -577,14 +602,29 @@ const ThingsToDoDetail = () => {
                 </Form.Item>
 
                 <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    className="book-button"
-                    block
-                  >
-                    {t('thingsToDoDetail.bookNow')}
-                  </Button>
+                  <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="book-button"
+                      block
+                    >
+                      {t('thingsToDoDetail.bookNow')}
+                    </Button>
+                    <Button
+                      type="default"
+                      icon={<ShoppingCartOutlined />}
+                      onClick={handleAddToCart}
+                      loading={tourCart.loading}
+                      className="add-to-cart-button"
+                      block
+                    >
+                      {tourCart.isInCart
+                        ? `${t('cart.inCart')} (${tourCart.quantity})`
+                        : t('cart.addToCart')
+                      }
+                    </Button>
+                  </Space>
                 </Form.Item>
               </Form>
 

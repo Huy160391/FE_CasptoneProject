@@ -125,8 +125,12 @@ const ShopApplicationForm: React.FC<ShopApplicationFormProps> = ({
                 <Form.Item
                     name="logo"
                     label={t('jobs.shopRegistration.form.logo')}
+                    rules={[
+                        { required: true, message: t('jobs.shopRegistration.form.logoRequired') }
+                    ]}
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
+                    validateFirst
                 >
                     <Upload
                         name="logo"

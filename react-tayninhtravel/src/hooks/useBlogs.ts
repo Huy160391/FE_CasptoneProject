@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { publicService, Blog, GetBlogsResponse } from '../services/publicService';
-import { UseBlogsState } from '../types';
+import { publicService } from '../services/publicService';
+import { Blog, PublicBlog, GetBlogsResponse, UseBlogsState } from '../types';
 
 export const useBlogs = (
     page: number = 1,
@@ -66,7 +66,7 @@ export const useBlogs = (
 };
 
 export const useBlog = (id: string) => {
-    const [blog, setBlog] = useState<Blog | null>(null);
+    const [blog, setBlog] = useState<PublicBlog | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
