@@ -289,12 +289,31 @@ export const userService = {
      * @param application Tour guide application data
      * @returns Promise with operation result
      */
-    submitTourGuideApplication: async (application: TourGuideApplicationForm): Promise<any> => {
+    submitTourGuideApplication: async (application: TourGuideApplicationForm & {
+        fullName: string;
+        phone: string;
+        experience: string;
+        skills: number[]; // List of skill IDs (TourGuideSkill)
+        skillsString: string; // Comma-separated string
+    }): Promise<any> => {
         const formData = new FormData();
+        formData.append('FullName', application.fullName);
+        formData.append('PhoneNumber', application.phone);
         formData.append('Email', application.email);
+        formData.append('Experience', application.experience);
+        // Lặp qua từng kỹ năng và append từng trường Skills
+        application.skills.forEach((id) => {
+            if (typeof id === 'number' && !isNaN(id)) {
+                formData.append('Skills', id.toString());
+            }
+        });
+        // Truyền SkillsString là chuỗi
+        if (application.skillsString) {
+            formData.append('SkillsString', application.skillsString);
+        }
         formData.append('CurriculumVitae', application.curriculumVitae);
 
-        const response = await axios.post('/Account/tourguide-application', formData, {
+        const response = await axios.post('/Account/tourguide-application/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
