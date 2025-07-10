@@ -344,11 +344,11 @@ class AdminService {
     }
 
     async approveTourGuideApplication(cvId: string): Promise<any> {
-        const response = await axios.put(`Cms/${cvId}/approve-application`);
+        const response = await axios.put(`Cms/tourguide-applications/${cvId}/approve`);
         return response.data;
     }
     async rejectTourGuideApplication(cvId: string, reason: string): Promise<any> {
-        const response = await axios.put(`Cms/${cvId}/reject-application`, { reason });
+        const response = await axios.put(`Cms/tourguide-applications/${cvId}/reject`, { reason });
         return response.data;
     }
 

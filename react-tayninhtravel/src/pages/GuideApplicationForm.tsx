@@ -1,9 +1,11 @@
-import { Form, Input, Button, Upload, Typography } from 'antd';
+import { Form, Input, Button, Upload, Typography, Select } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import skillsService, { SkillCategoriesDto } from '@/services/skillsService';
 
 const { Title, Paragraph } = Typography;
+const { Option, OptGroup } = Select;
 
 interface GuideApplicationFormProps {
     form: any;
@@ -23,6 +25,63 @@ const GuideApplicationForm: React.FC<GuideApplicationFormProps> = ({
     onFinish,
 }) => {
     const { t } = useTranslation();
+    const [skillCategories, setSkillCategories] = useState<SkillCategoriesDto | null>(null);
+
+    useEffect(() => {
+        // Lấy danh sách kỹ năng từ service
+        skillsService.getSkillsCategories().then(res => {
+            if (res && res.data) setSkillCategories(res.data);
+        });
+    }, []);
+
+    // Tạo options động từ API
+    const SKILL_CATEGORIES = skillCategories
+        ? [
+            {
+                label: t('skills.category.languages'),
+                options: skillCategories.languages.map(skill => ({ value: skill.englishName, label: t(`skills.${skill.englishName}`) })),
+            },
+            {
+                label: t('skills.category.knowledge'),
+                options: skillCategories.knowledge.map(skill => ({ value: skill.englishName, label: t(`skills.${skill.englishName}`) })),
+            },
+            {
+                label: t('skills.category.activity'),
+                options: skillCategories.activities.map(skill => ({ value: skill.englishName, label: t(`skills.${skill.englishName}`) })),
+            },
+            {
+                label: t('skills.category.special'),
+                options: skillCategories.special.map(skill => ({ value: skill.englishName, label: t(`skills.${skill.englishName}`) })),
+            },
+        ]
+        : [];
+
+    // Tạo mapping englishName -> skillId
+    const englishNameToId: Record<string, number> = React.useMemo(() => {
+        if (!skillCategories) return {};
+        const allSkills = [
+            ...skillCategories.languages,
+            ...skillCategories.knowledge,
+            ...skillCategories.activities,
+            ...skillCategories.special,
+        ];
+        const map: Record<string, number> = {};
+        allSkills.forEach(skill => {
+            map[skill.englishName] = skill.skill;
+        });
+        return map;
+    }, [skillCategories]);
+
+    // Xử lý submit: chuyển skills (englishName) thành đúng array id và truyền cả hai
+    const handleFinish = (values: any) => {
+        const { skills, ...rest } = values;
+        const skillsEnumNames = (skills || []).filter((name: string) => {
+            const id = englishNameToId[name];
+            return typeof id === 'number' && !isNaN(id);
+        });
+        const skillsIds = skillsEnumNames.map((name: string) => englishNameToId[name]);
+        onFinish({ ...rest, skills: skillsIds, skillsEnumNames });
+    };
 
     return (
         <div className="job-application-form">
@@ -33,7 +92,7 @@ const GuideApplicationForm: React.FC<GuideApplicationFormProps> = ({
                 form={form}
                 layout="vertical"
                 name="job_application_form"
-                onFinish={onFinish}
+                onFinish={handleFinish}
                 className="form"
                 validateTrigger="onSubmit"
             >
@@ -67,16 +126,38 @@ const GuideApplicationForm: React.FC<GuideApplicationFormProps> = ({
                 <Form.Item
                     name="experience"
                     label={t('jobs.applicationForm.experience')}
-                    rules={[{ required: true, message: t('jobs.applicationForm.experienceRequired') }]}
+                    rules={[
+                        { required: true, message: t('jobs.applicationForm.experienceRequired') },
+                        { min: 10, message: t('jobs.applicationForm.experienceMinLength') }
+                    ]}
                 >
                     <Input placeholder={t('jobs.applicationForm.experiencePlaceholder')} />
                 </Form.Item>
                 <Form.Item
-                    name="languages"
-                    label={t('jobs.applicationForm.languages')}
-                    rules={[{ required: true, message: t('jobs.applicationForm.languagesRequired') }]}
+                    name="skills"
+                    label={t('jobs.applicationForm.skills')}
+                    rules={[{ required: true, message: t('jobs.applicationForm.skillsRequired') }]}
                 >
-                    <Input placeholder={t('jobs.applicationForm.languagesPlaceholder')} />
+                    <Select
+                        mode="multiple"
+                        placeholder={t('jobs.applicationForm.skillsPlaceholder')}
+                        optionLabelProp="label"
+                        showSearch
+                        filterOption={(input, option) => {
+                            const label = typeof option?.label === 'string' ? option.label : '';
+                            return label.toLowerCase().includes(input.toLowerCase());
+                        }}
+                    >
+                        {SKILL_CATEGORIES.map(cat => (
+                            <OptGroup key={cat.label} label={cat.label}>
+                                {cat.options.map(opt => (
+                                    <Option key={opt.value} value={opt.value} label={opt.label}>
+                                        {opt.label}
+                                    </Option>
+                                ))}
+                            </OptGroup>
+                        ))}
+                    </Select>
                 </Form.Item>
                 <Form.Item
                     name="cvFile"

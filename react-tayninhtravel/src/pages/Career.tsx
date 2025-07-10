@@ -132,11 +132,19 @@ const Career = () => {
             // Get the CV file from the upload component
             const file = cvFile[0].originFileObj as File;
 
-            // Use userService instead of direct axios call
+            // Nhận skills (ID) và skillsString từ form, không mapping lại
+            const { skills, skillsString } = values;
+
+            // Submit đầy đủ thông tin
             const response = await userService.submitTourGuideApplication({
+                fullName: values.fullName,
+                phone: values.phone,
                 email: values.email,
+                experience: values.experience,
+                skills,
+                skillsString,
                 curriculumVitae: file
-            });
+            } as any);
 
             console.log('API response:', response);
 
