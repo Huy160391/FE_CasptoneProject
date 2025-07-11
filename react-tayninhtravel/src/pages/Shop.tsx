@@ -151,6 +151,7 @@ const Shop = () => {
       if (product.quantityInStock === 0) return
 
       productCart.addToCart({
+        cartItemId: "", // Empty string for new items, will be updated after syncing
         productId: product.id,
         name: product.name,
         image: product.imageUrl[0],

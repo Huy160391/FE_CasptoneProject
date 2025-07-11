@@ -161,8 +161,16 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (!product) return
-
+    // Ngăn không cho thêm vượt quá số lượng tồn kho
+    if (productCart.quantity + quantity > product.stock) {
+      notification.error({
+        message: t('cart.error'),
+        description: t('Số lượng vượt quá tồn kho hiện có!'),
+      })
+      return
+    }
     productCart.addToCart({
+      cartItemId: product.id,
       productId: product.id,
       name: product.name,
       image: product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : 'https://placehold.co/400x400?text=No+Image',
@@ -479,6 +487,7 @@ const ProductDetail = () => {
                   onClick={handleAddToCart}
                   loading={productCart.loading}
                   className="add-to-cart-btn"
+                  disabled={quantity > product.stock}
                 >
                   {productCart.isInCart
                     ? t('cart.inCart') + ` (${productCart.quantity})`

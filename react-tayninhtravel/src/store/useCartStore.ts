@@ -23,7 +23,7 @@ export const useCartStore = create<CartState>()(
 
       addItem: (item) => set((state) => {
         const existingItemIndex = state.items.findIndex(
-          (i) => i.id === item.id && i.type === item.type
+          (i) => i.productId === item.productId && i.type === item.type
         )
 
         if (existingItemIndex !== -1) {
@@ -37,20 +37,20 @@ export const useCartStore = create<CartState>()(
         }
       }),
 
-      removeItem: (id, type) => set((state) => ({
-        items: state.items.filter((item) => !(item.id === id && item.type === type))
+      removeItem: (productId, type) => set((state) => ({
+        items: state.items.filter((item) => !(item.productId === productId && item.type === type))
       })),
 
-      updateQuantity: (id, type, quantity) => set((state) => {
+      updateQuantity: (productId, type, quantity) => set((state) => {
         if (quantity <= 0) {
           return {
-            items: state.items.filter((item) => !(item.id === id && item.type === type))
+            items: state.items.filter((item) => !(item.productId === productId && item.type === type))
           }
         }
 
         return {
           items: state.items.map((item) =>
-            item.id === id && item.type === type
+            item.productId === productId && item.type === type
               ? { ...item, quantity }
               : item
           )

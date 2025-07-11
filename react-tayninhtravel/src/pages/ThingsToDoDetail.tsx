@@ -304,6 +304,7 @@ const ThingsToDoDetail = () => {
     const selectedDate = formValues.date
 
     tourCart.addToCart({
+      cartItemId: "", // Add missing property for type safety
       productId: String(tour.id),
       name: tour.title,
       image: tour.images[0],
