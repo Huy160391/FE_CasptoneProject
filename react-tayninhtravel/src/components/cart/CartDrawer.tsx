@@ -18,12 +18,12 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore()
-  const handleQuantityChange = (id: string | number, type: 'product' | 'tour', quantity: number) => {
-    updateQuantity(id, type, quantity)
+  const handleQuantityChange = (productId: string | number, type: 'product' | 'tour', quantity: number) => {
+    updateQuantity(productId, type, quantity)
   }
 
-  const handleRemoveItem = (id: string | number, type: 'product' | 'tour') => {
-    removeItem(id, type)
+  const handleRemoveItem = (productId: string | number, type: 'product' | 'tour') => {
+    removeItem(productId, type)
   }
 
   const formatPrice = (price: number) => {
@@ -80,7 +80,7 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
                   type="text"
                   danger
                   icon={<DeleteOutlined />}
-                  onClick={() => handleRemoveItem(item.id, item.type)}
+                  onClick={() => handleRemoveItem(item.productId, item.type)}
                 />
               ]}
             >
@@ -98,7 +98,7 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
                     <Button
                       type="text"
                       icon={<MinusOutlined />}
-                      onClick={() => handleQuantityChange(item.id, item.type, Math.max(1, item.quantity - 1))}
+                      onClick={() => handleQuantityChange(item.productId, item.type, Math.max(1, item.quantity - 1))}
                       disabled={item.quantity <= 1}
                       className="quantity-btn minus-btn"
                       size="small"
@@ -107,7 +107,7 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
                     <Button
                       type="text"
                       icon={<PlusOutlined />}
-                      onClick={() => handleQuantityChange(item.id, item.type, item.quantity + 1)}
+                      onClick={() => handleQuantityChange(item.productId, item.type, item.quantity + 1)}
                       disabled={item.quantity >= 99}
                       className="quantity-btn plus-btn"
                       size="small"

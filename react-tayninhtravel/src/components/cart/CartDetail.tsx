@@ -36,13 +36,13 @@ const CartDetail = () => {
     const navigate = useNavigate()
     const { items, removeItem, updateQuantity, clearCart, getTotalItems, getTotalPrice } = useCartStore()
 
-    const handleQuantityChange = (id: string | number, type: 'product' | 'tour', quantity: number) => {
+    const handleQuantityChange = (cartItemId: string | number, type: 'product' | 'tour', quantity: number) => {
         if (quantity < 1) return
-        updateQuantity(id, type, quantity)
+        updateQuantity(cartItemId, type, quantity)
     }
 
-    const handleRemoveItem = (id: string | number, type: 'product' | 'tour') => {
-        removeItem(id, type)
+    const handleRemoveItem = (productId: string | number, type: 'product' | 'tour') => {
+        removeItem(productId, type)
         notification.success({
             message: t('cart.itemRemoved'),
             description: t('cart.itemRemovedDescription')
@@ -110,7 +110,7 @@ const CartDetail = () => {
                     <Button
                         type="text"
                         icon={<MinusOutlined />}
-                        onClick={() => handleQuantityChange(record.id, record.type, quantity - 1)}
+                        onClick={() => handleQuantityChange(record.productId, record.type, quantity - 1)}
                         disabled={quantity <= 1}
                         className="quantity-btn minus-btn"
                         size="small"
@@ -119,7 +119,7 @@ const CartDetail = () => {
                     <Button
                         type="text"
                         icon={<PlusOutlined />}
-                        onClick={() => handleQuantityChange(record.id, record.type, quantity + 1)}
+                        onClick={() => handleQuantityChange(record.productId, record.type, quantity + 1)}
                         disabled={quantity >= 99}
                         className="quantity-btn plus-btn"
                         size="small"
@@ -147,7 +147,7 @@ const CartDetail = () => {
                     type="text"
                     danger
                     icon={<DeleteOutlined />}
-                    onClick={() => handleRemoveItem(record.id, record.type)}
+                    onClick={() => handleRemoveItem(record.productId, record.type)}
                     title={t('cart.removeItem')}
                 />
             )
@@ -233,7 +233,7 @@ const CartDetail = () => {
                         >
                             <Table
                                 columns={columns}
-                                dataSource={items.map(item => ({ ...item, key: `${item.type}-${item.id}` }))}
+                                dataSource={items.map(item => ({ ...item, key: `${item.type}-${item.cartItemId}` }))}
                                 pagination={items.length > 10 ? { pageSize: 10, showSizeChanger: false } : false}
                                 className="cart-table"
                             />
