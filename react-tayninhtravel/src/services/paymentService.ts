@@ -18,12 +18,12 @@ export const getOrderPaymentStatus = async (orderId: string, token: string) => {
 
 // Xác nhận thanh toán thành công từ PayOS callback
 export const confirmPaymentCallback = async (orderId: string) => {
-    const response = await axios.get(`/payment-callback/paid/${orderId}`);
+    const response = await axios.post(`/payment-callback/paid/${orderId}`);
     return response.data; // { message, orderId, status, statusValue, stockUpdated, cartCleared }
 };
 
 // Xác nhận huỷ thanh toán từ PayOS callback
 export const confirmPaymentCancelCallback = async (orderId: string) => {
-    const response = await axios.get(`/payment-callback/cancelled/${orderId}`);
+    const response = await axios.post(`/payment-callback/cancelled/${orderId}`);
     return response.data; // response tu API huỷ thanh toán
 };
