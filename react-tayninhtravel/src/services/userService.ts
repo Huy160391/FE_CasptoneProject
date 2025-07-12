@@ -454,7 +454,6 @@ export const userService = {
                 (response.data?.data && Array.isArray(response.data.data)) ? response.data.data : [];
 
             // For debugging
-            console.log('Comments API response:', response.data);
             console.log('Processed comments data:', commentsData);
 
             return {

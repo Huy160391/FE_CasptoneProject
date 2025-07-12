@@ -13,7 +13,6 @@ interface RegisterHistoryItem {
 }
 
 const mapRegisterHistoryData = (apiData: any, type: 'shop' | 'tourGuide') => {
-    console.log(`Mapping ${type} data:`, apiData);
 
     if (!apiData) {
         console.log(`No ${type} data found`);
@@ -35,7 +34,6 @@ const mapRegisterHistoryData = (apiData: any, type: 'shop' | 'tourGuide') => {
         // Nếu là object đơn, chuyển thành array
         arr = [apiData];
     } else {
-        console.log(`Invalid ${type} data structure:`, apiData);
         return [];
     }
 

@@ -11,7 +11,8 @@
         "bookings": "Book Tour",
         "activities": "Activities",
         "shop": "Shop",
-        "blog": "Blog"
+        "blog": "Blog",
+        "contact": "Contact"
     },
     "admin": {
         "sidebar": {
@@ -525,6 +526,7 @@
         "quantity": "Quantity",
         "price": "Price",
         "product": "Product",
+        "noReviews": "No reviews for this product yet",
         "summary": "Order Summary",
         "coupon": "Coupon",
         "enterCouponCode": "Enter coupon code",
@@ -536,7 +538,9 @@
         "itemRemovedDescription": "Item has been removed from cart",
         "cartCleared": "Cart Cleared",
         "cartClearedDescription": "All items have been removed from cart",
-        "checkoutDescription": "Checkout functionality is under development"
+        "checkoutDescription": "Checkout functionality is under development",
+        "error": "Error",
+        "errorDescription": "An error occurred while processing your cart. Please try again later."
     },
     "checkout": {
         "title": "Checkout",

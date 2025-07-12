@@ -11,7 +11,8 @@
         "bookings": "Đặt tour",
         "activities": "Hoạt động",
         "shop": "Cửa hàng",
-        "blog": "Blog"
+        "blog": "Blog",
+        "contact": "Liên hệ"
     },
     "admin": {
         "sidebar": {
@@ -545,6 +546,7 @@
         "quantity": "Số lượng",
         "price": "Giá",
         "product": "Sản phẩm",
+        "noReviews": "Chưa có đánh giá nào cho sản phẩm này",
         "summary": "Tóm tắt đơn hàng",
         "coupon": "Mã giảm giá",
         "enterCouponCode": "Nhập mã giảm giá",
@@ -556,7 +558,9 @@
         "itemRemovedDescription": "Sản phẩm đã được xóa khỏi giỏ hàng",
         "cartCleared": "Đã xóa giỏ hàng",
         "cartClearedDescription": "Tất cả sản phẩm đã được xóa khỏi giỏ hàng",
-        "checkoutDescription": "Chức năng thanh toán đang được phát triển"
+        "checkoutDescription": "Chức năng thanh toán đang được phát triển",
+        "error": "Lỗi",
+        "errorDescription": "Đã xảy ra lỗi khi xử lý giỏ hàng. Vui lòng thử lại sau."
     },
     "checkout": {
         "title": "Thanh toán",

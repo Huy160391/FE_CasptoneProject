@@ -371,7 +371,6 @@ class AdminService {
         const response = await axios.get('SpecialtyShopApplication', { params });
 
         // Log để debug
-        console.log('Shop registrations API response:', response.data);
 
         // Xử lý các cấu trúc response khác nhau
         if (response.data) {
