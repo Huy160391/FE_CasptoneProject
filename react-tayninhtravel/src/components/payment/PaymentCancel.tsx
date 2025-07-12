@@ -26,7 +26,7 @@ const PaymentCancel: React.FC = () => {
                     try {
                         const callbackRes = await confirmPaymentCancelCallback(orderId);
                         info = {
-                            orderId: callbackRes.orderId || orderId,
+                            orderId: orderId,
                             status: callbackRes.status === 0 ? 'Đã hủy' : 'Thất bại',
                             message: callbackRes.message,
                             totalAmount: callbackRes.totalAmount,
@@ -68,29 +68,9 @@ const PaymentCancel: React.FC = () => {
             ) : error ? (
                 <div style={{ color: '#cf1322', marginBottom: 8 }}>{error}</div>
             ) : orderInfo ? (
-                <>
-                    <div style={{ marginBottom: 8 }}>
-                        Mã đơn hàng: <b style={{ color: '#1890ff', fontSize: 18 }}>{orderInfo.orderId || orderId}</b>
-                    </div>
-                    <div style={{ marginBottom: 8 }}>
-                        Trạng thái: <b style={{ color: '#cf1322' }}>{orderInfo.status}</b>
-                    </div>
-                    {orderInfo.message && (
-                        <div style={{ marginBottom: 8 }}>
-                            {orderInfo.message}
-                        </div>
-                    )}
-                    {orderInfo.totalAmount && (
-                        <div style={{ marginBottom: 8 }}>
-                            Tổng tiền: <b>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(orderInfo.totalAmount)}</b>
-                        </div>
-                    )}
-                    {orderInfo.createdAt && (
-                        <div style={{ marginBottom: 8 }}>
-                            Ngày tạo: <b>{new Date(orderInfo.createdAt).toLocaleString('vi-VN')}</b>
-                        </div>
-                    )}
-                </>
+                <div style={{ marginBottom: 8 }}>
+                    Mã đơn hàng: <b style={{ color: '#1890ff', fontSize: 18 }}>{orderInfo.orderId || orderId}</b>
+                </div>
             ) : null}
             <div style={{ marginBottom: 32 }}>
                 Vui lòng thử lại hoặc <Link to="/support" style={{ color: isDarkMode ? '#79eac0' : '#1890ff', textDecoration: 'underline' }}>liên hệ hỗ trợ</Link> nếu cần thiết.
