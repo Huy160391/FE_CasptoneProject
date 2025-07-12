@@ -338,7 +338,6 @@ const TourTemplateManagement: React.FC = () => {
 
             // Debug log to check values
             console.log('Form values:', processedValues);
-            console.log('API body:', apiBody);
 
             if (editingTemplate) {
                 // EDIT: gọi updateTourTemplate

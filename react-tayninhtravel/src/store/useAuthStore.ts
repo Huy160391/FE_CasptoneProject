@@ -17,11 +17,9 @@ const getStoredUser = (): User | null => {
   if (userStr) {
     try {
       const user = JSON.parse(userStr);
-      console.log('useAuthStore - Raw stored user:', user);
 
       // Đảm bảo role luôn đúng định dạng
       if (user && user.role) {
-        console.log('useAuthStore - Original role:', user.role);
         // Chuẩn hóa role
         if (user.role.toLowerCase() === 'admin' || user.role === 'Admin') {
           user.role = 'Admin';
@@ -38,7 +36,6 @@ const getStoredUser = (): User | null => {
         } else {
           user.role = 'user';
         }
-        console.log('useAuthStore - Normalized role:', user.role);
       }
 
       return user;
@@ -64,8 +61,6 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
       login: (user, token) => {
-        console.log('useAuthStore - Login called with user:', user);
-        console.log('useAuthStore - Login called with user role:', user.role);
         localStorage.setItem('token', token)
         localStorage.setItem('user', JSON.stringify(user))
         set({ user, isAuthenticated: true, token, error: null })

@@ -26,7 +26,7 @@ const PaymentSuccess: React.FC = () => {
                     try {
                         const callbackRes = await confirmPaymentCallback(orderId);
                         info = {
-                            orderId: callbackRes.orderId || orderId,
+                            orderId: orderId,
                             status: callbackRes.status === 1 ? 'Thành công' : 'Thất bại',
                             message: callbackRes.message,
                             stockUpdated: callbackRes.stockUpdated,
@@ -70,29 +70,9 @@ const PaymentSuccess: React.FC = () => {
             ) : error ? (
                 <div style={{ color: '#cf1322', marginBottom: 8 }}>{error}</div>
             ) : orderInfo ? (
-                <>
-                    <div style={{ marginBottom: 8 }}>
-                        Mã số đơn hàng của bạn là <b style={{ color: '#1890ff', fontSize: 18 }}>{orderInfo.orderId || orderId}</b>.
-                    </div>
-                    <div style={{ marginBottom: 8 }}>
-                        Trạng thái: <b style={{ color: orderInfo.status === 'Thành công' ? '#52c41a' : '#cf1322' }}>{orderInfo.status}</b>
-                    </div>
-                    {orderInfo.message && (
-                        <div style={{ marginBottom: 8 }}>
-                            {orderInfo.message}
-                        </div>
-                    )}
-                    {orderInfo.totalAmount && (
-                        <div style={{ marginBottom: 8 }}>
-                            Tổng tiền: <b>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(orderInfo.totalAmount)}</b>
-                        </div>
-                    )}
-                    {orderInfo.createdAt && (
-                        <div style={{ marginBottom: 8 }}>
-                            Ngày tạo: <b>{new Date(orderInfo.createdAt).toLocaleString('vi-VN')}</b>
-                        </div>
-                    )}
-                </>
+                <div style={{ marginBottom: 8 }}>
+                    Mã số đơn hàng của bạn là <b style={{ color: '#1890ff', fontSize: 18 }}>{orderInfo.orderId || orderId}</b>.
+                </div>
             ) : null}
             <div style={{ marginBottom: 32 }}>
                 Bạn có thể xem chi tiết trong <Link

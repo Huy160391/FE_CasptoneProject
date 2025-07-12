@@ -58,13 +58,11 @@ export const getTourTemplates = async (params: GetTourTemplatesParams = {}, toke
 
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    console.log('🔍 Fetching templates from API...');
-    console.log('📡 Request URL:', `/TourCompany/template`);
+    console.log(' Request URL:', `/TourCompany/template`);
     console.log('📡 Query params:', queryParams);
     console.log('📡 Headers:', headers);
 
     const response = await axios.get('/TourCompany/template', { params: queryParams, headers });
-    console.log('✅ Templates API response:', response.data);
     console.log('✅ Response structure check:', {
         statusCode: response.data.statusCode,
         hasData: 'data' in response.data,
@@ -130,13 +128,11 @@ export const getTourDetailsList = async (params: any = {}, token?: string): Prom
         ...params
     };
 
-    console.log('🔍 Fetching tour details from API...');
     console.log('📡 Request URL:', `/TourDetails/paginated`);
     console.log('📡 Query params:', queryParams);
     console.log('📡 Headers:', headers);
 
     const response = await axios.get('/TourDetails/paginated', { params: queryParams, headers });
-    console.log('✅ Tour Details API response:', response.data);
 
     // Backend trả về ResponseGetTourDetailsPaginatedDto với structure mới
     // Data, TotalCount, PageIndex, PageSize, TotalPages, StatusCode, Message, IsSuccess

@@ -150,3 +150,13 @@ export const syncCartOnLogin = async (token: string) => {
     // 6. Trả về cart đã đồng bộ
     return syncedCart;
 };
+
+// Xoá toàn bộ cart (xoá cart khỏi hệ thống)
+export const removeCart = async (token: string) => {
+    const response = await axios.delete('/Product/RemoveCart', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};

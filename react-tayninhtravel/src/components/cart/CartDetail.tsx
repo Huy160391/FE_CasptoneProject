@@ -29,6 +29,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import './CartDetail.scss'
 
+import { removeCart } from '@/services/cartService'
+import { useAuthStore } from '@/store/useAuthStore'
+
 const { Title, Text } = Typography
 
 const CartDetail = () => {
@@ -55,6 +58,20 @@ const CartDetail = () => {
             message: t('cart.cartCleared'),
             description: t('cart.cartClearedDescription')
         })
+        // Gọi API xoá cart trên server
+        const token = useAuthStore.getState().token || ''
+        if (token) {
+            removeCart(token)
+                .then(() => {
+                    // Có thể thêm thông báo hoặc xử lý sau khi xoá cart thành công
+                })
+                .catch(() => {
+                    notification.error({
+                        message: t('cart.removeCartError'),
+                        description: t('cart.removeCartErrorDesc')
+                    })
+                })
+        }
     }
 
     const formatPrice = (price: number) => {
@@ -266,13 +283,15 @@ const CartDetail = () => {
                                 >
                                     {t('cart.proceedToCheckout')}
                                 </Button>
-                                <Button
-                                    size="large"
-                                    block
-                                    onClick={handleContinueShopping}
-                                >
-                                    {t('cart.continueShopping')}
-                                </Button>
+                                {/* Đặt nút tiếp tục mua hàng dưới nút checkout */}
+                                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <Button
+                                        size="large"
+                                        onClick={handleContinueShopping}
+                                    >
+                                        {t('cart.continueShopping')}
+                                    </Button>
+                                </div>
                             </Space>
                         </Card>
 

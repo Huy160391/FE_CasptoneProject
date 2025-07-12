@@ -29,6 +29,7 @@ import {
   PlusOutlined,
   MinusOutlined
 } from '@ant-design/icons'
+import { Empty } from 'antd'
 import './ProductDetail.scss'
 import { useProductCart } from '@/hooks/useCart'
 import { useTranslation } from 'react-i18next'
@@ -74,6 +75,9 @@ const ProductDetail = () => {
   const [imageModalVisible, setImageModalVisible] = useState<boolean>(false)
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
 
+  const [reviewsData, setReviewsData] = useState<Review[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState<boolean>(true)
+
   // Use cart hook instead of direct store access
   const productCart = useProductCart(productId)
   const { t, i18n } = useTranslation()
@@ -85,6 +89,24 @@ const ProductDetail = () => {
       try {
         const productData = await publicService.getPublicProductById(productId)
         if (productData) {
+          // Lấy review từ API
+          setReviewsLoading(true)
+          let fetchedReviews: Review[] = []
+          try {
+            const apiReviews = await publicService.getProductReviews(productId)
+            // Map về đúng kiểu Review nếu cần
+            fetchedReviews = (apiReviews || []).map((r: any, idx: number) => ({
+              id: r.id || idx + 1,
+              userName: r.userName || r.user || 'Ẩn danh',
+              rating: r.rating || 0,
+              date: r.date || r.createdAt || '',
+              comment: r.comment || '',
+            }))
+          } catch {
+            fetchedReviews = []
+          }
+          setReviewsData(fetchedReviews)
+          setReviewsLoading(false)
           // Create enhanced product with additional UI data
           const enhancedProduct: EnhancedProduct = {
             ...productData,
@@ -109,29 +131,7 @@ const ProductDetail = () => {
               'https://placehold.co/400x400?text=Image+3',
               'https://placehold.co/400x400?text=Image+4',
             ],
-            reviewsData: [
-              {
-                id: 1,
-                userName: 'Nguyễn Văn A',
-                rating: 5,
-                date: '15/03/2024',
-                comment: 'Sản phẩm rất đẹp và chất lượng. Đóng gói cẩn thận, giao hàng nhanh.',
-              },
-              {
-                id: 2,
-                userName: 'Trần Thị B',
-                rating: 4,
-                date: '10/03/2024',
-                comment: 'Hàng đẹp, đúng như mô tả. Sẽ ủng hộ shop lần sau.',
-              },
-              {
-                id: 3,
-                userName: 'Lê Văn C',
-                rating: 5,
-                date: '05/03/2024',
-                comment: 'Quá tuyệt vời, mọi người nên mua thử.',
-              },
-            ],
+            reviewsData: fetchedReviews,
             soldCount: productData.soldCount || 0,
           }
           setProduct(enhancedProduct)
@@ -554,63 +554,72 @@ const ProductDetail = () => {
           </TabPane>
           <TabPane tab={`Đánh giá (${product.reviews})`} key="reviews">
             <div className="tab-content">
-              <div className="reviews-summary">
-                <div className="rating-summary">
-                  <div className="average-rating">
-                    <Title level={2}>{product.rating.toFixed(1)}</Title>
-                    <Rate disabled defaultValue={product.rating} />
-                    <Text>{product.reviews} đánh giá</Text>
-                  </div>
-                  <div className="rating-bars">
-                    {[5, 4, 3, 2, 1].map(star => (
-                      <div key={star} className="rating-bar-item">
-                        <Text>{star} sao</Text>
-                        <div className="rating-bar">
-                          <div
-                            className="rating-bar-fill"
-                            style={{
-                              width: `${(product.reviewsData.filter(r => Math.round(r.rating) === star)
-                                .length /
-                                product.reviewsData.length) *
-                                100
-                                }%`,
-                            }}
-                          ></div>
-                        </div>
-                        <Text>
-                          {
-                            product.reviewsData.filter(r => Math.round(r.rating) === star).length
-                          }
-                        </Text>
+              {reviewsLoading ? (
+                <Skeleton active paragraph={{ rows: 2 }} />
+              ) : (
+                <>
+                  <div className="reviews-summary">
+                    <div className="rating-summary">
+                      <div className="average-rating">
+                        <Title level={2}>{reviewsData.length === 0 ? '0.0' : product.rating.toFixed(1)}</Title>
+                        <Rate disabled defaultValue={reviewsData.length === 0 ? 0 : product.rating} />
+                        <Text>{reviewsData.length} đánh giá</Text>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="write-review">
-                  <Button type="primary" icon={<StarOutlined />}>
-                    Viết đánh giá
-                  </Button>
-                </div>
-              </div>
-
-              <Divider />
-
-              <div className="reviews-list">
-                {product.reviewsData &&
-                  product.reviewsData.map((review: Review) => (
-                    <div key={review.id} className="review-item">
-                      <div className="review-header">
-                        <div className="reviewer-info">
-                          <Title level={5}>{review.userName}</Title>
-                          <Text type="secondary">{review.date}</Text>
-                        </div>
-                        <Rate disabled defaultValue={review.rating} />
+                      <div className="rating-bars">
+                        {[5, 4, 3, 2, 1].map(star => (
+                          <div key={star} className="rating-bar-item">
+                            <Text>{star} sao</Text>
+                            <div className="rating-bar">
+                              <div
+                                className="rating-bar-fill"
+                                style={{
+                                  width: `${(reviewsData.filter(r => Math.round(r.rating) === star)
+                                    .length /
+                                    reviewsData.length) *
+                                    100
+                                    }%`,
+                                }}
+                              ></div>
+                            </div>
+                            <Text>
+                              {
+                                reviewsData.filter(r => Math.round(r.rating) === star).length
+                              }
+                            </Text>
+                          </div>
+                        ))}
                       </div>
-                      <Paragraph>{review.comment}</Paragraph>
-                      <Divider />
                     </div>
-                  ))}
-              </div>
+                    <div className="write-review">
+                      <Button type="primary" icon={<StarOutlined />}>
+                        Viết đánh giá
+                      </Button>
+                    </div>
+                  </div>
+                  <Divider />
+                  <div className="reviews-list">
+                    {reviewsData.length === 0 ? (
+                      <div style={{ textAlign: 'center', margin: '32px 0', color: '#888' }}>
+                        <Empty description={t('cart.noReviews')} />
+                      </div>
+                    ) : (
+                      reviewsData.map((review: Review) => (
+                        <div key={review.id} className="review-item">
+                          <div className="review-header">
+                            <div className="reviewer-info">
+                              <Title level={5}>{review.userName}</Title>
+                              <Text type="secondary">{review.date}</Text>
+                            </div>
+                            <Rate disabled defaultValue={review.rating} />
+                          </div>
+                          <Paragraph>{review.comment}</Paragraph>
+                          <Divider />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </TabPane>
         </Tabs>

@@ -16,7 +16,6 @@ const axiosInstance = axios.create({
 
 // Development logging
 if (isDevelopment) {
-    console.log('🌐 API Base URL:', API_BASE_URL);
 }
 
 // Request interceptor
@@ -36,14 +35,7 @@ axiosInstance.interceptors.request.use(
 
         // Development logging
         if (isDevelopment) {
-            console.log('🚀 API Request:', {
-                method: config.method?.toUpperCase(),
-                url: config.url,
-                baseURL: config.baseURL,
-                fullURL: `${config.baseURL}${config.url}`,
-                data: config.data,
-                headers: config.headers
-            });
+            // Đã xoá log request
         }
 
         return config;
@@ -62,12 +54,7 @@ axiosInstance.interceptors.response.use(
     (response) => {
         // Development logging
         if (isDevelopment) {
-            console.log('✅ API Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                url: response.config.url,
-                data: response.data
-            });
+            // Đã xoá log response
         }
         return response;
     },

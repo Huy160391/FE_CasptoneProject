@@ -441,7 +441,6 @@ const CustomProductModal = ({
             console.log("FormData will be sent with Content-Type: multipart/form-data");
 
             // Gọi API để tạo/cập nhật sản phẩm
-            console.log("Calling API with FormData...");
             await onSubmit(formData);
 
             // Clean up object URLs

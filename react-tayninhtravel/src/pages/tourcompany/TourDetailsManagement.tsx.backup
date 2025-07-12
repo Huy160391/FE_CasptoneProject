@@ -125,7 +125,6 @@ const TourDetailsManagement: React.FC = () => {
                 includeInactive: false
             }, token ?? undefined);
 
-            console.log('📊 TourDetails API Response:', response);
 
             // Backend trả về ResponseGetTourDetailsPaginatedDto
             if (response.success && response.data) {
@@ -155,7 +154,6 @@ const TourDetailsManagement: React.FC = () => {
         try {
             console.log('🔍 Loading templates with token:', token ? 'Present' : 'Missing');
             const response = await getTourTemplates({}, token ?? undefined);
-            console.log('📡 Templates API response:', response);
             console.log('📡 Response structure:', {
                 hasIsSuccess: 'isSuccess' in response,
                 hasData: 'data' in response,
