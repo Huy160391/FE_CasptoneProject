@@ -17,7 +17,9 @@ import {
     Divider,
     Tag,
     Alert,
-    Spin
+    Spin,
+    Upload,
+    Image
 } from 'antd';
 import {
     PlusOutlined,
@@ -25,7 +27,8 @@ import {
     EditOutlined,
     ClockCircleOutlined,
     UserOutlined,
-    ShopOutlined
+    ShopOutlined,
+    UploadOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useTourTemplateStore } from '../../store/useTourTemplateStore';
@@ -35,6 +38,7 @@ import {
     createTimelineItems,
     handleApiError
 } from '../../services/tourcompanyService';
+import publicService from '../../services/publicService';
 import {
     TourTemplate,
     SpecialtyShop,
@@ -64,6 +68,7 @@ interface WizardData {
         description: string;
         skillsRequired: string;
         selectedSkills: string[]; // Array of selected skill english names
+        imageUrl?: string;
     };
     // Step 2: Timeline
     timeline: CreateTimelineItemRequest[];
@@ -110,7 +115,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             title: '',
             description: '',
             skillsRequired: '',
-            selectedSkills: []
+            selectedSkills: [],
+            imageUrl: ''
         },
         timeline: [],
         operation: {
@@ -119,9 +125,42 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         }
     });
 
-    // Timeline editing state
+    // Image upload states
+    const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
+    const [imageUploading, setImageUploading] = useState(false);
 
+    // Timeline editing state
     const [timelineForm] = Form.useForm();
+
+    // Image upload handler
+    const handleImageUpload = async (file: File): Promise<boolean> => {
+        try {
+            setImageUploading(true);
+            const imageUrl = await publicService.uploadImage(file);
+
+            if (imageUrl) {
+                setUploadedImageUrl(imageUrl);
+                setWizardData(prev => ({
+                    ...prev,
+                    basicInfo: {
+                        ...prev.basicInfo,
+                        imageUrl: imageUrl
+                    }
+                }));
+                message.success('Tải ảnh thành công');
+                return true;
+            } else {
+                message.error('Tải ảnh thất bại');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            message.error('Có lỗi xảy ra khi tải ảnh');
+            return false;
+        } finally {
+            setImageUploading(false);
+        }
+    };
 
     // Update local state when cache changes
     useEffect(() => {
@@ -302,7 +341,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 title: '',
                 description: '',
                 skillsRequired: '',
-                selectedSkills: []
+                selectedSkills: [],
+                imageUrl: ''
             },
             timeline: [],
             operation: {
@@ -310,6 +350,9 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 maxSeats: 10
             }
         });
+        // Reset image upload states
+        setUploadedImageUrl('');
+        setImageUploading(false);
         form.resetFields();
         timelineForm.resetFields();
         onCancel();
@@ -420,6 +463,49 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     rows={4}
                     placeholder="Nhập mô tả chi tiết"
                 />
+            </Form.Item>
+
+            {/* Image Upload Section */}
+            <Form.Item
+                label="Hình ảnh tour (tùy chọn)"
+                style={{ marginBottom: 16 }}
+            >
+                <div>
+                    <Upload
+                        accept="image/*"
+                        showUploadList={false}
+                        beforeUpload={(file) => {
+                            handleImageUpload(file);
+                            return false; // Prevent default upload
+                        }}
+                        disabled={imageUploading}
+                    >
+                        <Button
+                            icon={<UploadOutlined />}
+                            loading={imageUploading}
+                            disabled={imageUploading}
+                        >
+                            {imageUploading ? 'Đang tải ảnh...' : 'Chọn ảnh'}
+                        </Button>
+                    </Upload>
+
+                    {uploadedImageUrl && (
+                        <div style={{ marginTop: 8 }}>
+                            <Image
+                                width={200}
+                                height={150}
+                                src={uploadedImageUrl}
+                                style={{ objectFit: 'cover', borderRadius: 8 }}
+                                preview={{
+                                    mask: 'Xem ảnh'
+                                }}
+                            />
+                            <div style={{ marginTop: 4, fontSize: '12px', color: '#666' }}>
+                                Ảnh đã được tải lên thành công
+                            </div>
+                        </div>
+                    )}
+                </div>
             </Form.Item>
 
             <Form.Item

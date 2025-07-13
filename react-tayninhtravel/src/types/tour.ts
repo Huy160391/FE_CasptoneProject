@@ -216,6 +216,7 @@ export interface TourDetails {
     status: TourDetailsStatus;
     commentApproved?: string;
     skillsRequired?: string;
+    imageUrl?: string;
     timeline: TimelineItem[];
     tourOperation?: TourOperation;
     timelineItemsCount: number;
@@ -242,6 +243,7 @@ export interface CreateTourDetailsRequest {
     title: string;
     description: string;
     skillsRequired: string;
+    imageUrl?: string;
     specialtyShopIds?: string[];
 }
 

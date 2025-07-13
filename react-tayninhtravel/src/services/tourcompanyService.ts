@@ -282,7 +282,7 @@ export const getPublicTourDetails = async (params: {
     return response.data;
 };
 
-// Lấy tour details nổi bật (featured tours)
+// Lấy tour details nổi bật (featured tours) - không cần authentication
 export const getFeaturedTourDetails = async (limit = 6): Promise<ApiResponse<any>> => {
     const response = await axios.get('/TourDetails/paginated', {
         params: {

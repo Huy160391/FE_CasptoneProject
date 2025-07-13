@@ -12,7 +12,9 @@ import {
     Popconfirm,
     Card,
     Alert,
-    Tabs
+    Tabs,
+    Upload,
+    Image
 } from 'antd';
 import {
     PlusOutlined,
@@ -23,7 +25,8 @@ import {
     CheckCircleOutlined,
     ExclamationCircleOutlined,
     BarChartOutlined,
-    RocketOutlined
+    RocketOutlined,
+    UploadOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import { usePreloadWizardData } from '../../hooks/usePreloadWizardData';
@@ -36,6 +39,7 @@ import {
     activatePublicTourDetails,
     handleApiError
 } from '../../services/tourcompanyService';
+import publicService from '../../services/publicService';
 import TourDetailsWizard from '../../components/tourcompany/TourDetailsWizard';
 import TourDetailsModal from '../../components/tourcompany/TourDetailsModal';
 import {
@@ -78,6 +82,10 @@ const TourDetailsManagement: React.FC = () => {
     const [apiError, setApiError] = useState<string>('');
     const [activeTab, setActiveTab] = useState('tours');
     const [form] = Form.useForm();
+
+    // Image upload states
+    const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
+    const [imageUploading, setImageUploading] = useState(false);
 
 
     // Pagination states
@@ -200,6 +208,9 @@ const TourDetailsManagement: React.FC = () => {
         setEditingDetails(null);
         setModalVisible(true);
         form.resetFields();
+        // Reset image upload states
+        setUploadedImageUrl('');
+        setImageUploading(false);
     };
 
 
@@ -258,6 +269,31 @@ const TourDetailsManagement: React.FC = () => {
         setModalVisible(true);
     };
 
+    // Image upload handler
+    const handleImageUpload = async (file: File): Promise<boolean> => {
+        try {
+            setImageUploading(true);
+            const imageUrl = await publicService.uploadImage(file);
+
+            if (imageUrl) {
+                setUploadedImageUrl(imageUrl);
+                // Update form field
+                form.setFieldsValue({ imageUrl: imageUrl });
+                message.success('Tải ảnh thành công');
+                return true;
+            } else {
+                message.error('Tải ảnh thất bại');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            message.error('Có lỗi xảy ra khi tải ảnh');
+            return false;
+        } finally {
+            setImageUploading(false);
+        }
+    };
+
     const handleSubmit = async (values: CreateTourDetailsRequest) => {
         try {
             setLoading(true);
@@ -271,11 +307,14 @@ const TourDetailsManagement: React.FC = () => {
 
             if (response.success) {
                 message.success(
-                    editingDetails 
-                        ? 'Cập nhật tour details thành công' 
+                    editingDetails
+                        ? 'Cập nhật tour details thành công'
                         : `Tạo tour details thành công${response.data ? ` và đã clone ${(response.data as any).assignedSlots?.length || 0} slots` : ''}`
                 );
                 setModalVisible(false);
+                // Reset image upload states
+                setUploadedImageUrl('');
+                setImageUploading(false);
                 loadTourDetailsList();
             }
         } catch (error) {
@@ -540,7 +579,11 @@ const TourDetailsManagement: React.FC = () => {
             <Modal
                 title={editingDetails ? 'Cập nhật Tour Details' : 'Tạo Tour Details'}
                 open={modalVisible}
-                onCancel={() => setModalVisible(false)}
+                onCancel={() => {
+                    setModalVisible(false);
+                    setUploadedImageUrl('');
+                    setImageUploading(false);
+                }}
                 footer={null}
                 width={600}
             >
@@ -589,6 +632,50 @@ const TourDetailsManagement: React.FC = () => {
                         />
                     </Form.Item>
 
+                    {/* Image Upload Section */}
+                    <Form.Item
+                        name="imageUrl"
+                        label="Hình ảnh tour (tùy chọn)"
+                        style={{ marginBottom: 16 }}
+                    >
+                        <div>
+                            <Upload
+                                accept="image/*"
+                                showUploadList={false}
+                                beforeUpload={(file) => {
+                                    handleImageUpload(file);
+                                    return false; // Prevent default upload
+                                }}
+                                disabled={imageUploading}
+                            >
+                                <Button
+                                    icon={<UploadOutlined />}
+                                    loading={imageUploading}
+                                    disabled={imageUploading}
+                                >
+                                    {imageUploading ? 'Đang tải ảnh...' : 'Chọn ảnh'}
+                                </Button>
+                            </Upload>
+
+                            {uploadedImageUrl && (
+                                <div style={{ marginTop: 8 }}>
+                                    <Image
+                                        width={200}
+                                        height={150}
+                                        src={uploadedImageUrl}
+                                        style={{ objectFit: 'cover', borderRadius: 8 }}
+                                        preview={{
+                                            mask: 'Xem ảnh'
+                                        }}
+                                    />
+                                    <div style={{ marginTop: 4, fontSize: '12px', color: '#666' }}>
+                                        Ảnh đã được tải lên thành công
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </Form.Item>
+
                     <Form.Item
                         name="skillsRequired"
                         label="Kỹ năng yêu cầu"
@@ -602,7 +689,11 @@ const TourDetailsManagement: React.FC = () => {
                             <Button type="primary" htmlType="submit" loading={loading}>
                                 {editingDetails ? 'Cập nhật' : 'Tạo mới'}
                             </Button>
-                            <Button onClick={() => setModalVisible(false)}>
+                            <Button onClick={() => {
+                                setModalVisible(false);
+                                setUploadedImageUrl('');
+                                setImageUploading(false);
+                            }}>
                                 Hủy
                             </Button>
                         </Space>
