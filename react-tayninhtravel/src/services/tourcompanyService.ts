@@ -176,24 +176,13 @@ export const createTourOperation = async (data: CreateTourOperationRequest, toke
 // Lấy TourOperation theo TourDetails ID
 export const getTourOperationByDetailsId = async (tourDetailsId: string, token?: string): Promise<ApiResponse<TourOperation>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    console.log('🚀 Getting TourOperation for TourDetails:', tourDetailsId);
     const response = await axios.get(`/TourOperation/details/${tourDetailsId}`, { headers });
+    console.log('✅ TourOperation API response:', response.data);
 
-    // Handle both ApiResponse format and direct TourOperation format
-    if (response.data && typeof response.data === 'object') {
-        // Check if it's ApiResponse format
-        if ('data' in response.data && 'isSuccess' in response.data) {
-            return response.data as ApiResponse<TourOperation>;
-        } else {
-            // Direct TourOperation format - wrap it in ApiResponse
-            return {
-                success: true,
-                message: 'Success',
-                data: response.data as TourOperation
-            } as ApiResponse<TourOperation>;
-        }
-    }
-
-    return response.data;
+    // API trả về format: { data: TourOperation, success: boolean, message: string, statusCode: number }
+    return response.data as ApiResponse<TourOperation>;
 };
 
 // Cập nhật TourOperation
