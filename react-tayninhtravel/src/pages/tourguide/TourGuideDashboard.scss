@@ -1,0 +1,214 @@
+.tour-guide-dashboard {
+    .dashboard-header {
+        margin-bottom: 24px;
+
+        h2 {
+            margin-bottom: 8px;
+            color: #1890ff;
+        }
+    }
+
+    .stat-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+
+        .ant-statistic {
+            .ant-statistic-title {
+                color: #666;
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .ant-statistic-content {
+                font-size: 24px;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .performance-card {
+        .ant-progress {
+            margin-bottom: 8px;
+            
+            .ant-progress-text {
+                font-weight: 500;
+            }
+        }
+
+        .ant-alert {
+            border-radius: 6px;
+            
+            .ant-alert-message {
+                font-weight: 500;
+            }
+        }
+    }
+
+    .ant-list {
+        .ant-list-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            .ant-list-item-meta {
+                .ant-list-item-meta-title {
+                    font-weight: 500;
+                    color: #1890ff;
+                    margin-bottom: 4px;
+                }
+
+                .ant-list-item-meta-description {
+                    color: #666;
+                    font-size: 12px;
+                }
+            }
+
+            .ant-list-item-action {
+                margin-left: 16px;
+            }
+        }
+    }
+
+    .ant-card {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+        .ant-card-head {
+            border-bottom: 1px solid #f0f0f0;
+
+            .ant-card-head-title {
+                font-weight: 600;
+                color: #262626;
+            }
+
+            .ant-card-extra {
+                .ant-btn-link {
+                    color: #1890ff;
+                    padding: 0;
+                }
+            }
+        }
+
+        .ant-card-body {
+            padding: 20px;
+        }
+    }
+
+    .ant-badge {
+        .ant-badge-count {
+            background: #1890ff;
+            box-shadow: 0 0 0 1px #fff;
+        }
+    }
+
+    // Empty state styling
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+
+        .anticon {
+            font-size: 48px;
+            color: #d9d9d9;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: #999;
+            margin: 0;
+        }
+    }
+
+    // Quick actions
+    .ant-btn {
+        border-radius: 6px;
+        font-weight: 500;
+        
+        &.ant-btn-primary {
+            background: #1890ff;
+            border-color: #1890ff;
+            
+            &:hover {
+                background: #40a9ff;
+                border-color: #40a9ff;
+            }
+        }
+    }
+
+    // Responsive design
+    @media (max-width: 768px) {
+        .dashboard-header {
+            text-align: center;
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+
+        .stat-card {
+            margin-bottom: 16px;
+
+            .ant-statistic-content {
+                font-size: 20px;
+            }
+        }
+
+        .ant-list-item {
+            .ant-list-item-action {
+                margin-left: 0;
+                margin-top: 8px;
+            }
+        }
+    }
+
+    @media (max-width: 576px) {
+        .ant-card-body {
+            padding: 16px;
+        }
+
+        .stat-card {
+            .stat-icon {
+                font-size: 20px;
+            }
+
+            .ant-statistic-content {
+                font-size: 18px;
+            }
+        }
+    }
+
+    // Animation for loading
+    .ant-spin-container {
+        min-height: 400px;
+    }
+
+    // Progress bar customization
+    .ant-progress {
+        .ant-progress-bg {
+            border-radius: 4px;
+        }
+    }
+
+    // Alert customization
+    .ant-alert-info {
+        background: #e6f7ff;
+        border: 1px solid #91d5ff;
+        
+        .ant-alert-icon {
+            color: #1890ff;
+        }
+    }
+}

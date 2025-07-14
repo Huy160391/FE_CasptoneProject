@@ -1102,6 +1102,72 @@
             "changePassword": "Đổi mật khẩu"
         }
     },
+    "tourGuide": {
+        "sidebar": {
+            "dashboard": "Bảng điều khiển",
+            "invitations": "Lời mời tham gia",
+            "schedule": "Lịch trình",
+            "profile": "Hồ sơ",
+            "settings": "Cài đặt",
+            "logout": "Đăng xuất"
+        },
+        "dashboard": {
+            "title": "Dashboard Tour Guide",
+            "welcome": "Chào mừng bạn trở lại! Đây là tổng quan về các lời mời và hoạt động của bạn.",
+            "stats": {
+                "pendingInvitations": "Lời mời chờ phản hồi",
+                "acceptedInvitations": "Đã chấp nhận",
+                "acceptanceRate": "Tỷ lệ chấp nhận",
+                "totalInvitations": "Tổng lời mời"
+            },
+            "pendingInvitations": "Lời mời chờ phản hồi",
+            "performance": "Hiệu suất",
+            "quickActions": "Hành động nhanh",
+            "viewAllInvitations": "Xem tất cả lời mời",
+            "viewSchedule": "Xem lịch trình",
+            "updateProfile": "Cập nhật hồ sơ"
+        },
+        "invitations": {
+            "title": "Lời mời tham gia Tour",
+            "tabs": {
+                "all": "Tất cả",
+                "pending": "Chờ phản hồi",
+                "accepted": "Đã chấp nhận",
+                "rejected": "Đã từ chối",
+                "expired": "Đã hết hạn"
+            },
+            "actions": {
+                "accept": "Chấp nhận",
+                "reject": "Từ chối",
+                "viewDetails": "Xem chi tiết"
+            },
+            "status": {
+                "pending": "Chờ phản hồi",
+                "accepted": "Đã chấp nhận",
+                "rejected": "Đã từ chối",
+                "expired": "Đã hết hạn"
+            },
+            "modals": {
+                "acceptTitle": "Chấp nhận lời mời",
+                "rejectTitle": "Từ chối lời mời",
+                "acceptMessage": "Tin nhắn chấp nhận (tùy chọn)",
+                "rejectionReason": "Lý do từ chối (bắt buộc)"
+            }
+        },
+        "profile": {
+            "title": "Hồ sơ Tour Guide",
+            "personalInfo": "Thông tin cá nhân",
+            "skills": "Kỹ năng và chuyên môn",
+            "experience": "Kinh nghiệm",
+            "languages": "Ngôn ngữ"
+        },
+        "schedule": {
+            "title": "Lịch trình Tour Guide",
+            "todaySchedule": "Lịch trình hôm nay",
+            "upcomingTours": "Tour sắp tới",
+            "eventDetails": "Chi tiết sự kiện"
+        }
+    },
     "tourCompany": {
         "sidebar": {
             "dashboard": "Dashboard",

@@ -1,0 +1,191 @@
+.tour-guide-invitations {
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+
+        h2 {
+            margin: 0;
+            color: #1890ff;
+        }
+    }
+
+    .ant-statistic {
+        .ant-statistic-title {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .ant-statistic-content {
+            color: #1890ff;
+            font-weight: 600;
+        }
+    }
+
+    .ant-table {
+        .ant-table-thead > tr > th {
+            background: #fafafa;
+            font-weight: 600;
+        }
+
+        .ant-table-tbody > tr:hover > td {
+            background: #f5f5f5;
+        }
+    }
+
+    .ant-tabs {
+        .ant-tabs-tab {
+            font-weight: 500;
+            
+            &.ant-tabs-tab-active {
+                color: #1890ff;
+            }
+        }
+    }
+
+    .ant-badge {
+        .ant-badge-count {
+            background: #1890ff;
+        }
+    }
+
+    // Status colors
+    .ant-tag {
+        border-radius: 4px;
+        font-size: 12px;
+        
+        &.ant-tag-processing {
+            background: #e6f7ff;
+            border-color: #91d5ff;
+            color: #1890ff;
+        }
+
+        &.ant-tag-success {
+            background: #f6ffed;
+            border-color: #b7eb8f;
+            color: #52c41a;
+        }
+
+        &.ant-tag-error {
+            background: #fff2f0;
+            border-color: #ffccc7;
+            color: #ff4d4f;
+        }
+
+        &.ant-tag-default {
+            background: #fafafa;
+            border-color: #d9d9d9;
+            color: #666;
+        }
+
+        &.ant-tag-blue {
+            background: #e6f7ff;
+            border-color: #91d5ff;
+            color: #1890ff;
+        }
+
+        &.ant-tag-green {
+            background: #f6ffed;
+            border-color: #b7eb8f;
+            color: #52c41a;
+        }
+    }
+
+    // Action buttons
+    .ant-btn {
+        &.ant-btn-primary {
+            background: #52c41a;
+            border-color: #52c41a;
+            
+            &:hover {
+                background: #73d13d;
+                border-color: #73d13d;
+            }
+        }
+
+        &.ant-btn-dangerous {
+            &:hover {
+                background: #ff7875;
+                border-color: #ff7875;
+            }
+        }
+    }
+
+    // Modal styles
+    .ant-modal {
+        .ant-modal-header {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .ant-modal-footer {
+            border-top: 1px solid #f0f0f0;
+        }
+    }
+
+    // Empty state
+    .ant-empty {
+        margin: 40px 0;
+        
+        .ant-empty-description {
+            color: #999;
+        }
+    }
+
+    // Responsive design
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+
+        .ant-table {
+            .ant-table-thead > tr > th,
+            .ant-table-tbody > tr > td {
+                padding: 8px;
+                font-size: 12px;
+            }
+        }
+
+        .ant-btn {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+    }
+
+    // Loading state
+    .ant-spin-container {
+        min-height: 200px;
+    }
+
+    // Time remaining warning
+    .ant-typography {
+        &.ant-typography-warning {
+            color: #faad14;
+            font-weight: 500;
+        }
+    }
+
+    // Statistics cards hover effect
+    .ant-card {
+        transition: all 0.3s ease;
+        
+        &:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+    }
+
+    // Badge positioning
+    .ant-badge {
+        .ant-badge-count {
+            top: -2px;
+            right: -8px;
+        }
+    }
+}
