@@ -1,8 +1,9 @@
 import { RouteObject } from 'react-router-dom';
 import TourGuideDashboard from '@/pages/tourguide/TourGuideDashboard';
-import TourGuideInvitations from '@/pages/tourguide/TourGuideInvitations';
+import TourGuideInvitationList from '@/pages/tourguide/TourGuideInvitationList';
 import TourGuideProfile from '@/pages/tourguide/TourGuideProfile';
 import TourGuideSchedule from '@/pages/tourguide/TourGuideSchedule';
+import TourGuideDebug from '@/components/debug/TourGuideDebug';
 
 export const tourguideRoutes: RouteObject[] = [
     {
@@ -14,7 +15,7 @@ export const tourguideRoutes: RouteObject[] = [
             },
             {
                 path: 'invitations',
-                element: <TourGuideInvitations />,
+                element: <TourGuideInvitationList />,
             },
             {
                 path: 'profile',
@@ -23,6 +24,10 @@ export const tourguideRoutes: RouteObject[] = [
             {
                 path: 'schedule',
                 element: <TourGuideSchedule />,
+            },
+            {
+                path: 'debug',
+                element: <TourGuideDebug />,
             },
         ],
     },

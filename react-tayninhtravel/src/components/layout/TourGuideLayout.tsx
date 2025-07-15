@@ -12,8 +12,8 @@ import {
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '@/store/authStore';
-import { useThemeStore } from '@/store/themeStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useThemeStore } from '@/store/useThemeStore';
 import './TourGuideLayout.scss';
 
 const { Sider, Content } = Layout;

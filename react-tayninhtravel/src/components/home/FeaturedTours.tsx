@@ -1,16 +1,21 @@
-import { Row, Col, Card, Button, Spin, Empty, Tag, Divider } from 'antd'
+import { Row, Col, Card, Button, Spin, Empty, Tag, Divider, message } from 'antd'
 import {
   ClockCircleOutlined,
   DollarOutlined,
   TeamOutlined,
   EnvironmentOutlined,
   CalendarOutlined,
-  StarOutlined
+  StarOutlined,
+  ShoppingCartOutlined
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getFeaturedTourDetails } from '../../services/tourcompanyService'
 import { TourDetailsStatus } from '../../types/tour'
+import { useAuthStore } from '../../store/useAuthStore'
+import { formatCurrency } from '../../services/paymentService'
+import LoginModal from '../auth/LoginModal'
 import './FeaturedTours.scss'
 
 const { Meta } = Card
@@ -20,9 +25,13 @@ interface TourDetail {
   title: string;
   description: string;
   tourTemplateName: string;
+  imageUrl?: string;
   tourOperation?: {
+    id: string;
     price: number;
     maxGuests: number;
+    currentBookings: number;
+    isActive: boolean;
   };
   timeline?: Array<{
     activity: string;
@@ -33,8 +42,12 @@ interface TourDetail {
 
 const FeaturedTours = () => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuthStore()
+
   const [tours, setTours] = useState<TourDetail[]>([])
   const [loading, setLoading] = useState(true)
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
 
   useEffect(() => {
     loadFeaturedTours()
@@ -57,6 +70,39 @@ const FeaturedTours = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Handle booking button click
+  const handleBookNow = (tour: TourDetail) => {
+    if (!isAuthenticated) {
+      // Show login modal if user is not authenticated
+      setIsLoginModalVisible(true)
+      return
+    }
+
+    // Check if tour has active operation
+    if (!tour.tourOperation || !tour.tourOperation.isActive) {
+      message.error('Tour này hiện không khả dụng để đặt')
+      return
+    }
+
+    // Navigate to booking page
+    message.info({
+      content: 'Đang chuyển đến trang đặt tour...',
+      duration: 1
+    })
+
+    navigate(`/booking/${tour.id}`, {
+      state: {
+        tourData: tour
+      }
+    })
+  }
+
+  // Handle view tour details
+  const handleViewDetails = (tour: TourDetail) => {
+    // Navigate to tour details page - this should call /api/TourDetails/{id}
+    navigate(`/tour-details/${tour.id}`)
   }
 
   const formatPrice = (price?: number) => {
@@ -145,8 +191,16 @@ const FeaturedTours = () => {
                   size="large"
                   className="book-now-btn"
                   icon={<CalendarOutlined />}
+                  onClick={() => handleBookNow(tour)}
+                  disabled={!tour.tourOperation?.isActive}
                 >
                   {t('tours.bookNow')}
+                </Button>,
+                <Button
+                  type="link"
+                  onClick={() => handleViewDetails(tour)}
+                >
+                  {t('tours.viewDetails')}
                 </Button>
               ]}
             >
@@ -182,6 +236,16 @@ const FeaturedTours = () => {
                     </span>
                   </div>
 
+                  {tour.tourOperation && (
+                    <div className="detail-item">
+                      <ShoppingCartOutlined className="detail-icon" />
+                      <span className="detail-label">Đã đặt:</span>
+                      <span className="detail-value">
+                        {tour.tourOperation.currentBookings || 0} / {tour.tourOperation.maxGuests} người
+                      </span>
+                    </div>
+                  )}
+
                   <div className="detail-item price-item">
                     <DollarOutlined className="detail-icon price-icon" />
                     <span className="detail-label">Giá tour:</span>
@@ -193,6 +257,16 @@ const FeaturedTours = () => {
           </Col>
         ))}
       </Row>
+
+      {/* Login Modal */}
+      <LoginModal
+        visible={isLoginModalVisible}
+        onCancel={() => setIsLoginModalVisible(false)}
+        onSuccess={() => {
+          setIsLoginModalVisible(false)
+          message.success('Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.')
+        }}
+      />
     </section>
   )
 }

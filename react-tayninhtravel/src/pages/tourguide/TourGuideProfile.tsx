@@ -21,7 +21,7 @@ import {
     SaveOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { getMyProfile, updateMyProfile } from '@/services/tourguideService';
 
 const { Title, Text } = Typography;

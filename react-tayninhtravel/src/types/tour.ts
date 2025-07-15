@@ -396,12 +396,13 @@ export interface TourGuideInvitation {
 
 export interface InvitationStatistics {
     totalInvitations: number;
-    pendingInvitations: number;
-    acceptedInvitations: number;
-    rejectedInvitations: number;
-    expiredInvitations: number;
+    pendingCount: number;
+    acceptedCount: number;
+    rejectedCount: number;
+    expiredCount: number;
     acceptanceRate: number;
-    rejectionRate: number;
+    latestInvitation?: string;
+    latestResponse?: string;
 }
 
 export interface TourGuideInvitationsResponse {

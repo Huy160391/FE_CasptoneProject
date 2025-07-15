@@ -246,7 +246,8 @@
         }
     },
     "tours": {
-        "bookNow": "Đặt ngay"
+        "bookNow": "Đặt ngay",
+        "viewDetails": "Xem chi tiết"
     },
     "thingsToDo": {
         "pageTitle": "Khám phá Tây Ninh",

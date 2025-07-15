@@ -188,7 +188,8 @@
         }
     },
     "tours": {
-        "bookNow": "Book Now"
+        "bookNow": "Book Now",
+        "viewDetails": "View Details"
     },
     "thingsToDo": {
         "pageTitle": "Explore Tay Ninh",
