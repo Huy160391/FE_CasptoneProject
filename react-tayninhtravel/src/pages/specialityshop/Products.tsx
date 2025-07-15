@@ -151,14 +151,7 @@ const SpecialityShopProducts = () => {
     };
 
     const columns: ColumnsType<Product> = [
-        {
-            title: 'Hình ảnh',
-            dataIndex: 'image',
-            key: 'image',
-            render: (image: string) => (
-                <img src={image} alt="Product" style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }} />
-            ),
-        },
+        // ...existing code...
         {
             title: 'Tên sản phẩm',
             dataIndex: 'name',
