@@ -51,9 +51,9 @@ export interface TourDate {
 
 export interface CreateTourBookingRequest {
     tourOperationId: string;
-    numberOfGuests: number;
-    adultCount: number;
-    childCount: number;
+    numberOfGuests: number; // Tổng số người
+    adultCount: number; // Sẽ bằng tổng số người
+    childCount: number; // Luôn = 0
     contactName?: string;
     contactPhone?: string;
     contactEmail?: string;
@@ -61,13 +61,13 @@ export interface CreateTourBookingRequest {
 }
 
 export interface CalculatePriceRequest {
-    tourOperationId: string;
+    tourDetailsId: string;
     numberOfGuests: number;
     bookingDate?: string;
 }
 
 export interface PriceCalculation {
-    tourOperationId: string;
+    tourDetailsId: string;
     tourTitle: string;
     numberOfGuests: number;
     originalPricePerGuest: number;
@@ -146,49 +146,75 @@ export const getTourDetailsForBooking = async (tourDetailsId: string): Promise<A
 };
 
 /**
- * Tính giá tour trước khi booking (có thể có early bird discount)
+ * Tính giá tour với Early Bird discount
+ * Logic:
+ * - Tour được tạo và mở bán
+ * - 15 ngày đầu sau khi tạo: Early Bird (giảm 25%)
+ * - Từ ngày 16 trở đi: Giá gốc (100%)
  */
 export const calculateBookingPrice = async (request: CalculatePriceRequest, token?: string): Promise<ApiResponse<PriceCalculation>> => {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    // Lấy thông tin tour để tính giá
-    const response = await axios.get(`/TourDetails/${request.tourOperationId}`, { headers });
+        // Lấy thông tin tour để tính giá
+        const response = await axios.get(`/TourDetails/${request.tourDetailsId}`, { headers });
 
-    if (response.data.success && response.data.data) {
-        const tourDetails = response.data.data;
-        const price = tourDetails.tourOperation?.price || 0;
+        if (response.data.success && response.data.data) {
+            const tourDetails = response.data.data;
+            const pricePerGuest = tourDetails.tourOperation?.price || 0;
+
+            // Tính số ngày từ khi tour được tạo đến hiện tại
+            const tourCreatedDate = new Date(tourDetails.createdAt);
+            const currentDate = new Date();
+            const daysSinceCreated = Math.floor((currentDate.getTime() - tourCreatedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+            // Kiểm tra Early Bird (15 ngày đầu)
+            const isEarlyBird = daysSinceCreated <= 15;
+            const discountPercent = isEarlyBird ? 25 : 0;
+
+            // Tính giá
+            const totalOriginalPrice = pricePerGuest * request.numberOfGuests;
+            const discountAmount = (totalOriginalPrice * discountPercent) / 100;
+            const finalPrice = totalOriginalPrice - discountAmount;
+
+            return {
+                success: true,
+                data: {
+                    tourDetailsId: request.tourDetailsId,
+                    tourTitle: tourDetails.title || '',
+                    numberOfGuests: request.numberOfGuests,
+                    originalPricePerGuest: pricePerGuest,
+                    totalOriginalPrice,
+                    discountPercent,
+                    discountAmount,
+                    finalPrice,
+                    isEarlyBird,
+                    pricingType: isEarlyBird ? 'Early Bird' : 'Standard',
+                    daysSinceCreated,
+                    daysUntilTour: 0, // Có thể tính sau nếu có tourStartDate
+                    bookingDate: new Date().toISOString()
+                }
+            };
+        }
 
         return {
-            success: true,
-            data: {
-                tourOperationId: request.tourOperationId,
-                tourTitle: tourDetails.title || '',
-                numberOfGuests: request.numberOfGuests,
-                originalPricePerGuest: price,
-                totalOriginalPrice: price * request.numberOfGuests,
-                discountPercent: 0,
-                discountAmount: 0,
-                finalPrice: price * request.numberOfGuests,
-                isEarlyBird: false,
-                pricingType: 'Standard',
-                daysSinceCreated: 0,
-                daysUntilTour: 0,
-                bookingDate: new Date().toISOString()
-            }
+            success: false,
+            message: 'Không tìm thấy thông tin tour'
+        };
+    } catch (error: any) {
+        console.error('Error calculating booking price:', error);
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Không thể tính giá tour'
         };
     }
-
-    return {
-        success: false,
-        message: 'Không thể tính giá tour'
-    };
 };
 
 /**
  * Tạo booking tour mới (yêu cầu authentication)
  */
 export const createTourBooking = async (request: CreateTourBookingRequest, token: string): Promise<ApiResponse<CreateBookingResult>> => {
-    const response = await axios.post('/TourBooking', request, {
+    const response = await axios.post('/UserTourBooking/create-booking', request, {
         headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -287,16 +313,16 @@ export const checkTourAvailability = async (tourOperationId: string, numberOfGue
     });
 
     // Transform response to match expected format
-    if (response.data.success && response.data.data) {
-        const data = response.data.data;
+    if (response.data.success && response.data.capacityInfo) {
+        const capacityInfo = response.data.capacityInfo;
         return {
             success: true,
             data: {
-                isAvailable: data.availableCapacity >= numberOfGuests,
-                maxGuests: data.maxCapacity,
-                currentBookings: data.bookedCapacity,
-                availableSlots: data.availableCapacity,
-                message: data.isFull ? 'Tour đã hết chỗ' : undefined
+                isAvailable: capacityInfo.availableCapacity >= numberOfGuests,
+                maxGuests: capacityInfo.maxCapacity,
+                currentBookings: capacityInfo.bookedCapacity,
+                availableSlots: capacityInfo.availableCapacity,
+                message: capacityInfo.isFull ? 'Tour đã hết chỗ' : undefined
             }
         };
     }
@@ -435,6 +461,12 @@ export const getBookingStatusColor = (status: BookingStatus): string => {
     }
 };
 
+// Helper function to validate email format
+const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+
 /**
  * Validate booking request
  */
@@ -446,23 +478,19 @@ export const validateBookingRequest = (request: CreateTourBookingRequest): { isV
     }
 
     if (!request.numberOfGuests || request.numberOfGuests < 1) {
-        errors.push('Số lượng khách phải lớn hơn 0');
+        errors.push('Số lượng người phải lớn hơn 0');
     }
 
-    if (!request.adultCount || request.adultCount < 0) {
-        errors.push('Số lượng người lớn không hợp lệ');
+    if (!request.contactName?.trim()) {
+        errors.push('Tên người liên hệ là bắt buộc');
     }
 
-    if (request.childCount < 0) {
-        errors.push('Số lượng trẻ em không hợp lệ');
+    if (!request.contactPhone?.trim()) {
+        errors.push('Số điện thoại liên hệ là bắt buộc');
     }
 
-    if (request.adultCount + request.childCount !== request.numberOfGuests) {
-        errors.push('Tổng số người lớn và trẻ em phải bằng tổng số khách');
-    }
-
-    if (request.numberOfGuests > 50) {
-        errors.push('Số lượng khách không được vượt quá 50');
+    if (request.contactEmail && !isValidEmail(request.contactEmail)) {
+        errors.push('Email không hợp lệ');
     }
 
     return {

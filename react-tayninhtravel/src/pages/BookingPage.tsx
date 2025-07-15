@@ -50,8 +50,6 @@ const { Step } = Steps;
 
 interface BookingFormData {
     numberOfGuests: number;
-    adultCount: number;
-    childCount: number;
     contactName: string;
     contactPhone: string;
     contactEmail: string;
@@ -78,6 +76,13 @@ const BookingPage: React.FC = () => {
 
     const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
     const [bookingData, setBookingData] = useState<any>(null);
+    const [formValues, setFormValues] = useState<BookingFormData>({
+        numberOfGuests: 1,
+        contactName: '',
+        contactPhone: '',
+        contactEmail: '',
+        specialRequests: ''
+    });
 
     // Get initial booking data from navigation state
     useEffect(() => {
@@ -103,16 +108,17 @@ const BookingPage: React.FC = () => {
                     setTourDetails(response.data);
 
                     // Pre-fill form with user data if available
-                    if (user) {
-                        form.setFieldsValue({
-                            contactName: user.fullName || '',
-                            contactEmail: user.email || '',
-                            contactPhone: user.phoneNumber || '',
-                            numberOfGuests: bookingData?.numberOfGuests || 1,
-                            adultCount: bookingData?.adultCount || 1,
-                            childCount: bookingData?.childCount || 0
-                        });
-                    }
+                    const initialValues = {
+                        numberOfGuests: bookingData?.numberOfGuests || 1,
+                        contactName: user?.fullName || '',
+                        contactEmail: user?.email || '',
+                        contactPhone: user?.phoneNumber || '',
+                        specialRequests: ''
+                    };
+
+                    // Update both form and state
+                    form.setFieldsValue(initialValues);
+                    setFormValues(initialValues);
                 } else {
                     setError(response.message || 'Không thể tải thông tin tour');
                 }
@@ -134,7 +140,7 @@ const BookingPage: React.FC = () => {
         try {
             setCalculating(true);
             const response = await calculateBookingPrice({
-                tourOperationId: tourDetails.tourOperation.id,
+                tourDetailsId: tourDetails.id,
                 numberOfGuests: values.numberOfGuests
             }, token ?? undefined);
 
@@ -149,6 +155,7 @@ const BookingPage: React.FC = () => {
                 );
 
                 if (availabilityResponse.success) {
+                    console.log('Availability data:', availabilityResponse.data); // Debug log
                     setAvailability(availabilityResponse.data);
                 }
             }
@@ -161,18 +168,11 @@ const BookingPage: React.FC = () => {
     };
 
     const handleFormValuesChange = (changedValues: Partial<BookingFormData>, allValues: BookingFormData) => {
-        if (changedValues.numberOfGuests || changedValues.adultCount || changedValues.childCount) {
-            // Auto-calculate total guests
-            const adultCount = allValues.adultCount || 0;
-            const childCount = allValues.childCount || 0;
-            const totalGuests = adultCount + childCount;
+        // Save form values to state
+        setFormValues(allValues);
 
-            if (totalGuests !== allValues.numberOfGuests) {
-                form.setFieldValue('numberOfGuests', totalGuests);
-                handleGuestCountChange({ ...allValues, numberOfGuests: totalGuests });
-            } else {
-                handleGuestCountChange(allValues);
-            }
+        if (changedValues.numberOfGuests) {
+            handleGuestCountChange(allValues);
         }
     };
 
@@ -200,21 +200,26 @@ const BookingPage: React.FC = () => {
         }
 
         try {
-            const values = await form.validateFields();
+            // Use form values from state (since form might not be rendered in current step)
+            console.log('Form values from state:', formValues); // Debug log
 
             // Validate booking request
             const bookingRequest: CreateTourBookingRequest = {
                 tourOperationId: tourDetails.tourOperation.id,
-                numberOfGuests: values.numberOfGuests,
-                adultCount: values.adultCount,
-                childCount: values.childCount,
-                contactName: values.contactName,
-                contactPhone: values.contactPhone,
-                contactEmail: values.contactEmail,
-                specialRequests: values.specialRequests
+                numberOfGuests: formValues.numberOfGuests, // Tổng số người
+                adultCount: formValues.numberOfGuests, // Tất cả đều tính là người lớn
+                childCount: 0, // Không phân biệt trẻ em
+                contactName: formValues.contactName,
+                contactPhone: formValues.contactPhone,
+                contactEmail: formValues.contactEmail,
+                specialRequests: formValues.specialRequests
             };
 
+            console.log('Booking request:', bookingRequest); // Debug log
+
             const validation = validateBookingRequest(bookingRequest);
+            console.log('Validation result:', validation); // Debug log
+
             if (!validation.isValid) {
                 message.error(validation.errors.join(', '));
                 return;
@@ -222,16 +227,20 @@ const BookingPage: React.FC = () => {
 
             setSubmitting(true);
             const response = await createTourBooking(bookingRequest, token);
+            console.log('Booking response:', response); // Debug log
 
             if (response.success && response.data) {
+                console.log('Booking data:', response.data); // Debug log
                 message.success('Đặt tour thành công! Đang chuyển đến trang thanh toán...');
 
                 // Redirect to PayOS payment
                 if (response.data.paymentUrl) {
+                    console.log('Payment URL found:', response.data.paymentUrl); // Debug log
                     setTimeout(() => {
                         redirectToPayOsPayment(response.data.paymentUrl!);
                     }, 1500);
                 } else {
+                    console.log('No payment URL, navigating to success page'); // Debug log
                     // If no payment URL, navigate to success page
                     navigate('/booking-success', {
                         state: { bookingData: response.data }
@@ -242,7 +251,8 @@ const BookingPage: React.FC = () => {
             }
         } catch (error: any) {
             console.error('Booking error:', error);
-            message.error(error.message || 'Có lỗi xảy ra khi đặt tour');
+            console.error('Error response data:', error.response?.data); // Debug log
+            message.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra khi đặt tour');
         } finally {
             setSubmitting(false);
         }
@@ -379,15 +389,22 @@ const BookingPage: React.FC = () => {
                                     form={form}
                                     layout="vertical"
                                     onValuesChange={handleFormValuesChange}
+                                    initialValues={{
+                                        numberOfGuests: 1,
+                                        contactName: '',
+                                        contactPhone: '',
+                                        contactEmail: '',
+                                        specialRequests: ''
+                                    }}
                                 >
                                     <Row gutter={16}>
                                         <Col xs={24} sm={12}>
                                             <Form.Item
-                                                name="adultCount"
-                                                label="Số người lớn"
+                                                name="numberOfGuests"
+                                                label="Số người"
                                                 rules={[
-                                                    { required: true, message: 'Vui lòng nhập số người lớn' },
-                                                    { type: 'number', min: 1, message: 'Phải có ít nhất 1 người lớn' }
+                                                    { required: true, message: 'Vui lòng nhập số người' },
+                                                    { type: 'number', min: 1, message: 'Phải có ít nhất 1 người' }
                                                 ]}
                                             >
                                                 <InputNumber
@@ -395,37 +412,11 @@ const BookingPage: React.FC = () => {
                                                     max={50}
                                                     style={{ width: '100%' }}
                                                     prefix={<TeamOutlined />}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col xs={24} sm={12}>
-                                            <Form.Item
-                                                name="childCount"
-                                                label="Số trẻ em"
-                                                rules={[
-                                                    { type: 'number', min: 0, message: 'Số trẻ em không được âm' }
-                                                ]}
-                                            >
-                                                <InputNumber
-                                                    min={0}
-                                                    max={50}
-                                                    style={{ width: '100%' }}
-                                                    prefix={<TeamOutlined />}
+                                                    placeholder="Nhập số người"
                                                 />
                                             </Form.Item>
                                         </Col>
                                     </Row>
-
-                                    <Form.Item
-                                        name="numberOfGuests"
-                                        label="Tổng số khách"
-                                    >
-                                        <InputNumber
-                                            disabled
-                                            style={{ width: '100%' }}
-                                            prefix={<TeamOutlined />}
-                                        />
-                                    </Form.Item>
 
                                     <Divider />
 
@@ -508,21 +499,20 @@ const BookingPage: React.FC = () => {
                                         {tourDetails.title}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Số khách">
-                                        {form.getFieldValue('numberOfGuests')} người
-                                        ({form.getFieldValue('adultCount')} người lớn, {form.getFieldValue('childCount')} trẻ em)
+                                        {formValues.numberOfGuests} người
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Người liên hệ">
-                                        {form.getFieldValue('contactName')}
+                                        {formValues.contactName}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Điện thoại">
-                                        {form.getFieldValue('contactPhone')}
+                                        {formValues.contactPhone}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Email">
-                                        {form.getFieldValue('contactEmail')}
+                                        {formValues.contactEmail}
                                     </Descriptions.Item>
-                                    {form.getFieldValue('specialRequests') && (
+                                    {formValues.specialRequests && (
                                         <Descriptions.Item label="Yêu cầu đặc biệt">
-                                            {form.getFieldValue('specialRequests')}
+                                            {formValues.specialRequests}
                                         </Descriptions.Item>
                                     )}
                                 </Descriptions>

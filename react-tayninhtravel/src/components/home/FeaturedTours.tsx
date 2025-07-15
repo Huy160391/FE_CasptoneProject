@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getFeaturedTourDetails } from '../../services/tourcompanyService'
+import { checkTourAvailability } from '../../services/tourBookingService'
 import { TourDetailsStatus } from '../../types/tour'
 import { useAuthStore } from '../../store/useAuthStore'
 import { formatCurrency } from '../../services/paymentService'
@@ -48,10 +49,34 @@ const FeaturedTours = () => {
   const [tours, setTours] = useState<TourDetail[]>([])
   const [loading, setLoading] = useState(true)
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
+  const [realTimeAvailability, setRealTimeAvailability] = useState<Record<string, {
+    availableSlots: number;
+    maxGuests: number;
+    currentBookings: number;
+  }>>({})
+  const { token } = useAuthStore()
 
   useEffect(() => {
     loadFeaturedTours()
   }, [])
+
+  const loadRealTimeAvailability = async (tourOperationId: string) => {
+    try {
+      const response = await checkTourAvailability(tourOperationId, 1, token ?? undefined)
+      if (response.success && response.data) {
+        setRealTimeAvailability(prev => ({
+          ...prev,
+          [tourOperationId]: {
+            availableSlots: response.data.availableSlots,
+            maxGuests: response.data.maxGuests,
+            currentBookings: response.data.currentBookings
+          }
+        }))
+      }
+    } catch (error) {
+      console.error('Error loading real-time availability:', error)
+    }
+  }
 
   const loadFeaturedTours = async () => {
     try {
@@ -61,7 +86,15 @@ const FeaturedTours = () => {
       if (response.success && response.data) {
         // Filter only public tours (status 8) - tours available for customer booking
         const publicTours = response.data.filter((tour: TourDetail) => tour.status === TourDetailsStatus.Public)
-        setTours(publicTours.slice(0, 3)) // Show only 3 tours
+        const selectedTours = publicTours.slice(0, 3) // Show only 3 tours
+        setTours(selectedTours)
+
+        // Load real-time availability for each tour
+        selectedTours.forEach(tour => {
+          if (tour.tourOperation?.id) {
+            loadRealTimeAvailability(tour.tourOperation.id)
+          }
+        })
       }
     } catch (error) {
       console.error('Error loading featured tours:', error)
@@ -241,7 +274,9 @@ const FeaturedTours = () => {
                       <ShoppingCartOutlined className="detail-icon" />
                       <span className="detail-label">Đã đặt:</span>
                       <span className="detail-value">
-                        {tour.tourOperation.currentBookings || 0} / {tour.tourOperation.maxGuests} người
+                        {realTimeAvailability[tour.tourOperation.id]
+                          ? realTimeAvailability[tour.tourOperation.id].currentBookings
+                          : (tour.tourOperation.currentBookings || 0)} / {tour.tourOperation.maxGuests} người
                       </span>
                     </div>
                   )}

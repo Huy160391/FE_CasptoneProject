@@ -28,6 +28,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatCurrency } from '../services/paymentService';
+import { checkTourAvailability } from '../services/tourBookingService';
 import LoginModal from '../components/auth/LoginModal';
 
 const { Title, Text, Paragraph } = Typography;
@@ -72,6 +73,11 @@ const TourDetailsPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+    const [realTimeAvailability, setRealTimeAvailability] = useState<{
+        availableSlots: number;
+        maxGuests: number;
+        currentBookings: number;
+    } | null>(null);
 
     // Load tour details
     useEffect(() => {
@@ -102,6 +108,10 @@ const TourDetailsPage: React.FC = () => {
 
                 if (data.success && data.data) {
                     setTour(data.data);
+                    // Load real-time availability
+                    if (data.data.tourOperation?.id) {
+                        loadRealTimeAvailability(data.data.tourOperation.id);
+                    }
                 } else {
                     setError(data.message || 'Không thể tải thông tin tour');
                 }
@@ -115,6 +125,22 @@ const TourDetailsPage: React.FC = () => {
 
         loadTourDetails();
     }, [tourId]);
+
+    // Load real-time availability
+    const loadRealTimeAvailability = async (tourOperationId: string) => {
+        try {
+            const response = await checkTourAvailability(tourOperationId, 1, token ?? undefined);
+            if (response.success && response.data) {
+                setRealTimeAvailability({
+                    availableSlots: response.data.availableSlots,
+                    maxGuests: response.data.maxGuests,
+                    currentBookings: response.data.currentBookings
+                });
+            }
+        } catch (error) {
+            console.error('Error loading real-time availability:', error);
+        }
+    };
 
     // Handle booking
     const handleBookNow = () => {
@@ -167,9 +193,12 @@ const TourDetailsPage: React.FC = () => {
         );
     }
 
-    const availableSlots = tour.tourOperation 
-        ? tour.tourOperation.maxGuests - (tour.tourOperation.currentBookings || 0)
-        : 0;
+    // Use real-time availability if available, otherwise fallback to static data
+    const availableSlots = realTimeAvailability
+        ? realTimeAvailability.availableSlots
+        : (tour.tourOperation
+            ? tour.tourOperation.maxGuests - (tour.tourOperation.currentBookings || 0)
+            : 0);
 
     return (
         <div style={{ padding: '20px', maxWidth: 1200, margin: '0 auto' }}>
@@ -286,7 +315,9 @@ const TourDetailsPage: React.FC = () => {
                                     <Descriptions.Item label="Đã đặt">
                                         <Space>
                                             <ShoppingCartOutlined />
-                                            {tour.tourOperation.currentBookings || 0} người
+                                            {realTimeAvailability
+                                                ? realTimeAvailability.currentBookings
+                                                : (tour.tourOperation.currentBookings || 0)} người
                                         </Space>
                                     </Descriptions.Item>
                                     

@@ -15,6 +15,7 @@ import OrderSuccess from '@/pages/OrderSuccess';
 import NotFound from '@/pages/NotFound';
 import Unauthorized from '@/pages/Unauthorized';
 import PaymentSuccessComponent from '@/components/payment/PaymentSuccess';
+import PaymentCancelComponent from '@/components/payment/PaymentCancel';
 import BookingPage from '@/pages/BookingPage';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancel from '@/pages/PaymentCancel';
