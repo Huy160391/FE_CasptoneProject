@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Modal, Button, Tag, Carousel } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import type { Product } from '@/types';
 import { getCategoryViLabel } from '@/utils/categoryViLabels';
 import './ViewProductModal.scss';
@@ -14,6 +15,7 @@ interface ViewProductModalProps {
 const ViewProductModal = ({ visible, onCancel, product }: ViewProductModalProps) => {
     const [activeImage, setActiveImage] = useState(0);
     const carouselRef = useRef<any>(null);
+    const { i18n } = useTranslation();
 
     if (!product) return null;
 
@@ -53,12 +55,12 @@ const ViewProductModal = ({ visible, onCancel, product }: ViewProductModalProps)
 
     return (
         <Modal
-            title="Chi tiết sản phẩm"
+            title={i18n.language === 'vi' ? 'Chi tiết sản phẩm' : 'Product Details'}
             open={visible}
             onCancel={onCancel}
             footer={[
                 <Button key="back" onClick={onCancel}>
-                    Đóng
+                    {i18n.language === 'vi' ? 'Đóng' : 'Close'}
                 </Button>
             ]}
             width={800}
@@ -66,7 +68,7 @@ const ViewProductModal = ({ visible, onCancel, product }: ViewProductModalProps)
         >
             <div className="product-view">
                 <div className="product-gallery">
-                    <div className="main-image-container">
+                    <div className="main-image-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 320 }}>
                         {product.imageUrl && product.imageUrl.length > 0 ? (
                             <>
                                 <Button
@@ -75,19 +77,18 @@ const ViewProductModal = ({ visible, onCancel, product }: ViewProductModalProps)
                                     onClick={handlePrev}
                                     disabled={product.imageUrl.length <= 1}
                                 />
-
                                 <Carousel
                                     ref={carouselRef}
                                     afterChange={handleCarouselChange}
                                     dots={false}
+                                    style={{ width: 320 }}
                                 >
                                     {product.imageUrl.map((image, index) => (
-                                        <div key={index} className="carousel-item">
-                                            <img src={image} alt={`${product.name} - Ảnh ${index + 1}`} />
+                                        <div key={index} className="carousel-item" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
+                                            <img src={image} alt={`${product.name} - Ảnh ${index + 1}`} style={{ maxHeight: 300, maxWidth: 300, objectFit: 'contain' }} />
                                         </div>
                                     ))}
                                 </Carousel>
-
                                 <Button
                                     className="gallery-nav next"
                                     icon={<RightOutlined />}
@@ -99,35 +100,32 @@ const ViewProductModal = ({ visible, onCancel, product }: ViewProductModalProps)
                             <div className="no-image">Không có hình ảnh</div>
                         )}
                     </div>
-
                     {product.imageUrl && product.imageUrl.length > 1 && (
-                        <div className="thumbnails">
+                        <div className="thumbnails" style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
                             {product.imageUrl.map((image, index) => (
                                 <div
                                     key={index}
                                     className={`thumbnail ${activeImage === index ? 'active' : ''}`}
                                     onClick={() => handleThumbnailClick(index)}
+                                    style={{ border: activeImage === index ? '2px solid #1890ff' : '1px solid #eee', margin: '0 4px', cursor: 'pointer', padding: 2, borderRadius: 4 }}
                                 >
-                                    <img src={image} alt={`Thumbnail ${index + 1}`} />
+                                    <img src={image} alt={`Thumbnail ${index + 1}`} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} />
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
-
                 <div className="product-details">
                     <h1 className="product-name">{product.name}</h1>
-
                     <div className="product-meta">
                         <Tag color="blue">{getCategoryViLabel(product.category.toLowerCase())}</Tag>
                         <Tag color={product.quantityInStock > 0 ? 'green' : 'red'}>
-                            {product.quantityInStock > 0 ? 'Có sẵn' : 'Hết hàng'}
+                            {product.quantityInStock > 0 ? (i18n.language === 'vi' ? 'Có sẵn' : 'Available') : (i18n.language === 'vi' ? 'Hết hàng' : 'Out of stock')}
                         </Tag>
                         {product.isSale && (
-                            <Tag color="volcano">Giảm giá {product.salePercent}%</Tag>
+                            <Tag color="volcano">{i18n.language === 'vi' ? `Giảm giá ${product.salePercent}%` : `Sale ${product.salePercent}%`}</Tag>
                         )}
                     </div>
-
                     <div className="product-price">
                         {product.isSale && product.salePercent ? (
                             <>
@@ -140,21 +138,18 @@ const ViewProductModal = ({ visible, onCancel, product }: ViewProductModalProps)
                             <span className="price-current">{product.price.toLocaleString()} ₫</span>
                         )}
                     </div>
-
                     <div className="product-stock">
-                        <span className="stock-label">Tồn kho:</span>
+                        <span className="stock-label">{i18n.language === 'vi' ? 'Tồn kho:' : 'Stock:'}</span>
                         <span className={`stock-value ${product.quantityInStock === 0 ? 'out-of-stock' : product.quantityInStock < 20 ? 'low-stock' : 'in-stock'}`}>
-                            {product.quantityInStock} sản phẩm
+                            {product.quantityInStock} {i18n.language === 'vi' ? 'sản phẩm' : 'items'}
                         </span>
                     </div>
-
                     <div className="product-description">
-                        <h3>Mô tả sản phẩm</h3>
+                        <h3>{i18n.language === 'vi' ? 'Mô tả sản phẩm' : 'Description'}</h3>
                         <div className="description-content">
-                            {product.description || 'Không có mô tả cho sản phẩm này.'}
+                            {product.description || (i18n.language === 'vi' ? 'Không có mô tả cho sản phẩm này.' : 'No description for this product.')}
                         </div>
                     </div>
-
                     <div className="product-additional-info">
                         <div className="info-item">
                             <span className="info-label">ID Sản phẩm:</span>

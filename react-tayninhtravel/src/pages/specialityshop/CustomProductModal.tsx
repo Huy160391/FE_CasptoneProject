@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { CATEGORY_LABELS } from '@/config/constants';
 import { CATEGORY_VI_LABELS } from '@/utils/categoryViLabels';
 import type { Product } from '@/types';
 import './CustomProductModal.scss';
@@ -79,6 +81,7 @@ const CustomProductModal = ({
 
     // Ref cho input file
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { i18n } = useTranslation();
 
     // Reset form khi modal mở/đóng hoặc khi initialValues thay đổi
     useEffect(() => {
@@ -352,8 +355,16 @@ const CustomProductModal = ({
 
             // Chuyển đổi category string thành giá trị enum (số)
             if (formValues.category) {
-                const categoryEnum = CATEGORY_TO_ENUM[formValues.category];
-                formData.append('Category', String(categoryEnum));
+                // Nếu đã là số, dùng luôn, nếu là string thì chuyển sang enum
+                let categoryEnum: number | undefined;
+                if (!isNaN(Number(formValues.category))) {
+                    categoryEnum = Number(formValues.category);
+                } else {
+                    categoryEnum = CATEGORY_TO_ENUM[formValues.category];
+                }
+                if (typeof categoryEnum === 'number' && !isNaN(categoryEnum)) {
+                    formData.append('Category', String(categoryEnum));
+                }
             }
 
             formData.append('IsSale', formValues.isSale ? 'true' : 'false');
@@ -599,8 +610,12 @@ const CustomProductModal = ({
                                 onChange={handleInputChange}
                             >
                                 <option value="">Chọn danh mục</option>
-                                {Object.keys(CATEGORY_VI_LABELS).map(key => (
-                                    <option key={key} value={key}>{CATEGORY_VI_LABELS[key]}</option>
+                                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                                    <option key={key.toLowerCase()} value={key.toLowerCase()}>
+                                        {i18n.language === 'vi'
+                                            ? CATEGORY_VI_LABELS[key.toLowerCase()] || String(label)
+                                            : String(label)}
+                                    </option>
                                 ))}
                             </select>
                             {errors.category && <div className="error-message">{errors.category}</div>}

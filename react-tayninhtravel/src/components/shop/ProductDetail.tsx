@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   Breadcrumb,
@@ -68,13 +68,9 @@ const ProductDetail = () => {
 
   const [product, setProduct] = useState<EnhancedProduct | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  const [mainImage, setMainImage] = useState<string>('')
   const [quantity, setQuantity] = useState<number>(1)
   const [isFavorite, setIsFavorite] = useState<boolean>(false)
   // const [activeTab, setActiveTab] = useState<string>('description')
-  const [imageModalVisible, setImageModalVisible] = useState<boolean>(false)
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
-
   const [reviewsData, setReviewsData] = useState<Review[]>([])
   const [reviewsLoading, setReviewsLoading] = useState<boolean>(true)
 
@@ -108,9 +104,16 @@ const ProductDetail = () => {
           setReviewsData(fetchedReviews)
           setReviewsLoading(false)
           // Create enhanced product with additional UI data
+          // Chỉ hiển thị đúng số lượng ảnh mà sản phẩm có, nếu không có thì dùng 1 ảnh placeholder
+          let additionalImages: string[] = [];
+          if (productData.imageUrl && productData.imageUrl.length > 0) {
+            additionalImages = [...productData.imageUrl];
+          } else {
+            additionalImages = ['https://placehold.co/400x400?text=No+Image'];
+          }
           const enhancedProduct: EnhancedProduct = {
             ...productData,
-            category: productData.category, // Đã là string, không cần kiểm tra kiểu số nữa
+            category: productData.category,
             rating: 4.5,
             reviews: 28,
             tags: ['đặc sản', 'quà tặng', 'truyền thống'],
@@ -120,22 +123,11 @@ const ProductDetail = () => {
             shortDescription: productData.description || 'Sản phẩm đặc trưng từ Tây Ninh, chất lượng cao',
             stock: productData.quantityInStock,
             sku: `TN-${productData.id.toString().padStart(5, '0')}`,
-            additionalImages: productData.imageUrl && productData.imageUrl.length > 0 ? [
-              ...productData.imageUrl,
-              'https://placehold.co/400x400?text=Image+2',
-              'https://placehold.co/400x400?text=Image+3',
-              'https://placehold.co/400x400?text=Image+4',
-            ] : [
-              'https://placehold.co/400x400?text=No+Image',
-              'https://placehold.co/400x400?text=Image+2',
-              'https://placehold.co/400x400?text=Image+3',
-              'https://placehold.co/400x400?text=Image+4',
-            ],
+            additionalImages,
             reviewsData: fetchedReviews,
             soldCount: productData.soldCount || 0,
           }
           setProduct(enhancedProduct)
-          setMainImage(enhancedProduct.additionalImages[0])
         }
       } catch (error) {
         console.error('Error fetching product:', error)
@@ -193,47 +185,120 @@ const ProductDetail = () => {
     })
   }
 
-  const handleThumbnailClick = (image: string, index: number) => {
-    setMainImage(image)
-    setCurrentImageIndex(index)
-  }
+  const ProductImages = React.memo(({ product }: { product: EnhancedProduct }) => {
+    const [mainImage, setMainImage] = useState<string>(product.additionalImages[0] || '');
+    const [imageModalVisible, setImageModalVisible] = useState<boolean>(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
-  const handleImageClick = () => {
-    if (!product) return
-    setImageModalVisible(true)
-  }
+    const handleThumbnailClick = (image: string, index: number) => {
+      setMainImage(image);
+      setCurrentImageIndex(index);
+    };
 
-  const handlePrevImage = () => {
-    if (!product) return
-    const newIndex =
-      (currentImageIndex - 1 + product.additionalImages.length) % product.additionalImages.length
-    setCurrentImageIndex(newIndex)
-    setMainImage(product.additionalImages[newIndex])
-  }
+    const handleImageClick = () => {
+      setImageModalVisible(true);
+    };
 
-  const handleNextImage = () => {
-    if (!product) return
-    const newIndex = (currentImageIndex + 1) % product.additionalImages.length
-    setCurrentImageIndex(newIndex)
-    setMainImage(product.additionalImages[newIndex])
-  }
+    const handlePrevImage = () => {
+      const newIndex = (currentImageIndex - 1 + product.additionalImages.length) % product.additionalImages.length;
+      setCurrentImageIndex(newIndex);
+      setMainImage(product.additionalImages[newIndex]);
+    };
 
-  const renderThumbnails = () => {
-    if (!product) return null
-    return product.additionalImages.map((image: string, index: number) => (
-      <div
-        key={index}
-        className={`thumbnail ${mainImage === image ? 'active-thumbnail' : ''}`}
-        onClick={() => handleThumbnailClick(image, index)}
-      >
-        <img
-          src={image}
-          alt={`${product.name} - Ảnh ${index + 1}`}
-          className="thumbnail-image"
-        />
-      </div>
-    ))
-  }
+    const handleNextImage = () => {
+      const newIndex = (currentImageIndex + 1) % product.additionalImages.length;
+      setCurrentImageIndex(newIndex);
+      setMainImage(product.additionalImages[newIndex]);
+    };
+
+    const renderThumbnails = () => {
+      return product.additionalImages.map((image: string, index: number) => (
+        <div
+          key={index}
+          className={`thumbnail ${mainImage === image ? 'active-thumbnail' : ''}`}
+          onClick={() => handleThumbnailClick(image, index)}
+        >
+          <img
+            src={image}
+            alt={`${product.name} - Ảnh ${index + 1}`}
+            className="thumbnail-image"
+          />
+        </div>
+      ));
+    };
+
+    return (
+      <>
+        <div className="product-images">
+          <div className="main-image-container" onClick={handleImageClick}>
+            <img
+              src={mainImage}
+              alt={product.name}
+              className="main-image"
+            />
+            {(product.isNew || product.isSale) && (
+              <div
+                className={`product-badge ${product.isNew ? 'new-badge' : 'sale-badge'}`}
+              >
+                {product.isNew
+                  ? 'Mới'
+                  : `Giảm ${typeof product.discountPrice === 'number' ? Math.round(
+                    ((product.price - product.discountPrice) / product.price) * 100
+                  ) : 0}%`}
+              </div>
+            )}
+            <div className="image-hint">Nhấp để xem ảnh lớn</div>
+          </div>
+          <div className="thumbnail-container">{renderThumbnails()}</div>
+        </div>
+        {/* Image Modal */}
+        <Modal
+          open={imageModalVisible}
+          footer={null}
+          onCancel={() => setImageModalVisible(false)}
+          width={800}
+          className="image-modal"
+          centered
+        >
+          <div className="modal-image-container">
+            <Button
+              className="image-nav-button prev-button"
+              onClick={handlePrevImage}
+              icon={<LeftOutlined />}
+            />
+            <div className="modal-main-image">
+              <img
+                src={product.additionalImages[currentImageIndex]}
+                alt={product.name}
+                className="modal-image"
+              />
+            </div>
+            <Button
+              className="image-nav-button next-button"
+              onClick={handleNextImage}
+              icon={<RightOutlined />}
+            />
+          </div>
+          <div className="modal-thumbnails">
+            <div className="modal-thumbnail-container">
+              {product.additionalImages.map((image, index) => (
+                <div
+                  key={index}
+                  className={`modal-thumbnail ${currentImageIndex === index ? 'active-thumbnail' : ''}`}
+                  onClick={() => setCurrentImageIndex(index)}
+                >
+                  <img src={image} alt={`Thumbnail ${index + 1}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="image-pagination">
+            {currentImageIndex + 1}/{product.additionalImages.length || 0}
+          </div>
+        </Modal>
+      </>
+    );
+  });
 
   // Related products component
   const RelatedProductsSection = ({
@@ -387,29 +452,7 @@ const ProductDetail = () => {
       <Row gutter={[32, 32]} className="product-detail-content">
         {/* Product Images */}
         <Col xs={24} md={12}>
-          <div className="product-images">
-            <div className="main-image-container" onClick={handleImageClick}>
-              <img
-                src={mainImage}
-                alt={product.name}
-                className="main-image"
-              />
-              {(product.isNew || product.isSale) && (
-                <div
-                  className={`product-badge ${product.isNew ? 'new-badge' : 'sale-badge'
-                    }`}
-                >
-                  {product.isNew
-                    ? 'Mới'
-                    : `Giảm ${Math.round(
-                      ((product.price - (product.discountPrice || 0)) / product.price) * 100
-                    )}%`}
-                </div>
-              )}
-              <div className="image-hint">Nhấp để xem ảnh lớn</div>
-            </div>
-            <div className="thumbnail-container">{renderThumbnails()}</div>
-          </div>
+          <ProductImages product={product} />
         </Col>
 
         {/* Product Info */}
@@ -429,19 +472,19 @@ const ProductDetail = () => {
             </div>
 
             <div className="product-price">
-              {product.discountPrice ? (
+              {typeof product.discountPrice === 'number' ? (
                 <>
                   <Text className="current-price">
-                    {product.discountPrice.toLocaleString('vi-VN')}₫
+                    {product.discountPrice?.toLocaleString('vi-VN')}₫
                   </Text>
                   <Text className="original-price">
                     {product.price.toLocaleString('vi-VN')}₫
                   </Text>
                   <Tag color="red" className="discount-tag">
                     Giảm{' '}
-                    {Math.round(
-                      ((product.price - (product.discountPrice || 0)) / product.price) * 100
-                    )}
+                    {typeof product.discountPrice === 'number' ? Math.round(
+                      ((product.price - product.discountPrice) / product.price) * 100
+                    ) : 0}
                     %
                   </Tag>
                 </>
@@ -641,58 +684,6 @@ const ProductDetail = () => {
           tags={product.tags}
         />
       </div>
-
-      {/* Image Modal */}
-      <Modal
-        open={imageModalVisible}
-        footer={null}
-        onCancel={() => setImageModalVisible(false)}
-        width={800}
-        className="image-modal"
-        centered
-      >
-        <div className="modal-image-container">
-          <Button
-            className="image-nav-button prev-button"
-            onClick={handlePrevImage}
-            icon={<LeftOutlined />}
-          />
-          <div className="modal-main-image">
-            {product && (
-              <img
-                src={product.additionalImages[currentImageIndex]}
-                alt={product.name}
-                className="modal-image"
-              />
-            )}
-          </div>
-          <Button
-            className="image-nav-button next-button"
-            onClick={handleNextImage}
-            icon={<RightOutlined />}
-          />
-        </div>
-
-        <div className="modal-thumbnails">
-          <div className="modal-thumbnail-container">
-            {product &&
-              product.additionalImages.map((image, index) => (
-                <div
-                  key={index}
-                  className={`modal-thumbnail ${currentImageIndex === index ? 'active-thumbnail' : ''
-                    }`}
-                  onClick={() => setCurrentImageIndex(index)}
-                >
-                  <img src={image} alt={`Thumbnail ${index + 1}`} />
-                </div>
-              ))}
-          </div>
-        </div>
-
-        <div className="image-pagination">
-          {currentImageIndex + 1}/{product?.additionalImages.length || 0}
-        </div>
-      </Modal>
     </div>
   )
 }

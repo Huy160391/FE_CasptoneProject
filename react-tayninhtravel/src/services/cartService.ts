@@ -4,6 +4,11 @@ import { useAuthStore } from '@/store/useAuthStore';
 
 // Cập nhật giỏ hàng: Gửi API thêm sản phẩm vào giỏ, truyền token qua header, body đúng chuẩn API mới
 export const updateCart = async (data: any, token: string) => {
+    // Xoá toàn bộ cart trước khi thêm mới
+    try {
+        await removeCart(token);
+    } catch { }
+
     const response = await axios.post(
         '/Product/AddtoCart',
         data,
@@ -16,11 +21,6 @@ export const updateCart = async (data: any, token: string) => {
     return response.data;
 };
 
-// Xóa toàn bộ sản phẩm trong giỏ hàng
-export const deleteAllCartItems = async (cartId: string) => {
-    const response = await axios.delete(`/cart/${cartId}/items`);
-    return response.data;
-};
 
 // Checkout giỏ hàng, trả về orderId và URL thanh toán PayOS
 export const checkoutCart = async (

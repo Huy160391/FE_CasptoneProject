@@ -194,7 +194,7 @@ export const publicService = {
      */
     async getProductReviews(productId: string): Promise<any[]> {
         try {
-            const response = await axiosInstance.get<any>(`Product/${productId}/reviews`);
+            const response = await axiosInstance.get<any>(`Product/${productId}/reviews-ratings`);
             // API trả về mảng review
             return response.data?.data || response.data || [];
         } catch (error) {
@@ -206,9 +206,14 @@ export const publicService = {
     /**
      * Gửi review cho product
      */
-    async submitProductReview(productId: string, reviewData: { rating: number; comment: string; }): Promise<any> {
+    async submitProductReview(productId: string, reviewData: { rating: number; review: string; }): Promise<any> {
         try {
-            const response = await axiosInstance.post<any>(`Product/${productId}/review`, reviewData);
+            const body = {
+                productId,
+                rating: reviewData.rating,
+                review: reviewData.review
+            };
+            const response = await axiosInstance.post<any>(`Product/reviews-ratings`, body);
             return response.data;
         } catch (error) {
             console.error(`Error submitting review for product ${productId}:`, error);
