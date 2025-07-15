@@ -72,9 +72,10 @@ const TourGuideInvitations: React.FC = () => {
         setLoading(true);
         try {
             const response = await getMyInvitations(status);
-            if (response.success && response.data) {
-                setInvitations(response.data.invitations);
-                setStatistics(response.data.statistics);
+            console.log('API Response:', response);
+            if (response.success) {
+                setInvitations(response.invitations || []);
+                setStatistics(response.statistics || {});
             } else {
                 message.error(response.message || 'Không thể tải danh sách lời mời');
             }

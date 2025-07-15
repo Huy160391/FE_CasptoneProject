@@ -20,6 +20,7 @@ interface LoginApiResponse {
     name: string;
     phoneNumber: string;
     avatar: string;
+    role: string;
 }
 
 export function decodeToken(token: string): DecodedToken | null {
@@ -39,29 +40,26 @@ export const authService = {
             if (data.token) {
                 localStorage.setItem('token', data.token);
 
-                // Chỉ decode token để lấy role
-                const decoded = decodeToken(data.token);
-                if (!decoded) {
-                    throw new Error('Invalid token format');
-                }
+                // Lấy role từ API response thay vì từ token
+                let userRole = data.role;
 
-                // Lấy role từ token - thử nhiều cách khác nhau
-                let userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
-                    || decoded['role'];
-
-
+                // Chuẩn hóa role
                 if (userRole && (userRole.toLowerCase() === 'admin' || userRole === 'Admin')) {
                     userRole = 'Admin';
                 } else if (userRole && (userRole.toLowerCase() === 'blogger' || userRole === 'Blogger')) {
                     userRole = 'Blogger';
                 } else if (userRole && (userRole.toLowerCase() === 'tour company' || userRole === 'Tour Company')) {
                     userRole = 'Tour Company';
+                } else if (userRole && (userRole.toLowerCase() === 'tour guide' || userRole === 'Tour Guide')) {
+                    userRole = 'Tour Guide';
                 } else if (userRole && (userRole.toLowerCase() === 'specialty shop' || userRole === 'Specialty Shop')) {
                     userRole = 'Specialty Shop';
                 } else {
                     userRole = 'user';
                 }
 
+                console.log('API Response role:', data.role);
+                console.log('Normalized role:', userRole);
 
                 // Tạo user info từ response API
                 const userInfo: User = {

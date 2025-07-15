@@ -45,13 +45,13 @@ const TourGuideDashboard: React.FC = () => {
             // Load pending invitations
             const pendingResponse = await getMyInvitations('Pending');
             if (pendingResponse.success) {
-                setPendingInvitations(pendingResponse.data.invitations.slice(0, 5)); // Show only 5 recent
+                setPendingInvitations(pendingResponse.invitations?.slice(0, 5) || []); // Show only 5 recent
             }
 
             // Load all invitations for statistics
             const allResponse = await getMyInvitations();
             if (allResponse.success) {
-                setStatistics(allResponse.data.statistics);
+                setStatistics(allResponse.statistics || {});
             }
         } catch (error) {
             console.error('Error loading dashboard data:', error);

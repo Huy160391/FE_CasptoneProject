@@ -112,6 +112,28 @@ const TourGuideDebug: React.FC = () => {
                         Check LocalStorage
                     </Button>
 
+                    <Button
+                        type="default"
+                        onClick={() => window.location.href = '/tour-guide/invitations'}
+                    >
+                        Navigate to Invitations Page
+                    </Button>
+
+                    <Button
+                        type="primary"
+                        onClick={() => {
+                            // Auto login as tour guide for testing
+                            const loginData = {
+                                email: 'tourguide1@example.com',
+                                password: '12345678h@'
+                            };
+                            console.log('Auto login data:', loginData);
+                            // You can implement auto login here if needed
+                        }}
+                    >
+                        Auto Login as Tour Guide
+                    </Button>
+
                     {loading && (
                         <div style={{ textAlign: 'center', padding: '20px' }}>
                             <Spin size="large" />

@@ -48,6 +48,7 @@ export interface MyInvitationsResponse {
 export interface AcceptInvitationRequest {
     invitationId: string;
     acceptanceMessage?: string;
+    confirmUnderstanding: boolean;
 }
 
 export interface RejectInvitationRequest {
@@ -96,7 +97,8 @@ export const acceptInvitation = async (
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const requestData: AcceptInvitationRequest = {
             invitationId,
-            acceptanceMessage
+            acceptanceMessage,
+            confirmUnderstanding: true
         };
         
         const response = await api.post(

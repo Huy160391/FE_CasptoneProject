@@ -29,6 +29,14 @@ export const tourguideRoutes: RouteObject[] = [
                 path: 'debug',
                 element: <TourGuideDebug />,
             },
+            {
+                path: 'test-invitations',
+                element: <div style={{padding: '20px'}}>
+                    <h1>Test Invitations Page</h1>
+                    <p>This is a test page to verify routing works.</p>
+                    <a href="/tour-guide/invitations">Go to Real Invitations Page</a>
+                </div>,
+            },
         ],
     },
 ];
