@@ -20,6 +20,33 @@ export type { Comment, UserComment } from '../types';
  */
 export const userService = {
     /**
+     * Lấy danh sách đơn hàng của user hiện tại
+     * @returns Promise với danh sách đơn hàng
+     */
+    /**
+     * Lấy danh sách đơn hàng của user hiện tại với phân trang, lọc trạng thái và mã PayOS
+     * @param pageIndex Trang hiện tại (mặc định 1)
+     * @param pageSize Số lượng mỗi trang (mặc định 10)
+     * @param status Trạng thái đơn hàng (tùy chọn)
+     * @param payOsOrderCode Mã đơn hàng PayOS (tùy chọn)
+     * @returns Promise với danh sách đơn hàng
+     */
+    getMyOrders: async (
+        pageIndex: number = 0,
+        pageSize: number = 10,
+        status?: string,
+        payOsOrderCode?: string
+    ): Promise<any[]> => {
+        const params: any = {
+            pageIndex,
+            pageSize
+        };
+        if (status) params.status = status;
+        if (payOsOrderCode) params.payOsOrderCode = payOsOrderCode;
+        const response = await axios.get<any[]>('/Account/my-orders', { params });
+        return response.data;
+    },
+    /**
      * Map API user format to application user format
      * @param apiUser User data from API
      * @returns User data in application format
