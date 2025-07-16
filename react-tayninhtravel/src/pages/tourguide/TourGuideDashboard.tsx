@@ -121,35 +121,43 @@ const TourGuideDashboard: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // Quick stats data
+    // Quick stats data with enhanced features
     const quickStats = [
         {
             title: 'Lời mời chờ phản hồi',
             value: statistics.pendingInvitations || 0,
             icon: <MailOutlined />,
             color: '#1890ff',
-            action: () => navigate('/tour-guide/invitations?tab=pending')
+            action: () => navigate('/tour-guide/invitations?tab=pending'),
+            urgent: (statistics.pendingInvitations || 0) > 0,
+            description: 'Cần phản hồi sớm'
         },
         {
             title: 'Đã chấp nhận',
             value: statistics.acceptedInvitations || 0,
             icon: <CheckCircleOutlined />,
             color: '#52c41a',
-            action: () => navigate('/tour-guide/invitations?tab=accepted')
+            action: () => navigate('/tour-guide/invitations?tab=accepted'),
+            urgent: false,
+            description: 'Tours đã xác nhận'
         },
         {
             title: 'Tỷ lệ chấp nhận',
             value: `${statistics.acceptanceRate || 0}%`,
             icon: <TrophyOutlined />,
             color: '#faad14',
-            action: () => navigate('/tour-guide/invitations')
+            action: () => navigate('/tour-guide/invitations'),
+            urgent: (statistics.acceptanceRate || 0) < 50,
+            description: 'Hiệu suất của bạn'
         },
         {
             title: 'Tổng lời mời',
             value: statistics.totalInvitations || 0,
             icon: <CalendarOutlined />,
             color: '#722ed1',
-            action: () => navigate('/tour-guide/invitations')
+            action: () => navigate('/tour-guide/invitations'),
+            urgent: false,
+            description: 'Tất cả lời mời'
         }
     ];
 
