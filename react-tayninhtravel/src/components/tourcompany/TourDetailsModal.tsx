@@ -296,7 +296,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             <Card>
                                 <Statistic
                                     title="Đang chờ"
-                                    value={invitations.statistics.pendingInvitations}
+                                    value={invitations.statistics.pendingCount}
                                     valueStyle={{ color: '#faad14' }}
                                     prefix={<ClockCircleOutlined />}
                                 />
@@ -306,7 +306,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             <Card>
                                 <Statistic
                                     title="Đã chấp nhận"
-                                    value={invitations.statistics.acceptedInvitations}
+                                    value={invitations.statistics.acceptedCount}
                                     valueStyle={{ color: '#52c41a' }}
                                     prefix={<CheckCircleOutlined />}
                                 />
@@ -455,7 +455,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             <span>
                                 <UserOutlined />
                                 Hướng dẫn viên ({invitations?.statistics.totalInvitations || 0})
-                                {(invitations?.statistics?.acceptedInvitations || 0) > 0 &&
+                                {(invitations?.statistics?.acceptedCount || 0) > 0 &&
                                     <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
                             </span>
                         }

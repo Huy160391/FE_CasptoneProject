@@ -190,7 +190,8 @@
         }
     },
     "tours": {
-        "bookNow": "Book Now"
+        "bookNow": "Book Now",
+        "viewDetails": "View Details"
     },
     "thingsToDo": {
         "pageTitle": "Explore Tay Ninh",
@@ -1040,6 +1041,72 @@
             "title": "My Information",
             "personalInfo": "Personal Information",
             "changePassword": "Change Password"
+        }
+    },
+    "tourGuide": {
+        "sidebar": {
+            "dashboard": "Dashboard",
+            "invitations": "Invitations",
+            "schedule": "Schedule",
+            "profile": "Profile",
+            "settings": "Settings",
+            "logout": "Logout"
+        },
+        "dashboard": {
+            "title": "Tour Guide Dashboard",
+            "welcome": "Welcome back! Here's an overview of your invitations and activities.",
+            "stats": {
+                "pendingInvitations": "Pending Invitations",
+                "acceptedInvitations": "Accepted",
+                "acceptanceRate": "Acceptance Rate",
+                "totalInvitations": "Total Invitations"
+            },
+            "pendingInvitations": "Pending Invitations",
+            "performance": "Performance",
+            "quickActions": "Quick Actions",
+            "viewAllInvitations": "View All Invitations",
+            "viewSchedule": "View Schedule",
+            "updateProfile": "Update Profile"
+        },
+        "invitations": {
+            "title": "Tour Invitations",
+            "tabs": {
+                "all": "All",
+                "pending": "Pending",
+                "accepted": "Accepted",
+                "rejected": "Rejected",
+                "expired": "Expired"
+            },
+            "actions": {
+                "accept": "Accept",
+                "reject": "Reject",
+                "viewDetails": "View Details"
+            },
+            "status": {
+                "pending": "Pending",
+                "accepted": "Accepted",
+                "rejected": "Rejected",
+                "expired": "Expired"
+            },
+            "modals": {
+                "acceptTitle": "Accept Invitation",
+                "rejectTitle": "Reject Invitation",
+                "acceptMessage": "Acceptance message (optional)",
+                "rejectionReason": "Rejection reason (required)"
+            }
+        },
+        "profile": {
+            "title": "Tour Guide Profile",
+            "personalInfo": "Personal Information",
+            "skills": "Skills and Expertise",
+            "experience": "Experience",
+            "languages": "Languages"
+        },
+        "schedule": {
+            "title": "Tour Guide Schedule",
+            "todaySchedule": "Today's Schedule",
+            "upcomingTours": "Upcoming Tours",
+            "eventDetails": "Event Details"
         }
     },
     "tourCompany": {

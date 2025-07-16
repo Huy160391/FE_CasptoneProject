@@ -17,7 +17,9 @@ import {
     Divider,
     Tag,
     Alert,
-    Spin
+    Spin,
+    Upload,
+    Image
 } from 'antd';
 import {
     PlusOutlined,
@@ -25,7 +27,8 @@ import {
     EditOutlined,
     ClockCircleOutlined,
     UserOutlined,
-    ShopOutlined
+    ShopOutlined,
+    UploadOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useTourTemplateStore } from '../../store/useTourTemplateStore';
@@ -35,6 +38,7 @@ import {
     createTimelineItems,
     handleApiError
 } from '../../services/tourcompanyService';
+import publicService from '../../services/publicService';
 import {
     TourTemplate,
     SpecialtyShop,
@@ -64,6 +68,8 @@ interface WizardData {
         description: string;
         skillsRequired: string;
         selectedSkills: string[]; // Array of selected skill english names
+        imageUrls: string[]; // New field for multiple images
+        imageUrl?: string; // Backward compatibility
     };
     // Step 2: Timeline
     timeline: CreateTimelineItemRequest[];
@@ -96,13 +102,11 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
 
-    console.log('🧙‍♂️ Wizard render - visible:', visible, 'token:', token ? 'present' : 'missing');
-
     // Data states - now using cached data
     const [templates, setTemplates] = useState<TourTemplate[]>(templatesCache?.data || []);
     const [specialtyShops, setSpecialtyShops] = useState<SpecialtyShop[]>(shopsCache?.data || []);
 
-    
+
     // Wizard data
     const [wizardData, setWizardData] = useState<WizardData>({
         basicInfo: {
@@ -110,7 +114,9 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             title: '',
             description: '',
             skillsRequired: '',
-            selectedSkills: []
+            selectedSkills: [],
+            imageUrls: [], // Initialize as empty array
+            imageUrl: '' // Keep for backward compatibility
         },
         timeline: [],
         operation: {
@@ -119,9 +125,67 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         }
     });
 
-    // Timeline editing state
 
+
+    // Image upload states
+    const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+    const [uploadedImageUrl, setUploadedImageUrl] = useState<string>(''); // Keep for backward compatibility
+    const [imageUploading, setImageUploading] = useState(false);
+
+    // Timeline editing state
     const [timelineForm] = Form.useForm();
+
+    // Image upload handler for multiple images
+    const handleImageUpload = async (file: File): Promise<boolean> => {
+        try {
+            setImageUploading(true);
+
+            const imageUrl = await publicService.uploadImage(file);
+
+            if (imageUrl) {
+                // Add to uploaded images array
+                const newImageUrls = [...uploadedImageUrls, imageUrl];
+                setUploadedImageUrls(newImageUrls);
+                setUploadedImageUrl(imageUrl); // Keep for backward compatibility
+
+                setWizardData(prev => ({
+                    ...prev,
+                    basicInfo: {
+                        ...prev.basicInfo,
+                        imageUrls: newImageUrls,
+                        imageUrl: newImageUrls[0] // Set first image as main image for backward compatibility
+                    }
+                }));
+                message.success('Tải ảnh thành công');
+                return true;
+            } else {
+                message.error('Tải ảnh thất bại - không nhận được URL');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            message.error('Có lỗi xảy ra khi tải ảnh');
+            return false;
+        } finally {
+            setImageUploading(false);
+        }
+    };
+
+    // Remove image handler
+    const handleRemoveImage = (indexToRemove: number) => {
+        const newImageUrls = uploadedImageUrls.filter((_, index) => index !== indexToRemove);
+        setUploadedImageUrls(newImageUrls);
+
+        setWizardData(prev => ({
+            ...prev,
+            basicInfo: {
+                ...prev.basicInfo,
+                imageUrls: newImageUrls,
+                imageUrl: newImageUrls[0] || '' // Update main image
+            }
+        }));
+        message.success('Đã xóa ảnh');
+    };
 
     // Update local state when cache changes
     useEffect(() => {
@@ -139,9 +203,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
 
     useEffect(() => {
-        console.log('🧙‍♂️ Wizard visibility changed:', visible);
         if (visible && token) {
-            console.log('🧙‍♂️ Loading wizard data...');
             loadInitialData();
         }
     }, [visible, token]);
@@ -193,6 +255,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 setWizardData(prev => ({
                     ...prev,
                     basicInfo: {
+                        ...prev.basicInfo, // Preserve existing data including imageUrl
                         ...values,
                         skillsRequired: skillsString,
                         selectedSkills: prev.basicInfo.selectedSkills
@@ -226,8 +289,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
     const handleCreateTourDetails = async (dataToUse?: WizardData) => {
         const currentWizardData = dataToUse || wizardData;
-        console.log('🚀 handleCreateTourDetails started');
-        console.log('🚀 wizardData:', currentWizardData);
+
 
         if (!token) {
             message.error('Vui lòng đăng nhập lại');
@@ -239,24 +301,25 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
             // Step 1: Create TourDetails
             const tourDetailsRequest: CreateTourDetailsRequest = {
-                ...currentWizardData.basicInfo
+                tourTemplateId: currentWizardData.basicInfo.tourTemplateId,
+                title: currentWizardData.basicInfo.title,
+                description: currentWizardData.basicInfo.description,
+                skillsRequired: currentWizardData.basicInfo.skillsRequired,
+                imageUrls: currentWizardData.basicInfo.imageUrls,
+                imageUrl: currentWizardData.basicInfo.imageUrl // Keep for backward compatibility
             };
-            console.log('🚀 TourDetails request:', tourDetailsRequest);
+
 
             const tourDetailsRes = await createTourDetails(tourDetailsRequest, token);
-            console.log('🚀 TourDetails response:', tourDetailsRes);
 
             if (!(tourDetailsRes as any).success || !tourDetailsRes.data) {
                 throw new Error(tourDetailsRes.message || 'Có lỗi xảy ra');
             }
 
             const tourDetailsId = tourDetailsRes.data.id;
-            console.log('🚀 TourDetails created with ID:', tourDetailsId);
 
             // Step 2: Create Timeline Items
-            console.log('🔄 Timeline data:', currentWizardData.timeline);
             if (currentWizardData.timeline.length > 0) {
-                console.log('🔄 Creating timeline items...');
                 const timelineRequest = {
                     tourDetailsId,
                     timelineItems: currentWizardData.timeline.map((item, index) => ({
@@ -266,22 +329,15 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                         sortOrder: index + 1
                     }))
                 };
-                console.log('🔄 Timeline request:', timelineRequest);
                 await createTimelineItems(timelineRequest, token);
-                console.log('✅ Timeline items created');
-            } else {
-                console.log('⚠️ No timeline items to create');
             }
 
             // Step 3: Create TourOperation
-            console.log('🔄 Operation data:', currentWizardData.operation);
             const operationRequest: CreateTourOperationRequest = {
                 tourDetailsId,
                 ...currentWizardData.operation
             };
-            console.log('🔄 Operation request:', operationRequest);
             await createTourOperation(operationRequest, token);
-            console.log('✅ TourOperation created');
 
             message.success('Tạo TourDetails và TourOperation thành công!');
             onSuccess();
@@ -302,7 +358,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 title: '',
                 description: '',
                 skillsRequired: '',
-                selectedSkills: []
+                selectedSkills: [],
+                imageUrl: ''
             },
             timeline: [],
             operation: {
@@ -310,6 +367,10 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 maxSeats: 10
             }
         });
+        // Reset image upload states
+        setUploadedImageUrls([]);
+        setUploadedImageUrl('');
+        setImageUploading(false);
         form.resetFields();
         timelineForm.resetFields();
         onCancel();
@@ -388,15 +449,11 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     loading={templatesLoading}
                     notFoundContent={templatesLoading ? <Spin size="small" /> : "Không có dữ liệu"}
                 >
-                    {(() => {
-                        console.log('🧙‍♂️ Rendering dropdown - templates count:', templates.length);
-                        console.log('🧙‍♂️ Templates data:', templates);
-                        return templates.map(template => (
-                            <Option key={template.id} value={template.id}>
-                                {template.title} ({template.templateType === 1 ? 'Free' : 'Paid'})
-                            </Option>
-                        ));
-                    })()}
+                    {templates.map(template => (
+                        <Option key={template.id} value={template.id}>
+                            {template.title} ({template.templateType === 1 ? 'Free' : 'Paid'})
+                        </Option>
+                    ))}
                 </Select>
             </Form.Item>
 
@@ -420,6 +477,87 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     rows={4}
                     placeholder="Nhập mô tả chi tiết"
                 />
+            </Form.Item>
+
+            {/* Multiple Images Upload Section */}
+            <Form.Item
+                label="Hình ảnh tour (tùy chọn)"
+                style={{ marginBottom: 16 }}
+            >
+                <div>
+                    <Upload
+                        accept="image/*"
+                        showUploadList={false}
+                        beforeUpload={(file) => {
+                            handleImageUpload(file);
+                            return false; // Prevent default upload
+                        }}
+                        disabled={imageUploading}
+                    >
+                        <Button
+                            icon={<UploadOutlined />}
+                            loading={imageUploading}
+                            disabled={imageUploading}
+                        >
+                            {imageUploading ? 'Đang tải ảnh...' : 'Thêm ảnh'}
+                        </Button>
+                    </Upload>
+
+                    {/* Display uploaded images */}
+                    {uploadedImageUrls.length > 0 && (
+                        <div style={{ marginTop: 16 }}>
+                            <div style={{ marginBottom: 8, fontSize: '14px', fontWeight: 500 }}>
+                                Ảnh đã tải lên ({uploadedImageUrls.length}):
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                                {uploadedImageUrls.map((imageUrl, index) => (
+                                    <div key={index} style={{ position: 'relative' }}>
+                                        <Image
+                                            width={120}
+                                            height={90}
+                                            src={imageUrl}
+                                            style={{ objectFit: 'cover', borderRadius: 8 }}
+                                            preview={{
+                                                mask: 'Xem ảnh'
+                                            }}
+                                        />
+                                        <Button
+                                            type="primary"
+                                            danger
+                                            size="small"
+                                            icon={<DeleteOutlined />}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 4,
+                                                right: 4,
+                                                minWidth: 'auto',
+                                                width: 24,
+                                                height: 24,
+                                                padding: 0
+                                            }}
+                                            onClick={() => handleRemoveImage(index)}
+                                        />
+                                        {index === 0 && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: 4,
+                                                left: 4,
+                                                background: 'rgba(0,0,0,0.7)',
+                                                color: 'white',
+                                                padding: '2px 6px',
+                                                borderRadius: 4,
+                                                fontSize: '10px'
+                                            }}>
+                                                Ảnh chính
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                </div>
             </Form.Item>
 
             <Form.Item
@@ -734,7 +872,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         </div>
     );
 
-    console.log('🧙‍♂️ Wizard Modal render - visible:', visible, 'templates:', templates.length);
+
 
     return (
         <Modal
@@ -744,13 +882,10 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             width={800}
             footer={null}
             afterOpenChange={(open) => {
-                console.log('🧙‍♂️ Modal afterOpenChange:', open);
                 if (open && token) {
-                    console.log('🧙‍♂️ Modal opened - data should already be cached');
                     // Data should already be preloaded and cached
                     // Only load if we don't have any data at all
                     if (templates.length === 0) {
-                        console.log('🔄 No templates found, loading data...');
                         loadInitialData();
                     }
                 }

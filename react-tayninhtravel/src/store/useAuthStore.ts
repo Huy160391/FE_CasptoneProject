@@ -27,6 +27,8 @@ const getStoredUser = (): User | null => {
           user.role = 'Blogger';
         } else if (user.role.toLowerCase() === 'tour company' || user.role === 'Tour Company') {
           user.role = 'Tour Company';
+        } else if (user.role.toLowerCase() === 'tour guide' || user.role === 'Tour Guide') {
+          user.role = 'Tour Guide';
         } else if (user.role.toLowerCase() === 'specialty shop' ||
           user.role === 'Specialty Shop' ||
           user.role.toLowerCase() === 'speciality shop' ||

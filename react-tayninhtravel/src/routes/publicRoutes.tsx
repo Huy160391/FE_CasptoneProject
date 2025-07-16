@@ -14,8 +14,16 @@ import Checkout from '@/components/payment/Checkout';
 import OrderSuccess from '@/pages/OrderSuccess';
 import NotFound from '@/pages/NotFound';
 import Unauthorized from '@/pages/Unauthorized';
-import PaymentSuccess from '@/components/payment/PaymentSuccess';
-import PaymentCancel from '@/components/payment/PaymentCancel';
+import PaymentSuccessComponent from '@/components/payment/PaymentSuccess';
+import PaymentCancelComponent from '@/components/payment/PaymentCancel';
+import BookingPage from '@/pages/BookingPage';
+import PaymentSuccess from '@/pages/PaymentSuccess';
+import PaymentCancel from '@/pages/PaymentCancel';
+import BookingHistory from '@/pages/BookingHistory';
+import TourDetailsPage from '@/pages/TourDetailsPage';
+import DebugAuth from '@/pages/DebugAuth';
+import BookingHistoryTest from '@/components/debug/BookingHistoryTest';
+import ImageUploadTest from '@/components/debug/ImageUploadTest';
 
 export const publicRoutes: RouteObject[] = [
     {
@@ -59,6 +67,14 @@ export const publicRoutes: RouteObject[] = [
         element: <ThingsToDoDetail />,
     },
     {
+        path: '/things-to-do/:id',
+        element: <ThingsToDoDetail />,
+    },
+    {
+        path: '/tour-details/:tourId',
+        element: <TourDetailsPage />,
+    },
+    {
         path: '/blog',
         element: <Blog />,
     }, {
@@ -67,13 +83,42 @@ export const publicRoutes: RouteObject[] = [
     }, {
         path: '/career',
         element: <Career />,
-    }, {
+    },
+    {
+        path: '/booking/:tourId',
+        element: <BookingPage />,
+    },
+    {
+        path: '/payment-success',
+        element: <PaymentSuccess />,
+    },
+    {
+        path: '/payment-cancel',
+        element: <PaymentCancel />,
+    },
+    {
+        path: '/booking-history',
+        element: <BookingHistory />,
+    },
+    {
         path: '/404',
         element: <NotFound />,
     },
     {
         path: '/unauthorized',
         element: <Unauthorized />,
+    },
+    {
+        path: '/debug-auth',
+        element: <DebugAuth />,
+    },
+    {
+        path: '/test-booking-history',
+        element: <BookingHistoryTest />,
+    },
+    {
+        path: '/test-image-upload',
+        element: <ImageUploadTest />,
     },
     {
         path: '/payment-success',

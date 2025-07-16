@@ -1,0 +1,308 @@
+.profile-section {
+    transition: all 0.3s ease;
+    
+    &.collapsed {
+        cursor: pointer;
+        
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-summary {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            
+            .profile-info {
+                flex: 1;
+                
+                .ant-progress {
+                    margin-top: 4px;
+                    
+                    .ant-progress-bg {
+                        border-radius: 2px;
+                    }
+                }
+            }
+            
+            .profile-actions {
+                .ant-btn {
+                    opacity: 0.6;
+                    transition: opacity 0.3s ease;
+                }
+            }
+        }
+        
+        &:hover .profile-actions .ant-btn {
+            opacity: 1;
+        }
+    }
+    
+    &.expanded {
+        .ant-card-head {
+            .ant-card-head-title {
+                .ant-tag {
+                    margin-left: 8px;
+                }
+            }
+        }
+        
+        .profile-avatar-section {
+            .profile-quick-info {
+                .info-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 12px;
+                    padding: 8px;
+                    border-radius: 6px;
+                    transition: background 0.3s ease;
+                    
+                    &:hover {
+                        background: #f5f5f5;
+                    }
+                    
+                    .anticon {
+                        color: #1890ff;
+                        font-size: 14px;
+                        width: 16px;
+                    }
+                    
+                    span {
+                        font-size: 13px;
+                        color: #666;
+                    }
+                }
+            }
+        }
+        
+        .ant-form {
+            .ant-form-item {
+                margin-bottom: 16px;
+                
+                .ant-form-item-label {
+                    padding-bottom: 4px;
+                    
+                    label {
+                        font-weight: 500;
+                        color: #262626;
+                    }
+                }
+                
+                .ant-input,
+                .ant-input-number,
+                .ant-select-selector {
+                    border-radius: 6px;
+                    
+                    &:focus,
+                    &:hover {
+                        border-color: #1890ff;
+                        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+                    }
+                }
+                
+                .ant-input[disabled],
+                .ant-input-number[disabled] {
+                    background: #fafafa;
+                    border-color: #e8e8e8;
+                    color: #666;
+                }
+            }
+        }
+    }
+}
+
+// Avatar upload styling
+.ant-upload {
+    .ant-btn {
+        border-radius: 6px;
+        font-size: 12px;
+        
+        &:hover {
+            transform: translateY(-1px);
+        }
+        
+        &[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+
+// Progress bar customization
+.ant-progress {
+    .ant-progress-bg {
+        transition: all 0.3s ease;
+    }
+    
+    &.ant-progress-status-success .ant-progress-bg {
+        background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%);
+    }
+    
+    &.ant-progress-status-normal .ant-progress-bg {
+        background: linear-gradient(90deg, #faad14 0%, #ffc53d 100%);
+    }
+}
+
+// Tag styling
+.ant-tag {
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    
+    &.ant-tag-green {
+        background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+        border-color: #b7eb8f;
+        color: #389e0d;
+    }
+    
+    &.ant-tag-orange {
+        background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%);
+        border-color: #ffb366;
+        color: #d46b08;
+    }
+}
+
+// Button enhancements
+.ant-btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &.ant-btn-primary {
+        background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+        border: none;
+        
+        &:hover {
+            background: linear-gradient(135deg, #40a9ff 0%, #69c0ff 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+        }
+    }
+    
+    &.ant-btn-text {
+        &:hover {
+            background: rgba(24, 144, 255, 0.1);
+        }
+    }
+}
+
+// Card enhancements
+.ant-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    
+    .ant-card-head {
+        border-bottom: 1px solid #f0f0f0;
+        
+        .ant-card-head-title {
+            font-weight: 600;
+            color: #262626;
+        }
+        
+        .ant-card-extra {
+            .ant-space {
+                .ant-btn {
+                    margin-left: 8px;
+                }
+            }
+        }
+    }
+    
+    .ant-card-body {
+        padding: 20px;
+    }
+}
+
+// Divider styling
+.ant-divider {
+    margin: 16px 0;
+    border-color: #f0f0f0;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .profile-section {
+        &.collapsed {
+            .profile-summary {
+                .profile-info {
+                    .ant-progress {
+                        display: none;
+                    }
+                }
+                
+                .profile-actions {
+                    display: none;
+                }
+            }
+        }
+        
+        &.expanded {
+            .profile-avatar-section {
+                text-align: center;
+                
+                .profile-quick-info {
+                    .info-item {
+                        justify-content: center;
+                        text-align: left;
+                    }
+                }
+            }
+            
+            .ant-form {
+                .ant-form-item {
+                    margin-bottom: 12px;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .profile-section {
+        &.expanded {
+            .ant-card-head {
+                .ant-card-head-title {
+                    font-size: 16px;
+                }
+                
+                .ant-card-extra {
+                    .ant-space {
+                        flex-wrap: wrap;
+                        
+                        .ant-btn {
+                            font-size: 12px;
+                            padding: 4px 8px;
+                        }
+                    }
+                }
+            }
+            
+            .profile-quick-info {
+                .info-item {
+                    font-size: 12px;
+                    padding: 6px;
+                }
+            }
+        }
+    }
+}
+
+// Animation for expand/collapse
+.profile-section {
+    .ant-card-body {
+        transition: all 0.3s ease;
+    }
+}
+
+// Loading state
+.ant-spin-container {
+    .ant-spin {
+        .ant-spin-dot {
+            .ant-spin-dot-item {
+                background-color: #1890ff;
+            }
+        }
+    }
+}

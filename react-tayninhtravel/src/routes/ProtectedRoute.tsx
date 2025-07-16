@@ -5,7 +5,7 @@ import { message } from 'antd';
 
 interface ProtectedRouteProps {
     children?: React.ReactNode;
-    requiredRole?: 'Admin' | 'Blogger' | 'Tour Company' | 'Specialty Shop';
+    requiredRole?: 'Admin' | 'Blogger' | 'Tour Company' | 'Tour Guide' | 'Specialty Shop';
     requireAuth?: boolean;
 }
 
@@ -16,7 +16,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
     const { isAuthenticated, user } = useAuthStore();
     const navigate = useNavigate();
-    const location = useLocation();    // Auto redirect logic
+    const location = useLocation();
+
+    // Debug logging
+    console.log('ProtectedRoute Debug:', {
+        path: location.pathname,
+        requiredRole,
+        isAuthenticated,
+        userRole: user?.role,
+        user: user
+    });    // Auto redirect logic
     useEffect(() => {
         if (isAuthenticated && user && user.role === 'Admin' &&
             location.pathname !== '/profile' &&
@@ -33,6 +42,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             !location.pathname.startsWith('/tour-company') &&
             !requiredRole) {
             navigate('/tour-company/dashboard');
+        } else if (isAuthenticated && user && user.role === 'Tour Guide' &&
+            location.pathname !== '/profile' &&
+            !location.pathname.startsWith('/tour-guide') &&
+            !requiredRole) {
+            navigate('/tour-guide/dashboard');
         } else if (isAuthenticated && user && user.role === 'Specialty Shop' &&
             location.pathname !== '/profile' &&
             !location.pathname.startsWith('/speciality-shop') &&
