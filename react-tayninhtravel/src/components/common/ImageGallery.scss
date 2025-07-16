@@ -1,0 +1,173 @@
+.image-gallery {
+  position: relative;
+  width: 100%;
+
+  .gallery-main {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+
+    .gallery-slide {
+      position: relative;
+
+      .ant-image {
+        width: 100%;
+        height: 100%;
+
+        img {
+          border-radius: 8px;
+        }
+      }
+    }
+
+    // Custom carousel arrows
+    .ant-carousel .slick-prev,
+    .ant-carousel .slick-next {
+      z-index: 10;
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      &:before {
+        display: none;
+      }
+
+      .anticon {
+        color: white;
+        font-size: 16px;
+      }
+    }
+
+    .ant-carousel .slick-prev {
+      left: 16px;
+    }
+
+    .ant-carousel .slick-next {
+      right: 16px;
+    }
+  }
+
+  .gallery-thumbnails {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    overflow-x: auto;
+    padding: 4px 0;
+
+    .thumbnail {
+      flex-shrink: 0;
+      width: 80px;
+      height: 60px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: #1890ff;
+        opacity: 0.8;
+      }
+
+      &.active {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      }
+
+      img {
+        border-radius: 4px;
+        transition: transform 0.3s ease;
+      }
+
+      &:hover img {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .gallery-counter {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 10;
+  }
+}
+
+.image-gallery-single {
+  .ant-image {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+
+    img {
+      border-radius: 8px;
+    }
+  }
+}
+
+.image-gallery-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  border: 2px dashed #d9d9d9;
+
+  .ant-image {
+    opacity: 0.6;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .image-gallery {
+    .gallery-main {
+      .ant-carousel .slick-prev,
+      .ant-carousel .slick-next {
+        width: 32px;
+        height: 32px;
+
+        .anticon {
+          font-size: 14px;
+        }
+      }
+
+      .ant-carousel .slick-prev {
+        left: 8px;
+      }
+
+      .ant-carousel .slick-next {
+        right: 8px;
+      }
+    }
+
+    .gallery-thumbnails {
+      .thumbnail {
+        width: 60px;
+        height: 45px;
+      }
+    }
+
+    .gallery-counter {
+      bottom: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 2px 8px;
+    }
+  }
+}

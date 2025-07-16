@@ -68,7 +68,8 @@ interface WizardData {
         description: string;
         skillsRequired: string;
         selectedSkills: string[]; // Array of selected skill english names
-        imageUrl?: string;
+        imageUrls: string[]; // New field for multiple images
+        imageUrl?: string; // Backward compatibility
     };
     // Step 2: Timeline
     timeline: CreateTimelineItemRequest[];
@@ -114,7 +115,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             description: '',
             skillsRequired: '',
             selectedSkills: [],
-            imageUrl: ''
+            imageUrls: [], // Initialize as empty array
+            imageUrl: '' // Keep for backward compatibility
         },
         timeline: [],
         operation: {
@@ -126,13 +128,14 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
 
     // Image upload states
-    const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
+    const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+    const [uploadedImageUrl, setUploadedImageUrl] = useState<string>(''); // Keep for backward compatibility
     const [imageUploading, setImageUploading] = useState(false);
 
     // Timeline editing state
     const [timelineForm] = Form.useForm();
 
-    // Image upload handler
+    // Image upload handler for multiple images
     const handleImageUpload = async (file: File): Promise<boolean> => {
         try {
             setImageUploading(true);
@@ -140,12 +143,17 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             const imageUrl = await publicService.uploadImage(file);
 
             if (imageUrl) {
-                setUploadedImageUrl(imageUrl);
+                // Add to uploaded images array
+                const newImageUrls = [...uploadedImageUrls, imageUrl];
+                setUploadedImageUrls(newImageUrls);
+                setUploadedImageUrl(imageUrl); // Keep for backward compatibility
+
                 setWizardData(prev => ({
                     ...prev,
                     basicInfo: {
                         ...prev.basicInfo,
-                        imageUrl: imageUrl
+                        imageUrls: newImageUrls,
+                        imageUrl: newImageUrls[0] // Set first image as main image for backward compatibility
                     }
                 }));
                 message.success('Tải ảnh thành công');
@@ -161,6 +169,22 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         } finally {
             setImageUploading(false);
         }
+    };
+
+    // Remove image handler
+    const handleRemoveImage = (indexToRemove: number) => {
+        const newImageUrls = uploadedImageUrls.filter((_, index) => index !== indexToRemove);
+        setUploadedImageUrls(newImageUrls);
+
+        setWizardData(prev => ({
+            ...prev,
+            basicInfo: {
+                ...prev.basicInfo,
+                imageUrls: newImageUrls,
+                imageUrl: newImageUrls[0] || '' // Update main image
+            }
+        }));
+        message.success('Đã xóa ảnh');
     };
 
     // Update local state when cache changes
@@ -281,7 +305,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 title: currentWizardData.basicInfo.title,
                 description: currentWizardData.basicInfo.description,
                 skillsRequired: currentWizardData.basicInfo.skillsRequired,
-                imageUrl: currentWizardData.basicInfo.imageUrl
+                imageUrls: currentWizardData.basicInfo.imageUrls,
+                imageUrl: currentWizardData.basicInfo.imageUrl // Keep for backward compatibility
             };
 
 
@@ -343,6 +368,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             }
         });
         // Reset image upload states
+        setUploadedImageUrls([]);
         setUploadedImageUrl('');
         setImageUploading(false);
         form.resetFields();
@@ -453,7 +479,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 />
             </Form.Item>
 
-            {/* Image Upload Section */}
+            {/* Multiple Images Upload Section */}
             <Form.Item
                 label="Hình ảnh tour (tùy chọn)"
                 style={{ marginBottom: 16 }}
@@ -473,26 +499,60 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                             loading={imageUploading}
                             disabled={imageUploading}
                         >
-                            {imageUploading ? 'Đang tải ảnh...' : 'Chọn ảnh'}
+                            {imageUploading ? 'Đang tải ảnh...' : 'Thêm ảnh'}
                         </Button>
                     </Upload>
 
-                    {uploadedImageUrl && (
-                        <div style={{ marginTop: 8 }}>
-                            <Image
-                                width={200}
-                                height={150}
-                                src={uploadedImageUrl}
-                                style={{ objectFit: 'cover', borderRadius: 8 }}
-                                preview={{
-                                    mask: 'Xem ảnh'
-                                }}
-                            />
-                            <div style={{ marginTop: 4, fontSize: '12px', color: '#666' }}>
-                                Ảnh đã được tải lên thành công
+                    {/* Display uploaded images */}
+                    {uploadedImageUrls.length > 0 && (
+                        <div style={{ marginTop: 16 }}>
+                            <div style={{ marginBottom: 8, fontSize: '14px', fontWeight: 500 }}>
+                                Ảnh đã tải lên ({uploadedImageUrls.length}):
                             </div>
-                            <div style={{ marginTop: 4, fontSize: '10px', color: '#999', wordBreak: 'break-all' }}>
-                                URL: {uploadedImageUrl}
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                                {uploadedImageUrls.map((imageUrl, index) => (
+                                    <div key={index} style={{ position: 'relative' }}>
+                                        <Image
+                                            width={120}
+                                            height={90}
+                                            src={imageUrl}
+                                            style={{ objectFit: 'cover', borderRadius: 8 }}
+                                            preview={{
+                                                mask: 'Xem ảnh'
+                                            }}
+                                        />
+                                        <Button
+                                            type="primary"
+                                            danger
+                                            size="small"
+                                            icon={<DeleteOutlined />}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 4,
+                                                right: 4,
+                                                minWidth: 'auto',
+                                                width: 24,
+                                                height: 24,
+                                                padding: 0
+                                            }}
+                                            onClick={() => handleRemoveImage(index)}
+                                        />
+                                        {index === 0 && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: 4,
+                                                left: 4,
+                                                background: 'rgba(0,0,0,0.7)',
+                                                color: 'white',
+                                                padding: '2px 6px',
+                                                borderRadius: 4,
+                                                fontSize: '10px'
+                                            }}>
+                                                Ảnh chính
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}

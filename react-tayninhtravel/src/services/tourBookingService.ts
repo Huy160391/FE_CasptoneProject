@@ -7,7 +7,8 @@ export interface TourDetailsForBooking {
     id: string;
     title: string;
     description?: string;
-    imageUrl?: string;
+    imageUrls: string[]; // New field for multiple images
+    imageUrl?: string; // Backward compatibility - first image
     skillsRequired?: string;
     createdAt: string;
     startLocation: string;

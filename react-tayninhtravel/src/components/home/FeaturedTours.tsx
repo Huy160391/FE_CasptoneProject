@@ -1,13 +1,4 @@
-import { Row, Col, Card, Button, Spin, Empty, Tag, Divider, message } from 'antd'
-import {
-  ClockCircleOutlined,
-  DollarOutlined,
-  TeamOutlined,
-  EnvironmentOutlined,
-  CalendarOutlined,
-  StarOutlined,
-  ShoppingCartOutlined
-} from '@ant-design/icons'
+import { Row, Col, Spin, Empty, message } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -15,20 +6,20 @@ import { getFeaturedTourDetails } from '../../services/tourcompanyService'
 import { checkTourAvailability } from '../../services/tourBookingService'
 import { TourDetailsStatus } from '../../types/tour'
 import { useAuthStore } from '../../store/useAuthStore'
-import { formatCurrency } from '../../services/paymentService'
-import { getTourImageWithFallback, getTourImageAltText } from '../../utils/imageUtils'
-import TourPriceDisplay from '../common/TourPriceDisplay'
+
+import TourCard from '../common/TourCard'
 import LoginModal from '../auth/LoginModal'
 import './FeaturedTours.scss'
 
-const { Meta } = Card
+
 
 interface TourDetail {
   id: string;
   title: string;
   description: string;
   tourTemplateName: string;
-  imageUrl?: string;
+  imageUrls: string[]; // New field for multiple images
+  imageUrl?: string; // Backward compatibility - first image
   tourOperation?: {
     id: string;
     price: number;
@@ -142,16 +133,7 @@ const FeaturedTours = () => {
 
 
 
-  const getStatusTag = (status: number) => {
-    switch (status) {
-      case TourDetailsStatus.Public:
-        return <Tag color="green" icon={<StarOutlined />}>Đang mở bán</Tag>
-      case TourDetailsStatus.WaitToPublic:
-        return <Tag color="orange" icon={<ClockCircleOutlined />}>Sắp mở bán</Tag>
-      default:
-        return <Tag color="default">Chưa sẵn sàng</Tag>
-    }
-  }
+
 
 
 
@@ -188,103 +170,11 @@ const FeaturedTours = () => {
       <Row gutter={[24, 32]}>
         {tours.map(tour => (
           <Col xs={24} sm={12} lg={8} key={tour.id}>
-            <Card
-              hoverable
-              className="tour-card"
-              cover={
-                <div className="tour-image-container">
-                  <img
-                    alt={getTourImageAltText(tour.title, tour.tourTemplateName)}
-                    src={getTourImageWithFallback(tour.imageUrl, tour.tourTemplateName)}
-                    className="tour-image"
-                  />
-                  <div className="tour-status-overlay">
-                    {getStatusTag(tour.status)}
-                  </div>
-                </div>
-              }
-              actions={[
-                <Button
-                  type="primary"
-                  size="large"
-                  className="book-now-btn"
-                  icon={<CalendarOutlined />}
-                  onClick={() => handleBookNow(tour)}
-                  disabled={!tour.tourOperation?.isActive}
-                >
-                  {t('tours.bookNow')}
-                </Button>,
-                <Button
-                  type="link"
-                  onClick={() => handleViewDetails(tour)}
-                >
-                  {t('tours.viewDetails')}
-                </Button>
-              ]}
-            >
-              <div className="tour-content">
-                <div className="tour-header">
-                  <h3 className="tour-title">{tour.title}</h3>
-                  <div className="tour-location">
-                    <EnvironmentOutlined />
-                    <span>{tour.tourTemplateName}</span>
-                  </div>
-                </div>
-
-                <p className="tour-description">
-                  {tour.description?.substring(0, 120) + '...' || 'Trải nghiệm tuyệt vời đang chờ đón bạn'}
-                </p>
-
-                <Divider style={{ margin: '16px 0' }} />
-
-                <div className="tour-details">
-                  <div className="detail-item">
-                    <ClockCircleOutlined className="detail-icon" />
-                    <span className="detail-label">Thời gian:</span>
-                    <span className="detail-value">
-                      {tour.timeline?.length ? `${tour.timeline.length} hoạt động` : '1 ngày'}
-                    </span>
-                  </div>
-
-                  <div className="detail-item">
-                    <TeamOutlined className="detail-icon" />
-                    <span className="detail-label">Sức chứa:</span>
-                    <span className="detail-value">
-                      {tour.tourOperation?.maxGuests ? `${tour.tourOperation.maxGuests} người` : 'Liên hệ'}
-                    </span>
-                  </div>
-
-                  {tour.tourOperation && (
-                    <div className="detail-item">
-                      <ShoppingCartOutlined className="detail-icon" />
-                      <span className="detail-label">Đã đặt:</span>
-                      <span className="detail-value">
-                        {realTimeAvailability[tour.tourOperation.id]
-                          ? realTimeAvailability[tour.tourOperation.id].currentBookings
-                          : (tour.tourOperation.currentBookings || 0)} / {tour.tourOperation.maxGuests} người
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="detail-item price-item">
-                    <DollarOutlined className="detail-icon price-icon" />
-                    <span className="detail-label">Giá tour:</span>
-                    <div className="price-value">
-                      {tour.tourOperation?.price ? (
-                        <TourPriceDisplay
-                          price={tour.tourOperation.price}
-                          createdAt={tour.createdAt}
-                          size="small"
-                          showDetails={true}
-                        />
-                      ) : (
-                        <span>Liên hệ</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <TourCard
+              tour={tour}
+              onBookNow={handleBookNow}
+              onViewDetails={handleViewDetails}
+            />
           </Col>
         ))}
       </Row>

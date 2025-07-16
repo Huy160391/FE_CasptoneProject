@@ -216,7 +216,8 @@ export interface TourDetails {
     status: TourDetailsStatus;
     commentApproved?: string;
     skillsRequired?: string;
-    imageUrl?: string;
+    imageUrls: string[]; // New field for multiple images
+    imageUrl?: string; // Backward compatibility - returns first image
     timeline: TimelineItem[];
     tourOperation?: TourOperation;
     timelineItemsCount: number;
@@ -243,7 +244,8 @@ export interface CreateTourDetailsRequest {
     title: string;
     description: string;
     skillsRequired: string;
-    imageUrl?: string;
+    imageUrls?: string[]; // New field for multiple images
+    imageUrl?: string; // Backward compatibility
     specialtyShopIds?: string[];
 }
 

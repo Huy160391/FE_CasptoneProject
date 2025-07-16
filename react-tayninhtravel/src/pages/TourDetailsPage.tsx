@@ -31,6 +31,7 @@ import { formatCurrency } from '../services/paymentService';
 import { getTourImageWithFallback, getTourImageAltText } from '../utils/imageUtils';
 import { checkTourAvailability } from '../services/tourBookingService';
 import LoginModal from '../components/auth/LoginModal';
+import ImageGallery from '../components/common/ImageGallery';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -38,7 +39,8 @@ interface TourDetail {
     id: string;
     title: string;
     description?: string;
-    imageUrl?: string;
+    imageUrls: string[]; // New field for multiple images
+    imageUrl?: string; // Backward compatibility - first image
     skillsRequired?: string;
     createdAt: string;
     status: number;
@@ -221,12 +223,13 @@ const TourDetailsPage: React.FC = () => {
                 {/* Main Content */}
                 <Col xs={24} lg={16}>
                     <Card>
-                        {/* Tour Image */}
-                        <Image
-                            src={tour.imageUrl || getDefaultImage(tour.tourTemplateName)}
+                        {/* Tour Images Gallery */}
+                        <ImageGallery
+                            images={tour.imageUrls && tour.imageUrls.length > 0 ? tour.imageUrls : [tour.imageUrl || getDefaultImage(tour.tourTemplateName)]}
                             alt={tour.title}
-                            style={{ width: '100%', height: 300, objectFit: 'cover' }}
-                            fallback="https://placehold.co/800x300?text=Tour+Image"
+                            height={300}
+                            showThumbnails={true}
+                            autoPlay={false}
                         />
 
                         {/* Tour Title */}
