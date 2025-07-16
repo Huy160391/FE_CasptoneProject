@@ -3,20 +3,16 @@ import axios from '../config/axios';
 // Test API connection
 export const testApiConnection = async (): Promise<boolean> => {
     try {
-        console.log('🔍 Testing API connection...');
-        
-        // Test với một endpoint đơn giản
-        const response = await axios.get('/health'); // hoặc endpoint nào đó có sẵn
-        
-        console.log('✅ API connection successful:', response.status);
+
+
         return true;
     } catch (error: any) {
         console.error('❌ API connection failed:', error.message);
-        
+
         if (error.code === 'ERR_NETWORK') {
             console.error('💡 Suggestion: Make sure your backend server is running on http://localhost:5173');
         }
-        
+
         return false;
     }
 };
@@ -25,14 +21,14 @@ export const testApiConnection = async (): Promise<boolean> => {
 export const testTourTemplateEndpoints = async (): Promise<void> => {
     try {
         console.log('🔍 Testing TourTemplate endpoints...');
-        
+
         // Test GET templates
         const response = await axios.get('/TourCompany/template');
         console.log('✅ GET /TourCompany/template successful:', response.status);
-        
+
     } catch (error: any) {
         console.error('❌ TourTemplate endpoints test failed:', error.message);
-        
+
         if (error.response?.status === 401) {
             console.error('💡 Authentication required. Make sure you have a valid token.');
         } else if (error.response?.status === 404) {

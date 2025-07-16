@@ -41,12 +41,12 @@ export const useCart = (options: UseCartOptions = {}) => {
     }, [cartStore, showNotifications, t])
 
     // Enhanced remove item
-    const removeItem = useCallback(async (id: string | number, type: 'product' | 'tour') => {
+    const removeItem = useCallback(async (productId: string, type: 'product' | 'tour') => {
         try {
             setLoading(true)
             setError(null)
 
-            cartStore.removeItem(id, type)
+            cartStore.removeItem(productId, type)
 
             if (showNotifications) {
                 message.success(t('common.removeFromCartSuccess'))
@@ -65,12 +65,12 @@ export const useCart = (options: UseCartOptions = {}) => {
     }, [cartStore, showNotifications, t])
 
     // Enhanced update quantity
-    const updateQuantity = useCallback(async (id: string | number, type: 'product' | 'tour', quantity: number) => {
+    const updateQuantity = useCallback(async (productId: string, type: 'product' | 'tour', quantity: number) => {
         try {
             setLoading(true)
             setError(null)
 
-            cartStore.updateQuantity(id, type, quantity)
+            cartStore.updateQuantity(productId, type, quantity)
 
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : t('common.updateCartQuantityError')
@@ -92,13 +92,13 @@ export const useCart = (options: UseCartOptions = {}) => {
     }, [cartStore])
 
     // Check if item is in cart
-    const isInCart = useCallback((id: string | number, type: 'product' | 'tour') => {
-        return cartStore.items.some(item => item.id === id && item.type === type)
+    const isInCart = useCallback((productId: string, type: 'product' | 'tour') => {
+        return cartStore.items.some(item => item.productId === productId && item.type === type)
     }, [cartStore.items])
 
     // Get item quantity in cart
-    const getItemQuantity = useCallback((id: string | number, type: 'product' | 'tour') => {
-        const item = cartStore.items.find(item => item.id === id && item.type === type)
+    const getItemQuantity = useCallback((productId: string, type: 'product' | 'tour') => {
+        const item = cartStore.items.find(item => item.productId === productId && item.type === type)
         return item?.quantity || 0
     }, [cartStore.items])
 
@@ -125,6 +125,9 @@ export const useCart = (options: UseCartOptions = {}) => {
         // Quick actions for easier usage
         isEmpty: cartStore.items.length === 0,
         hasItems: cartStore.items.length > 0,
+
+        // Lấy danh sách cartItemId
+        cartItemIds: cartStore.items.map(item => item.cartItemId),
     }
 }
 
@@ -136,9 +139,9 @@ export const useProductCart = (productId: string) => {
         ...cart,
         isInCart: cart.isInCart(productId, 'product'),
         quantity: cart.getItemQuantity(productId, 'product'),
-        addToCart: (item: Omit<CartItem, 'id' | 'type'>) => cart.addItem({
+        addToCart: (item: Omit<CartItem, 'type'>) => cart.addItem({
             ...item,
-            id: productId,
+            productId,
             type: 'product'
         }),
         removeFromCart: () => cart.removeItem(productId, 'product'),
@@ -154,9 +157,9 @@ export const useTourCart = (tourId: string) => {
         ...cart,
         isInCart: cart.isInCart(tourId, 'tour'),
         quantity: cart.getItemQuantity(tourId, 'tour'),
-        addToCart: (item: Omit<CartItem, 'id' | 'type'>) => cart.addItem({
+        addToCart: (item: Omit<CartItem, 'type'>) => cart.addItem({
             ...item,
-            id: tourId,
+            productId: tourId,
             type: 'tour'
         }),
         removeFromCart: () => cart.removeItem(tourId, 'tour'),

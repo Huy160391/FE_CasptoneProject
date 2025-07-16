@@ -28,15 +28,15 @@ export interface BookingPaymentInfo {
 
 // ===== PRODUCT PAYMENT APIs =====
 
-// Tra cứu thông tin đơn hàng từ PayOS orderCode (không cần token)
-export const lookupOrderByPayOsOrderCode = async (payOsOrderCode: string) => {
-    const response = await axios.get(`/payment-callback/lookup/${payOsOrderCode}`);
+// Tra cứu thông tin đơn hàng từ PayOS orderCode
+export const lookupPayOSOrder = async (payOsOrderCode: string) => {
+    const response = await axios.get(`/api/payment-callback/lookup/${payOsOrderCode}`);
     return response.data;
 };
 
-// Kiểm tra trạng thái thanh toán của đơn hàng (cần token)
+// Kiểm tra trạng thái thanh toán của đơn hàng
 export const getOrderPaymentStatus = async (orderId: string, token: string) => {
-    const response = await axios.get(`/Product/orders/${orderId}/payment-status`, {
+    const response = await axios.get(`/api/Product/orders/${orderId}/payment-status`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -44,6 +44,18 @@ export const getOrderPaymentStatus = async (orderId: string, token: string) => {
     return response.data;
 };
 
+<<<<<<< HEAD
+// Xác nhận thanh toán thành công từ PayOS callback
+export const confirmPaymentCallback = async (orderId: string) => {
+    const response = await axios.post(`/payment-callback/paid/${orderId}`);
+    return response.data; // { message, orderId, status, statusValue, stockUpdated, cartCleared }
+};
+
+// Xác nhận huỷ thanh toán từ PayOS callback
+export const confirmPaymentCancelCallback = async (orderId: string) => {
+    const response = await axios.post(`/payment-callback/cancelled/${orderId}`);
+    return response.data; // response tu API huỷ thanh toán
+=======
 // ===== TOUR BOOKING PAYMENT APIs =====
 
 /**
@@ -145,4 +157,5 @@ export const validatePayOsOrderCode = (orderCode: string): boolean => {
     // PayOS order code format: TNDT + 10 digits
     const regex = /^TNDT\d{10}$/;
     return regex.test(orderCode);
+>>>>>>> 82eaed31d1583f44ff768c440d3d17c804d6ba26
 };

@@ -100,6 +100,10 @@ const TourDetailsManagement: React.FC = () => {
                 includeInactive: false
             }, token ?? undefined);
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 82eaed31d1583f44ff768c440d3d17c804d6ba26
             // Backend trả về ResponseGetTourDetailsPaginatedDto
             if (response.success && response.data) {
                 setTourDetailsList(response.data);
@@ -120,7 +124,6 @@ const TourDetailsManagement: React.FC = () => {
         try {
             console.log('🔍 Loading templates with token:', token ? 'Present' : 'Missing');
             const response = await getTourTemplates({}, token ?? undefined);
-            console.log('📡 Templates API response:', response);
             console.log('📡 Response structure:', {
                 hasIsSuccess: 'isSuccess' in response,
                 hasData: 'data' in response,
@@ -207,9 +210,38 @@ const TourDetailsManagement: React.FC = () => {
         setModalInitialTab('operation');
     };
 
+<<<<<<< HEAD
+    const handleSubmit = async (values: CreateTourDetailsRequest) => {
+        try {
+            setLoading(true);
+            let response;
+
+            if (editingDetails) {
+                response = await updateTourDetails(editingDetails.id, values, token ?? undefined);
+            } else {
+                response = await createTourDetails(values, token ?? undefined);
+            }
+
+            if (response.success) {
+                message.success(
+                    editingDetails
+                        ? 'Cập nhật tour details thành công'
+                        : `Tạo tour details thành công${response.data ? ` và đã clone ${(response.data as any).assignedSlots?.length || 0} slots` : ''}`
+                );
+                setModalVisible(false);
+                loadTourDetailsList();
+            }
+        } catch (error) {
+            message.error(handleApiError(error));
+        } finally {
+            setLoading(false);
+        }
+    };
+=======
 
 
 
+>>>>>>> 82eaed31d1583f44ff768c440d3d17c804d6ba26
 
     const handleActivatePublic = async (tourDetailsId: string) => {
         try {
@@ -403,23 +435,23 @@ const TourDetailsManagement: React.FC = () => {
                     >
                         <div>
 
-                        <Table
-                            columns={columns}
-                            dataSource={tourDetailsList}
-                            rowKey="id"
-                            loading={loading}
-                            pagination={{
-                                current: currentPage,
-                                pageSize: pageSize,
-                                total: totalCount,
-                                showSizeChanger: true,
-                                showQuickJumper: true,
-                                showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} tours`,
-                                onChange: handlePageChange,
-                                onShowSizeChange: handlePageSizeChange,
-                                pageSizeOptions: ['10', '20', '50', '100'],
-                            }}
-                        />
+                            <Table
+                                columns={columns}
+                                dataSource={tourDetailsList}
+                                rowKey="id"
+                                loading={loading}
+                                pagination={{
+                                    current: currentPage,
+                                    pageSize: pageSize,
+                                    total: totalCount,
+                                    showSizeChanger: true,
+                                    showQuickJumper: true,
+                                    showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} tours`,
+                                    onChange: handlePageChange,
+                                    onShowSizeChange: handlePageSizeChange,
+                                    pageSizeOptions: ['10', '20', '50', '100'],
+                                }}
+                            />
                         </div>
                     </TabPane>
 

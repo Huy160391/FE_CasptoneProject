@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { CloseCircleFilled } from '@ant-design/icons';
 import { useThemeStore } from '@/store/useThemeStore';
-import { lookupOrderByPayOsOrderCode, getOrderPaymentStatus } from '@/services/paymentService';
+import { confirmPaymentCancelCallback } from '@/services/paymentService';
 
 const PaymentCancel: React.FC = () => {
     const location = useLocation();
@@ -22,25 +22,22 @@ const PaymentCancel: React.FC = () => {
                 // Đợi webhook xử lý xong
                 await new Promise(res => setTimeout(res, 2000));
                 let info = null;
-                // Ưu tiên lấy theo orderId nếu có
-                if (orderId && localStorage.getItem('token')) {
+                if (orderId) {
                     try {
-                        const statusData = await getOrderPaymentStatus(orderId, localStorage.getItem('token')!);
-                        if (payOsOrderCode) {
-                            const lookupData = await lookupOrderByPayOsOrderCode(payOsOrderCode);
-                            info = { ...lookupData, status: statusData.status };
-                        } else {
-                            info = { orderId, status: statusData.status };
-                        }
+                        const callbackRes = await confirmPaymentCancelCallback(orderId);
+                        info = {
+                            orderId: orderId,
+                            status: callbackRes.status === 0 ? 'Đã hủy' : 'Thất bại',
+                            message: callbackRes.message,
+                            totalAmount: callbackRes.totalAmount,
+                            createdAt: callbackRes.createdAt,
+                        };
                     } catch (e) {
-                        // fallback
+                        setError('Không thể xác nhận trạng thái huỷ thanh toán');
                     }
                 }
-                if (!info && payOsOrderCode) {
-                    info = await lookupOrderByPayOsOrderCode(payOsOrderCode);
-                }
                 setOrderInfo(info);
-            } catch (e: any) {
+            } catch (e) {
                 setError('Không thể lấy thông tin đơn hàng');
             } finally {
                 setLoading(false);
@@ -71,24 +68,9 @@ const PaymentCancel: React.FC = () => {
             ) : error ? (
                 <div style={{ color: '#cf1322', marginBottom: 8 }}>{error}</div>
             ) : orderInfo ? (
-                <>
-                    <div style={{ marginBottom: 8 }}>
-                        Mã đơn hàng: <b style={{ color: '#1890ff', fontSize: 18 }}>{orderInfo.orderId || orderId}</b>
-                    </div>
-                    <div style={{ marginBottom: 8 }}>
-                        Trạng thái: <b style={{ color: '#cf1322' }}>{orderInfo.status}</b>
-                    </div>
-                    {orderInfo.totalAmount && (
-                        <div style={{ marginBottom: 8 }}>
-                            Tổng tiền: <b>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(orderInfo.totalAmount)}</b>
-                        </div>
-                    )}
-                    {orderInfo.createdAt && (
-                        <div style={{ marginBottom: 8 }}>
-                            Ngày tạo: <b>{new Date(orderInfo.createdAt).toLocaleString('vi-VN')}</b>
-                        </div>
-                    )}
-                </>
+                <div style={{ marginBottom: 8 }}>
+                    Mã đơn hàng: <b style={{ color: '#1890ff', fontSize: 18 }}>{orderInfo.orderId || orderId}</b>
+                </div>
             ) : null}
             <div style={{ marginBottom: 32 }}>
                 Vui lòng thử lại hoặc <Link to="/support" style={{ color: isDarkMode ? '#79eac0' : '#1890ff', textDecoration: 'underline' }}>liên hệ hỗ trợ</Link> nếu cần thiết.

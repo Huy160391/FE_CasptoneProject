@@ -48,7 +48,7 @@ export interface Product {
 }
 
 export interface CartItem {
-    id: string | number;
+    cartItemId: string;
     productId: string;
     product?: Product;
     name: string;

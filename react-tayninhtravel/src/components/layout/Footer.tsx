@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import './Footer.scss'
 
 const { Footer: AntFooter } = Layout
-const { Title, Text, Paragraph } = Typography
+const { Title, Text } = Typography
 
 const Footer = () => {
   const { t } = useTranslation()
@@ -25,9 +25,9 @@ const Footer = () => {
           <Col xs={24} sm={12} md={8} lg={6}>
             <div className="footer-section">
               <Title level={4}>{t('footer.companyName')}</Title>
-              <Paragraph>
+              <div className="footer-description">
                 {t('footer.description')}
-              </Paragraph>
+              </div>
               <Space className="social-icons">
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
                   <FacebookOutlined />

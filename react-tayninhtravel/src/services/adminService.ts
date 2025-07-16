@@ -344,11 +344,11 @@ class AdminService {
     }
 
     async approveTourGuideApplication(cvId: string): Promise<any> {
-        const response = await axios.put(`Cms/${cvId}/approve-application`);
+        const response = await axios.put(`Cms/tourguide-applications/${cvId}/approve`);
         return response.data;
     }
     async rejectTourGuideApplication(cvId: string, reason: string): Promise<any> {
-        const response = await axios.put(`Cms/${cvId}/reject-application`, { reason });
+        const response = await axios.put(`Cms/tourguide-applications/${cvId}/reject`, { reason });
         return response.data;
     }
 
@@ -371,7 +371,6 @@ class AdminService {
         const response = await axios.get('SpecialtyShopApplication', { params });
 
         // Log để debug
-        console.log('Shop registrations API response:', response.data);
 
         // Xử lý các cấu trúc response khác nhau
         if (response.data) {

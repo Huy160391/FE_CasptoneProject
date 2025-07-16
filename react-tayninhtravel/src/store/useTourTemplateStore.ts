@@ -26,26 +26,26 @@ interface TourTemplateState {
   templatesCache: TourTemplateCache | null;
   shopsCache: SpecialtyShopCache | null;
   guidesCache: TourGuideCache | null;
-  
+
   // Loading states
   templatesLoading: boolean;
   shopsLoading: boolean;
   guidesLoading: boolean;
-  
+
   // Cache settings
   cacheTimeout: number; // milliseconds
-  
+
   // Actions
   getTemplates: (params?: GetTourTemplatesParams, token?: string, forceRefresh?: boolean) => Promise<TourTemplate[]>;
   getShops: (includeInactive?: boolean, token?: string, forceRefresh?: boolean) => Promise<SpecialtyShop[]>;
   getGuides: (includeInactive?: boolean, token?: string, forceRefresh?: boolean) => Promise<TourGuide[]>;
-  
+
   // Cache management
   clearCache: () => void;
   clearTemplatesCache: () => void;
   clearShopsCache: () => void;
   clearGuidesCache: () => void;
-  
+
   // Preload data
   preloadWizardData: (token?: string) => Promise<void>;
 }
@@ -75,12 +75,12 @@ export const useTourTemplateStore = create<TourTemplateState>()(
       // Get templates with caching
       getTemplates: async (params = { pageIndex: 0, pageSize: 100, includeInactive: false }, token, forceRefresh = false) => {
         const state = get();
-        
+
         // Check cache validity
-        if (!forceRefresh && 
-            state.templatesCache && 
-            isCacheValid(state.templatesCache.timestamp, state.cacheTimeout) &&
-            paramsEqual(state.templatesCache.params, params)) {
+        if (!forceRefresh &&
+          state.templatesCache &&
+          isCacheValid(state.templatesCache.timestamp, state.cacheTimeout) &&
+          paramsEqual(state.templatesCache.params, params)) {
           console.log('🎯 Using cached templates:', state.templatesCache.data.length);
           return state.templatesCache.data;
         }
@@ -98,13 +98,12 @@ export const useTourTemplateStore = create<TourTemplateState>()(
 
         try {
           set({ templatesLoading: true });
-          console.log('🔄 Fetching fresh templates from API...');
-          
+
           const response = await getTourTemplates(params, token);
-          
+
           if (response && response.statusCode === 200 && response.data) {
             const templates = response.data;
-            
+
             // Update cache
             set({
               templatesCache: {
@@ -113,7 +112,7 @@ export const useTourTemplateStore = create<TourTemplateState>()(
                 params: { ...params }
               }
             });
-            
+
             console.log('✅ Templates cached successfully:', templates.length);
             return templates;
           } else {
@@ -131,12 +130,12 @@ export const useTourTemplateStore = create<TourTemplateState>()(
       // Get specialty shops with caching
       getShops: async (includeInactive = false, token, forceRefresh = false) => {
         const state = get();
-        
+
         // Check cache validity
-        if (!forceRefresh && 
-            state.shopsCache && 
-            isCacheValid(state.shopsCache.timestamp, state.cacheTimeout) &&
-            state.shopsCache.includeInactive === includeInactive) {
+        if (!forceRefresh &&
+          state.shopsCache &&
+          isCacheValid(state.shopsCache.timestamp, state.cacheTimeout) &&
+          state.shopsCache.includeInactive === includeInactive) {
           console.log('🎯 Using cached shops:', state.shopsCache.data.length);
           return state.shopsCache.data;
         }
@@ -153,13 +152,12 @@ export const useTourTemplateStore = create<TourTemplateState>()(
 
         try {
           set({ shopsLoading: true });
-          console.log('🔄 Fetching fresh shops from API...');
-          
+
           const response = await getSpecialtyShops(includeInactive, token);
-          
+
           if (response && response.success && response.data) {
             const shops = response.data;
-            
+
             // Update cache
             set({
               shopsCache: {
@@ -168,7 +166,7 @@ export const useTourTemplateStore = create<TourTemplateState>()(
                 includeInactive
               }
             });
-            
+
             console.log('✅ Shops cached successfully:', shops.length);
             return shops;
           } else {
@@ -186,12 +184,12 @@ export const useTourTemplateStore = create<TourTemplateState>()(
       // Get tour guides with caching
       getGuides: async (includeInactive = false, token, forceRefresh = false) => {
         const state = get();
-        
+
         // Check cache validity
-        if (!forceRefresh && 
-            state.guidesCache && 
-            isCacheValid(state.guidesCache.timestamp, state.cacheTimeout) &&
-            state.guidesCache.includeInactive === includeInactive) {
+        if (!forceRefresh &&
+          state.guidesCache &&
+          isCacheValid(state.guidesCache.timestamp, state.cacheTimeout) &&
+          state.guidesCache.includeInactive === includeInactive) {
           console.log('🎯 Using cached guides:', state.guidesCache.data.length);
           return state.guidesCache.data;
         }
@@ -208,13 +206,12 @@ export const useTourTemplateStore = create<TourTemplateState>()(
 
         try {
           set({ guidesLoading: true });
-          console.log('🔄 Fetching fresh guides from API...');
-          
+
           const response = await getTourGuides(includeInactive, token);
-          
+
           if (Array.isArray(response)) {
             const guides = response;
-            
+
             // Update cache
             set({
               guidesCache: {
@@ -223,7 +220,7 @@ export const useTourTemplateStore = create<TourTemplateState>()(
                 includeInactive
               }
             });
-            
+
             console.log('✅ Guides cached successfully:', guides.length);
             return guides;
           } else {
@@ -242,7 +239,7 @@ export const useTourTemplateStore = create<TourTemplateState>()(
       preloadWizardData: async (token) => {
         console.log('🚀 Preloading wizard data...');
         const state = get();
-        
+
         try {
           // Preload all data in parallel
           await Promise.all([
@@ -250,7 +247,7 @@ export const useTourTemplateStore = create<TourTemplateState>()(
             state.getShops(false, token),
             state.getGuides(false, token)
           ]);
-          
+
           console.log('✅ Wizard data preloaded successfully');
         } catch (error) {
           console.error('❌ Error preloading wizard data:', error);

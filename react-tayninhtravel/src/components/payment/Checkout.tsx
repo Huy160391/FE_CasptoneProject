@@ -30,9 +30,9 @@ import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
-import BankTransferConfirmModal, { type BankTransferData } from './BankTransferConfirmModal'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
+import { checkoutCart } from '@/services/cartService'
 import './Checkout.scss'
 
 const { Title, Text } = Typography
@@ -84,8 +84,6 @@ const Checkout = () => {
     const [selectedShippingMethod, setSelectedShippingMethod] = useState('pickup')
     const [agreeTerms, setAgreeTerms] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [bankTransferModalVisible, setBankTransferModalVisible] = useState(false)
-    const [orderId] = useState(`TN-${Date.now()}`) // Generate order ID
 
     // Authentication modal states
     const [loginModalVisible, setLoginModalVisible] = useState(false)
@@ -119,7 +117,7 @@ const Checkout = () => {
         }
     ]
 
-    // Shipping methods
+    // Shipping methods giữ cả hai phương án
     const shippingMethods: ShippingMethod[] = [
         {
             id: 'ship_cod',
@@ -250,71 +248,24 @@ const Checkout = () => {
             return
         }
 
-        // If bank transfer payment method, show confirmation modal
-        if (selectedPaymentMethod === 'bank_transfer') {
-            setBankTransferModalVisible(true)
-            return
-        }
-
-        // For COD payment, proceed directly
         setLoading(true)
-
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000))
-
-            // Clear cart after successful order
+            const res = await checkoutCart('');
+            // Điều chỉnh lấy checkoutUrl từ response mới
+            if (res.checkoutUrl && res.checkoutUrl.checkoutUrl) {
+                window.location.href = res.checkoutUrl.checkoutUrl;
+                return;
+            }
             clearCart()
-
             notification.success({
                 message: t('checkout.orderSuccess'),
                 description: t('checkout.orderSuccessDescription')
             })
-
-            // Navigate to success page or order history
-            navigate('/order-success')
-
+            // Xoá navigate('/order-success') vì không cần chuyển trang nữa
         } catch (error) {
             notification.error({
                 message: t('checkout.orderError'),
                 description: t('checkout.orderErrorDescription')
-            })
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleBankTransferConfirm = async (bankTransferData: BankTransferData) => {
-        setLoading(true)
-
-        try {
-            // Here you would send both order data and bank transfer confirmation to API
-            console.log('Order placed with bank transfer:', {
-                orderId,
-                deliveryInfo,
-                items,
-                total: getTotalWithShipping(),
-                bankTransferData
-            })
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500))
-
-            // Clear cart after successful order
-            clearCart()
-
-            notification.success({
-                message: 'Đặt hàng thành công',
-                description: 'Đơn hàng đã được tạo và đang chờ xác minh thanh toán. Chúng tôi sẽ liên hệ với bạn sớm nhất.'
-            })
-
-            // Navigate to success page
-            navigate('/order-success')
-
-        } catch (error) {
-            notification.error({
-                message: t('checkout.orderError'),
-                description: 'Có lỗi xảy ra khi xử lý đơn hàng'
             })
         } finally {
             setLoading(false)
@@ -378,6 +329,19 @@ const Checkout = () => {
         )
     }
 
+    // Thêm hàm xử lý khi chọn phương thức ship_cod
+    const handleShippingMethodChange = (value: string) => {
+        if (value === 'ship_cod') {
+            notification.info({
+                message: 'Phương thức nhận hàng chưa khả dụng',
+                description: 'Phương thức nhận hàng này hiện chưa khả dụng, chúng tôi sẽ cập nhật trong thời gian tới. Mong quý khách hàng thông cảm.',
+                duration: 5
+            });
+            return;
+        }
+        setSelectedShippingMethod(value);
+    };
+
     return (
         <div className="checkout-wrapper">
             <div className="checkout">
@@ -414,7 +378,7 @@ const Checkout = () => {
                             <Card title={t('checkout.shippingMethod')} className="step-card">
                                 <Radio.Group
                                     value={selectedShippingMethod}
-                                    onChange={(e) => setSelectedShippingMethod(e.target.value)}
+                                    onChange={e => handleShippingMethodChange(e.target.value)}
                                     className="shipping-methods"
                                 >
                                     {shippingMethods.map(method => (
@@ -429,10 +393,10 @@ const Checkout = () => {
                                                 </div>
                                                 <div className="method-details">
                                                     <div className="method-price">
-                                                        {t('checkout.free')}
+                                                        {method.price === 0 ? t('checkout.free') : formatPrice(method.price)}
                                                     </div>
                                                     <div className="method-time">
-                                                        {t('checkout.immediate')}
+                                                        {method.estimatedDays === '0' ? t('checkout.immediate') : `${method.estimatedDays} ngày`}
                                                     </div>
                                                 </div>
                                             </div>
@@ -656,7 +620,7 @@ const Checkout = () => {
                         <Card title={t('checkout.orderSummary')} className="order-summary-card">
                             <Table
                                 columns={columns}
-                                dataSource={items.map(item => ({ ...item, key: `${item.type}-${item.id}` }))}
+                                dataSource={items.map(item => ({ ...item, key: `${item.type}-${item.cartItemId}` }))}
                                 pagination={false}
                                 size="small"
                                 className="summary-table"
@@ -685,15 +649,6 @@ const Checkout = () => {
                         </Card>
                     </Col>
                 </Row>
-
-                {/* Bank Transfer Confirmation Modal */}
-                <BankTransferConfirmModal
-                    visible={bankTransferModalVisible}
-                    onClose={() => setBankTransferModalVisible(false)}
-                    onConfirm={handleBankTransferConfirm}
-                    orderTotal={getTotalWithShipping()}
-                    orderId={orderId}
-                />
 
                 {/* Authentication Modals */}
                 <LoginModal

@@ -63,7 +63,20 @@ const Profile = () => {
             try {
                 setTicketsLoading(true);
                 const tickets = await userService.getUserSupportTickets();
-                setSupportTickets(tickets);
+                // Lọc bỏ các ticket không hợp lệ (null, undefined, hoặc thiếu thông tin quan trọng)
+                const validTickets = Array.isArray(tickets)
+                    ? tickets.filter(ticket => {
+                        if (!ticket || typeof ticket !== 'object') return false;
+                        // Loại bỏ ticket placeholder của API
+                        if (ticket.id === '00000000-0000-0000-0000-000000000000') {
+                            return false;
+                        }
+                        // Loại bỏ ticket nếu tất cả các trường đều null/undefined/rỗng
+                        const hasValidField = ticket.id || ticket.content || ticket.createdAt || ticket.status;
+                        return Boolean(hasValidField);
+                    })
+                    : [];
+                setSupportTickets(validTickets);
             } catch (error: any) {
                 console.error('Error fetching support tickets:', error);
                 // Removing error message to avoid "No tickets found" notification

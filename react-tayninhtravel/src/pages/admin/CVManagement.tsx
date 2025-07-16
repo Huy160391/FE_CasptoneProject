@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Input, Space, Tag, Modal, Form, message } from 'antd'
+import { Table, Button, Input, Space, Tag, Modal, Form, message, Tooltip } from 'antd'
 import {
     SearchOutlined,
     CheckCircleOutlined,
@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
 import './CVManagement.scss'
+import CVDetailModal from './CVDetailModal'
 
 // Đổi tên interface CV thành AdminCV để tránh xung đột với type CV global
 interface AdminCV {
@@ -41,6 +42,9 @@ const CVManagement = () => {
     const [cvs, setCvs] = useState<AdminCV[]>([])
     const [loading, setLoading] = useState(false)
     const [form] = Form.useForm()
+    const [detailModalOpen, setDetailModalOpen] = useState(false);
+    const [selectedCVDetail, setSelectedCVDetail] = useState<AdminCV | null>(null);
+
     const fetchCVs = async () => {
         try {
             setLoading(true)
@@ -123,7 +127,14 @@ const CVManagement = () => {
             dataIndex: 'experience',
             key: 'experience',
             width: '10%',
-            render: (exp: string) => `${exp} năm`,
+            render: (exp: string) => {
+                const displayText = exp.length > 50 ? exp.slice(0, 50) + '...' : exp;
+                return (
+                    <Tooltip title={exp} placement="topLeft">
+                        <span>{displayText} năm</span>
+                    </Tooltip>
+                );
+            },
         },
         {
             title: t('admin.cvManagement.columns.submitDate'),
@@ -309,6 +320,17 @@ const CVManagement = () => {
                 pagination={{ pageSize: 10 }}
                 className="cv-table"
                 loading={loading}
+                onRow={record => ({
+                    onClick: () => {
+                        setSelectedCVDetail(record);
+                        setDetailModalOpen(true);
+                    }
+                })}
+            />
+            <CVDetailModal
+                open={detailModalOpen}
+                onClose={() => setDetailModalOpen(false)}
+                cv={selectedCVDetail}
             />
 
             <Modal
@@ -325,7 +347,7 @@ const CVManagement = () => {
                     <Form.Item
                         name="reason"
                         label={t('admin.cvManagement.confirmations.reject.label')}
-                        rules={[{ required: true, message: t('admin.cvManagement.confirmations.reject.required') }]}
+                        rules={[{ required: true, message: t('admin.cvManagement.confirmations.reject.required') }, { min: 10, message: t('admin.cvManagement.confirmations.reject.minLength') }]}
                     >
                         <TextArea
                             rows={4}

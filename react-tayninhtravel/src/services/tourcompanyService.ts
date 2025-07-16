@@ -58,7 +58,17 @@ export const getTourTemplates = async (params: GetTourTemplatesParams = {}, toke
 
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
+    console.log(' Request URL:', `/TourCompany/template`);
+    console.log('📡 Query params:', queryParams);
+    console.log('📡 Headers:', headers);
+
     const response = await axios.get('/TourCompany/template', { params: queryParams, headers });
+    console.log('✅ Response structure check:', {
+        statusCode: response.data.statusCode,
+        hasData: 'data' in response.data,
+        dataType: typeof response.data.data,
+        dataLength: Array.isArray(response.data.data) ? response.data.data.length : 'not array'
+    });
     return response.data;
 };
 
@@ -118,6 +128,13 @@ export const getTourDetailsList = async (params: any = {}, token?: string): Prom
         ...params
     };
 
+<<<<<<< HEAD
+    console.log('📡 Request URL:', `/TourDetails/paginated`);
+    console.log('📡 Query params:', queryParams);
+    console.log('📡 Headers:', headers);
+
+=======
+>>>>>>> 82eaed31d1583f44ff768c440d3d17c804d6ba26
     const response = await axios.get('/TourDetails/paginated', { params: queryParams, headers });
 
     // Backend trả về ResponseGetTourDetailsPaginatedDto với structure mới

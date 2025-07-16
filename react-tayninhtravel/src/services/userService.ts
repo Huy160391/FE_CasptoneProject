@@ -20,6 +20,33 @@ export type { Comment, UserComment } from '../types';
  */
 export const userService = {
     /**
+     * Lấy danh sách đơn hàng của user hiện tại
+     * @returns Promise với danh sách đơn hàng
+     */
+    /**
+     * Lấy danh sách đơn hàng của user hiện tại với phân trang, lọc trạng thái và mã PayOS
+     * @param pageIndex Trang hiện tại (mặc định 1)
+     * @param pageSize Số lượng mỗi trang (mặc định 10)
+     * @param status Trạng thái đơn hàng (tùy chọn)
+     * @param payOsOrderCode Mã đơn hàng PayOS (tùy chọn)
+     * @returns Promise với danh sách đơn hàng
+     */
+    getMyOrders: async (
+        pageIndex: number = 0,
+        pageSize: number = 10,
+        status?: string,
+        payOsOrderCode?: string
+    ): Promise<any[]> => {
+        const params: any = {
+            pageIndex,
+            pageSize
+        };
+        if (status) params.status = status;
+        if (payOsOrderCode) params.payOsOrderCode = payOsOrderCode;
+        const response = await axios.get<any[]>('/Account/my-orders', { params });
+        return response.data;
+    },
+    /**
      * Map API user format to application user format
      * @param apiUser User data from API
      * @returns User data in application format
@@ -289,12 +316,31 @@ export const userService = {
      * @param application Tour guide application data
      * @returns Promise with operation result
      */
-    submitTourGuideApplication: async (application: TourGuideApplicationForm): Promise<any> => {
+    submitTourGuideApplication: async (application: TourGuideApplicationForm & {
+        fullName: string;
+        phone: string;
+        experience: string;
+        skills: number[]; // List of skill IDs (TourGuideSkill)
+        skillsString: string; // Comma-separated string
+    }): Promise<any> => {
         const formData = new FormData();
+        formData.append('FullName', application.fullName);
+        formData.append('PhoneNumber', application.phone);
         formData.append('Email', application.email);
+        formData.append('Experience', application.experience);
+        // Lặp qua từng kỹ năng và append từng trường Skills
+        application.skills.forEach((id) => {
+            if (typeof id === 'number' && !isNaN(id)) {
+                formData.append('Skills', id.toString());
+            }
+        });
+        // Truyền SkillsString là chuỗi
+        if (application.skillsString) {
+            formData.append('SkillsString', application.skillsString);
+        }
         formData.append('CurriculumVitae', application.curriculumVitae);
 
-        const response = await axios.post('/Account/tourguide-application', formData, {
+        const response = await axios.post('/Account/tourguide-application/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -435,7 +481,6 @@ export const userService = {
                 (response.data?.data && Array.isArray(response.data.data)) ? response.data.data : [];
 
             // For debugging
-            console.log('Comments API response:', response.data);
             console.log('Processed comments data:', commentsData);
 
             return {

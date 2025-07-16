@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   Breadcrumb,
@@ -29,6 +29,7 @@ import {
   PlusOutlined,
   MinusOutlined
 } from '@ant-design/icons'
+import { Empty } from 'antd'
 import './ProductDetail.scss'
 import { useProductCart } from '@/hooks/useCart'
 import { useTranslation } from 'react-i18next'
@@ -67,12 +68,11 @@ const ProductDetail = () => {
 
   const [product, setProduct] = useState<EnhancedProduct | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  const [mainImage, setMainImage] = useState<string>('')
   const [quantity, setQuantity] = useState<number>(1)
   const [isFavorite, setIsFavorite] = useState<boolean>(false)
   // const [activeTab, setActiveTab] = useState<string>('description')
-  const [imageModalVisible, setImageModalVisible] = useState<boolean>(false)
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
+  const [reviewsData, setReviewsData] = useState<Review[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState<boolean>(true)
 
   // Use cart hook instead of direct store access
   const productCart = useProductCart(productId)
@@ -85,10 +85,35 @@ const ProductDetail = () => {
       try {
         const productData = await publicService.getPublicProductById(productId)
         if (productData) {
+          // Lấy review từ API
+          setReviewsLoading(true)
+          let fetchedReviews: Review[] = []
+          try {
+            const apiReviews = await publicService.getProductReviews(productId)
+            // Map về đúng kiểu Review nếu cần
+            fetchedReviews = (apiReviews || []).map((r: any, idx: number) => ({
+              id: r.id || idx + 1,
+              userName: r.userName || r.user || 'Ẩn danh',
+              rating: r.rating || 0,
+              date: r.date || r.createdAt || '',
+              comment: r.comment || '',
+            }))
+          } catch {
+            fetchedReviews = []
+          }
+          setReviewsData(fetchedReviews)
+          setReviewsLoading(false)
           // Create enhanced product with additional UI data
+          // Chỉ hiển thị đúng số lượng ảnh mà sản phẩm có, nếu không có thì dùng 1 ảnh placeholder
+          let additionalImages: string[] = [];
+          if (productData.imageUrl && productData.imageUrl.length > 0) {
+            additionalImages = [...productData.imageUrl];
+          } else {
+            additionalImages = ['https://placehold.co/400x400?text=No+Image'];
+          }
           const enhancedProduct: EnhancedProduct = {
             ...productData,
-            category: productData.category, // Đã là string, không cần kiểm tra kiểu số nữa
+            category: productData.category,
             rating: 4.5,
             reviews: 28,
             tags: ['đặc sản', 'quà tặng', 'truyền thống'],
@@ -98,44 +123,11 @@ const ProductDetail = () => {
             shortDescription: productData.description || 'Sản phẩm đặc trưng từ Tây Ninh, chất lượng cao',
             stock: productData.quantityInStock,
             sku: `TN-${productData.id.toString().padStart(5, '0')}`,
-            additionalImages: productData.imageUrl && productData.imageUrl.length > 0 ? [
-              ...productData.imageUrl,
-              'https://placehold.co/400x400?text=Image+2',
-              'https://placehold.co/400x400?text=Image+3',
-              'https://placehold.co/400x400?text=Image+4',
-            ] : [
-              'https://placehold.co/400x400?text=No+Image',
-              'https://placehold.co/400x400?text=Image+2',
-              'https://placehold.co/400x400?text=Image+3',
-              'https://placehold.co/400x400?text=Image+4',
-            ],
-            reviewsData: [
-              {
-                id: 1,
-                userName: 'Nguyễn Văn A',
-                rating: 5,
-                date: '15/03/2024',
-                comment: 'Sản phẩm rất đẹp và chất lượng. Đóng gói cẩn thận, giao hàng nhanh.',
-              },
-              {
-                id: 2,
-                userName: 'Trần Thị B',
-                rating: 4,
-                date: '10/03/2024',
-                comment: 'Hàng đẹp, đúng như mô tả. Sẽ ủng hộ shop lần sau.',
-              },
-              {
-                id: 3,
-                userName: 'Lê Văn C',
-                rating: 5,
-                date: '05/03/2024',
-                comment: 'Quá tuyệt vời, mọi người nên mua thử.',
-              },
-            ],
+            additionalImages,
+            reviewsData: fetchedReviews,
             soldCount: productData.soldCount || 0,
           }
           setProduct(enhancedProduct)
-          setMainImage(enhancedProduct.additionalImages[0])
         }
       } catch (error) {
         console.error('Error fetching product:', error)
@@ -161,8 +153,16 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (!product) return
-
+    // Ngăn không cho thêm vượt quá số lượng tồn kho
+    if (productCart.quantity + quantity > product.stock) {
+      notification.error({
+        message: t('cart.error'),
+        description: t('Số lượng vượt quá tồn kho hiện có!'),
+      })
+      return
+    }
     productCart.addToCart({
+      cartItemId: product.id,
       productId: product.id,
       name: product.name,
       image: product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : 'https://placehold.co/400x400?text=No+Image',
@@ -185,47 +185,120 @@ const ProductDetail = () => {
     })
   }
 
-  const handleThumbnailClick = (image: string, index: number) => {
-    setMainImage(image)
-    setCurrentImageIndex(index)
-  }
+  const ProductImages = React.memo(({ product }: { product: EnhancedProduct }) => {
+    const [mainImage, setMainImage] = useState<string>(product.additionalImages[0] || '');
+    const [imageModalVisible, setImageModalVisible] = useState<boolean>(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
-  const handleImageClick = () => {
-    if (!product) return
-    setImageModalVisible(true)
-  }
+    const handleThumbnailClick = (image: string, index: number) => {
+      setMainImage(image);
+      setCurrentImageIndex(index);
+    };
 
-  const handlePrevImage = () => {
-    if (!product) return
-    const newIndex =
-      (currentImageIndex - 1 + product.additionalImages.length) % product.additionalImages.length
-    setCurrentImageIndex(newIndex)
-    setMainImage(product.additionalImages[newIndex])
-  }
+    const handleImageClick = () => {
+      setImageModalVisible(true);
+    };
 
-  const handleNextImage = () => {
-    if (!product) return
-    const newIndex = (currentImageIndex + 1) % product.additionalImages.length
-    setCurrentImageIndex(newIndex)
-    setMainImage(product.additionalImages[newIndex])
-  }
+    const handlePrevImage = () => {
+      const newIndex = (currentImageIndex - 1 + product.additionalImages.length) % product.additionalImages.length;
+      setCurrentImageIndex(newIndex);
+      setMainImage(product.additionalImages[newIndex]);
+    };
 
-  const renderThumbnails = () => {
-    if (!product) return null
-    return product.additionalImages.map((image: string, index: number) => (
-      <div
-        key={index}
-        className={`thumbnail ${mainImage === image ? 'active-thumbnail' : ''}`}
-        onClick={() => handleThumbnailClick(image, index)}
-      >
-        <img
-          src={image}
-          alt={`${product.name} - Ảnh ${index + 1}`}
-          className="thumbnail-image"
-        />
-      </div>
-    ))
-  }
+    const handleNextImage = () => {
+      const newIndex = (currentImageIndex + 1) % product.additionalImages.length;
+      setCurrentImageIndex(newIndex);
+      setMainImage(product.additionalImages[newIndex]);
+    };
+
+    const renderThumbnails = () => {
+      return product.additionalImages.map((image: string, index: number) => (
+        <div
+          key={index}
+          className={`thumbnail ${mainImage === image ? 'active-thumbnail' : ''}`}
+          onClick={() => handleThumbnailClick(image, index)}
+        >
+          <img
+            src={image}
+            alt={`${product.name} - Ảnh ${index + 1}`}
+            className="thumbnail-image"
+          />
+        </div>
+      ));
+    };
+
+    return (
+      <>
+        <div className="product-images">
+          <div className="main-image-container" onClick={handleImageClick}>
+            <img
+              src={mainImage}
+              alt={product.name}
+              className="main-image"
+            />
+            {(product.isNew || product.isSale) && (
+              <div
+                className={`product-badge ${product.isNew ? 'new-badge' : 'sale-badge'}`}
+              >
+                {product.isNew
+                  ? 'Mới'
+                  : `Giảm ${typeof product.discountPrice === 'number' ? Math.round(
+                    ((product.price - product.discountPrice) / product.price) * 100
+                  ) : 0}%`}
+              </div>
+            )}
+            <div className="image-hint">Nhấp để xem ảnh lớn</div>
+          </div>
+          <div className="thumbnail-container">{renderThumbnails()}</div>
+        </div>
+        {/* Image Modal */}
+        <Modal
+          open={imageModalVisible}
+          footer={null}
+          onCancel={() => setImageModalVisible(false)}
+          width={800}
+          className="image-modal"
+          centered
+        >
+          <div className="modal-image-container">
+            <Button
+              className="image-nav-button prev-button"
+              onClick={handlePrevImage}
+              icon={<LeftOutlined />}
+            />
+            <div className="modal-main-image">
+              <img
+                src={product.additionalImages[currentImageIndex]}
+                alt={product.name}
+                className="modal-image"
+              />
+            </div>
+            <Button
+              className="image-nav-button next-button"
+              onClick={handleNextImage}
+              icon={<RightOutlined />}
+            />
+          </div>
+          <div className="modal-thumbnails">
+            <div className="modal-thumbnail-container">
+              {product.additionalImages.map((image, index) => (
+                <div
+                  key={index}
+                  className={`modal-thumbnail ${currentImageIndex === index ? 'active-thumbnail' : ''}`}
+                  onClick={() => setCurrentImageIndex(index)}
+                >
+                  <img src={image} alt={`Thumbnail ${index + 1}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="image-pagination">
+            {currentImageIndex + 1}/{product.additionalImages.length || 0}
+          </div>
+        </Modal>
+      </>
+    );
+  });
 
   // Related products component
   const RelatedProductsSection = ({
@@ -379,29 +452,7 @@ const ProductDetail = () => {
       <Row gutter={[32, 32]} className="product-detail-content">
         {/* Product Images */}
         <Col xs={24} md={12}>
-          <div className="product-images">
-            <div className="main-image-container" onClick={handleImageClick}>
-              <img
-                src={mainImage}
-                alt={product.name}
-                className="main-image"
-              />
-              {(product.isNew || product.isSale) && (
-                <div
-                  className={`product-badge ${product.isNew ? 'new-badge' : 'sale-badge'
-                    }`}
-                >
-                  {product.isNew
-                    ? 'Mới'
-                    : `Giảm ${Math.round(
-                      ((product.price - (product.discountPrice || 0)) / product.price) * 100
-                    )}%`}
-                </div>
-              )}
-              <div className="image-hint">Nhấp để xem ảnh lớn</div>
-            </div>
-            <div className="thumbnail-container">{renderThumbnails()}</div>
-          </div>
+          <ProductImages product={product} />
         </Col>
 
         {/* Product Info */}
@@ -421,19 +472,19 @@ const ProductDetail = () => {
             </div>
 
             <div className="product-price">
-              {product.discountPrice ? (
+              {typeof product.discountPrice === 'number' ? (
                 <>
                   <Text className="current-price">
-                    {product.discountPrice.toLocaleString('vi-VN')}₫
+                    {product.discountPrice?.toLocaleString('vi-VN')}₫
                   </Text>
                   <Text className="original-price">
                     {product.price.toLocaleString('vi-VN')}₫
                   </Text>
                   <Tag color="red" className="discount-tag">
                     Giảm{' '}
-                    {Math.round(
-                      ((product.price - (product.discountPrice || 0)) / product.price) * 100
-                    )}
+                    {typeof product.discountPrice === 'number' ? Math.round(
+                      ((product.price - product.discountPrice) / product.price) * 100
+                    ) : 0}
                     %
                   </Tag>
                 </>
@@ -479,6 +530,7 @@ const ProductDetail = () => {
                   onClick={handleAddToCart}
                   loading={productCart.loading}
                   className="add-to-cart-btn"
+                  disabled={quantity > product.stock}
                 >
                   {productCart.isInCart
                     ? t('cart.inCart') + ` (${productCart.quantity})`
@@ -545,63 +597,72 @@ const ProductDetail = () => {
           </TabPane>
           <TabPane tab={`Đánh giá (${product.reviews})`} key="reviews">
             <div className="tab-content">
-              <div className="reviews-summary">
-                <div className="rating-summary">
-                  <div className="average-rating">
-                    <Title level={2}>{product.rating.toFixed(1)}</Title>
-                    <Rate disabled defaultValue={product.rating} />
-                    <Text>{product.reviews} đánh giá</Text>
-                  </div>
-                  <div className="rating-bars">
-                    {[5, 4, 3, 2, 1].map(star => (
-                      <div key={star} className="rating-bar-item">
-                        <Text>{star} sao</Text>
-                        <div className="rating-bar">
-                          <div
-                            className="rating-bar-fill"
-                            style={{
-                              width: `${(product.reviewsData.filter(r => Math.round(r.rating) === star)
-                                .length /
-                                product.reviewsData.length) *
-                                100
-                                }%`,
-                            }}
-                          ></div>
-                        </div>
-                        <Text>
-                          {
-                            product.reviewsData.filter(r => Math.round(r.rating) === star).length
-                          }
-                        </Text>
+              {reviewsLoading ? (
+                <Skeleton active paragraph={{ rows: 2 }} />
+              ) : (
+                <>
+                  <div className="reviews-summary">
+                    <div className="rating-summary">
+                      <div className="average-rating">
+                        <Title level={2}>{reviewsData.length === 0 ? '0.0' : product.rating.toFixed(1)}</Title>
+                        <Rate disabled defaultValue={reviewsData.length === 0 ? 0 : product.rating} />
+                        <Text>{reviewsData.length} đánh giá</Text>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="write-review">
-                  <Button type="primary" icon={<StarOutlined />}>
-                    Viết đánh giá
-                  </Button>
-                </div>
-              </div>
-
-              <Divider />
-
-              <div className="reviews-list">
-                {product.reviewsData &&
-                  product.reviewsData.map((review: Review) => (
-                    <div key={review.id} className="review-item">
-                      <div className="review-header">
-                        <div className="reviewer-info">
-                          <Title level={5}>{review.userName}</Title>
-                          <Text type="secondary">{review.date}</Text>
-                        </div>
-                        <Rate disabled defaultValue={review.rating} />
+                      <div className="rating-bars">
+                        {[5, 4, 3, 2, 1].map(star => (
+                          <div key={star} className="rating-bar-item">
+                            <Text>{star} sao</Text>
+                            <div className="rating-bar">
+                              <div
+                                className="rating-bar-fill"
+                                style={{
+                                  width: `${(reviewsData.filter(r => Math.round(r.rating) === star)
+                                    .length /
+                                    reviewsData.length) *
+                                    100
+                                    }%`,
+                                }}
+                              ></div>
+                            </div>
+                            <Text>
+                              {
+                                reviewsData.filter(r => Math.round(r.rating) === star).length
+                              }
+                            </Text>
+                          </div>
+                        ))}
                       </div>
-                      <Paragraph>{review.comment}</Paragraph>
-                      <Divider />
                     </div>
-                  ))}
-              </div>
+                    <div className="write-review">
+                      <Button type="primary" icon={<StarOutlined />}>
+                        Viết đánh giá
+                      </Button>
+                    </div>
+                  </div>
+                  <Divider />
+                  <div className="reviews-list">
+                    {reviewsData.length === 0 ? (
+                      <div style={{ textAlign: 'center', margin: '32px 0', color: '#888' }}>
+                        <Empty description={t('cart.noReviews')} />
+                      </div>
+                    ) : (
+                      reviewsData.map((review: Review) => (
+                        <div key={review.id} className="review-item">
+                          <div className="review-header">
+                            <div className="reviewer-info">
+                              <Title level={5}>{review.userName}</Title>
+                              <Text type="secondary">{review.date}</Text>
+                            </div>
+                            <Rate disabled defaultValue={review.rating} />
+                          </div>
+                          <Paragraph>{review.comment}</Paragraph>
+                          <Divider />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </TabPane>
         </Tabs>
@@ -623,58 +684,6 @@ const ProductDetail = () => {
           tags={product.tags}
         />
       </div>
-
-      {/* Image Modal */}
-      <Modal
-        open={imageModalVisible}
-        footer={null}
-        onCancel={() => setImageModalVisible(false)}
-        width={800}
-        className="image-modal"
-        centered
-      >
-        <div className="modal-image-container">
-          <Button
-            className="image-nav-button prev-button"
-            onClick={handlePrevImage}
-            icon={<LeftOutlined />}
-          />
-          <div className="modal-main-image">
-            {product && (
-              <img
-                src={product.additionalImages[currentImageIndex]}
-                alt={product.name}
-                className="modal-image"
-              />
-            )}
-          </div>
-          <Button
-            className="image-nav-button next-button"
-            onClick={handleNextImage}
-            icon={<RightOutlined />}
-          />
-        </div>
-
-        <div className="modal-thumbnails">
-          <div className="modal-thumbnail-container">
-            {product &&
-              product.additionalImages.map((image, index) => (
-                <div
-                  key={index}
-                  className={`modal-thumbnail ${currentImageIndex === index ? 'active-thumbnail' : ''
-                    }`}
-                  onClick={() => setCurrentImageIndex(index)}
-                >
-                  <img src={image} alt={`Thumbnail ${index + 1}`} />
-                </div>
-              ))}
-          </div>
-        </div>
-
-        <div className="image-pagination">
-          {currentImageIndex + 1}/{product?.additionalImages.length || 0}
-        </div>
-      </Modal>
     </div>
   )
 }

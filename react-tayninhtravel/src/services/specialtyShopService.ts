@@ -49,8 +49,6 @@ export const createProduct = async (data: FormData | CreateProductData, token?: 
         data = formData;
     }
 
-    // Log trước khi gửi
-    console.log("Creating product with FormData");
 
     const response = await axios.post('/Product/Product', data, {
         headers,
@@ -131,9 +129,8 @@ export const updateProduct = async (id: string, data: FormData | UpdateProductDa
     }
 
     // Log trước khi gửi
-    console.log("Updating product with FormData, ID:", id);
 
-    const response = await axios.patch(`/Product/Product/${id}`, data, {
+    const response = await axios.put(`/Product/Product/${id}`, data, {
         headers,
     });
     return response.data;
@@ -172,5 +169,37 @@ export const searchProducts = async (searchTerm: string, params: GetProductsPara
 export const deleteProduct = async (id: string, token?: string) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.delete(`/Product/Product/${id}`, { headers });
+    return response.data;
+};
+
+// Lấy số dư ví của shop
+export const getWalletBalance = async (shopId: string, token?: string): Promise<number> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`/ShopWallet/${shopId}/balance`, { headers });
+    // API trả về { balance: number }
+    return response.data?.balance ?? 0;
+};
+
+// Lấy lịch sử giao dịch ví
+export const getWalletTransactions = async (shopId: string, params: { page?: number; pageSize?: number } = {}, token?: string): Promise<any[]> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`/ShopWallet/${shopId}/transactions`, { params, headers });
+    // API trả về mảng transaction
+    return response.data?.data || response.data || [];
+};
+
+// Lấy lịch sử rút tiền
+export const getWithdrawHistory = async (shopId: string, params: { page?: number; pageSize?: number } = {}, token?: string): Promise<any[]> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`/ShopWallet/${shopId}/withdrawals`, { params, headers });
+    // API trả về mảng withdrawal
+    return response.data?.data || response.data || [];
+};
+
+// Rút tiền từ ví
+export const withdrawMoney = async (shopId: string, amount: number, token?: string): Promise<any> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const body = { shopId, amount };
+    const response = await axios.post(`/ShopWallet/${shopId}/withdraw`, body, { headers });
     return response.data;
 };

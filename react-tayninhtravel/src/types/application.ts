@@ -8,6 +8,9 @@ export interface TourGuideApplication {
     submittedAt: string;
     userName: string;
     userEmail: string;
+    skills: string[]; // List of enum names, e.g. ["Vietnamese", "English", ...]
+    skillsString: string; // Comma-separated string, e.g. "Vietnamese,English,History"
+    curriculumVitaeUrl?: string; // Optional: URL to CV file
 }
 
 // Shop Application Type  

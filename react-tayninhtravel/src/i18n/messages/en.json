@@ -11,7 +11,8 @@
         "bookings": "Book Tour",
         "activities": "Activities",
         "shop": "Shop",
-        "blog": "Blog"
+        "blog": "Blog",
+        "contact": "Contact"
     },
     "admin": {
         "sidebar": {
@@ -132,7 +133,8 @@
                     "content": "Please provide rejection reason",
                     "label": "Rejection Reason",
                     "placeholder": "Enter rejection reason...",
-                    "required": "Please enter rejection reason"
+                    "required": "Please enter rejection reason",
+                    "minLength": "Rejection reason must be at least 10 characters"
                 },
                 "delete": {
                     "title": "Delete CV",
@@ -324,7 +326,14 @@
             "fileUploadSuccess": "has been uploaded successfully!",
             "submissionSuccessTitle": "Application Submitted Successfully",
             "submissionSuccessContent": "Thank you for applying! We've received your application and will review it shortly. If your qualifications match our requirements, we will contact you for the next steps.",
-            "loginRequired": "Please log in to submit your application."
+            "loginRequired": "Please log in to submit your application.",
+            "skills": "Tour Guide Skills",
+            "skillsRequired": "Please select at least one skill!",
+            "skillsPlaceholder": "Select skills relevant to the tour guide position",
+            "success": "Application submitted successfully!",
+            "error": "An error occurred while submitting the application. Please try again later.",
+            "fail": "Application submission failed. Please check your information.",
+            "experienceMinLength": "Experience must be at least 10 characters long"
         },
         "shopRegistration": {
             "title": "Shop Registration",
@@ -518,6 +527,7 @@
         "quantity": "Quantity",
         "price": "Price",
         "product": "Product",
+        "noReviews": "No reviews for this product yet",
         "summary": "Order Summary",
         "coupon": "Coupon",
         "enterCouponCode": "Enter coupon code",
@@ -529,7 +539,9 @@
         "itemRemovedDescription": "Item has been removed from cart",
         "cartCleared": "Cart Cleared",
         "cartClearedDescription": "All items have been removed from cart",
-        "checkoutDescription": "Checkout functionality is under development"
+        "checkoutDescription": "Checkout functionality is under development",
+        "error": "Error",
+        "errorDescription": "An error occurred while processing your cart. Please try again later."
     },
     "checkout": {
         "title": "Checkout",
@@ -1378,5 +1390,48 @@
                 "allTime": "All Time"
             }
         }
+    },
+    "skills": {
+        "title": "Tour Guide Skills",
+        "label": "Tour Guide Skills",
+        "category": {
+            "languages": "Languages",
+            "knowledge": "Knowledge Areas",
+            "activity": "Activity Skills",
+            "special": "Special Skills"
+        },
+        "Vietnamese": "Vietnamese",
+        "English": "English",
+        "Chinese": "Chinese (Mandarin)",
+        "Japanese": "Japanese",
+        "Korean": "Korean",
+        "French": "French",
+        "German": "German",
+        "Russian": "Russian",
+        "History": "History",
+        "Culture": "Culture",
+        "Religion": "Religion",
+        "Cuisine": "Cuisine",
+        "Geography": "Geography",
+        "Nature": "Nature",
+        "Arts": "Arts",
+        "Architecture": "Architecture",
+        "MountainClimbing": "Mountain climbing",
+        "Trekking": "Trekking",
+        "Photography": "Photography",
+        "WaterSports": "Water sports",
+        "Cycling": "Cycling",
+        "Camping": "Camping",
+        "BirdWatching": "Bird watching",
+        "AdventureSports": "Adventure sports",
+        "FirstAid": "First aid",
+        "Driving": "Driving",
+        "Cooking": "Cooking",
+        "Meditation": "Meditation guidance",
+        "TraditionalMassage": "Traditional massage"
+    },
+    "chatbot": {
+        "greeting": "Hello! How can I help you today?",
+        "inputPlaceholder": "Type a message..."
     }
 }

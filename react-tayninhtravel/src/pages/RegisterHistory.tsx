@@ -13,10 +13,9 @@ interface RegisterHistoryItem {
 }
 
 const mapRegisterHistoryData = (apiData: any, type: 'shop' | 'tourGuide') => {
-    console.log(`Mapping ${type} data:`, apiData);
 
-    if (!apiData) {
-        console.log(`No ${type} data found`);
+    // Nếu không có dữ liệu hoặc data là null/[] thì trả về mảng rỗng
+    if (!apiData || apiData.data === null || (Array.isArray(apiData.data) && apiData.data.length === 0)) {
         return [];
     }
 
@@ -35,16 +34,10 @@ const mapRegisterHistoryData = (apiData: any, type: 'shop' | 'tourGuide') => {
         // Nếu là object đơn, chuyển thành array
         arr = [apiData];
     } else {
-        console.log(`Invalid ${type} data structure:`, apiData);
         return [];
     }
 
-    console.log(`Processing ${type} array:`, arr);
-
     return arr.map((item: any, index: number) => {
-        console.log(`Processing item ${index} for ${type}:`, item);
-        console.log(`Item status value:`, item.status, typeof item.status);
-
         const mapped = {
             id: item.id || `${type}-${index}`,
             type,
@@ -58,7 +51,6 @@ const mapRegisterHistoryData = (apiData: any, type: 'shop' | 'tourGuide') => {
             response: item.status === 0 ? '' : (item.response || item.rejectionReason || ''),
             originalData: item, // Lưu data gốc
         };
-        console.log(`Mapped ${type} item:`, mapped);
         return mapped;
     });
 };
@@ -79,17 +71,9 @@ const RegisterHistory = () => {
                     userService.getMyShopApplications(),
                 ]);
 
-                console.log('Raw tourGuide data:', tourGuide);
-                console.log('Raw shop data:', shop);
-
                 const tourGuideData = mapRegisterHistoryData(tourGuide, 'tourGuide');
                 const shopData = mapRegisterHistoryData(shop, 'shop');
-
-                console.log('Mapped tourGuide data:', tourGuideData);
-                console.log('Mapped shop data:', shopData);
-
                 const allData = [...tourGuideData, ...shopData];
-                console.log('Final allData:', allData);
 
                 setData(allData);
             } catch (e) {

@@ -2,7 +2,7 @@ import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ConfigProvider, theme as antTheme } from 'antd';
 import routes from './routes';
-import Chatbot from './components/common/Chatbot';
+import CustomChatbot from './components/ChatBot/CustomChatbot';
 import { useThemeStore } from './store/useThemeStore';
 import './styles/global.scss';
 
@@ -58,7 +58,7 @@ const App = () => {
     <ConfigProvider theme={theme}>
       <Router>
         <AppRoutes />
-        <Chatbot />
+        <CustomChatbot />
       </Router>
     </ConfigProvider>
   );

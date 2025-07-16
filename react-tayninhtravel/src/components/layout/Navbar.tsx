@@ -89,15 +89,12 @@ const Navbar = () => {
         }
       }
     }
-    // Xóa thông tin từ localStorage
+    // Đợi updateCart hoàn thành rồi mới clear cart và logout
+    clearCart();
+    logout();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('cart');
-    // Xóa cart trong Zustand store
-    clearCart();
-    // Cập nhật state trong useAuthStore
-    logout();
-
     message.success(t('common.logoutSuccess'));
   }
 
