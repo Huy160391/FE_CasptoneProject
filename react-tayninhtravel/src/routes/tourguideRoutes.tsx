@@ -3,7 +3,7 @@ import TourGuideDashboard from '@/pages/tourguide/TourGuideDashboard';
 import TourGuideInvitationList from '@/pages/tourguide/TourGuideInvitationList';
 import TourGuideProfile from '@/pages/tourguide/TourGuideProfile';
 import TourGuideSchedule from '@/pages/tourguide/TourGuideSchedule';
-import TourGuideDebug from '@/components/debug/TourGuideDebug';
+
 
 export const tourguideRoutes: RouteObject[] = [
     {
@@ -25,10 +25,7 @@ export const tourguideRoutes: RouteObject[] = [
                 path: 'schedule',
                 element: <TourGuideSchedule />,
             },
-            {
-                path: 'debug',
-                element: <TourGuideDebug />,
-            },
+
             {
                 path: 'test-invitations',
                 element: <div style={{padding: '20px'}}>

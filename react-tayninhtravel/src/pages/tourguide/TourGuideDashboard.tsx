@@ -12,7 +12,11 @@ import {
     Progress,
     Calendar,
     Alert,
-    Spin
+    Spin,
+    Tooltip,
+    Space,
+    Divider,
+    notification
 } from 'antd';
 import {
     MailOutlined,
@@ -21,12 +25,24 @@ import {
     TrophyOutlined,
     CalendarOutlined,
     UserOutlined,
-    RightOutlined
+    RightOutlined,
+    BellOutlined,
+    EyeOutlined,
+    CheckOutlined,
+    CloseOutlined,
+    ReloadOutlined,
+    FireOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TourGuideInvitation } from '@/types/tour';
-import { getMyInvitations, formatTimeUntilExpiry } from '@/services/tourguideService';
+import {
+    getMyInvitations,
+    formatTimeUntilExpiry,
+    acceptInvitation,
+    rejectInvitation,
+    canRespondToInvitation
+} from '@/services/tourguideService';
 import './TourGuideDashboard.scss';
 
 const { Title, Text } = Typography;
@@ -35,12 +51,14 @@ const TourGuideDashboard: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [pendingInvitations, setPendingInvitations] = useState<TourGuideInvitation[]>([]);
     const [statistics, setStatistics] = useState<any>({});
+    const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
     // Load dashboard data
-    const loadDashboardData = async () => {
-        setLoading(true);
+    const loadDashboardData = async (showLoading = true) => {
+        if (showLoading) setLoading(true);
         try {
             // Load pending invitations
             const pendingResponse = await getMyInvitations('Pending');
@@ -53,15 +71,54 @@ const TourGuideDashboard: React.FC = () => {
             if (allResponse.success) {
                 setStatistics(allResponse.statistics || {});
             }
+
+            setLastUpdate(new Date());
         } catch (error) {
             console.error('Error loading dashboard data:', error);
+            notification.error({
+                message: 'Lỗi tải dữ liệu',
+                description: 'Không thể tải dữ liệu dashboard. Vui lòng thử lại.',
+            });
         } finally {
-            setLoading(false);
+            if (showLoading) setLoading(false);
         }
     };
 
+    // Quick accept invitation
+    const handleQuickAccept = async (invitationId: string) => {
+        setActionLoading(invitationId);
+        try {
+            const response = await acceptInvitation(invitationId, '');
+            if (response.success) {
+                notification.success({
+                    message: 'Chấp nhận thành công',
+                    description: 'Bạn đã chấp nhận lời mời thành công!',
+                });
+                loadDashboardData(false); // Refresh data without loading spinner
+            } else {
+                notification.error({
+                    message: 'Lỗi chấp nhận',
+                    description: response.message || 'Không thể chấp nhận lời mời',
+                });
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Lỗi hệ thống',
+                description: 'Có lỗi xảy ra khi chấp nhận lời mời',
+            });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    // Auto refresh every 30 seconds
     useEffect(() => {
         loadDashboardData();
+        const interval = setInterval(() => {
+            loadDashboardData(false);
+        }, 30000);
+
+        return () => clearInterval(interval);
     }, []);
 
     // Quick stats data
