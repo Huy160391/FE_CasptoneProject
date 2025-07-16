@@ -1407,5 +1407,9 @@
         "Cooking": "Nấu ăn",
         "Meditation": "Hướng dẫn thiền",
         "TraditionalMassage": "Massage truyền thống"
+    },
+    "chatbot": {
+        "greeting": "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?",
+        "inputPlaceholder": "Nhập tin nhắn..."
     }
 }

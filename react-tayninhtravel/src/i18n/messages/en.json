@@ -1362,5 +1362,9 @@
         "Cooking": "Cooking",
         "Meditation": "Meditation guidance",
         "TraditionalMassage": "Traditional massage"
+    },
+    "chatbot": {
+        "greeting": "Hello! How can I help you today?",
+        "inputPlaceholder": "Type a message..."
     }
 }
