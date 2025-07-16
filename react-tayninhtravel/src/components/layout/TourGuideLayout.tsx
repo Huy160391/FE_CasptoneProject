@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Avatar, Divider, theme } from 'antd';
+import { Layout, Menu, Avatar, Divider, theme, Space } from 'antd';
 import {
     DashboardOutlined,
     MailOutlined,
@@ -14,6 +14,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
+import ThemeToggle from '@/components/common/ThemeToggle';
 import './TourGuideLayout.scss';
 
 const { Sider, Content } = Layout;
@@ -44,11 +45,6 @@ const TourGuideLayout: React.FC = () => {
             key: '/tour-guide/schedule',
             icon: <CalendarOutlined />,
             label: t('tourGuide.sidebar.schedule'),
-        },
-        {
-            key: '/tour-guide/profile',
-            icon: <UserOutlined />,
-            label: t('tourGuide.sidebar.profile'),
         },
     ];
 
@@ -106,6 +102,14 @@ const TourGuideLayout: React.FC = () => {
 
                 {/* Bottom menu */}
                 <div className="bottom-menu">
+                    {/* Theme Toggle */}
+                    <div style={{ padding: '8px 16px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <Space align="center" style={{ width: '100%', justifyContent: collapsed ? 'center' : 'flex-start' }}>
+                            <ThemeToggle />
+                            {!collapsed && <span style={{ color: 'rgba(255, 255, 255, 0.85)', marginLeft: 8 }}>Theme</span>}
+                        </Space>
+                    </div>
+
                     <Menu
                         theme="dark"
                         mode="inline"

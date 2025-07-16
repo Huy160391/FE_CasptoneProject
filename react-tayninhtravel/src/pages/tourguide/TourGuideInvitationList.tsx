@@ -19,14 +19,26 @@ import {
     Spin,
     Descriptions,
     Divider,
-    Alert
+    Alert,
+    Select,
+    DatePicker,
+    Dropdown,
+    Menu,
+    Progress
 } from 'antd';
 import {
     CheckOutlined,
     CloseOutlined,
     ClockCircleOutlined,
     EyeOutlined,
-    ReloadOutlined
+    ReloadOutlined,
+    SearchOutlined,
+    FilterOutlined,
+    SortAscendingOutlined,
+    DownOutlined,
+    CalendarOutlined,
+    UserOutlined,
+    FireOutlined
 } from '@ant-design/icons';
 import { TourGuideInvitation } from '@/types/tour';
 import {
@@ -43,10 +55,13 @@ import './TourGuideInvitations.scss';
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { TabPane } = Tabs;
+const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const TourGuideInvitationList: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [invitations, setInvitations] = useState<TourGuideInvitation[]>([]);
+    const [filteredInvitations, setFilteredInvitations] = useState<TourGuideInvitation[]>([]);
     const [statistics, setStatistics] = useState<any>({});
     const [activeTab, setActiveTab] = useState<string>('all');
     const [selectedInvitation, setSelectedInvitation] = useState<TourGuideInvitation | null>(null);
@@ -55,6 +70,13 @@ const TourGuideInvitationList: React.FC = () => {
     const [acceptModalVisible, setAcceptModalVisible] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [acceptanceMessage, setAcceptanceMessage] = useState('');
+
+    // Enhanced filtering states
+    const [searchText, setSearchText] = useState('');
+    const [sortBy, setSortBy] = useState<string>('createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [dateRange, setDateRange] = useState<any[]>([]);
+    const [companyFilter, setCompanyFilter] = useState<string>('');
     const [actionLoading, setActionLoading] = useState(false);
     const [detailsLoading, setDetailsLoading] = useState(false);
     const [invitationDetails, setInvitationDetails] = useState<any>(null);
@@ -84,6 +106,70 @@ const TourGuideInvitationList: React.FC = () => {
     useEffect(() => {
         loadInvitations();
     }, [loadInvitations]);
+
+    // Enhanced filtering and sorting
+    const applyFilters = useCallback(() => {
+        let filtered = [...invitations];
+
+        // Text search
+        if (searchText) {
+            filtered = filtered.filter(invitation =>
+                invitation.tourDetails.title.toLowerCase().includes(searchText.toLowerCase()) ||
+                invitation.createdBy.name.toLowerCase().includes(searchText.toLowerCase())
+            );
+        }
+
+        // Company filter
+        if (companyFilter) {
+            filtered = filtered.filter(invitation =>
+                invitation.createdBy.name === companyFilter
+            );
+        }
+
+        // Date range filter
+        if (dateRange && dateRange.length === 2) {
+            filtered = filtered.filter(invitation => {
+                const inviteDate = new Date(invitation.invitedAt);
+                return inviteDate >= dateRange[0].toDate() && inviteDate <= dateRange[1].toDate();
+            });
+        }
+
+        // Sorting
+        filtered.sort((a, b) => {
+            let aValue, bValue;
+
+            switch (sortBy) {
+                case 'title':
+                    aValue = a.tourDetails.title;
+                    bValue = b.tourDetails.title;
+                    break;
+                case 'company':
+                    aValue = a.createdBy.name;
+                    bValue = b.createdBy.name;
+                    break;
+                case 'expiresAt':
+                    aValue = new Date(a.expiresAt);
+                    bValue = new Date(b.expiresAt);
+                    break;
+                default:
+                    aValue = new Date(a.invitedAt);
+                    bValue = new Date(b.invitedAt);
+            }
+
+            if (sortOrder === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+
+        setFilteredInvitations(filtered);
+    }, [invitations, searchText, companyFilter, dateRange, sortBy, sortOrder]);
+
+    // Apply filters when dependencies change
+    useEffect(() => {
+        applyFilters();
+    }, [applyFilters]);
 
     // Handle tab change
     const handleTabChange = (key: string) => {
@@ -347,42 +433,126 @@ const TourGuideInvitationList: React.FC = () => {
                 </Button>
             </div>
 
-            {/* Statistics Cards */}
+            {/* Enhanced Filtering Controls */}
+            <Card style={{ marginBottom: 16 }}>
+                <Row gutter={[16, 16]} align="middle">
+                    <Col xs={24} sm={12} md={8}>
+                        <Input
+                            placeholder="Tìm kiếm theo tên tour hoặc công ty..."
+                            prefix={<SearchOutlined />}
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            allowClear
+                        />
+                    </Col>
+                    <Col xs={24} sm={12} md={4}>
+                        <Select
+                            placeholder="Công ty"
+                            value={companyFilter}
+                            onChange={setCompanyFilter}
+                            allowClear
+                            style={{ width: '100%' }}
+                        >
+                            {Array.from(new Set(invitations.map(inv => inv.createdBy.name))).map(company => (
+                                <Option key={company} value={company}>{company}</Option>
+                            ))}
+                        </Select>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                        <RangePicker
+                            placeholder={['Từ ngày', 'Đến ngày']}
+                            value={dateRange}
+                            onChange={setDateRange}
+                            style={{ width: '100%' }}
+                        />
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                        <Space>
+                            <Dropdown
+                                overlay={
+                                    <Menu onClick={({ key }) => setSortBy(key)}>
+                                        <Menu.Item key="invitedAt">Ngày mời</Menu.Item>
+                                        <Menu.Item key="title">Tên tour</Menu.Item>
+                                        <Menu.Item key="company">Công ty</Menu.Item>
+                                        <Menu.Item key="expiresAt">Hạn phản hồi</Menu.Item>
+                                    </Menu>
+                                }
+                            >
+                                <Button>
+                                    <SortAscendingOutlined /> Sắp xếp <DownOutlined />
+                                </Button>
+                            </Dropdown>
+                            <Button
+                                type={sortOrder === 'desc' ? 'primary' : 'default'}
+                                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                            >
+                                {sortOrder === 'desc' ? '↓' : '↑'}
+                            </Button>
+                        </Space>
+                    </Col>
+                </Row>
+            </Card>
+
+            {/* Enhanced Statistics Cards */}
             <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
                 <Col xs={24} sm={12} md={6}>
-                    <Card>
+                    <Card hoverable className="stat-card">
                         <Statistic
                             title="Tổng lời mời"
                             value={statistics.totalInvitations || 0}
-                            prefix={<Badge status="default" />}
+                            prefix={<CalendarOutlined style={{ color: '#722ed1' }} />}
+                        />
+                        <Progress
+                            percent={100}
+                            showInfo={false}
+                            strokeColor="#722ed1"
+                            size="small"
                         />
                     </Card>
                 </Col>
                 <Col xs={24} sm={12} md={6}>
-                    <Card>
+                    <Card hoverable className="stat-card urgent">
                         <Statistic
                             title="Chờ phản hồi"
                             value={statistics.pendingCount || 0}
-                            prefix={<Badge status="processing" />}
+                            prefix={<ClockCircleOutlined style={{ color: '#1890ff' }} />}
+                        />
+                        <Progress
+                            percent={((statistics.pendingCount || 0) / (statistics.totalInvitations || 1)) * 100}
+                            showInfo={false}
+                            strokeColor="#1890ff"
+                            size="small"
                         />
                     </Card>
                 </Col>
                 <Col xs={24} sm={12} md={6}>
-                    <Card>
+                    <Card hoverable className="stat-card">
                         <Statistic
                             title="Đã chấp nhận"
                             value={statistics.acceptedCount || 0}
-                            prefix={<Badge status="success" />}
+                            prefix={<CheckOutlined style={{ color: '#52c41a' }} />}
+                        />
+                        <Progress
+                            percent={((statistics.acceptedCount || 0) / (statistics.totalInvitations || 1)) * 100}
+                            showInfo={false}
+                            strokeColor="#52c41a"
+                            size="small"
                         />
                     </Card>
                 </Col>
                 <Col xs={24} sm={12} md={6}>
-                    <Card>
+                    <Card hoverable className="stat-card">
                         <Statistic
                             title="Tỷ lệ chấp nhận"
                             value={statistics.acceptanceRate || 0}
                             suffix="%"
-                            prefix={<Badge status="success" />}
+                            prefix={<FireOutlined style={{ color: '#faad14' }} />}
+                        />
+                        <Progress
+                            percent={statistics.acceptanceRate || 0}
+                            showInfo={false}
+                            strokeColor="#faad14"
+                            size="small"
                         />
                     </Card>
                 </Col>
@@ -407,19 +577,30 @@ const TourGuideInvitationList: React.FC = () => {
 
                 <Table
                     columns={columns}
-                    dataSource={invitations}
+                    dataSource={filteredInvitations}
                     rowKey="id"
                     loading={loading}
                     pagination={{
                         pageSize: 10,
                         showSizeChanger: true,
                         showQuickJumper: true,
-                        showTotal: (total, range) => 
+                        showTotal: (total, range) =>
                             `${range[0]}-${range[1]} của ${total} lời mời`,
+                        pageSizeOptions: ['5', '10', '20', '50'],
                     }}
                     locale={{
-                        emptyText: <Empty description="Không có lời mời nào" />
+                        emptyText: (
+                            <Empty
+                                description={
+                                    searchText || companyFilter || dateRange.length > 0
+                                        ? "Không tìm thấy lời mời nào phù hợp với bộ lọc"
+                                        : "Không có lời mời nào"
+                                }
+                            />
+                        )
                     }}
+                    scroll={{ x: 800 }}
+                    size="middle"
                 />
             </Card>
 

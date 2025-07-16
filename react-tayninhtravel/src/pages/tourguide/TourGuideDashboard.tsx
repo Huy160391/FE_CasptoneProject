@@ -43,6 +43,7 @@ import {
     rejectInvitation,
     canRespondToInvitation
 } from '@/services/tourguideService';
+import ProfileSection from '@/components/tourguide/ProfileSection';
 import './TourGuideDashboard.scss';
 
 const { Title, Text } = Typography;
@@ -55,6 +56,7 @@ const TourGuideDashboard: React.FC = () => {
     const [pendingInvitations, setPendingInvitations] = useState<TourGuideInvitation[]>([]);
     const [statistics, setStatistics] = useState<any>({});
     const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+    const [profileExpanded, setProfileExpanded] = useState(false);
 
     // Load dashboard data
     const loadDashboardData = async (showLoading = true) => {
@@ -164,102 +166,205 @@ const TourGuideDashboard: React.FC = () => {
     return (
         <div className="tour-guide-dashboard">
             <div className="dashboard-header">
-                <Title level={2}>Dashboard Tour Guide</Title>
-                <Text type="secondary">Chào mừng bạn trở lại! Đây là tổng quan về các lời mời và hoạt động của bạn.</Text>
+                <div className="header-content">
+                    <div>
+                        <Title level={2}>
+                            <Space>
+                                Dashboard Tour Guide
+                                {(statistics.pendingInvitations || 0) > 0 && (
+                                    <Badge count={statistics.pendingInvitations} offset={[10, 0]}>
+                                        <BellOutlined style={{ color: '#1890ff' }} />
+                                    </Badge>
+                                )}
+                            </Space>
+                        </Title>
+                        <Text type="secondary">
+                            Chào mừng bạn trở lại! Đây là tổng quan về các lời mời và hoạt động của bạn.
+                        </Text>
+                    </div>
+                    <div className="header-actions">
+                        <Tooltip title="Làm mới dữ liệu">
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={() => loadDashboardData()}
+                                loading={loading}
+                            />
+                        </Tooltip>
+                        <Text type="secondary" style={{ fontSize: '12px', marginLeft: 8 }}>
+                            Cập nhật: {lastUpdate.toLocaleTimeString()}
+                        </Text>
+                    </div>
+                </div>
             </div>
 
             <Spin spinning={loading}>
+                {/* Profile Section */}
+                <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                    <Col span={24}>
+                        <ProfileSection
+                            collapsed={!profileExpanded}
+                            onToggle={() => setProfileExpanded(!profileExpanded)}
+                        />
+                    </Col>
+                </Row>
+
                 {/* Quick Stats */}
                 <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
                     {quickStats.map((stat, index) => (
                         <Col xs={24} sm={12} lg={6} key={index}>
-                            <Card 
-                                hoverable 
-                                className="stat-card"
+                            <Card
+                                hoverable
+                                className={`stat-card ${stat.urgent ? 'urgent' : ''}`}
                                 onClick={stat.action}
                             >
-                                <Statistic
-                                    title={stat.title}
-                                    value={stat.value}
-                                    prefix={
-                                        <div 
-                                            className="stat-icon" 
-                                            style={{ color: stat.color }}
-                                        >
-                                            {stat.icon}
-                                        </div>
-                                    }
-                                    valueStyle={{ color: stat.color }}
-                                />
+                                <div className="stat-content">
+                                    <Statistic
+                                        title={
+                                            <Space>
+                                                {stat.title}
+                                                {stat.urgent && <FireOutlined style={{ color: '#ff4d4f' }} />}
+                                            </Space>
+                                        }
+                                        value={stat.value}
+                                        prefix={
+                                            <div
+                                                className="stat-icon"
+                                                style={{ color: stat.color }}
+                                            >
+                                                {stat.icon}
+                                            </div>
+                                        }
+                                        valueStyle={{ color: stat.color }}
+                                    />
+                                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                                        {stat.description}
+                                    </Text>
+                                </div>
                             </Card>
                         </Col>
                     ))}
                 </Row>
 
                 <Row gutter={[16, 16]}>
-                    {/* Pending Invitations */}
+                    {/* Enhanced Pending Invitations */}
                     <Col xs={24} lg={16}>
-                        <Card 
+                        <Card
                             title={
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Space>
                                     <MailOutlined />
                                     Lời mời chờ phản hồi
-                                    <Badge count={pendingInvitations.length} />
-                                </div>
+                                    <Badge count={pendingInvitations.length} showZero />
+                                    {pendingInvitations.length > 0 && (
+                                        <Tooltip title="Có lời mời cần phản hồi gấp">
+                                            <FireOutlined style={{ color: '#ff4d4f' }} />
+                                        </Tooltip>
+                                    )}
+                                </Space>
                             }
                             extra={
-                                <Button 
-                                    type="link" 
-                                    onClick={() => navigate('/tour-guide/invitations?tab=pending')}
-                                >
-                                    Xem tất cả <RightOutlined />
-                                </Button>
+                                <Space>
+                                    <Button
+                                        type="link"
+                                        onClick={() => navigate('/tour-guide/invitations?tab=pending')}
+                                    >
+                                        Xem tất cả <RightOutlined />
+                                    </Button>
+                                </Space>
                             }
+                            className="invitation-card"
                         >
                             {pendingInvitations.length > 0 ? (
                                 <List
                                     dataSource={pendingInvitations}
-                                    renderItem={(invitation) => (
-                                        <List.Item
-                                            actions={[
-                                                <Button 
-                                                    type="primary" 
-                                                    size="small"
-                                                    onClick={() => navigate('/tour-guide/invitations?tab=pending')}
-                                                >
-                                                    Phản hồi
-                                                </Button>
-                                            ]}
-                                        >
-                                            <List.Item.Meta
-                                                avatar={
-                                                    <Avatar 
-                                                        icon={<UserOutlined />}
-                                                        style={{ backgroundColor: '#1890ff' }}
-                                                    />
-                                                }
-                                                title={invitation.tourDetails.title}
-                                                description={
-                                                    <div>
-                                                        <Text type="secondary">
-                                                            Từ: {invitation.createdBy.name}
-                                                        </Text>
-                                                        <br />
-                                                        <Text type="warning">
-                                                            <ClockCircleOutlined /> Còn lại: {formatTimeUntilExpiry(invitation.expiresAt)}
-                                                        </Text>
-                                                    </div>
-                                                }
-                                            />
-                                        </List.Item>
-                                    )}
+                                    renderItem={(invitation) => {
+                                        const canRespond = canRespondToInvitation(invitation);
+                                        const isUrgent = new Date(invitation.expiresAt).getTime() - Date.now() < 24 * 60 * 60 * 1000; // Less than 24 hours
+
+                                        return (
+                                            <List.Item
+                                                className={`invitation-item ${isUrgent ? 'urgent' : ''}`}
+                                                actions={[
+                                                    <Space key="actions">
+                                                        <Tooltip title="Xem chi tiết">
+                                                            <Button
+                                                                size="small"
+                                                                icon={<EyeOutlined />}
+                                                                onClick={() => navigate(`/tour-guide/invitations?tab=pending&id=${invitation.id}`)}
+                                                            />
+                                                        </Tooltip>
+                                                        {canRespond && (
+                                                            <>
+                                                                <Tooltip title="Chấp nhận nhanh">
+                                                                    <Button
+                                                                        type="primary"
+                                                                        size="small"
+                                                                        icon={<CheckOutlined />}
+                                                                        loading={actionLoading === invitation.id}
+                                                                        onClick={() => handleQuickAccept(invitation.id)}
+                                                                    />
+                                                                </Tooltip>
+                                                                <Tooltip title="Từ chối">
+                                                                    <Button
+                                                                        danger
+                                                                        size="small"
+                                                                        icon={<CloseOutlined />}
+                                                                        onClick={() => navigate(`/tour-guide/invitations?tab=pending&action=reject&id=${invitation.id}`)}
+                                                                    />
+                                                                </Tooltip>
+                                                            </>
+                                                        )}
+                                                    </Space>
+                                                ]}
+                                            >
+                                                <List.Item.Meta
+                                                    avatar={
+                                                        <Avatar
+                                                            icon={<UserOutlined />}
+                                                            style={{
+                                                                backgroundColor: isUrgent ? '#ff4d4f' : '#1890ff'
+                                                            }}
+                                                        />
+                                                    }
+                                                    title={
+                                                        <Space>
+                                                            <span>{invitation.tourDetails.title}</span>
+                                                            {isUrgent && (
+                                                                <Badge status="error" text="Gấp" />
+                                                            )}
+                                                        </Space>
+                                                    }
+                                                    description={
+                                                        <div>
+                                                            <Text type="secondary">
+                                                                Từ: {invitation.createdBy.name}
+                                                            </Text>
+                                                            <br />
+                                                            <Text type={isUrgent ? "danger" : "warning"}>
+                                                                <ClockCircleOutlined /> Còn lại: {formatTimeUntilExpiry(invitation.expiresAt)}
+                                                            </Text>
+                                                            <br />
+                                                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                                                                Ngày tour: {new Date(invitation.tourDetails.startDate).toLocaleDateString('vi-VN')}
+                                                            </Text>
+                                                        </div>
+                                                    }
+                                                />
+                                            </List.Item>
+                                        );
+                                    }}
                                 />
                             ) : (
-                                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                                <div className="empty-state">
                                     <MailOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
                                     <p style={{ color: '#999', marginTop: 16 }}>
                                         Không có lời mời nào chờ phản hồi
                                     </p>
+                                    <Button
+                                        type="link"
+                                        onClick={() => navigate('/tour-guide/invitations')}
+                                    >
+                                        Xem tất cả lời mời
+                                    </Button>
                                 </div>
                             )}
                         </Card>
@@ -303,9 +408,9 @@ const TourGuideDashboard: React.FC = () => {
                         <Card title="Hành động nhanh">
                             <Row gutter={[16, 16]}>
                                 <Col xs={24} sm={8}>
-                                    <Button 
-                                        type="primary" 
-                                        block 
+                                    <Button
+                                        type="primary"
+                                        block
                                         icon={<MailOutlined />}
                                         onClick={() => navigate('/tour-guide/invitations')}
                                     >
@@ -313,8 +418,8 @@ const TourGuideDashboard: React.FC = () => {
                                     </Button>
                                 </Col>
                                 <Col xs={24} sm={8}>
-                                    <Button 
-                                        block 
+                                    <Button
+                                        block
                                         icon={<CalendarOutlined />}
                                         onClick={() => navigate('/tour-guide/schedule')}
                                     >
@@ -322,12 +427,12 @@ const TourGuideDashboard: React.FC = () => {
                                     </Button>
                                 </Col>
                                 <Col xs={24} sm={8}>
-                                    <Button 
-                                        block 
+                                    <Button
+                                        block
                                         icon={<UserOutlined />}
-                                        onClick={() => navigate('/tour-guide/profile')}
+                                        onClick={() => setProfileExpanded(!profileExpanded)}
                                     >
-                                        Cập nhật hồ sơ
+                                        {profileExpanded ? 'Thu gọn hồ sơ' : 'Xem hồ sơ'}
                                     </Button>
                                 </Col>
                             </Row>
