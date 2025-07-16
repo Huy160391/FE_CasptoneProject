@@ -103,20 +103,10 @@ const TourDetailsManagement: React.FC = () => {
                 includeInactive: false
             }, token ?? undefined);
 
-            console.log('📊 TourDetails API Response:', response);
-
             // Backend trả về ResponseGetTourDetailsPaginatedDto
             if (response.success && response.data) {
                 setTourDetailsList(response.data);
                 setTotalCount(response.totalCount || 0);
-
-                // Log thêm thông tin pagination từ backend
-                console.log('📄 Pagination Info:', {
-                    pageIndex: response.pageIndex,
-                    pageSize: response.pageSize,
-                    totalPages: response.totalPages,
-                    totalCount: response.totalCount
-                });
             } else {
                 console.error('❌ API Error:', response.message);
                 message.error(response.message || 'Không thể tải danh sách tour details');

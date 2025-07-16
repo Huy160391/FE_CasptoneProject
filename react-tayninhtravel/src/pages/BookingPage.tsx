@@ -84,6 +84,20 @@ const BookingPage: React.FC = () => {
         specialRequests: ''
     });
 
+    // Get default image based on tour template name
+    const getDefaultImage = (templateName: string) => {
+        if (templateName?.toLowerCase().includes('núi bà đen')) {
+            return '/images/tours/nui-ba-den.jpg';
+        }
+        if (templateName?.toLowerCase().includes('cao đài')) {
+            return '/images/tours/toa-thanh-cao-dai.jpg';
+        }
+        if (templateName?.toLowerCase().includes('suối đá')) {
+            return '/images/tours/suoi-da.jpg';
+        }
+        return '/images/tours/default-tour.jpg';
+    };
+
     // Get initial booking data from navigation state
     useEffect(() => {
         if (location.state?.bookingDetails) {
@@ -551,13 +565,11 @@ const BookingPage: React.FC = () => {
 
                 <Col xs={24} lg={8}>
                     <Card title="Tóm tắt đơn hàng" style={{ position: 'sticky', top: 20 }}>
-                        {tourDetails.imageUrl && (
-                            <img
-                                src={tourDetails.imageUrl}
-                                alt={tourDetails.title}
-                                style={{ width: '100%', height: 150, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }}
-                            />
-                        )}
+                        <img
+                            src={tourDetails.imageUrl || getDefaultImage(tourDetails.tourTemplateName)}
+                            alt={tourDetails.title}
+                            style={{ width: '100%', height: 150, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }}
+                        />
 
                         <Title level={5}>{tourDetails.title}</Title>
 

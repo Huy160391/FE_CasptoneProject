@@ -68,23 +68,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ collapsed = true, onTog
     const [profileData, setProfileData] = useState<any>({});
     const [activeTab, setActiveTab] = useState('personal');
 
-    // Mock data for history tabs - replace with real API calls
-    const [bookingHistory] = useState([
-        {
-            id: 1,
-            tourName: 'Tour Tây Ninh 1 ngày',
-            date: '2024-03-15',
-            status: 'completed',
-            price: '1,500,000 ₫',
-        },
-        {
-            id: 2,
-            tourName: 'Tour Núi Bà Đen',
-            date: '2024-03-20',
-            status: 'upcoming',
-            price: '2,000,000 ₫',
-        },
-    ]);
+    // BookingHistory component now uses real API calls instead of mock data
 
     const [transactionHistory] = useState([
         {
@@ -440,10 +424,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ collapsed = true, onTog
                             <Space>
                                 <HistoryOutlined />
                                 Lịch sử đặt tour
-                                <Badge count={bookingHistory.length} showZero />
                             </Space>
                         ),
-                        children: <BookingHistory data={bookingHistory} />
+                        children: <BookingHistory />
                     },
                     {
                         key: 'transactions',

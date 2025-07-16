@@ -347,4 +347,23 @@ body.dark-mode {
       }
     }
   }
+
+  // Tour Price Display styling
+  .price-item {
+    .tour-price-display {
+      .ant-space {
+        align-items: flex-start;
+      }
+
+      .ant-tag {
+        margin: 2px 0;
+        font-size: 10px !important;
+      }
+
+      // Override text colors for gradient background
+      .ant-typography {
+        color: inherit !important;
+      }
+    }
+  }
 }

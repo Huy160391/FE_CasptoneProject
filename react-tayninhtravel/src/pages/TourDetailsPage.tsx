@@ -28,6 +28,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatCurrency } from '../services/paymentService';
+import { getTourImageWithFallback, getTourImageAltText } from '../utils/imageUtils';
 import { checkTourAvailability } from '../services/tourBookingService';
 import LoginModal from '../components/auth/LoginModal';
 
@@ -78,6 +79,20 @@ const TourDetailsPage: React.FC = () => {
         maxGuests: number;
         currentBookings: number;
     } | null>(null);
+
+    // Get default image based on tour template name
+    const getDefaultImage = (templateName: string) => {
+        if (templateName?.toLowerCase().includes('núi bà đen')) {
+            return '/images/tours/nui-ba-den.jpg';
+        }
+        if (templateName?.toLowerCase().includes('cao đài')) {
+            return '/images/tours/toa-thanh-cao-dai.jpg';
+        }
+        if (templateName?.toLowerCase().includes('suối đá')) {
+            return '/images/tours/suoi-da.jpg';
+        }
+        return '/images/tours/default-tour.jpg';
+    };
 
     // Load tour details
     useEffect(() => {
@@ -207,14 +222,12 @@ const TourDetailsPage: React.FC = () => {
                 <Col xs={24} lg={16}>
                     <Card>
                         {/* Tour Image */}
-                        {tour.imageUrl && (
-                            <Image
-                                src={tour.imageUrl}
-                                alt={tour.title}
-                                style={{ width: '100%', height: 300, objectFit: 'cover' }}
-                                fallback="https://placehold.co/800x300?text=Tour+Image"
-                            />
-                        )}
+                        <Image
+                            src={tour.imageUrl || getDefaultImage(tour.tourTemplateName)}
+                            alt={tour.title}
+                            style={{ width: '100%', height: 300, objectFit: 'cover' }}
+                            fallback="https://placehold.co/800x300?text=Tour+Image"
+                        />
 
                         {/* Tour Title */}
                         <Title level={2} style={{ marginTop: 16 }}>

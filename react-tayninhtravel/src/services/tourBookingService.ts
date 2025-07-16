@@ -19,14 +19,19 @@ export interface TourDetailsForBooking {
 
 export interface TourOperationSummary {
     id: string;
-    tourDetailsId: string;
-    tourTitle: string;
     price: number;
     maxGuests: number;
-    currentBookings: number;
+    tourTitle?: string;
+    tourDescription?: string;
+    tourDate?: string;
+    guideName?: string;
+    guidePhone?: string;
+    // Legacy fields for backward compatibility
+    tourDetailsId?: string;
+    currentBookings?: number;
     tourStartDate?: string;
     tourEndDate?: string;
-    isActive: boolean;
+    isActive?: boolean;
 }
 
 export interface TimelineItem {
@@ -250,6 +255,7 @@ export const getMyBookings = async (token: string, params?: {
     pageSize?: number;
     status?: BookingStatus;
     searchKeyword?: string;
+    includeInactive?: boolean;
 }): Promise<ApiResponse<{
     items: TourBooking[];
     totalCount: number;
@@ -261,7 +267,8 @@ export const getMyBookings = async (token: string, params?: {
         pageIndex: params?.pageIndex || 0,
         pageSize: params?.pageSize || 10,
         ...(params?.status !== undefined && { status: params.status }),
-        ...(params?.searchKeyword && { searchKeyword: params.searchKeyword })
+        ...(params?.searchKeyword && { searchKeyword: params.searchKeyword }),
+        ...(params?.includeInactive !== undefined && { includeInactive: params.includeInactive })
     };
 
     const response = await axios.get('/TourBooking/my-bookings', {
@@ -270,17 +277,24 @@ export const getMyBookings = async (token: string, params?: {
     });
 
     // Transform response to match expected format
-    if (response.data.success && response.data.bookings) {
+    if ((response.data.success || response.data.isSuccess) && response.data.bookings) {
         return {
             success: true,
             data: {
                 items: response.data.bookings.map((booking: any) => ({
                     ...booking,
-                    numberOfGuests: booking.totalGuests,
+                    numberOfGuests: booking.totalGuests || booking.numberOfGuests,
                     statusName: booking.statusName || getBookingStatusText(booking.status),
                     tourOperation: booking.tourOperation ? {
-                        ...booking.tourOperation,
+                        id: booking.tourOperation.id,
+                        price: booking.tourOperation.price,
+                        maxGuests: booking.tourOperation.maxGuests,
                         tourTitle: booking.tourOperation.tourTitle,
+                        tourDescription: booking.tourOperation.tourDescription,
+                        tourDate: booking.tourOperation.tourDate,
+                        guideName: booking.tourOperation.guideName,
+                        guidePhone: booking.tourOperation.guidePhone,
+                        // Legacy fields for backward compatibility
                         currentBookings: 0,
                         isActive: true
                     } : undefined

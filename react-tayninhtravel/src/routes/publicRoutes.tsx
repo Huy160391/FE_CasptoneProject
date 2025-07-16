@@ -22,6 +22,8 @@ import PaymentCancel from '@/pages/PaymentCancel';
 import BookingHistory from '@/pages/BookingHistory';
 import TourDetailsPage from '@/pages/TourDetailsPage';
 import DebugAuth from '@/pages/DebugAuth';
+import BookingHistoryTest from '@/components/debug/BookingHistoryTest';
+import ImageUploadTest from '@/components/debug/ImageUploadTest';
 
 export const publicRoutes: RouteObject[] = [
     {
@@ -109,6 +111,14 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/debug-auth',
         element: <DebugAuth />,
+    },
+    {
+        path: '/test-booking-history',
+        element: <BookingHistoryTest />,
+    },
+    {
+        path: '/test-image-upload',
+        element: <ImageUploadTest />,
     },
     {
         path: '/payment-success',

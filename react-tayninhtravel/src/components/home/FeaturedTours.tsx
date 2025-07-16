@@ -16,6 +16,8 @@ import { checkTourAvailability } from '../../services/tourBookingService'
 import { TourDetailsStatus } from '../../types/tour'
 import { useAuthStore } from '../../store/useAuthStore'
 import { formatCurrency } from '../../services/paymentService'
+import { getTourImageWithFallback, getTourImageAltText } from '../../utils/imageUtils'
+import TourPriceDisplay from '../common/TourPriceDisplay'
 import LoginModal from '../auth/LoginModal'
 import './FeaturedTours.scss'
 
@@ -138,13 +140,7 @@ const FeaturedTours = () => {
     navigate(`/tour-details/${tour.id}`)
   }
 
-  const formatPrice = (price?: number) => {
-    if (!price) return 'Liên hệ'
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price)
-  }
+
 
   const getStatusTag = (status: number) => {
     switch (status) {
@@ -157,18 +153,7 @@ const FeaturedTours = () => {
     }
   }
 
-  const getDefaultImage = (templateName: string) => {
-    if (templateName.toLowerCase().includes('núi bà đen')) {
-      return '/images/tours/nui-ba-den.jpg'
-    }
-    if (templateName.toLowerCase().includes('cao đài')) {
-      return '/images/tours/toa-thanh-cao-dai.jpg'
-    }
-    if (templateName.toLowerCase().includes('suối đá')) {
-      return '/images/tours/suoi-da.jpg'
-    }
-    return '/images/tours/default-tour.jpg'
-  }
+
 
   if (loading) {
     return (
@@ -209,8 +194,8 @@ const FeaturedTours = () => {
               cover={
                 <div className="tour-image-container">
                   <img
-                    alt={tour.title}
-                    src={tour.imageUrl || getDefaultImage(tour.tourTemplateName)}
+                    alt={getTourImageAltText(tour.title, tour.tourTemplateName)}
+                    src={getTourImageWithFallback(tour.imageUrl, tour.tourTemplateName)}
                     className="tour-image"
                   />
                   <div className="tour-status-overlay">
@@ -284,7 +269,18 @@ const FeaturedTours = () => {
                   <div className="detail-item price-item">
                     <DollarOutlined className="detail-icon price-icon" />
                     <span className="detail-label">Giá tour:</span>
-                    <span className="price-value">{formatPrice(tour.tourOperation?.price)}</span>
+                    <div className="price-value">
+                      {tour.tourOperation?.price ? (
+                        <TourPriceDisplay
+                          price={tour.tourOperation.price}
+                          createdAt={tour.createdAt}
+                          size="small"
+                          showDetails={true}
+                        />
+                      ) : (
+                        <span>Liên hệ</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
