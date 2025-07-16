@@ -18,7 +18,7 @@ import {
     ReloadOutlined,
     ShoppingCartOutlined
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
+
 import {
     parsePayOsCallbackParams,
     createPayOsCallbackRequest,
@@ -29,10 +29,9 @@ import {
 } from '../services/paymentService';
 import { useAuthStore } from '../store/useAuthStore';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const PaymentCancel: React.FC = () => {
-    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthStore();
@@ -41,7 +40,6 @@ const PaymentCancel: React.FC = () => {
     const [processing, setProcessing] = useState(false);
     const [bookingInfo, setBookingInfo] = useState<BookingPaymentInfo | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [cancelProcessed, setCancelProcessed] = useState(false);
 
     useEffect(() => {
         const processPaymentCancel = async () => {
@@ -80,8 +78,6 @@ const PaymentCancel: React.FC = () => {
                 const response = await handleTourBookingPaymentCancel(callbackRequest);
 
                 if (response.success) {
-                    setCancelProcessed(true);
-
                     // If we don't have booking info from lookup, try to get it from response
                     if (!bookingInfo && response.data) {
                         setBookingInfo(response.data);

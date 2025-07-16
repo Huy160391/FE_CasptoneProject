@@ -3,12 +3,10 @@ import {
     Table,
     Button,
     message,
-    Space,
     Tag,
     Card,
     Tabs,
     Dropdown,
-    Menu,
     Modal,
     Tooltip
 } from 'antd';
@@ -52,7 +50,6 @@ const TourDetailsManagement: React.FC = () => {
     const { isPreloaded, templatesCount, shopsCount, guidesCount } = usePreloadWizardData();
 
     const [tourDetailsList, setTourDetailsList] = useState<TourDetails[]>([]);
-    const [templates, setTemplates] = useState<TourTemplate[]>([]);
 
     const [loading, setLoading] = useState(false);
     const [wizardVisible, setWizardVisible] = useState(false);
@@ -148,8 +145,7 @@ const TourDetailsManagement: React.FC = () => {
                     templateItems = [];
                 }
 
-                setTemplates(templateItems);
-                console.log('✅ Final templates set:', templateItems);
+                console.log('✅ Final templates loaded:', templateItems);
             } else {
                 console.warn('⚠️ Templates API returned unsuccessful response:', response);
             }
@@ -258,7 +254,7 @@ const TourDetailsManagement: React.FC = () => {
                 label: <span style={{ color: '#722ed1' }}>Kích hoạt Public</span>,
                 onClick: () => {
                     // Show confirmation modal
-                    const modal = Modal.confirm({
+                    Modal.confirm({
                         title: 'Kích hoạt public cho TourDetails này?',
                         content: 'Sau khi kích hoạt, khách hàng có thể booking tour này.',
                         okText: 'Kích hoạt',
@@ -269,19 +265,15 @@ const TourDetailsManagement: React.FC = () => {
             });
         }
 
-        // Add delete option
-        items.push({
-            type: 'divider' as const
-        });
+        // Add delete option with divider
 
         items.push({
             key: 'delete',
             icon: <DeleteOutlined />,
-            label: 'Xóa tour',
-            danger: true,
+            label: <span style={{ color: '#ff4d4f' }}>Xóa tour</span>,
             onClick: () => {
                 // Show confirmation modal
-                const modal = Modal.confirm({
+                Modal.confirm({
                     title: 'Bạn có chắc chắn muốn xóa?',
                     content: 'Hành động này không thể hoàn tác.',
                     okText: 'Có',

@@ -9,8 +9,7 @@ import {
     Button,
     Modal,
     Descriptions,
-    Empty,
-    Spin
+    Empty
 } from 'antd';
 import {
     CalendarOutlined,
@@ -19,11 +18,10 @@ import {
     TeamOutlined,
     EyeOutlined
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface ScheduleEvent {
     id: string;
@@ -38,8 +36,6 @@ interface ScheduleEvent {
 }
 
 const TourGuideSchedule: React.FC = () => {
-    const { t } = useTranslation();
-    const [loading, setLoading] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
     const [events, setEvents] = useState<ScheduleEvent[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);

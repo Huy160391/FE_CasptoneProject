@@ -33,11 +33,9 @@ import {
     EyeOutlined,
     ReloadOutlined,
     SearchOutlined,
-    FilterOutlined,
     SortAscendingOutlined,
     DownOutlined,
     CalendarOutlined,
-    UserOutlined,
     FireOutlined
 } from '@ant-design/icons';
 import { TourGuideInvitation } from '@/types/tour';
@@ -50,6 +48,7 @@ import {
     validateInvitationAcceptance,
     getInvitationDetails
 } from '@/services/tourguideService';
+import type { Dayjs } from 'dayjs';
 import './TourGuideInvitations.scss';
 
 const { Title, Text, Paragraph } = Typography;
@@ -75,7 +74,7 @@ const TourGuideInvitationList: React.FC = () => {
     const [searchText, setSearchText] = useState('');
     const [sortBy, setSortBy] = useState<string>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-    const [dateRange, setDateRange] = useState<any[]>([]);
+    const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
     const [companyFilter, setCompanyFilter] = useState<string>('');
     const [actionLoading, setActionLoading] = useState(false);
     const [detailsLoading, setDetailsLoading] = useState(false);
@@ -89,9 +88,9 @@ const TourGuideInvitationList: React.FC = () => {
         try {
             const response = await getMyInvitations(status);
             console.log('API Response:', response);
-            if (response.success) {
-                setInvitations(response.invitations || []);
-                setStatistics(response.statistics || {});
+            if (response.success && response.data) {
+                setInvitations(response.data.invitations || []);
+                setStatistics(response.data.statistics || {});
             } else {
                 message.error(response.message || 'Không thể tải danh sách lời mời');
             }
@@ -127,10 +126,10 @@ const TourGuideInvitationList: React.FC = () => {
         }
 
         // Date range filter
-        if (dateRange && dateRange.length === 2) {
+        if (dateRange && dateRange.length === 2 && dateRange[0] && dateRange[1]) {
             filtered = filtered.filter(invitation => {
                 const inviteDate = new Date(invitation.invitedAt);
-                return inviteDate >= dateRange[0].toDate() && inviteDate <= dateRange[1].toDate();
+                return inviteDate >= dateRange[0]!.toDate() && inviteDate <= dateRange[1]!.toDate();
             });
         }
 
@@ -592,7 +591,7 @@ const TourGuideInvitationList: React.FC = () => {
                         emptyText: (
                             <Empty
                                 description={
-                                    searchText || companyFilter || dateRange.length > 0
+                                    searchText || companyFilter || (dateRange && dateRange.length > 0)
                                         ? "Không tìm thấy lời mời nào phù hợp với bộ lọc"
                                         : "Không có lời mời nào"
                                 }

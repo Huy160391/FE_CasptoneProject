@@ -27,7 +27,6 @@ import {
     Col,
     Form,
     Dropdown,
-    Menu,
     Tooltip
 } from 'antd';
 import {
@@ -78,15 +77,11 @@ const TourTemplateManagement: React.FC = () => {
         ];
 
         // Add delete option with divider
-        items.push({
-            type: 'divider' as const
-        });
 
         items.push({
             key: 'delete',
             icon: <DeleteOutlined />,
-            label: 'Xóa template',
-            danger: true,
+            label: <span style={{ color: '#ff4d4f' }}>Xóa template</span>,
             onClick: () => {
                 // Show confirmation modal
                 Modal.confirm({

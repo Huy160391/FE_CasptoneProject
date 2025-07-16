@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tag, Typography, Space, Tooltip } from 'antd';
 import { ClockCircleOutlined, FireOutlined } from '@ant-design/icons';
-import { calculateTourPricing, formatPrice, formatPriceNumber, getRemainingEarlyBirdDays, isEarlyBirdEndingSoon } from '../../services/pricingService';
+import { calculateTourPricing, formatPriceNumber, getRemainingEarlyBirdDays, isEarlyBirdEndingSoon } from '../../services/pricingService';
 
 const { Text } = Typography;
 

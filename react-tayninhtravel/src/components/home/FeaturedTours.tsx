@@ -20,6 +20,7 @@ interface TourDetail {
   tourTemplateName: string;
   imageUrls: string[]; // New field for multiple images
   imageUrl?: string; // Backward compatibility - first image
+  createdAt: string;
   tourOperation?: {
     id: string;
     price: number;
@@ -42,11 +43,6 @@ const FeaturedTours = () => {
   const [tours, setTours] = useState<TourDetail[]>([])
   const [loading, setLoading] = useState(true)
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
-  const [realTimeAvailability, setRealTimeAvailability] = useState<Record<string, {
-    availableSlots: number;
-    maxGuests: number;
-    currentBookings: number;
-  }>>({})
   const { token } = useAuthStore()
 
   useEffect(() => {
@@ -57,14 +53,8 @@ const FeaturedTours = () => {
     try {
       const response = await checkTourAvailability(tourOperationId, 1, token ?? undefined)
       if (response.success && response.data) {
-        setRealTimeAvailability(prev => ({
-          ...prev,
-          [tourOperationId]: {
-            availableSlots: response.data.availableSlots,
-            maxGuests: response.data.maxGuests,
-            currentBookings: response.data.currentBookings
-          }
-        }))
+        // Note: realTimeAvailability state removed as it was unused
+        console.log('Tour availability loaded:', response.data)
       }
     } catch (error) {
       console.error('Error loading real-time availability:', error)
@@ -83,7 +73,7 @@ const FeaturedTours = () => {
         setTours(selectedTours)
 
         // Load real-time availability for each tour
-        selectedTours.forEach(tour => {
+        selectedTours.forEach((tour: TourDetail) => {
           if (tour.tourOperation?.id) {
             loadRealTimeAvailability(tour.tourOperation.id)
           }
@@ -181,9 +171,10 @@ const FeaturedTours = () => {
 
       {/* Login Modal */}
       <LoginModal
-        visible={isLoginModalVisible}
-        onCancel={() => setIsLoginModalVisible(false)}
-        onSuccess={() => {
+        isVisible={isLoginModalVisible}
+        onClose={() => setIsLoginModalVisible(false)}
+        onRegisterClick={() => {}}
+        onLoginSuccess={() => {
           setIsLoginModalVisible(false)
           message.success('Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.')
         }}

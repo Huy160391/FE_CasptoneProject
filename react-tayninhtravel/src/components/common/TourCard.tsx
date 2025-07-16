@@ -21,6 +21,7 @@ interface TourDetail {
     tourTemplateName: string;
     imageUrls: string[];
     imageUrl?: string;
+    createdAt: string;
     tourOperation?: {
         id: string;
         price: number;
@@ -152,7 +153,7 @@ const TourCard: React.FC<TourCardProps> = ({
                             <TourPriceDisplay
                                 price={tour.tourOperation.price}
                                 size="large"
-                                showCurrency={true}
+                                createdAt={tour.createdAt}
                             />
                         ) : (
                             <span className="price-placeholder">Liên hệ</span>

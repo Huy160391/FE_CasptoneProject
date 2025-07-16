@@ -129,7 +129,6 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
     // Image upload states
     const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
-    const [uploadedImageUrl, setUploadedImageUrl] = useState<string>(''); // Keep for backward compatibility
     const [imageUploading, setImageUploading] = useState(false);
 
     // Timeline editing state
@@ -146,7 +145,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 // Add to uploaded images array
                 const newImageUrls = [...uploadedImageUrls, imageUrl];
                 setUploadedImageUrls(newImageUrls);
-                setUploadedImageUrl(imageUrl); // Keep for backward compatibility
+                // Keep for backward compatibility - use first image
 
                 setWizardData(prev => ({
                     ...prev,
@@ -359,6 +358,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 description: '',
                 skillsRequired: '',
                 selectedSkills: [],
+                imageUrls: [],
                 imageUrl: ''
             },
             timeline: [],
@@ -369,7 +369,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         });
         // Reset image upload states
         setUploadedImageUrls([]);
-        setUploadedImageUrl('');
+        // Reset image URLs
         setImageUploading(false);
         form.resetFields();
         timelineForm.resetFields();

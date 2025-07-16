@@ -16,18 +16,14 @@ import {
     Col,
     Descriptions,
     Modal,
-    message,
     Switch
 } from 'antd';
 import {
     CalendarOutlined,
     DollarOutlined,
     UserOutlined,
-    PhoneOutlined,
-    MailOutlined,
     EyeOutlined,
-    ReloadOutlined,
-    SearchOutlined
+    ReloadOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';

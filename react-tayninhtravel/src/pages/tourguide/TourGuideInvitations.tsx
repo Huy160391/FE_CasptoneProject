@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Card,
     Table,
@@ -15,38 +15,23 @@ import {
     Typography,
     Tooltip,
     Badge,
-    Empty,
-    Spin,
-    Descriptions,
-    Divider,
-    Alert,
-    Progress,
-    notification
+    Empty
 } from 'antd';
 import {
     CheckOutlined,
     CloseOutlined,
     ClockCircleOutlined,
-    ExclamationCircleOutlined,
     EyeOutlined,
-    ReloadOutlined,
-    CalendarOutlined,
-    UserOutlined,
-    EnvironmentOutlined,
-    DollarOutlined,
-    InfoCircleOutlined,
-    WarningOutlined
+    ReloadOutlined
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
+
 import { TourGuideInvitation } from '@/types/tour';
 import {
     getMyInvitations,
     acceptInvitation,
     rejectInvitation,
     formatTimeUntilExpiry,
-    canRespondToInvitation,
-    MyInvitationsResponse,
-    validateInvitationAcceptance
+    canRespondToInvitation
 } from '@/services/tourguideService';
 import './TourGuideInvitations.scss';
 
@@ -55,7 +40,6 @@ const { TextArea } = Input;
 const { TabPane } = Tabs;
 
 const TourGuideInvitations: React.FC = () => {
-    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [invitations, setInvitations] = useState<TourGuideInvitation[]>([]);
     const [statistics, setStatistics] = useState<any>({});
@@ -73,9 +57,9 @@ const TourGuideInvitations: React.FC = () => {
         try {
             const response = await getMyInvitations(status);
             console.log('API Response:', response);
-            if (response.success) {
-                setInvitations(response.invitations || []);
-                setStatistics(response.statistics || {});
+            if (response.success && response.data) {
+                setInvitations(response.data.invitations || []);
+                setStatistics(response.data.statistics || {});
             } else {
                 message.error(response.message || 'Không thể tải danh sách lời mời');
             }

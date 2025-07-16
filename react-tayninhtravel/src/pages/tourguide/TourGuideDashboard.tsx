@@ -10,12 +10,10 @@ import {
     Avatar,
     Badge,
     Progress,
-    Calendar,
     Alert,
     Spin,
     Tooltip,
     Space,
-    Divider,
     notification
 } from 'antd';
 import {
@@ -34,13 +32,12 @@ import {
     FireOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+
 import { TourGuideInvitation } from '@/types/tour';
 import {
     getMyInvitations,
     formatTimeUntilExpiry,
     acceptInvitation,
-    rejectInvitation,
     canRespondToInvitation
 } from '@/services/tourguideService';
 import ProfileSection from '@/components/tourguide/ProfileSection';
@@ -49,7 +46,6 @@ import './TourGuideDashboard.scss';
 const { Title, Text } = Typography;
 
 const TourGuideDashboard: React.FC = () => {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -64,14 +60,14 @@ const TourGuideDashboard: React.FC = () => {
         try {
             // Load pending invitations
             const pendingResponse = await getMyInvitations('Pending');
-            if (pendingResponse.success) {
-                setPendingInvitations(pendingResponse.invitations?.slice(0, 5) || []); // Show only 5 recent
+            if (pendingResponse.success && pendingResponse.data) {
+                setPendingInvitations(pendingResponse.data.invitations?.slice(0, 5) || []); // Show only 5 recent
             }
 
             // Load all invitations for statistics
             const allResponse = await getMyInvitations();
-            if (allResponse.success) {
-                setStatistics(allResponse.statistics || {});
+            if (allResponse.success && allResponse.data) {
+                setStatistics(allResponse.data.statistics || {});
             }
 
             setLastUpdate(new Date());
@@ -344,7 +340,7 @@ const TourGuideDashboard: React.FC = () => {
                                                             </Text>
                                                             <br />
                                                             <Text type="secondary" style={{ fontSize: '12px' }}>
-                                                                Ngày tour: {new Date(invitation.tourDetails.startDate).toLocaleDateString('vi-VN')}
+                                                                Lời mời: {new Date(invitation.invitedAt).toLocaleDateString('vi-VN')}
                                                             </Text>
                                                         </div>
                                                     }

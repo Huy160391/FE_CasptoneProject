@@ -16,21 +16,16 @@ import {
     message,
     Space,
     Tag,
-    Descriptions,
-    Modal
+    Descriptions
 } from 'antd';
 import {
     UserOutlined,
     PhoneOutlined,
     MailOutlined,
     TeamOutlined,
-    CalendarOutlined,
-    DollarOutlined,
     CreditCardOutlined,
-    InfoCircleOutlined,
-    ExclamationCircleOutlined
+    InfoCircleOutlined
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import {
     getTourDetailsForBooking,
@@ -44,6 +39,7 @@ import {
 } from '../services/tourBookingService';
 import { redirectToPayOsPayment, formatCurrency } from '../services/paymentService';
 import LoginModal from '../components/auth/LoginModal';
+import { getDefaultTourImage } from '../utils/imageUtils';
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
@@ -60,7 +56,6 @@ const BookingPage: React.FC = () => {
     const { tourId } = useParams<{ tourId: string }>();
     const navigate = useNavigate();
     const location = useLocation();
-    const { t } = useTranslation();
     const { isAuthenticated, token, user } = useAuthStore();
 
     const [form] = Form.useForm<BookingFormData>();
@@ -84,19 +79,7 @@ const BookingPage: React.FC = () => {
         specialRequests: ''
     });
 
-    // Get default image based on tour template name
-    const getDefaultImage = (templateName: string) => {
-        if (templateName?.toLowerCase().includes('núi bà đen')) {
-            return '/images/tours/nui-ba-den.jpg';
-        }
-        if (templateName?.toLowerCase().includes('cao đài')) {
-            return '/images/tours/toa-thanh-cao-dai.jpg';
-        }
-        if (templateName?.toLowerCase().includes('suối đá')) {
-            return '/images/tours/suoi-da.jpg';
-        }
-        return '/images/tours/default-tour.jpg';
-    };
+
 
     // Get initial booking data from navigation state
     useEffect(() => {
@@ -124,9 +107,9 @@ const BookingPage: React.FC = () => {
                     // Pre-fill form with user data if available
                     const initialValues = {
                         numberOfGuests: bookingData?.numberOfGuests || 1,
-                        contactName: user?.fullName || '',
+                        contactName: user?.name || '',
                         contactEmail: user?.email || '',
-                        contactPhone: user?.phoneNumber || '',
+                        contactPhone: user?.phone || '',
                         specialRequests: ''
                     };
 
@@ -248,10 +231,10 @@ const BookingPage: React.FC = () => {
                 message.success('Đặt tour thành công! Đang chuyển đến trang thanh toán...');
 
                 // Redirect to PayOS payment
-                if (response.data.paymentUrl) {
+                if (response.data?.paymentUrl) {
                     console.log('Payment URL found:', response.data.paymentUrl); // Debug log
                     setTimeout(() => {
-                        redirectToPayOsPayment(response.data.paymentUrl!);
+                        redirectToPayOsPayment(response.data!.paymentUrl!);
                     }, 1500);
                 } else {
                     console.log('No payment URL, navigating to success page'); // Debug log
@@ -367,7 +350,7 @@ const BookingPage: React.FC = () => {
                                 {tourDetails.timeline.length > 0 && (
                                     <div style={{ marginTop: 16 }}>
                                         <Title level={5}>Lịch trình tour</Title>
-                                        {tourDetails.timeline.map((item, index) => (
+                                        {tourDetails.timeline.map((item) => (
                                             <Card key={item.id} size="small" style={{ marginBottom: 8 }}>
                                                 <Space>
                                                     <Tag color="blue">{item.startTime} - {item.endTime}</Tag>
@@ -566,7 +549,7 @@ const BookingPage: React.FC = () => {
                 <Col xs={24} lg={8}>
                     <Card title="Tóm tắt đơn hàng" style={{ position: 'sticky', top: 20 }}>
                         <img
-                            src={tourDetails.imageUrl || getDefaultImage(tourDetails.tourTemplateName)}
+                            src={tourDetails.imageUrl || getDefaultTourImage(tourDetails.title)}
                             alt={tourDetails.title}
                             style={{ width: '100%', height: 150, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }}
                         />
@@ -636,7 +619,6 @@ const BookingPage: React.FC = () => {
                                     <Alert
                                         message={`Chỉ còn ${availability.availableSlots} chỗ trống!`}
                                         type="warning"
-                                        size="small"
                                         showIcon
                                     />
                                 )}
@@ -647,9 +629,10 @@ const BookingPage: React.FC = () => {
             </Row>
 
             <LoginModal
-                visible={isLoginModalVisible}
-                onCancel={() => setIsLoginModalVisible(false)}
-                onSuccess={() => {
+                isVisible={isLoginModalVisible}
+                onClose={() => setIsLoginModalVisible(false)}
+                onRegisterClick={() => {}}
+                onLoginSuccess={() => {
                     setIsLoginModalVisible(false);
                     // Retry booking after login
                     handleSubmit();

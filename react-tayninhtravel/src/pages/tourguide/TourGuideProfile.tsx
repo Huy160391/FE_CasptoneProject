@@ -20,7 +20,6 @@ import {
     EditOutlined,
     SaveOutlined
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getMyProfile, updateMyProfile } from '@/services/tourguideService';
 
@@ -28,7 +27,6 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const TourGuideProfile: React.FC = () => {
-    const { t } = useTranslation();
     const { user } = useAuthStore();
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);

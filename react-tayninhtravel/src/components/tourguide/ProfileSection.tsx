@@ -13,15 +13,10 @@ import {
     Divider,
     Tag,
     Space,
-    Collapse,
     Progress,
     Tooltip,
     Tabs,
-    List,
-    Table,
-    Empty,
-    Badge,
-    Statistic
+    Badge
 } from 'antd';
 import {
     UserOutlined,
@@ -29,7 +24,6 @@ import {
     EditOutlined,
     SaveOutlined,
     CloseOutlined,
-    StarOutlined,
     PhoneOutlined,
     MailOutlined,
     EnvironmentOutlined,
@@ -38,8 +32,7 @@ import {
     ShoppingOutlined,
     CommentOutlined,
     QuestionCircleOutlined,
-    CalendarOutlined,
-    DollarOutlined
+    CalendarOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getMyProfile, updateMyProfile } from '@/services/tourguideService';
@@ -50,10 +43,8 @@ import SupportTicketHistory from '@/pages/SupportTicketHistory';
 import RegisterHistory from '@/pages/RegisterHistory';
 import './ProfileSection.scss';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text } = Typography;
 const { TextArea } = Input;
-const { Panel } = Collapse;
-const { TabPane } = Tabs;
 
 interface ProfileSectionProps {
     collapsed?: boolean;

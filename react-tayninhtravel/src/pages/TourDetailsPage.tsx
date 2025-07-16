@@ -11,27 +11,23 @@ import {
     Spin,
     Alert,
     Space,
-    Image,
     Descriptions,
     Timeline,
     message
 } from 'antd';
 import {
     CalendarOutlined,
-    DollarOutlined,
     TeamOutlined,
-    EnvironmentOutlined,
     ClockCircleOutlined,
-    StarOutlined,
     ShoppingCartOutlined
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
+
 import { useAuthStore } from '../store/useAuthStore';
 import { formatCurrency } from '../services/paymentService';
-import { getTourImageWithFallback, getTourImageAltText } from '../utils/imageUtils';
 import { checkTourAvailability } from '../services/tourBookingService';
 import LoginModal from '../components/auth/LoginModal';
 import ImageGallery from '../components/common/ImageGallery';
+import { getDefaultTourImage } from '../utils/imageUtils';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -69,7 +65,6 @@ interface TourDetail {
 const TourDetailsPage: React.FC = () => {
     const { tourId } = useParams<{ tourId: string }>();
     const navigate = useNavigate();
-    const { t } = useTranslation();
     const { isAuthenticated, token } = useAuthStore();
 
     const [tour, setTour] = useState<TourDetail | null>(null);
@@ -82,19 +77,7 @@ const TourDetailsPage: React.FC = () => {
         currentBookings: number;
     } | null>(null);
 
-    // Get default image based on tour template name
-    const getDefaultImage = (templateName: string) => {
-        if (templateName?.toLowerCase().includes('núi bà đen')) {
-            return '/images/tours/nui-ba-den.jpg';
-        }
-        if (templateName?.toLowerCase().includes('cao đài')) {
-            return '/images/tours/toa-thanh-cao-dai.jpg';
-        }
-        if (templateName?.toLowerCase().includes('suối đá')) {
-            return '/images/tours/suoi-da.jpg';
-        }
-        return '/images/tours/default-tour.jpg';
-    };
+
 
     // Load tour details
     useEffect(() => {
@@ -225,7 +208,7 @@ const TourDetailsPage: React.FC = () => {
                     <Card>
                         {/* Tour Images Gallery */}
                         <ImageGallery
-                            images={tour.imageUrls && tour.imageUrls.length > 0 ? tour.imageUrls : [tour.imageUrl || getDefaultImage(tour.tourTemplateName)]}
+                            images={tour.imageUrls && tour.imageUrls.length > 0 ? tour.imageUrls : [tour.imageUrl || getDefaultTourImage(tour.title)]}
                             alt={tour.title}
                             height={300}
                             showThumbnails={true}
@@ -414,9 +397,10 @@ const TourDetailsPage: React.FC = () => {
 
             {/* Login Modal */}
             <LoginModal
-                visible={isLoginModalVisible}
-                onCancel={() => setIsLoginModalVisible(false)}
-                onSuccess={() => {
+                isVisible={isLoginModalVisible}
+                onClose={() => setIsLoginModalVisible(false)}
+                onRegisterClick={() => {}}
+                onLoginSuccess={() => {
                     setIsLoginModalVisible(false);
                     message.success('Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.');
                 }}
