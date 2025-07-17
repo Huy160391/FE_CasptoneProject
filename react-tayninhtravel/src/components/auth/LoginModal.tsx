@@ -72,8 +72,8 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         } else if (response.user.role === 'Blogger') {
           navigate('/blogger/dashboard')
         } else {
-          // Return to previous page or home
-          navigate(-1)
+          // Điều hướng về trang chủ cho role 'user' để tránh blank tab
+          navigate('/')
         }
       } else {
         throw new Error('Login response invalid')
