@@ -134,6 +134,41 @@ const Navbar = () => {
     },
   ]
   const userMenuItems: MenuProps['items'] = [
+    // Dashboard items based on user role
+    ...(user?.role === 'Tour Guide' ? [{
+      key: 'tourguide-dashboard',
+      label: 'Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/tour-guide/dashboard'),
+    }] : []),
+    ...(user?.role === 'Admin' ? [{
+      key: 'admin-dashboard',
+      label: 'Admin Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/admin/dashboard'),
+    }] : []),
+    ...(user?.role === 'Blogger' ? [{
+      key: 'blogger-dashboard',
+      label: 'Blogger Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/blogger/dashboard'),
+    }] : []),
+    ...(user?.role === 'Tour Company' ? [{
+      key: 'tourcompany-dashboard',
+      label: 'Tour Company Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/tour-company/dashboard'),
+    }] : []),
+    ...(user?.role === 'Specialty Shop' ? [{
+      key: 'specialtyshop-dashboard',
+      label: 'Specialty Shop Dashboard',
+      icon: <DashboardOutlined />,
+      onClick: () => navigate('/speciality-shop'),
+    }] : []),
+    // Add divider if dashboard exists
+    ...(user?.role && ['Tour Guide', 'Admin', 'Blogger', 'Tour Company', 'Specialty Shop'].includes(user.role) ? [{
+      type: 'divider' as const,
+    }] : []),
     {
       key: 'profile',
       label: t('common.profile'),

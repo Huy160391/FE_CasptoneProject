@@ -1,19 +1,32 @@
-import { Row, Col, Card, Button, Spin, Empty } from 'antd'
+import { Row, Col, Spin, Empty, message } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getFeaturedTourDetails } from '../../services/tourcompanyService'
+import { checkTourAvailability } from '../../services/tourBookingService'
+import { TourDetailsStatus } from '../../types/tour'
+import { useAuthStore } from '../../store/useAuthStore'
+
+import TourCard from '../common/TourCard'
+import LoginModal from '../auth/LoginModal'
 import './FeaturedTours.scss'
 
-const { Meta } = Card
+
 
 interface TourDetail {
   id: string;
   title: string;
   description: string;
   tourTemplateName: string;
+  imageUrls: string[]; // New field for multiple images
+  imageUrl?: string; // Backward compatibility - first image
+  createdAt: string;
   tourOperation?: {
+    id: string;
     price: number;
     maxGuests: number;
+    currentBookings: number;
+    isActive: boolean;
   };
   timeline?: Array<{
     activity: string;
@@ -24,12 +37,29 @@ interface TourDetail {
 
 const FeaturedTours = () => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuthStore()
+
   const [tours, setTours] = useState<TourDetail[]>([])
   const [loading, setLoading] = useState(true)
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
+  const { token } = useAuthStore()
 
   useEffect(() => {
     loadFeaturedTours()
   }, [])
+
+  const loadRealTimeAvailability = async (tourOperationId: string) => {
+    try {
+      const response = await checkTourAvailability(tourOperationId, 1, token ?? undefined)
+      if (response.success && response.data) {
+        // Note: realTimeAvailability state removed as it was unused
+        console.log('Tour availability loaded:', response.data)
+      }
+    } catch (error) {
+      console.error('Error loading real-time availability:', error)
+    }
+  }
 
   const loadFeaturedTours = async () => {
     try {
@@ -37,9 +67,17 @@ const FeaturedTours = () => {
       const response = await getFeaturedTourDetails(6)
 
       if (response.success && response.data) {
-        // Filter only approved tours (status 4)
-        const approvedTours = response.data.filter((tour: TourDetail) => tour.status === 4)
-        setTours(approvedTours.slice(0, 3)) // Show only 3 tours
+        // Filter only public tours (status 8) - tours available for customer booking
+        const publicTours = response.data.filter((tour: TourDetail) => tour.status === TourDetailsStatus.Public)
+        const selectedTours = publicTours.slice(0, 3) // Show only 3 tours
+        setTours(selectedTours)
+
+        // Load real-time availability for each tour
+        selectedTours.forEach((tour: TourDetail) => {
+          if (tour.tourOperation?.id) {
+            loadRealTimeAvailability(tour.tourOperation.id)
+          }
+        })
       }
     } catch (error) {
       console.error('Error loading featured tours:', error)
@@ -50,26 +88,44 @@ const FeaturedTours = () => {
     }
   }
 
-  const formatPrice = (price?: number) => {
-    if (!price) return 'Liên hệ'
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price)
+  // Handle booking button click
+  const handleBookNow = (tour: TourDetail) => {
+    if (!isAuthenticated) {
+      // Show login modal if user is not authenticated
+      setIsLoginModalVisible(true)
+      return
+    }
+
+    // Check if tour has active operation
+    if (!tour.tourOperation || !tour.tourOperation.isActive) {
+      message.error('Tour này hiện không khả dụng để đặt')
+      return
+    }
+
+    // Navigate to booking page
+    message.info({
+      content: 'Đang chuyển đến trang đặt tour...',
+      duration: 1
+    })
+
+    navigate(`/booking/${tour.id}`, {
+      state: {
+        tourData: tour
+      }
+    })
   }
 
-  const getDefaultImage = (templateName: string) => {
-    if (templateName.toLowerCase().includes('núi bà đen')) {
-      return '/images/tours/nui-ba-den.jpg'
-    }
-    if (templateName.toLowerCase().includes('cao đài')) {
-      return '/images/tours/toa-thanh-cao-dai.jpg'
-    }
-    if (templateName.toLowerCase().includes('suối đá')) {
-      return '/images/tours/suoi-da.jpg'
-    }
-    return '/images/tours/default-tour.jpg'
+  // Handle view tour details
+  const handleViewDetails = (tour: TourDetail) => {
+    // Navigate to tour details page - this should call /api/TourDetails/{id}
+    navigate(`/tour-details/${tour.id}`)
   }
+
+
+
+
+
+
 
   if (loading) {
     return (
@@ -87,7 +143,7 @@ const FeaturedTours = () => {
       <section className="featured-tours">
         <h2>{t('home.featuredToursTitle')}</h2>
         <Empty
-          description="Hiện tại chưa có tour nào được duyệt"
+          description="Hiện tại chưa có tour nào được công khai"
           style={{ padding: '50px 0' }}
         />
       </section>
@@ -96,51 +152,33 @@ const FeaturedTours = () => {
 
   return (
     <section className="featured-tours">
-      <h2>{t('home.featuredToursTitle')}</h2>
+      <div className="section-header">
+        <h2>{t('home.featuredToursTitle')}</h2>
+        <p className="section-subtitle">Khám phá những tour du lịch hấp dẫn nhất tại Tây Ninh</p>
+      </div>
 
-      <Row gutter={[24, 24]}>
+      <Row gutter={[24, 32]}>
         {tours.map(tour => (
-          <Col xs={24} sm={12} md={8} key={tour.id}>
-            <Card
-              hoverable
-              cover={
-                <img
-                  alt={tour.title}
-                  src={getDefaultImage(tour.tourTemplateName)}
-                  style={{ height: 200, objectFit: 'cover' }}
-                />
-              }
-              className="tour-card"
-            >
-              <Meta
-                title={tour.title}
-                description={tour.description?.substring(0, 100) + '...' || tour.tourTemplateName}
-              />
-              <div className="tour-info">
-                <div className="info-item">
-                  <span className="label">{t('home.tourInfo.duration')}:</span>
-                  <span className="value">
-                    {tour.timeline?.length ? `${tour.timeline.length} hoạt động` : '1 ngày'}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <span className="label">{t('home.tourInfo.price')}:</span>
-                  <span className="value">{formatPrice(tour.tourOperation?.price)}</span>
-                </div>
-                <div className="info-item">
-                  <span className="label">Sức chứa:</span>
-                  <span className="value">
-                    {tour.tourOperation?.maxGuests ? `${tour.tourOperation.maxGuests} người` : 'Liên hệ'}
-                  </span>
-                </div>
-              </div>
-              <Button type="primary" block>
-                {t('tours.bookNow')}
-              </Button>
-            </Card>
+          <Col xs={24} sm={12} lg={8} key={tour.id}>
+            <TourCard
+              tour={tour}
+              onBookNow={handleBookNow}
+              onViewDetails={handleViewDetails}
+            />
           </Col>
         ))}
       </Row>
+
+      {/* Login Modal */}
+      <LoginModal
+        isVisible={isLoginModalVisible}
+        onClose={() => setIsLoginModalVisible(false)}
+        onRegisterClick={() => {}}
+        onLoginSuccess={() => {
+          setIsLoginModalVisible(false)
+          message.success('Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.')
+        }}
+      />
     </section>
   )
 }

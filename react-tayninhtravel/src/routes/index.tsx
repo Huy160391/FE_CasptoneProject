@@ -8,6 +8,8 @@ import { adminRoutes } from './adminRoutes';
 import { bloggerRoutes } from './bloggerRoutes';
 import TourCompanyLayout from '@/components/layout/TourCompanyLayout';
 import { tourCompanyRoutes } from './tourCompanyRoutes';
+import TourGuideLayout from '@/components/layout/TourGuideLayout';
+import { tourguideRoutes } from './tourguideRoutes';
 import ProtectedRoute from './ProtectedRoute';
 import SpecialityShopLayout from '@/components/layout/SpecialityShopLayout';
 import Dashboard from '@/pages/specialityshop/Dashboard';
@@ -60,6 +62,19 @@ const routes: RouteObject[] = [
       children: [
         { path: '', element: <Navigate to="/tour-company/dashboard" /> },
         ...(tourCompanyRoutes[0].children || []),
+      ],
+    }
+    ],
+  },
+  {
+    path: '/tour-guide',
+    element: <ProtectedRoute requiredRole="Tour Guide" />,
+    children: [{
+      path: '',
+      element: <TourGuideLayout />,
+      children: [
+        { path: '', element: <Navigate to="/tour-guide/dashboard" /> },
+        ...(tourguideRoutes[0].children || []),
       ],
     }
     ],
