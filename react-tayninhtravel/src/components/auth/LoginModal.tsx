@@ -72,8 +72,12 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         } else if (response.user.role === 'Blogger') {
           navigate('/blogger/dashboard')
         } else {
-          // Điều hướng về trang chủ cho role 'user' để tránh blank tab
-          navigate('/')
+          // Nếu trang trước là home thì ở lại home, ngược lại thì quay lại trang trước
+          if (window.location.pathname === '/') {
+            navigate('/')
+          } else {
+            navigate(-1)
+          }
         }
       } else {
         throw new Error('Login response invalid')
