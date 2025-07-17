@@ -10,7 +10,7 @@ import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import Career from '@/pages/Career';
 import CartDetail from '@/components/cart/CartDetail';
-import Checkout from '@/components/payment/Checkout';
+
 import OrderSuccess from '@/pages/OrderSuccess';
 import NotFound from '@/pages/NotFound';
 import Unauthorized from '@/pages/Unauthorized';
@@ -48,10 +48,7 @@ export const publicRoutes: RouteObject[] = [
         path: '/cart',
         element: <CartDetail />,
     },
-    {
-        path: '/checkout',
-        element: <Checkout />,
-    },
+
     {
         path: '/order-success',
         element: <OrderSuccess />,
