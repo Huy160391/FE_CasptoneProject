@@ -73,7 +73,9 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                 });
 
                 // Load capacity info
-                await loadCapacityInfo(response.data.id);
+                if (response.data.id) {
+                    await loadCapacityInfo(response.data.id);
+                }
             }
         } catch (error) {
             console.error('Error loading tour operation:', error);
@@ -165,10 +167,10 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
     };
 
     const getCapacityStatus = () => {
-        if (!capacityInfo) return 'normal';
-        
+        if (!capacityInfo || !capacityInfo.maxSeats || capacityInfo.maxSeats === 0) return 'normal';
+
         const utilizationRate = (capacityInfo.bookedSeats / capacityInfo.maxSeats) * 100;
-        
+
         if (utilizationRate >= 100) return 'exception';
         if (utilizationRate >= 80) return 'active';
         return 'normal';
@@ -192,13 +194,13 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                         <Descriptions.Item label="Giá tour">
                             <Space>
                                 <DollarOutlined />
-                                {operation.price.toLocaleString('vi-VN')} VNĐ
+                                {operation.price ? operation.price.toLocaleString('vi-VN') : '0'} VNĐ
                             </Space>
                         </Descriptions.Item>
                         <Descriptions.Item label="Số ghế tối đa">
                             <Space>
                                 <TeamOutlined />
-                                {operation.maxSeats} ghế
+                                {operation.maxSeats || 0} ghế
                             </Space>
                         </Descriptions.Item>
                         <Descriptions.Item label="Hướng dẫn viên">

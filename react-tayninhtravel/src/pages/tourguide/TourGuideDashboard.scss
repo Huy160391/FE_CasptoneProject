@@ -1,0 +1,421 @@
+.tour-guide-dashboard {
+    .dashboard-header {
+        margin-bottom: 24px;
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 {
+            margin-bottom: 8px;
+            color: #1890ff;
+
+            .ant-badge {
+                .ant-badge-count {
+                    animation: pulse 2s infinite;
+                }
+            }
+        }
+    }
+
+    // Profile section integration
+    .profile-section {
+        margin-bottom: 16px;
+
+        &.collapsed {
+            transition: all 0.3s ease;
+
+            &:hover {
+                transform: translateY(-1px);
+            }
+        }
+
+        &.expanded {
+            animation: expandProfile 0.5s ease-out;
+        }
+    }
+
+    .stat-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        &.urgent {
+            border: 2px solid #ff4d4f;
+            box-shadow: 0 0 10px rgba(255, 77, 79, 0.3);
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 0;
+                height: 0;
+                border-left: 20px solid transparent;
+                border-top: 20px solid #ff4d4f;
+            }
+        }
+
+        .stat-content {
+            position: relative;
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+
+        .ant-statistic {
+            .ant-statistic-title {
+                color: #666;
+                font-size: 14px;
+                margin-bottom: 8px;
+
+                .anticon {
+                    animation: flicker 1.5s infinite;
+                }
+            }
+
+            .ant-statistic-content {
+                font-size: 24px;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .performance-card {
+        .ant-progress {
+            margin-bottom: 8px;
+            
+            .ant-progress-text {
+                font-weight: 500;
+            }
+        }
+
+        .ant-alert {
+            border-radius: 6px;
+            
+            .ant-alert-message {
+                font-weight: 500;
+            }
+        }
+    }
+
+    // Enhanced invitation card
+    .invitation-card {
+        .ant-card-body {
+            padding: 16px;
+        }
+    }
+
+    .ant-list {
+        .ant-list-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            &:hover {
+                background: #fafafa;
+                border-radius: 8px;
+                margin: 0 -8px;
+                padding: 16px 8px;
+            }
+
+            &.urgent {
+                border-left: 4px solid #ff4d4f;
+                background: linear-gradient(90deg, rgba(255, 77, 79, 0.05) 0%, transparent 100%);
+
+                .ant-list-item-meta-title {
+                    color: #ff4d4f !important;
+                }
+            }
+
+            .ant-list-item-meta {
+                .ant-list-item-meta-title {
+                    font-weight: 500;
+                    color: #1890ff;
+                    margin-bottom: 4px;
+
+                    .ant-badge {
+                        margin-left: 8px;
+                    }
+                }
+
+                .ant-list-item-meta-description {
+                    color: #666;
+                    font-size: 12px;
+                    line-height: 1.4;
+                }
+            }
+
+            .ant-list-item-action {
+                margin-left: 16px;
+
+                .ant-space {
+                    .ant-btn {
+                        transition: all 0.3s ease;
+
+                        &:hover {
+                            transform: scale(1.1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .ant-card {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+        .ant-card-head {
+            border-bottom: 1px solid #f0f0f0;
+
+            .ant-card-head-title {
+                font-weight: 600;
+                color: #262626;
+            }
+
+            .ant-card-extra {
+                .ant-btn-link {
+                    color: #1890ff;
+                    padding: 0;
+                }
+            }
+        }
+
+        .ant-card-body {
+            padding: 20px;
+        }
+    }
+
+    .ant-badge {
+        .ant-badge-count {
+            background: #1890ff;
+            box-shadow: 0 0 0 1px #fff;
+        }
+    }
+
+    // Empty state styling
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+
+        .anticon {
+            font-size: 48px;
+            color: #d9d9d9;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: #999;
+            margin: 0;
+        }
+    }
+
+    // Quick actions
+    .ant-btn {
+        border-radius: 6px;
+        font-weight: 500;
+        
+        &.ant-btn-primary {
+            background: #1890ff;
+            border-color: #1890ff;
+            
+            &:hover {
+                background: #40a9ff;
+                border-color: #40a9ff;
+            }
+        }
+    }
+
+    // Responsive design
+    @media (max-width: 768px) {
+        .dashboard-header {
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+
+        .stat-card {
+            margin-bottom: 16px;
+
+            .ant-statistic-content {
+                font-size: 20px;
+            }
+        }
+
+        .invitation-card {
+            .ant-card-head {
+                .ant-card-head-title {
+                    font-size: 16px;
+                }
+            }
+        }
+
+        .ant-list-item {
+            .ant-list-item-action {
+                margin-left: 0;
+                margin-top: 8px;
+
+                .ant-space {
+                    justify-content: center;
+                }
+            }
+
+            .ant-list-item-meta {
+                .ant-list-item-meta-title {
+                    font-size: 14px;
+                }
+
+                .ant-list-item-meta-description {
+                    font-size: 11px;
+                }
+            }
+        }
+    }
+
+    @media (max-width: 576px) {
+        .ant-card-body {
+            padding: 16px;
+        }
+
+        .stat-card {
+            .stat-icon {
+                font-size: 20px;
+            }
+
+            .ant-statistic-content {
+                font-size: 18px;
+            }
+        }
+    }
+
+    // Animation for loading
+    .ant-spin-container {
+        min-height: 400px;
+    }
+
+    // Progress bar customization
+    .ant-progress {
+        .ant-progress-bg {
+            border-radius: 4px;
+        }
+    }
+
+    // Alert customization
+    .ant-alert-info {
+        background: #e6f7ff;
+        border: 1px solid #91d5ff;
+
+        .ant-alert-icon {
+            color: #1890ff;
+        }
+    }
+
+    // Animations
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes flicker {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes expandProfile {
+        from {
+            opacity: 0;
+            transform: scaleY(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+    }
+
+    // Enhanced empty state
+    .empty-state {
+        animation: slideIn 0.5s ease-out;
+
+        .anticon {
+            transition: all 0.3s ease;
+
+            &:hover {
+                color: #1890ff !important;
+                transform: scale(1.1);
+            }
+        }
+
+        .ant-btn-link {
+            margin-top: 8px;
+
+            &:hover {
+                transform: translateY(-2px);
+            }
+        }
+    }
+
+    // Loading improvements
+    .ant-spin-container {
+        position: relative;
+
+        .ant-spin {
+            .ant-spin-dot {
+                .ant-spin-dot-item {
+                    background-color: #1890ff;
+                }
+            }
+        }
+    }
+}

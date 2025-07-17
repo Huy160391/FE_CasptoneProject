@@ -2,35 +2,26 @@ import React, { useState, useEffect } from 'react';
 import {
     Table,
     Button,
-    Modal,
-    Form,
-    Input,
-    Select,
     message,
-    Space,
     Tag,
-    Popconfirm,
     Card,
-    Alert,
-    Tabs
+    Tabs,
+    Dropdown,
+    Modal,
+    Tooltip
 } from 'antd';
 import {
     PlusOutlined,
-    EditOutlined,
     DeleteOutlined,
     EyeOutlined,
-    ApiOutlined,
     CheckCircleOutlined,
-    ExclamationCircleOutlined,
-    BarChartOutlined,
-    RocketOutlined
+    RocketOutlined,
+    MoreOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import { usePreloadWizardData } from '../../hooks/usePreloadWizardData';
 import {
     getTourDetailsList,
-    createTourDetails,
-    updateTourDetails,
     deleteTourDetails,
     getTourTemplates,
     activatePublicTourDetails,
@@ -40,7 +31,6 @@ import TourDetailsWizard from '../../components/tourcompany/TourDetailsWizard';
 import TourDetailsModal from '../../components/tourcompany/TourDetailsModal';
 import {
     TourDetails,
-    CreateTourDetailsRequest,
     TourTemplate,
     TourDetailsStatus
 } from '../../types/tour';
@@ -49,12 +39,8 @@ import {
     getTourDetailsStatusLabel,
     getStatusColor
 } from '../../constants/tourTemplate';
-import ApiTester from '../../components/debug/ApiTester';
-import CacheStatus from '../../components/debug/CacheStatus';
-import WizardTemplatesTester from '../../components/debug/WizardTemplatesTester';
 
-const { TextArea } = Input;
-const { Option } = Select;
+
 const { TabPane } = Tabs;
 
 const TourDetailsManagement: React.FC = () => {
@@ -64,20 +50,12 @@ const TourDetailsManagement: React.FC = () => {
     const { isPreloaded, templatesCount, shopsCount, guidesCount } = usePreloadWizardData();
 
     const [tourDetailsList, setTourDetailsList] = useState<TourDetails[]>([]);
-    const [templates, setTemplates] = useState<TourTemplate[]>([]);
 
     const [loading, setLoading] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
     const [wizardVisible, setWizardVisible] = useState(false);
-
-    const [editingDetails, setEditingDetails] = useState<TourDetails | null>(null);
     const [selectedTourDetailsId, setSelectedTourDetailsId] = useState<string | null>(null);
     const [modalInitialTab, setModalInitialTab] = useState('details');
-
-    const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
-    const [apiError, setApiError] = useState<string>('');
     const [activeTab, setActiveTab] = useState('tours');
-    const [form] = Form.useForm();
 
 
     // Pagination states
@@ -103,14 +81,10 @@ const TourDetailsManagement: React.FC = () => {
 
     const checkApiAndLoadData = async () => {
         try {
-            setApiStatus('checking');
             await loadTourDetailsList();
             await loadTemplates();
-
-            setApiStatus('connected');
         } catch (error) {
-            setApiStatus('error');
-            setApiError(handleApiError(error));
+            message.error(handleApiError(error));
         }
     };
 
@@ -126,19 +100,10 @@ const TourDetailsManagement: React.FC = () => {
                 includeInactive: false
             }, token ?? undefined);
 
-
             // Backend trả về ResponseGetTourDetailsPaginatedDto
             if (response.success && response.data) {
                 setTourDetailsList(response.data);
                 setTotalCount(response.totalCount || 0);
-
-                // Log thêm thông tin pagination từ backend
-                console.log('📄 Pagination Info:', {
-                    pageIndex: response.pageIndex,
-                    pageSize: response.pageSize,
-                    totalPages: response.totalPages,
-                    totalCount: response.totalCount
-                });
             } else {
                 console.error('❌ API Error:', response.message);
                 message.error(response.message || 'Không thể tải danh sách tour details');
@@ -179,8 +144,7 @@ const TourDetailsManagement: React.FC = () => {
                     templateItems = [];
                 }
 
-                setTemplates(templateItems);
-                console.log('✅ Final templates set:', templateItems);
+                console.log('✅ Final templates loaded:', templateItems);
             } else {
                 console.warn('⚠️ Templates API returned unsuccessful response:', response);
             }
@@ -194,11 +158,7 @@ const TourDetailsManagement: React.FC = () => {
 
 
 
-    const handleCreate = () => {
-        setEditingDetails(null);
-        setModalVisible(true);
-        form.resetFields();
-    };
+
 
 
 
@@ -221,16 +181,7 @@ const TourDetailsManagement: React.FC = () => {
         loadTourDetailsList(1, size);
     };
 
-    const handleEdit = (record: TourDetails) => {
-        setEditingDetails(record);
-        setModalVisible(true);
-        form.setFieldsValue({
-            tourTemplateId: record.tourTemplateId,
-            title: record.title,
-            description: record.description,
-            skillsRequired: record.skillsRequired
-        });
-    };
+
 
     const handleDelete = async (id: string) => {
         try {
@@ -253,35 +204,11 @@ const TourDetailsManagement: React.FC = () => {
     const handleCreateOperation = (record: TourDetails) => {
         setSelectedTourDetailsId(record.id);
         setModalInitialTab('operation');
-        setModalVisible(true);
     };
 
-    const handleSubmit = async (values: CreateTourDetailsRequest) => {
-        try {
-            setLoading(true);
-            let response;
 
-            if (editingDetails) {
-                response = await updateTourDetails(editingDetails.id, values, token ?? undefined);
-            } else {
-                response = await createTourDetails(values, token ?? undefined);
-            }
 
-            if (response.success) {
-                message.success(
-                    editingDetails
-                        ? 'Cập nhật tour details thành công'
-                        : `Tạo tour details thành công${response.data ? ` và đã clone ${(response.data as any).assignedSlots?.length || 0} slots` : ''}`
-                );
-                setModalVisible(false);
-                loadTourDetailsList();
-            }
-        } catch (error) {
-            message.error(handleApiError(error));
-        } finally {
-            setLoading(false);
-        }
-    };
+
 
     const handleActivatePublic = async (tourDetailsId: string) => {
         try {
@@ -299,6 +226,64 @@ const TourDetailsManagement: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Create dropdown menu items for each record
+    const getActionMenuItems = (record: TourDetails) => {
+        const items = [
+            {
+                key: 'view',
+                icon: <EyeOutlined style={{ color: '#1890ff' }} />,
+                label: <span style={{ color: '#1890ff' }}>Xem chi tiết</span>,
+                onClick: () => handleViewDetails(record)
+            },
+            {
+                key: 'operation',
+                icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+                label: <span style={{ color: '#52c41a' }}>Quản lý vận hành</span>,
+                onClick: () => handleCreateOperation(record)
+            }
+        ];
+
+        // Add "Kích hoạt Public" option if status is WaitToPublic
+        if (record.status === TourDetailsStatus.WaitToPublic) {
+            items.push({
+                key: 'activate',
+                icon: <RocketOutlined style={{ color: '#722ed1' }} />,
+                label: <span style={{ color: '#722ed1' }}>Kích hoạt Public</span>,
+                onClick: () => {
+                    // Show confirmation modal
+                    Modal.confirm({
+                        title: 'Kích hoạt public cho TourDetails này?',
+                        content: 'Sau khi kích hoạt, khách hàng có thể booking tour này.',
+                        okText: 'Kích hoạt',
+                        cancelText: 'Hủy',
+                        onOk: () => handleActivatePublic(record.id)
+                    });
+                }
+            });
+        }
+
+        // Add delete option with divider
+
+        items.push({
+            key: 'delete',
+            icon: <DeleteOutlined />,
+            label: <span style={{ color: '#ff4d4f' }}>Xóa tour</span>,
+            onClick: () => {
+                // Show confirmation modal
+                Modal.confirm({
+                    title: 'Bạn có chắc chắn muốn xóa?',
+                    content: 'Hành động này không thể hoàn tác.',
+                    okText: 'Có',
+                    cancelText: 'Không',
+                    okType: 'danger',
+                    onOk: () => handleDelete(record.id)
+                });
+            }
+        });
+
+        return items;
     };
 
     const columns = [
@@ -333,62 +318,48 @@ const TourDetailsManagement: React.FC = () => {
         {
             title: 'Thao tác',
             key: 'actions',
+            width: 80,
+            align: 'center' as const,
             render: (_: any, record: TourDetails) => (
-                <Space>
-                    <Button
-                        type="link"
-                        icon={<EyeOutlined />}
-                        onClick={() => handleViewDetails(record)}
-                    >
-                        Xem
-                    </Button>
-                    <Button
-                        type="link"
-                        icon={<EditOutlined />}
-                        onClick={() => handleEdit(record)}
-                    >
-                        Sửa
-                    </Button>
-                    <Button
-                        type="link"
-                        icon={<CheckCircleOutlined />}
-                        onClick={() => handleCreateOperation(record)}
-                        style={{ color: '#52c41a' }}
-                    >
-                        Vận hành
-                    </Button>
-                    {record.status === TourDetailsStatus.WaitToPublic && (
-                        <Popconfirm
-                            title="Kích hoạt public cho TourDetails này?"
-                            description="Sau khi kích hoạt, khách hàng có thể booking tour này."
-                            onConfirm={() => handleActivatePublic(record.id)}
-                            okText="Kích hoạt"
-                            cancelText="Hủy"
-                        >
-                            <Button
-                                type="link"
-                                icon={<RocketOutlined />}
-                                style={{ color: '#1890ff' }}
-                            >
-                                Kích hoạt Public
-                            </Button>
-                        </Popconfirm>
-                    )}
-                    <Popconfirm
-                        title="Bạn có chắc chắn muốn xóa?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Có"
-                        cancelText="Không"
-                    >
+                <Dropdown
+                    menu={{
+                        items: getActionMenuItems(record),
+                        style: {
+                            minWidth: '180px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                        }
+                    }}
+                    trigger={['click']}
+                    placement="bottomRight"
+                    arrow={{ pointAtCenter: true }}
+                >
+                    <Tooltip title="Thao tác" placement="top">
                         <Button
-                            type="link"
-                            danger
-                            icon={<DeleteOutlined />}
-                        >
-                            Xóa
-                        </Button>
-                    </Popconfirm>
-                </Space>
+                            type="text"
+                            icon={<MoreOutlined style={{ fontSize: '16px' }} />}
+                            style={{
+                                border: 'none',
+                                boxShadow: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 32,
+                                height: 32,
+                                borderRadius: '6px',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f0f0f0';
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        />
+                    </Tooltip>
+                </Dropdown>
             ),
         },
     ];
@@ -403,66 +374,21 @@ const TourDetailsManagement: React.FC = () => {
                             Quản lý tours với TourDetails APIs mới
                         </p>
                     </div>
-                    <Space>
-                        {/* API Status */}
-                        {apiStatus === 'checking' && <Tag icon={<ApiOutlined />} color="processing">Checking API...</Tag>}
-                        {apiStatus === 'connected' && (
-                            <Tag icon={<CheckCircleOutlined />} color="success">
-                                API Connected ({templates.length} templates)
-                            </Tag>
-                        )}
-                        {apiStatus === 'error' && (
-                            <Tag icon={<ExclamationCircleOutlined />} color="error" title={apiError}>
-                                API Error
-                            </Tag>
-                        )}
-
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={() => {
-                                console.log('🧙‍♂️ Button clicked - Opening wizard...');
-                                console.log('🧙‍♂️ Current wizardVisible state:', wizardVisible);
-                                setWizardVisible(true);
-                                console.log('🧙‍♂️ setWizardVisible(true) called');
-                            }}
-                            disabled={apiStatus !== 'connected'}
-                        >
-                            Tạo Tour (Wizard)
-                        </Button>
-
-                        <Button
-                            icon={<PlusOutlined />}
-                            onClick={handleCreate}
-                            disabled={apiStatus !== 'connected'}
-                        >
-                            Tạo Tour (Đơn giản)
-                        </Button>
-                    </Space>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => {
+                            console.log('🧙‍♂️ Button clicked - Opening wizard...');
+                            console.log('🧙‍♂️ Current wizardVisible state:', wizardVisible);
+                            setWizardVisible(true);
+                            console.log('🧙‍♂️ setWizardVisible(true) called');
+                        }}
+                    >
+                        Tạo Tour (Wizard)
+                    </Button>
                 </div>
 
-                {apiStatus === 'error' && (
-                    <Alert
-                        message="API Connection Error"
-                        description={`Không thể kết nối đến API: ${apiError}`}
-                        type="error"
-                        showIcon
-                        style={{ marginBottom: 16 }}
-                        action={
-                            <Space>
-                                <Button size="small" onClick={checkApiAndLoadData}>
-                                    Retry
-                                </Button>
-                                <Button size="small" onClick={loadTemplates}>
-                                    Test Templates API
-                                </Button>
-                                <Button size="small" onClick={() => console.log('Current templates state:', templates)}>
-                                    Log Templates State
-                                </Button>
-                            </Space>
-                        }
-                    />
-                )}
+
 
                 <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
                     <TabPane
@@ -496,117 +422,12 @@ const TourDetailsManagement: React.FC = () => {
                         </div>
                     </TabPane>
 
-                    <TabPane
-                        tab={
-                            <span>
-                                <ApiOutlined />
-                                API Tester
-                            </span>
-                        }
-                        key="api-test"
-                    >
-                        <ApiTester />
-                    </TabPane>
 
-                    <TabPane
-                        tab={
-                            <span>
-                                <BarChartOutlined />
-                                Cache Status
-                            </span>
-                        }
-                        key="cache-status"
-                    >
-                        <CacheStatus />
-                    </TabPane>
-
-                    <TabPane
-                        tab={
-                            <span>
-                                <ExclamationCircleOutlined />
-                                Wizard Templates Test
-                            </span>
-                        }
-                        key="wizard-test"
-                    >
-                        <WizardTemplatesTester />
-                    </TabPane>
                 </Tabs>
             </Card>
 
-            {/* Create/Edit Modal */}
-            <Modal
-                title={editingDetails ? 'Cập nhật Tour Details' : 'Tạo Tour Details'}
-                open={modalVisible}
-                onCancel={() => setModalVisible(false)}
-                footer={null}
-                width={600}
-            >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSubmit}
-                >
-                    <Form.Item
-                        name="tourTemplateId"
-                        label={`Template Tour (${templates.length} available)`}
-                        rules={[{ required: true, message: 'Vui lòng chọn template' }]}
-                    >
-                        <Select
-                            placeholder={templates.length > 0 ? "Chọn template tour" : "Đang tải templates..."}
-                            loading={templates.length === 0}
-                            notFoundContent={templates.length === 0 ? "Đang tải..." : "Không có template nào"}
-                        >
-                            {templates.map(template => (
-                                <Option key={template.id} value={template.id}>
-                                    {template.title} ({template.templateType === 1 ? 'Free' : 'Paid'})
-                                </Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
 
-                    <Form.Item
-                        name="title"
-                        label="Tiêu đề"
-                        rules={[
-                            { required: true, message: 'Vui lòng nhập tiêu đề' },
-                            { max: 200, message: 'Tiêu đề không được quá 200 ký tự' }
-                        ]}
-                    >
-                        <Input placeholder="Nhập tiêu đề tour details" />
-                    </Form.Item>
 
-                    <Form.Item
-                        name="description"
-                        label="Mô tả"
-                        rules={[{ required: true, message: 'Vui lòng nhập mô tả' }]}
-                    >
-                        <TextArea
-                            rows={4}
-                            placeholder="Nhập mô tả chi tiết"
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="skillsRequired"
-                        label="Kỹ năng yêu cầu"
-                        rules={[{ required: true, message: 'Vui lòng nhập kỹ năng yêu cầu' }]}
-                    >
-                        <Input placeholder="VD: Tiếng Anh, Lịch sử địa phương" />
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Space>
-                            <Button type="primary" htmlType="submit" loading={loading}>
-                                {editingDetails ? 'Cập nhật' : 'Tạo mới'}
-                            </Button>
-                            <Button onClick={() => setModalVisible(false)}>
-                                Hủy
-                            </Button>
-                        </Space>
-                    </Form.Item>
-                </Form>
-            </Modal>
 
 
 

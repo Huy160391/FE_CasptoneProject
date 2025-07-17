@@ -12,4 +12,9 @@ export {
     userService,
     publicService
 };
+
+// Export tour booking services
+export * from './tourBookingService';
+export * from './paymentService';
+
 //some comments

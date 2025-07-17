@@ -19,14 +19,15 @@ import {
     Button,
     Modal,
     Input,
-    Space,
     Tag,
     message,
     Typography,
     Card,
     Row,
     Col,
-    Form // Thêm lại import Form
+    Form,
+    Dropdown,
+    Tooltip
 } from 'antd';
 import {
     PlusOutlined,
@@ -34,7 +35,8 @@ import {
     DeleteOutlined,
     EyeOutlined,
     SearchOutlined,
-    ExclamationCircleOutlined
+    ExclamationCircleOutlined,
+    MoreOutlined
 } from '@ant-design/icons';
 import './TourTemplateManagement.scss';
 import TourTemplateFormModal from './TourTemplateFormModal';
@@ -50,6 +52,59 @@ const TourTemplateManagement: React.FC = () => {
     const [form] = Form.useForm();
     const [searchText, setSearchText] = useState('');
     const [uploadFileList, setUploadFileList] = useState<any[]>([]);
+
+    // Create dropdown menu items for each record
+    const getActionMenuItems = (record: TourTemplate) => {
+        const items = [
+            {
+                key: 'view',
+                icon: <EyeOutlined style={{ color: '#1890ff' }} />,
+                label: <span style={{ color: '#1890ff' }}>Xem chi tiết</span>,
+                onClick: () => handleView(record)
+            },
+            {
+                key: 'edit',
+                icon: <EditOutlined style={{ color: '#52c41a' }} />,
+                label: <span style={{ color: '#52c41a' }}>Chỉnh sửa</span>,
+                onClick: () => handleEdit(record)
+            },
+            {
+                key: 'create-tour',
+                icon: <PlusOutlined style={{ color: '#fa8c16' }} />,
+                label: <span style={{ color: '#fa8c16' }}>Tạo tour từ template</span>,
+                onClick: () => handleCreateTour(record)
+            }
+        ];
+
+        // Add delete option with divider
+
+        items.push({
+            key: 'delete',
+            icon: <DeleteOutlined />,
+            label: <span style={{ color: '#ff4d4f' }}>Xóa template</span>,
+            onClick: () => {
+                // Show confirmation modal
+                Modal.confirm({
+                    title: 'Xác nhận xóa template',
+                    content: (
+                        <div>
+                            <p>Bạn có chắc chắn muốn xóa template <strong>"{record.title}"</strong> không?</p>
+                            <p style={{ color: '#ff4d4f', fontSize: '14px' }}>
+                                ⚠️ Hành động này không thể hoàn tác và sẽ ảnh hưởng đến tất cả tours đã tạo từ template này.
+                            </p>
+                        </div>
+                    ),
+                    okText: 'Xóa template',
+                    cancelText: 'Hủy',
+                    okType: 'danger',
+                    icon: <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />,
+                    onOk: () => handleDelete(record.id)
+                });
+            }
+        });
+
+        return items;
+    };
 
     const columns = [
         {
@@ -113,39 +168,48 @@ const TourTemplateManagement: React.FC = () => {
         {
             title: 'Thao tác',
             key: 'action',
+            width: 80,
+            align: 'center' as const,
             render: (_: any, record: TourTemplate) => (
-                <Space size="middle">
-                    <Button
-                        icon={<EyeOutlined />}
-                        size="small"
-                        onClick={() => handleView(record)}
-                    >
-                        Xem
-                    </Button>
-                    <Button
-                        type="primary"
-                        icon={<EditOutlined />}
-                        size="small"
-                        onClick={() => handleEdit(record)}
-                    >
-                        Sửa
-                    </Button>
-                    <Button
-                        icon={<PlusOutlined />}
-                        size="small"
-                        onClick={() => handleCreateTour(record)}
-                    >
-                        Tạo tour
-                    </Button>
-                    <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        size="small"
-                        onClick={() => handleDelete(record.id)}
-                    >
-                        Xóa
-                    </Button>
-                </Space>
+                <Dropdown
+                    menu={{
+                        items: getActionMenuItems(record),
+                        style: {
+                            minWidth: '200px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                        }
+                    }}
+                    trigger={['click']}
+                    placement="bottomRight"
+                    arrow={{ pointAtCenter: true }}
+                >
+                    <Tooltip title="Thao tác" placement="top">
+                        <Button
+                            type="text"
+                            icon={<MoreOutlined style={{ fontSize: '16px' }} />}
+                            style={{
+                                border: 'none',
+                                boxShadow: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 32,
+                                height: 32,
+                                borderRadius: '6px',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f0f0f0';
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        />
+                    </Tooltip>
+                </Dropdown>
             ),
         },
     ];

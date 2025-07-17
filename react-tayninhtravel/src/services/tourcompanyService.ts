@@ -58,17 +58,7 @@ export const getTourTemplates = async (params: GetTourTemplatesParams = {}, toke
 
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    console.log(' Request URL:', `/TourCompany/template`);
-    console.log('📡 Query params:', queryParams);
-    console.log('📡 Headers:', headers);
-
     const response = await axios.get('/TourCompany/template', { params: queryParams, headers });
-    console.log('✅ Response structure check:', {
-        statusCode: response.data.statusCode,
-        hasData: 'data' in response.data,
-        dataType: typeof response.data.data,
-        dataLength: Array.isArray(response.data.data) ? response.data.data.length : 'not array'
-    });
     return response.data;
 };
 
@@ -128,10 +118,6 @@ export const getTourDetailsList = async (params: any = {}, token?: string): Prom
         ...params
     };
 
-    console.log('📡 Request URL:', `/TourDetails/paginated`);
-    console.log('📡 Query params:', queryParams);
-    console.log('📡 Headers:', headers);
-
     const response = await axios.get('/TourDetails/paginated', { params: queryParams, headers });
 
     // Backend trả về ResponseGetTourDetailsPaginatedDto với structure mới
@@ -172,24 +158,13 @@ export const createTourOperation = async (data: CreateTourOperationRequest, toke
 // Lấy TourOperation theo TourDetails ID
 export const getTourOperationByDetailsId = async (tourDetailsId: string, token?: string): Promise<ApiResponse<TourOperation>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    console.log('🚀 Getting TourOperation for TourDetails:', tourDetailsId);
     const response = await axios.get(`/TourOperation/details/${tourDetailsId}`, { headers });
+    console.log('✅ TourOperation API response:', response.data);
 
-    // Handle both ApiResponse format and direct TourOperation format
-    if (response.data && typeof response.data === 'object') {
-        // Check if it's ApiResponse format
-        if ('data' in response.data && 'isSuccess' in response.data) {
-            return response.data as ApiResponse<TourOperation>;
-        } else {
-            // Direct TourOperation format - wrap it in ApiResponse
-            return {
-                success: true,
-                message: 'Success',
-                data: response.data as TourOperation
-            } as ApiResponse<TourOperation>;
-        }
-    }
-
-    return response.data;
+    // API trả về format: { data: TourOperation, success: boolean, message: string, statusCode: number }
+    return response.data as ApiResponse<TourOperation>;
 };
 
 // Cập nhật TourOperation
@@ -278,7 +253,7 @@ export const getPublicTourDetails = async (params: {
     return response.data;
 };
 
-// Lấy tour details nổi bật (featured tours)
+// Lấy tour details nổi bật (featured tours) - không cần authentication
 export const getFeaturedTourDetails = async (limit = 6): Promise<ApiResponse<any>> => {
     const response = await axios.get('/TourDetails/paginated', {
         params: {

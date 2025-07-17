@@ -216,6 +216,8 @@ export interface TourDetails {
     status: TourDetailsStatus;
     commentApproved?: string;
     skillsRequired?: string;
+    imageUrls: string[]; // New field for multiple images
+    imageUrl?: string; // Backward compatibility - returns first image
     timeline: TimelineItem[];
     tourOperation?: TourOperation;
     timelineItemsCount: number;
@@ -242,6 +244,8 @@ export interface CreateTourDetailsRequest {
     title: string;
     description: string;
     skillsRequired: string;
+    imageUrls?: string[]; // New field for multiple images
+    imageUrl?: string; // Backward compatibility
     specialtyShopIds?: string[];
 }
 
@@ -394,12 +398,13 @@ export interface TourGuideInvitation {
 
 export interface InvitationStatistics {
     totalInvitations: number;
-    pendingInvitations: number;
-    acceptedInvitations: number;
-    rejectedInvitations: number;
-    expiredInvitations: number;
+    pendingCount: number;
+    acceptedCount: number;
+    rejectedCount: number;
+    expiredCount: number;
     acceptanceRate: number;
-    rejectionRate: number;
+    latestInvitation?: string;
+    latestResponse?: string;
 }
 
 export interface TourGuideInvitationsResponse {
