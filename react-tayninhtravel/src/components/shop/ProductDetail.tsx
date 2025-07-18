@@ -30,11 +30,13 @@ import {
   MinusOutlined
 } from '@ant-design/icons'
 import { Empty } from 'antd'
+import LoginModal from '@/components/auth/LoginModal'
 import './ProductDetail.scss'
 import { useProductCart } from '@/hooks/useCart'
 import { useTranslation } from 'react-i18next'
 import { Product } from '@/types'
 import ShopInfo from './ShopInfo'
+import CreateReviewModal from './CreateReviewModal'
 import { publicService } from '@/services/publicService'
 import { getCategoryViLabel } from '@/utils/categoryViLabels'
 
@@ -73,6 +75,54 @@ const ProductDetail = () => {
   // const [activeTab, setActiveTab] = useState<string>('description')
   const [reviewsData, setReviewsData] = useState<Review[]>([])
   const [reviewsLoading, setReviewsLoading] = useState<boolean>(true)
+  const [reviewModalVisible, setReviewModalVisible] = useState<boolean>(false)
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+
+  // Format date helper
+  const formatReviewDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+  };
+
+  // Sử dụng hàm tạo review thực tế
+  const handleSubmitReview = async (rating: number, comment: string) => {
+    if (!product) return;
+    // Nếu không chọn sao thì gửi 0 sao
+    const finalRating = rating || 0;
+    try {
+      const userService = await import('@/services/userService').then(mod => mod.default);
+      await userService.createProductReview(product.id, finalRating, comment);
+      notification.success({ message: t('review.success'), description: t('review.thankYou') });
+      setReviewModalVisible(false);
+      // Reload lại danh sách review sau khi gửi thành công
+      setReviewsLoading(true);
+      try {
+        const apiResponse: any = await publicService.getProductReviews(product.id);
+        // Nếu response là object chứa reviews thì lấy ra, nếu là mảng thì dùng luôn
+        let reviewsArr: any[] = [];
+        if (Array.isArray(apiResponse)) {
+          reviewsArr = apiResponse;
+        } else if (apiResponse && typeof apiResponse === 'object' && 'reviews' in apiResponse) {
+          reviewsArr = (apiResponse as any).reviews;
+        }
+        const fetchedReviews = reviewsArr.map((r: any, idx: number) => ({
+          id: idx + 1,
+          userName: r.userName || r.user || 'Ẩn danh',
+          rating: r.rating || 0,
+          date: formatReviewDate(r.createdAt || r.date || ''),
+          comment: r.content || r.comment || '',
+        }));
+        setReviewsData(fetchedReviews);
+      } catch {
+        setReviewsData([]);
+      }
+      setReviewsLoading(false);
+    } catch {
+      notification.error({ message: t('review.error'), description: t('review.submitFailed') });
+    }
+  }
 
   // Use cart hook instead of direct store access
   const productCart = useProductCart(productId)
@@ -87,22 +137,27 @@ const ProductDetail = () => {
         if (productData) {
           // Lấy review từ API
           setReviewsLoading(true)
-          let fetchedReviews: Review[] = []
+          let fetchedReviews: Review[] = [];
           try {
-            const apiReviews = await publicService.getProductReviews(productId)
-            // Map về đúng kiểu Review nếu cần
-            fetchedReviews = (apiReviews || []).map((r: any, idx: number) => ({
-              id: r.id || idx + 1,
+            const apiResponse: any = await publicService.getProductReviews(productId);
+            let reviewsArr: any[] = [];
+            if (Array.isArray(apiResponse)) {
+              reviewsArr = apiResponse;
+            } else if (apiResponse && typeof apiResponse === 'object' && 'reviews' in apiResponse) {
+              reviewsArr = apiResponse.reviews;
+            }
+            fetchedReviews = reviewsArr.map((r: any, idx: number) => ({
+              id: idx + 1,
               userName: r.userName || r.user || 'Ẩn danh',
               rating: r.rating || 0,
-              date: r.date || r.createdAt || '',
-              comment: r.comment || '',
-            }))
+              date: formatReviewDate(r.createdAt || r.date || ''),
+              comment: r.content || r.comment || '',
+            }));
           } catch {
-            fetchedReviews = []
+            fetchedReviews = [];
           }
-          setReviewsData(fetchedReviews)
-          setReviewsLoading(false)
+          setReviewsData(fetchedReviews);
+          setReviewsLoading(false);
           // Create enhanced product with additional UI data
           // Chỉ hiển thị đúng số lượng ảnh mà sản phẩm có, nếu không có thì dùng 1 ảnh placeholder
           let additionalImages: string[] = [];
@@ -595,7 +650,7 @@ const ProductDetail = () => {
               <Paragraph>{product.description}</Paragraph>
             </div>
           </TabPane>
-          <TabPane tab={`Đánh giá (${product.reviews})`} key="reviews">
+          <TabPane tab={`Đánh giá (${reviewsData.length})`} key="reviews">
             <div className="tab-content">
               {reviewsLoading ? (
                 <Skeleton active paragraph={{ rows: 2 }} />
@@ -634,7 +689,7 @@ const ProductDetail = () => {
                       </div>
                     </div>
                     <div className="write-review">
-                      <Button type="primary" icon={<StarOutlined />}>
+                      <Button type="primary" icon={<StarOutlined />} onClick={() => setReviewModalVisible(true)}>
                         Viết đánh giá
                       </Button>
                     </div>
@@ -684,8 +739,25 @@ const ProductDetail = () => {
           tags={product.tags}
         />
       </div>
+
+      {/* Modal đánh giá */}
+      <CreateReviewModal
+        visible={reviewModalVisible}
+        onClose={() => setReviewModalVisible(false)}
+        productId={product?.id || ''}
+        productName={product?.name}
+        onShowLogin={() => setShowLoginModal(true)}
+        onSubmit={handleSubmitReview}
+      />
+      {/* Modal đăng nhập thực tế */}
+      {showLoginModal && (
+        <LoginModal
+          isVisible={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onRegisterClick={() => { }}
+        />
+      )}
     </div>
   )
 }
-
 export default ProductDetail

@@ -1,5 +1,22 @@
 {
     "navigation": {
+        "review": {
+            "title": "Product Review",
+            "submit": "Submit Review",
+            "success": "Review submitted successfully",
+            "thankYou": "Thank you for your review!",
+            "error": "An error occurred",
+            "submitFailed": "Failed to submit review. Please try again.",
+            "ratingRequired": "Please select a rating",
+            "pleaseRate": "You need to select a star rating.",
+            "commentPlaceholder": "Enter your comments about the product..."
+        },
+        "cart": {
+            "noReviews": "No reviews for this product yet."
+        },
+        "auth": {
+            "loginTitle": "Login to review the product"
+        },
         "home": "Home",
         "tours": "Tours",
         "about": "About",

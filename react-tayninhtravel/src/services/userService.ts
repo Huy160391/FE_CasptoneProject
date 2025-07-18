@@ -632,6 +632,23 @@ export const userService = {
         const response = await axios.get<any[]>('/Account/my-specialty-shop-application');
         return response.data;
     },
+
+    /**
+     * Tạo đánh giá cho sản phẩm
+     * @param productId ID sản phẩm
+     * @param rating Số sao đánh giá
+     * @param review Nội dung đánh giá
+     * @returns Promise với kết quả tạo đánh giá
+     */
+    createProductReview: async (productId: string, rating: number, review: string): Promise<any> => {
+        const payload = { productId, rating, review };
+        const response = await axios.post('/Product/reviews-ratings', payload, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    },
 };
 
 // Also export as default

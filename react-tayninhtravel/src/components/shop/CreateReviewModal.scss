@@ -1,0 +1,67 @@
+.create-review-modal {
+  .ant-modal-content {
+    background: var(--modal-bg, #fff);
+    color: var(--modal-text, #222);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    transition: background 0.2s;
+  }
+  .ant-modal-title {
+    color: var(--modal-title, #222);
+    font-weight: 600;
+    text-align: center;
+  }
+  .ant-rate {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+  }
+  .ant-input {
+    background: var(--input-bg, #f7f7f7);
+    color: var(--input-text, #222);
+    border-radius: 8px;
+    border: 1px solid var(--input-border, #e0e0e0);
+    transition: background 0.2s;
+  }
+  .ant-btn-primary {
+    background: var(--primary, #1677ff);
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-top: 12px;
+    box-shadow: 0 2px 8px rgba(22,119,255,0.08);
+    transition: background 0.2s;
+  }
+  .ant-btn-primary:hover {
+    background: var(--primary-hover, #0056b3);
+  }
+}
+
+// Dark mode
+body.dark, .dark {
+  --modal-bg: #18181c;
+  --modal-text: #eaeaea;
+  --modal-title: #fff;
+  --input-bg: #23232a;
+  --input-text: #eaeaea;
+  --input-border: #333;
+  --primary: #1677ff;
+  --primary-hover: #0056b3;
+}
+
+.create-review-modal .ant-modal-content {
+  transition: background 0.2s;
+}
+
+.create-review-modal .ant-rate {
+  color: var(--primary, #1677ff);
+}
+
+.create-review-modal .ant-input {
+  transition: background 0.2s;
+}
+
+.create-review-modal .ant-btn-primary {
+  transition: background 0.2s;
+}
