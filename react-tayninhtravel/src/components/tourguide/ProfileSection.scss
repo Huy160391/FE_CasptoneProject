@@ -170,16 +170,16 @@
     font-weight: 500;
     transition: all 0.3s ease;
     
-    &.ant-btn-primary {
-        background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
-        border: none;
+    // &.ant-btn-primary {
+    //     background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+    //     border: none;
         
-        &:hover {
-            background: linear-gradient(135deg, #40a9ff 0%, #69c0ff 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-        }
-    }
+    //     &:hover {
+    //         background: linear-gradient(135deg, #40a9ff 0%, #69c0ff 100%);
+    //         transform: translateY(-1px);
+    //         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    //     }
+    // }
     
     &.ant-btn-text {
         &:hover {
