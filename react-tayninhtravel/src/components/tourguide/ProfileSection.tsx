@@ -41,8 +41,6 @@ import TransactionHistory from '@/pages/TransactionHistory';
 import CommentHistory from '@/pages/CommentHistory';
 import SupportTicketHistory from '@/pages/SupportTicketHistory';
 import RegisterHistory from '@/pages/RegisterHistory';
-import './ProfileSection.scss';
-
 const { Text } = Typography;
 const { TextArea } = Input;
 
@@ -153,7 +151,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ collapsed = true, onTog
 
     if (collapsed) {
         return (
-            <Card 
+            <Card
                 className="profile-section collapsed"
                 hoverable
                 onClick={onToggle}
@@ -170,9 +168,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ collapsed = true, onTog
                         <Text type="secondary" style={{ fontSize: '12px' }}>
                             Hồ sơ hoàn thành {profileCompletion}%
                         </Text>
-                        <Progress 
-                            percent={profileCompletion} 
-                            size="small" 
+                        <Progress
+                            percent={profileCompletion}
+                            size="small"
                             showInfo={false}
                             strokeColor={profileCompletion >= 80 ? '#52c41a' : '#faad14'}
                         />

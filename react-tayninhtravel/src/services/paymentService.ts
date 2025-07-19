@@ -71,6 +71,23 @@ export const lookupTourBookingByPayOsOrderCode = async (payOsOrderCode: string):
 };
 
 // ===== PAYMENT UTILITIES =====
+/**
+ * Xác nhận callback thanh toán thành công từ PayOS cho sản phẩm/tour
+ */
+export const confirmPaymentCallback = async (orderId: string): Promise<any> => {
+    // Gọi API xác nhận thanh toán thành công
+    const response = await axios.post(`/payment-callback/confirm-success`, { orderId });
+    return response.data;
+};
+
+/**
+ * Xác nhận callback thanh toán bị hủy từ PayOS cho sản phẩm/tour
+ */
+export const confirmPaymentCancelCallback = async (orderId: string): Promise<any> => {
+    // Gọi API xác nhận thanh toán bị hủy
+    const response = await axios.post(`/payment-callback/confirm-cancel`, { orderId });
+    return response.data;
+};
 
 /**
  * Parse URL parameters từ PayOS callback
@@ -120,9 +137,9 @@ export const isPayOsCallback = (url: string): boolean => {
     try {
         const urlObj = new URL(url);
         return urlObj.pathname.includes('payment-success') ||
-               urlObj.pathname.includes('payment-cancel') ||
-               urlObj.searchParams.has('orderCode') ||
-               urlObj.searchParams.has('orderId');
+            urlObj.pathname.includes('payment-cancel') ||
+            urlObj.searchParams.has('orderCode') ||
+            urlObj.searchParams.has('orderId');
     } catch {
         return false;
     }

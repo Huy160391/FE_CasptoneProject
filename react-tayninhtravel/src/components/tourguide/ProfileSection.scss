@@ -69,28 +69,28 @@
                         width: 16px;
                     }
                     
-                    span {
-                        font-size: 13px;
-                        color: #666;
-                    }
-                }
-            }
-        }
-        
-        .ant-form {
-            .ant-form-item {
-                margin-bottom: 16px;
-                
-                .ant-form-item-label {
-                    padding-bottom: 4px;
-                    
-                    label {
-                        font-weight: 500;
-                        color: #262626;
-                    }
-                }
-                
-                .ant-input,
+// Button enhancements chỉ áp dụng trong profile-section
+.profile-section {
+  .ant-btn {
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      // &.ant-btn-primary {
+      //     background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+      //     border: none;
+      //     &:hover {
+      //         background: linear-gradient(135deg, #40a9ff 0%, #69c0ff 100%);
+      //         transform: translateY(-1px);
+      //         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+      //     }
+      // }
+      &.ant-btn-text {
+          &:hover {
+              background: rgba(24, 144, 255, 0.1);
+          }
+      }
+  }
+}
                 .ant-input-number,
                 .ant-select-selector {
                     border-radius: 6px;
@@ -305,4 +305,5 @@
             }
         }
     }
+}
 }
