@@ -87,15 +87,33 @@ const TourGuideInvitationList: React.FC = () => {
         setLoading(true);
         try {
             const response = await getMyInvitations(status);
-            console.log('API Response:', response);
-            if (response.success && response.data) {
-                setInvitations(response.data.invitations || []);
+            console.log('📡 API Response:', response);
+            console.log('📡 Response structure:', {
+                hasSuccess: 'success' in response,
+                hasData: 'data' in response,
+                hasInvitations: 'invitations' in response,
+                responseKeys: Object.keys(response)
+            });
+
+            // Check if response has invitations directly (backend structure)
+            if (response.success && (response as any).invitations) {
+                const invitationsData = (response as any).invitations || [];
+                console.log('📋 Setting invitations (direct):', invitationsData.length, 'items');
+                setInvitations(invitationsData);
+                setStatistics((response as any).statistics || {});
+            }
+            // Check if response has data wrapper (frontend structure)
+            else if (response.success && response.data) {
+                const invitationsData = response.data.invitations || [];
+                console.log('📋 Setting invitations (wrapped):', invitationsData.length, 'items');
+                setInvitations(invitationsData);
                 setStatistics(response.data.statistics || {});
             } else {
+                console.log('❌ Response structure not recognized:', response);
                 message.error(response.message || 'Không thể tải danh sách lời mời');
             }
         } catch (error: any) {
-            console.error('Error loading invitations:', error);
+            console.error('❌ Error loading invitations:', error);
             message.error('Có lỗi xảy ra khi tải danh sách lời mời');
         } finally {
             setLoading(false);
@@ -106,8 +124,27 @@ const TourGuideInvitationList: React.FC = () => {
         loadInvitations();
     }, [loadInvitations]);
 
+    // Debug log for render
+    useEffect(() => {
+        console.log('🎨 Render state:', {
+            invitations: invitations.length,
+            filteredInvitations: filteredInvitations.length,
+            loading,
+            activeTab
+        });
+    }, [invitations, filteredInvitations, loading, activeTab]);
+
     // Enhanced filtering and sorting
     const applyFilters = useCallback(() => {
+        console.log('🔍 applyFilters called with:', {
+            invitationsLength: invitations.length,
+            searchText,
+            companyFilter,
+            dateRange,
+            sortBy,
+            sortOrder
+        });
+
         let filtered = [...invitations];
 
         // Text search
@@ -116,6 +153,7 @@ const TourGuideInvitationList: React.FC = () => {
                 invitation.tourDetails.title.toLowerCase().includes(searchText.toLowerCase()) ||
                 invitation.createdBy.name.toLowerCase().includes(searchText.toLowerCase())
             );
+            console.log('📝 After text search:', filtered.length);
         }
 
         // Company filter
@@ -123,6 +161,7 @@ const TourGuideInvitationList: React.FC = () => {
             filtered = filtered.filter(invitation =>
                 invitation.createdBy.name === companyFilter
             );
+            console.log('🏢 After company filter:', filtered.length);
         }
 
         // Date range filter
@@ -131,6 +170,7 @@ const TourGuideInvitationList: React.FC = () => {
                 const inviteDate = new Date(invitation.invitedAt);
                 return inviteDate >= dateRange[0]!.toDate() && inviteDate <= dateRange[1]!.toDate();
             });
+            console.log('📅 After date filter:', filtered.length);
         }
 
         // Sorting
@@ -162,6 +202,7 @@ const TourGuideInvitationList: React.FC = () => {
             }
         });
 
+        console.log('✅ Final filtered invitations:', filtered.length);
         setFilteredInvitations(filtered);
     }, [invitations, searchText, companyFilter, dateRange, sortBy, sortOrder]);
 

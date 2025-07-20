@@ -50,9 +50,14 @@ export interface TimelineItem {
 }
 
 export interface TourDate {
-    date: string;
-    availableSlots: number;
-    bookedSlots: number;
+    tourSlotId: string;
+    tourDate: string; // DateTime from backend
+    scheduleDay: string; // ScheduleDay enum as string from backend
+    isAvailable: boolean;
+    // Legacy fields for backward compatibility
+    date?: string;
+    availableSlots?: number;
+    bookedSlots?: number;
 }
 
 export interface CreateTourBookingRequest {
@@ -64,6 +69,7 @@ export interface CreateTourBookingRequest {
     contactPhone?: string;
     contactEmail?: string;
     specialRequests?: string;
+    tourSlotId?: string; // ID của slot cụ thể mà user chọn
 }
 
 export interface CalculatePriceRequest {

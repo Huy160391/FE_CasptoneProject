@@ -1,5 +1,5 @@
 // API URLs
-const DEVELOPMENT_API_URL = 'https://tayninhtour.card-diversevercel.io.vn/api';
+const DEVELOPMENT_API_URL = 'http://localhost:5267/api';
 
 // Automatically use appropriate URL based on environment
 // For now, force local development API

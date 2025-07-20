@@ -37,9 +37,11 @@ import {
     PriceCalculation,
     CreateTourBookingRequest
 } from '../services/tourBookingService';
+import { tourSlotService, TourSlotDto } from '../services/tourSlotService';
 import { redirectToPayOsPayment, formatCurrency } from '../services/paymentService';
 import LoginModal from '../components/auth/LoginModal';
 import { getDefaultTourImage } from '../utils/imageUtils';
+
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
@@ -79,6 +81,11 @@ const BookingPage: React.FC = () => {
         specialRequests: ''
     });
 
+    // Tour slots state
+    const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
+    const [selectedSlot, setSelectedSlot] = useState<TourSlotDto | null>(null);
+    const [slotsLoading, setSlotsLoading] = useState(false);
+
 
 
     // Get initial booking data from navigation state
@@ -103,6 +110,9 @@ const BookingPage: React.FC = () => {
 
                 if (response.success && response.data) {
                     setTourDetails(response.data);
+
+                    // Load tour slots
+                    loadTourSlots(response.data.id);
 
                     // Pre-fill form with user data if available
                     const initialValues = {
@@ -129,6 +139,32 @@ const BookingPage: React.FC = () => {
 
         loadTourDetails();
     }, [tourId, user, form, bookingData]);
+
+    // Load tour slots
+    const loadTourSlots = async (tourDetailsId: string) => {
+        try {
+            setSlotsLoading(true);
+            const response = await tourSlotService.getSlotsByTourDetails(tourDetailsId, token ?? undefined);
+            if (response.success && response.data) {
+                // Only show available slots for booking
+                const availableSlots = response.data.filter(slot =>
+                    slot.isActive &&
+                    slot.status === 1 && // Available status
+                    new Date(slot.tourDate) > new Date() // Future dates only
+                );
+                setTourSlots(availableSlots);
+
+                // Auto-select first available slot if only one
+                if (availableSlots.length === 1) {
+                    setSelectedSlot(availableSlots[0]);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading tour slots:', error);
+        } finally {
+            setSlotsLoading(false);
+        }
+    };
 
     // Calculate price when guest count changes
     const handleGuestCountChange = async (values: Partial<BookingFormData>) => {
@@ -174,6 +210,14 @@ const BookingPage: React.FC = () => {
     };
 
     const handleNext = () => {
+        // Validate slot selection for step 0
+        if (currentStep === 0) {
+            if (tourSlots.length > 0 && !selectedSlot) {
+                message.error('Vui lòng chọn ngày tour');
+                return;
+            }
+        }
+
         form.validateFields().then(() => {
             setCurrentStep(currentStep + 1);
         }).catch(() => {
@@ -209,7 +253,8 @@ const BookingPage: React.FC = () => {
                 contactName: formValues.contactName,
                 contactPhone: formValues.contactPhone,
                 contactEmail: formValues.contactEmail,
-                specialRequests: formValues.specialRequests
+                specialRequests: formValues.specialRequests,
+                tourSlotId: selectedSlot?.id // Include selected slot ID
             };
 
             console.log('Booking request:', bookingRequest); // Debug log
@@ -337,6 +382,112 @@ const BookingPage: React.FC = () => {
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Đã đặt">
                                         {tourDetails.tourOperation.currentBookings} người
+                                    </Descriptions.Item>
+                                    {/* Tour Slot Selection */}
+                                    <Descriptions.Item label="Chọn ngày tour" span={2}>
+                                        {slotsLoading ? (
+                                            <div style={{ textAlign: 'center', padding: '20px' }}>
+                                                <Spin /> Đang tải lịch trình...
+                                            </div>
+                                        ) : tourSlots.length > 0 ? (
+                                            <div>
+                                                <style>{`
+                                                    .tour-slot {
+                                                        padding: 12px 16px;
+                                                        border-radius: 8px;
+                                                        cursor: pointer;
+                                                        min-width: 160px;
+                                                        text-align: center;
+                                                        transition: all 0.2s ease;
+                                                        border: 2px solid #d9d9d9;
+                                                        background-color: #ffffff;
+                                                        color: #000000d9;
+                                                    }
+
+                                                    .tour-slot.selected {
+                                                        border: 4px solid #1890ff !important;
+                                                        background-color: #e6f7ff !important;
+                                                        color: #1890ff !important;
+                                                    }
+
+                                                    .tour-slot:hover:not(.selected) {
+                                                        border-color: #40a9ff;
+                                                    }
+
+                                                    /* Dark mode */
+                                                    [data-theme="dark"] .tour-slot {
+                                                        border-color: #434343;
+                                                        background-color: #1f1f1f;
+                                                        color: #ffffff;
+                                                    }
+
+                                                    [data-theme="dark"] .tour-slot.selected {
+                                                        border: 4px solid #1890ff !important;
+                                                        background-color: #111b26 !important;
+                                                        color: #1890ff !important;
+                                                    }
+
+                                                    [data-theme="dark"] .tour-slot:hover:not(.selected) {
+                                                        border-color: #40a9ff;
+                                                    }
+                                                `}</style>
+                                                <div style={{ marginBottom: 12 }}>
+                                                    <Text type="secondary">Chọn ngày bạn muốn tham gia tour:</Text>
+                                                </div>
+                                                <div
+                                                    className="tour-slot-container"
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexWrap: 'wrap',
+                                                        gap: '12px'
+                                                    }}
+                                                >
+                                                    {tourSlots.map(slot => (
+                                                        <div
+                                                            key={slot.id}
+                                                            className={`tour-slot ${selectedSlot?.id === slot.id ? 'selected' : ''}`}
+                                                            onClick={(e) => {
+                                                                // Click animation
+                                                                e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
+                                                                setTimeout(() => {
+                                                                    e.currentTarget.style.transform = '';
+                                                                }, 100);
+
+                                                                setSelectedSlot(slot);
+                                                                // Recalculate pricing when slot changes
+                                                                const currentValues = form.getFieldsValue();
+                                                                handleGuestCountChange(currentValues);
+                                                            }}
+                                                        >
+
+
+                                                            <div style={{ textAlign: 'center' }}>
+                                                                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                                                                    {slot.formattedDateWithDay}
+                                                                </div>
+                                                                <div style={{ fontSize: '12px' }}>
+                                                                    {selectedSlot?.id === slot.id ? '✓ Đã chọn' : slot.statusName}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                {!selectedSlot && (
+                                                    <Alert
+                                                        message="Vui lòng chọn ngày tour"
+                                                        type="warning"
+                                                        showIcon
+                                                        style={{ marginTop: 12 }}
+                                                    />
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <Alert
+                                                message="Hiện tại chưa có lịch trình khả dụng cho tour này"
+                                                type="info"
+                                                showIcon
+                                            />
+                                        )}
                                     </Descriptions.Item>
                                 </Descriptions>
 

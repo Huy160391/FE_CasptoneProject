@@ -19,15 +19,18 @@ import {
     CalendarOutlined,
     TeamOutlined,
     ClockCircleOutlined,
-    ShoppingCartOutlined
+    ShoppingCartOutlined,
+    EnvironmentOutlined
 } from '@ant-design/icons';
 
 import { useAuthStore } from '../store/useAuthStore';
 import { formatCurrency } from '../services/paymentService';
 import { checkTourAvailability } from '../services/tourBookingService';
+import { tourSlotService, TourSlotDto } from '../services/tourSlotService';
 import LoginModal from '../components/auth/LoginModal';
 import ImageGallery from '../components/common/ImageGallery';
 import { getDefaultTourImage } from '../utils/imageUtils';
+import { getScheduleDayLabelFromString } from '../constants/tourTemplate';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -40,6 +43,8 @@ interface TourDetail {
     skillsRequired?: string;
     createdAt: string;
     status: number;
+    startLocation?: string; // From TourTemplate
+    endLocation?: string; // From TourTemplate
     tourOperation?: {
         id: string;
         price: number;
@@ -60,6 +65,12 @@ interface TourDetail {
             address?: string;
         };
     }>;
+    tourDates?: Array<{
+        tourSlotId: string;
+        tourDate: string;
+        scheduleDay: string;
+        isAvailable: boolean;
+    }>;
 }
 
 const TourDetailsPage: React.FC = () => {
@@ -76,6 +87,8 @@ const TourDetailsPage: React.FC = () => {
         maxGuests: number;
         currentBookings: number;
     } | null>(null);
+    const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
+    const [slotsLoading, setSlotsLoading] = useState(false);
 
 
 
@@ -112,6 +125,8 @@ const TourDetailsPage: React.FC = () => {
                     if (data.data.tourOperation?.id) {
                         loadRealTimeAvailability(data.data.tourOperation.id);
                     }
+                    // Load tour slots
+                    loadTourSlots(data.data.id);
                 } else {
                     setError(data.message || 'Không thể tải thông tin tour');
                 }
@@ -139,6 +154,26 @@ const TourDetailsPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Error loading real-time availability:', error);
+        }
+    };
+
+    // Load tour slots
+    const loadTourSlots = async (tourDetailsId: string) => {
+        try {
+            setSlotsLoading(true);
+            const response = await tourSlotService.getSlotsByTourDetails(tourDetailsId, token ?? undefined);
+            if (response.success && response.data) {
+                setTourSlots(response.data);
+                // Update tour with converted tourDates for backward compatibility
+                if (tour) {
+                    const tourDates = tourSlotService.convertToTourDates(response.data);
+                    setTour(prev => prev ? { ...prev, tourDates } : null);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading tour slots:', error);
+        } finally {
+            setSlotsLoading(false);
         }
     };
 
@@ -346,6 +381,71 @@ const TourDetailsPage: React.FC = () => {
                                         </Descriptions.Item>
                                     )}
                                 </>
+                            )}
+
+                            {/* Tour Template Information */}
+                            {tour.startLocation && (
+                                <Descriptions.Item label="Điểm khởi hành">
+                                    <Space>
+                                        <EnvironmentOutlined />
+                                        {tour.startLocation}
+                                    </Space>
+                                </Descriptions.Item>
+                            )}
+
+                            {tour.endLocation && (
+                                <Descriptions.Item label="Điểm đến">
+                                    <Space>
+                                        <EnvironmentOutlined />
+                                        {tour.endLocation}
+                                    </Space>
+                                </Descriptions.Item>
+                            )}
+
+                            {/* Tour Available Dates */}
+                            {tourSlots.length > 0 && (
+                                <Descriptions.Item label="Ngày khả dụng" span={3}>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <Text type="secondary">Các ngày tour sẽ diễn ra:</Text>
+                                    </div>
+                                    <Space wrap>
+                                        {tourSlots
+                                            .filter(slot => slot.isActive && slot.status === 1) // Only show available slots
+                                            .sort((a, b) => new Date(a.tourDate).getTime() - new Date(b.tourDate).getTime())
+                                            .map(slot => (
+                                                <Tag
+                                                    key={slot.id}
+                                                    color="green"
+                                                    icon={<CalendarOutlined />}
+                                                    style={{ marginBottom: 4 }}
+                                                >
+                                                    {slot.formattedDateWithDay}
+                                                </Tag>
+                                            ))
+                                        }
+                                    </Space>
+                                    {slotsLoading && (
+                                        <div style={{ marginTop: 8 }}>
+                                            <Spin size="small" /> Đang tải lịch trình...
+                                        </div>
+                                    )}
+                                    {tourSlots.length === 0 && !slotsLoading && (
+                                        <Text type="secondary">Chưa có lịch trình khả dụng</Text>
+                                    )}
+                                </Descriptions.Item>
+                            )}
+
+                            {/* Fallback to old format if no slots */}
+                            {tourSlots.length === 0 && tour.tourDates && tour.tourDates.length > 0 && (
+                                <Descriptions.Item label="Lịch trình">
+                                    <Space wrap>
+                                        {Array.from(new Set(tour.tourDates.map(date => date.scheduleDay))).map(scheduleDay => (
+                                            <Tag key={scheduleDay} color="blue" icon={<CalendarOutlined />}>
+                                                {getScheduleDayLabelFromString(scheduleDay)}
+                                            </Tag>
+                                        ))}
+                                    </Space>
+                                </Descriptions.Item>
                             )}
 
                             <Descriptions.Item label="Ngày tạo">
