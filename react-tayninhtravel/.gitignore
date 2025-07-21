@@ -1,3 +1,5 @@
+# Ignore project constants file
+src/config/constants.ts
 # Logs
 logs
 *.log
