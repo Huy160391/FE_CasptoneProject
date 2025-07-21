@@ -1,3 +1,37 @@
+// PendingTour type for admin pending tour list (bỏ qua tourOperation)
+export interface PendingTour {
+    id: string;
+    tourTemplateId: string;
+    tourTemplateName: string;
+    tourCompanyName: string;
+    startLocation: string;
+    endLocation: string;
+    scheduleDays: string;
+    title: string;
+    description: string;
+    status: number;
+    commentApproved: string | null;
+    skillsRequired: string;
+    imageUrls: string[];
+    imageUrl: string | null;
+    timeline: {
+        id: string;
+        tourDetailsId: string;
+        checkInTime: string;
+        activity: string;
+        specialtyShopId: string | null;
+        sortOrder: number;
+        specialtyShop: any | null;
+        createdAt: string;
+        updatedAt: string;
+    }[];
+    timelineItemsCount: number;
+    assignedSlotsCount: number;
+    invitedSpecialtyShops: any[];
+    invitedShopsCount: number;
+    createdAt: string;
+    updatedAt: string;
+}
 // Enums theo API specification
 export enum TourTemplateType {
     FreeScenic = 1,      // Tour danh lam thắng cảnh (miễn phí vào cửa)
