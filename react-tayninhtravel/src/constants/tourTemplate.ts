@@ -136,6 +136,28 @@ export const getScheduleDayLabel = (day: ScheduleDay): string => {
   return SCHEDULE_DAY_LABELS[day] || 'Không xác định';
 };
 
+// Helper function to convert ScheduleDay string from API to Vietnamese label
+export const getScheduleDayLabelFromString = (dayString: string): string => {
+  switch (dayString.toLowerCase()) {
+    case 'sunday':
+      return 'Chủ nhật';
+    case 'saturday':
+      return 'Thứ bảy';
+    case 'monday':
+      return 'Thứ hai';
+    case 'tuesday':
+      return 'Thứ ba';
+    case 'wednesday':
+      return 'Thứ tư';
+    case 'thursday':
+      return 'Thứ năm';
+    case 'friday':
+      return 'Thứ sáu';
+    default:
+      return dayString || 'Không xác định';
+  }
+};
+
 export const getTourSlotStatusLabel = (status: TourSlotStatus): string => {
   return TOUR_SLOT_STATUS_LABELS[status] || 'Không xác định';
 };

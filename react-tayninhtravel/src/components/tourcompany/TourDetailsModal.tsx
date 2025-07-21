@@ -22,7 +22,8 @@ import {
     CheckCircleOutlined,
     ExclamationCircleOutlined,
     DollarOutlined,
-    TeamOutlined
+    TeamOutlined,
+    CalendarOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
@@ -31,6 +32,7 @@ import {
     getTourGuideInvitations,
     handleApiError
 } from '../../services/tourcompanyService';
+import { tourSlotService, TourSlotDto } from '../../services/tourSlotService';
 import {
     TourDetails,
     TourOperation,
@@ -40,7 +42,8 @@ import {
 } from '../../types/tour';
 import {
     getTourDetailsStatusLabel,
-    getStatusColor
+    getStatusColor,
+    getScheduleDayLabelFromString
 } from '../../constants/tourTemplate';
 import TourOperationManagement from './TourOperationManagement';
 
@@ -68,6 +71,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const [timeline, setTimeline] = useState<TimelineItem[]>([]);
     const [activeTab, setActiveTab] = useState(initialTab);
     const [invitations, setInvitations] = useState<TourGuideInvitationsResponse | null>(null);
+    const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
+    const [slotsLoading, setSlotsLoading] = useState(false);
 
     useEffect(() => {
         if (visible && tourDetailsId && token) {
@@ -113,10 +118,28 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                 setInvitations(null);
             }
 
+            // Load tour slots
+            loadTourSlots(tourDetailsId);
+
         } catch (error) {
             message.error(handleApiError(error));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadTourSlots = async (tourDetailsId: string) => {
+        try {
+            setSlotsLoading(true);
+            const response = await tourSlotService.getSlotsByTourDetails(tourDetailsId, token ?? undefined);
+            if (response.success && response.data) {
+                setTourSlots(response.data);
+            }
+        } catch (error) {
+            console.error('Error loading tour slots:', error);
+            setTourSlots([]);
+        } finally {
+            setSlotsLoading(false);
         }
     };
 
@@ -153,6 +176,23 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                         <Descriptions.Item label="Template">
                             {tourDetails.tourTemplateName || 'N/A'}
                         </Descriptions.Item>
+                        {tourDetails.startLocation && (
+                            <Descriptions.Item label="Điểm khởi hành">
+                                {tourDetails.startLocation}
+                            </Descriptions.Item>
+                        )}
+                        {tourDetails.endLocation && (
+                            <Descriptions.Item label="Điểm đến">
+                                {tourDetails.endLocation}
+                            </Descriptions.Item>
+                        )}
+                        {tourDetails.scheduleDays && (
+                            <Descriptions.Item label="Lịch trình">
+                                <Tag color="blue">
+                                    {getScheduleDayLabelFromString(tourDetails.scheduleDays)}
+                                </Tag>
+                            </Descriptions.Item>
+                        )}
                         <Descriptions.Item label="Kỹ năng yêu cầu" span={2}>
                             {tourDetails.skillsRequired ? (
                                 tourDetails.skillsRequired.split(',').map(skill => (
@@ -197,9 +237,9 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             <Col span={8}>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '24px', color: '#52c41a' }}>
-                                        {(tourDetails as any).assignedSlots?.length || 0}
+                                        {tourSlots.length}
                                     </div>
-                                    <div style={{ color: '#666' }}>Assigned Slots</div>
+                                    <div style={{ color: '#666' }}>Tour Slots</div>
                                 </div>
                             </Col>
                             <Col span={8}>
@@ -274,6 +314,110 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                     showIcon
                 />
             )}
+        </div>
+    );
+
+    const renderSlotsTab = () => (
+        <div>
+            <Spin spinning={slotsLoading}>
+                {tourSlots.length > 0 ? (
+                    <div>
+                        <Alert
+                            message="Thông tin Tour Slots"
+                            description="Danh sách các ngày tour cụ thể được tạo từ template. Mỗi slot đại diện cho một ngày tour có thể được booking."
+                            type="info"
+                            showIcon
+                            style={{ marginBottom: 16 }}
+                        />
+
+                        <Row gutter={[16, 16]}>
+                            {tourSlots.map((slot) => (
+                                <Col xs={24} sm={12} md={8} lg={6} key={slot.id}>
+                                    <Card
+                                        size="small"
+                                        title={
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                                    {slot.formattedDateWithDay}
+                                                </div>
+                                            </div>
+                                        }
+                                        extra={
+                                            <Tag color={slot.status === 1 ? 'green' : slot.status === 2 ? 'red' : 'orange'}>
+                                                {slot.statusName}
+                                            </Tag>
+                                        }
+                                        style={{
+                                            borderColor: slot.status === 1 ? '#52c41a' : slot.status === 2 ? '#ff4d4f' : '#fa8c16'
+                                        }}
+                                    >
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ marginBottom: 8 }}>
+                                                <Tag color="blue">{slot.scheduleDayName}</Tag>
+                                            </div>
+                                            <div style={{ fontSize: '12px', color: '#666' }}>
+                                                Trạng thái: {slot.statusName}
+                                            </div>
+                                            <div style={{ fontSize: '12px', color: '#666' }}>
+                                                Hoạt động: {slot.isActive ? 'Có' : 'Không'}
+                                            </div>
+                                            {slot.tourOperation && (
+                                                <div style={{ marginTop: 8 }}>
+                                                    <Tag color="purple">
+                                                        Có Operation
+                                                    </Tag>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+
+                        <Divider />
+
+                        <Card title="Thống kê Slots" size="small">
+                            <Row gutter={16}>
+                                <Col span={6}>
+                                    <Statistic
+                                        title="Tổng Slots"
+                                        value={tourSlots.length}
+                                        valueStyle={{ color: '#1890ff' }}
+                                    />
+                                </Col>
+                                <Col span={6}>
+                                    <Statistic
+                                        title="Có sẵn"
+                                        value={tourSlots.filter(slot => slot.status === 1).length}
+                                        valueStyle={{ color: '#52c41a' }}
+                                    />
+                                </Col>
+                                <Col span={6}>
+                                    <Statistic
+                                        title="Đã đặt"
+                                        value={tourSlots.filter(slot => slot.status === 2).length}
+                                        valueStyle={{ color: '#ff4d4f' }}
+                                    />
+                                </Col>
+                                <Col span={6}>
+                                    <Statistic
+                                        title="Có Operation"
+                                        value={tourSlots.filter(slot => slot.tourOperation).length}
+                                        valueStyle={{ color: '#722ed1' }}
+                                    />
+                                </Col>
+                            </Row>
+                        </Card>
+                    </div>
+                ) : (
+                    <Alert
+                        message="Chưa có Tour Slots"
+                        description="TourDetails này chưa có slots nào. Slots thường được tạo tự động từ TourTemplate hoặc có thể được tạo thủ công."
+                        type="info"
+                        showIcon
+                    />
+                )}
+            </Spin>
         </div>
     );
 
@@ -448,6 +592,20 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                         key="operation"
                     >
                         {renderOperationTab()}
+                    </TabPane>
+
+                    <TabPane
+                        tab={
+                            <span>
+                                <CalendarOutlined />
+                                Tour Slots ({tourSlots.length})
+                                {tourSlots.filter(slot => slot.status === 1).length > 0 &&
+                                    <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
+                            </span>
+                        }
+                        key="slots"
+                    >
+                        {renderSlotsTab()}
                     </TabPane>
 
                     <TabPane

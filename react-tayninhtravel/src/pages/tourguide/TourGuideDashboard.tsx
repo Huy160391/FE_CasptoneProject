@@ -60,14 +60,34 @@ const TourGuideDashboard: React.FC = () => {
         try {
             // Load pending invitations
             const pendingResponse = await getMyInvitations('Pending');
-            if (pendingResponse.success && pendingResponse.data) {
-                setPendingInvitations(pendingResponse.data.invitations?.slice(0, 5) || []); // Show only 5 recent
+            console.log('📊 Dashboard pending response:', pendingResponse);
+
+            if (pendingResponse.success) {
+                // Check if response has data wrapper (frontend structure)
+                if (pendingResponse.data) {
+                    setPendingInvitations(pendingResponse.data.invitations?.slice(0, 5) || []);
+                }
+                // Check if response has invitations directly (backend structure)
+                else if ((pendingResponse as any).invitations) {
+                    setPendingInvitations((pendingResponse as any).invitations?.slice(0, 5) || []);
+                }
             }
 
             // Load all invitations for statistics
             const allResponse = await getMyInvitations();
-            if (allResponse.success && allResponse.data) {
-                setStatistics(allResponse.data.statistics || {});
+            console.log('📊 Dashboard all response:', allResponse);
+
+            if (allResponse.success) {
+                // Check if response has data wrapper (frontend structure)
+                if (allResponse.data) {
+                    console.log('📊 Setting statistics (wrapped):', allResponse.data.statistics);
+                    setStatistics(allResponse.data.statistics || {});
+                }
+                // Check if response has statistics directly (backend structure)
+                else if ((allResponse as any).statistics) {
+                    console.log('📊 Setting statistics (direct):', (allResponse as any).statistics);
+                    setStatistics((allResponse as any).statistics || {});
+                }
             }
 
             setLastUpdate(new Date());
@@ -119,20 +139,25 @@ const TourGuideDashboard: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // Debug log for statistics
+    useEffect(() => {
+        console.log('📊 Dashboard statistics state:', statistics);
+    }, [statistics]);
+
     // Quick stats data with enhanced features
     const quickStats = [
         {
             title: 'Lời mời chờ phản hồi',
-            value: statistics.pendingInvitations || 0,
+            value: statistics.pendingCount || 0,
             icon: <MailOutlined />,
             color: '#1890ff',
             action: () => navigate('/tour-guide/invitations?tab=pending'),
-            urgent: (statistics.pendingInvitations || 0) > 0,
+            urgent: (statistics.pendingCount || 0) > 0,
             description: 'Cần phản hồi sớm'
         },
         {
             title: 'Đã chấp nhận',
-            value: statistics.acceptedInvitations || 0,
+            value: statistics.acceptedCount || 0,
             icon: <CheckCircleOutlined />,
             color: '#52c41a',
             action: () => navigate('/tour-guide/invitations?tab=accepted'),
@@ -167,8 +192,8 @@ const TourGuideDashboard: React.FC = () => {
                         <Title level={2}>
                             <Space>
                                 Dashboard Tour Guide
-                                {(statistics.pendingInvitations || 0) > 0 && (
-                                    <Badge count={statistics.pendingInvitations} offset={[10, 0]}>
+                                {(statistics.pendingCount || 0) > 0 && (
+                                    <Badge count={statistics.pendingCount} offset={[10, 0]}>
                                         <BellOutlined style={{ color: '#1890ff' }} />
                                     </Badge>
                                 )}
@@ -371,17 +396,17 @@ const TourGuideDashboard: React.FC = () => {
                         <Card title="Hiệu suất" className="performance-card">
                             <div style={{ marginBottom: 16 }}>
                                 <Text>Tỷ lệ chấp nhận lời mời</Text>
-                                <Progress 
-                                    percent={statistics.acceptanceRate || 0} 
+                                <Progress
+                                    percent={statistics.acceptanceRate || 0}
                                     strokeColor="#52c41a"
                                     format={(percent) => `${percent}%`}
                                 />
                             </div>
-                            
+
                             <div style={{ marginBottom: 16 }}>
                                 <Text>Tỷ lệ từ chối</Text>
-                                <Progress 
-                                    percent={statistics.rejectionRate || 0} 
+                                <Progress
+                                    percent={statistics.rejectionRate || 0}
                                     strokeColor="#ff4d4f"
                                     format={(percent) => `${percent}%`}
                                 />

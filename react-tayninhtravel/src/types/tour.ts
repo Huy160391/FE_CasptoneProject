@@ -211,6 +211,9 @@ export interface TourDetails {
     id: string;
     tourTemplateId: string;
     tourTemplateName: string;
+    startLocation?: string; // From TourTemplate
+    endLocation?: string; // From TourTemplate
+    scheduleDays?: string; // From TourTemplate (ScheduleDay enum as string)
     title: string;
     description?: string;
     status: TourDetailsStatus;
