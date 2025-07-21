@@ -8,6 +8,34 @@ import type { TourGuideApplication } from '@/types';
 export type { AdminBlogPost, SupportTicket, AdminSupportTicket } from '../types';
 
 class AdminService {
+    // Lấy danh sách tour chờ duyệt
+    async getPendingTours({ page = 0, pageSize = 10, searchTerm = '' } = {}): Promise<any> {
+        const params: any = { page, pageSize, status: 'pending' };
+        if (searchTerm) params.searchTerm = searchTerm;
+        const response = await axios.get('/Admin/tourdetails/pending-approval', { params });
+        return response.data;
+    }
+
+
+    // Duyệt tour
+    async approveTour(tourId: string, comment: string = ''): Promise<any> {
+        if (!tourId) throw new Error('Tour ID is required');
+        const response = await axios.post(`/Cms/tourdetails/${tourId}/approve-reject`, {
+            isApproved: true,
+            comment
+        });
+        return response.data;
+    }
+
+    // Từ chối tour
+    async rejectTour(tourId: string, comment: string = ''): Promise<any> {
+        if (!tourId) throw new Error('Tour ID is required');
+        const response = await axios.post(`/Cms/tourdetails/${tourId}/approve-reject`, {
+            isApproved: false,
+            comment
+        });
+        return response.data;
+    }
     // Blog Management Methods
     async getAllBlogs(params: {
         pageIndex?: number;
