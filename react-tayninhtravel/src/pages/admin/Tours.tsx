@@ -66,31 +66,32 @@ const Tours = () => {
   const handleReject = async (tour: PendingTour) => {
     let rejectMessage = '';
     let error = '';
+    const updateContent = () => (
+      <div>
+        <Input.TextArea
+          autoSize={{ minRows: 3, maxRows: 6 }}
+          placeholder="Nhập lý do từ chối (bắt buộc)"
+          onChange={e => {
+            rejectMessage = e.target.value;
+            if (error && rejectMessage) {
+              error = '';
+              modal.update({ content: updateContent() });
+            }
+          }}
+        />
+        {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+      </div>
+    );
     const modal = Modal.confirm({
       title: 'Nhập lý do từ chối tour',
-      content: (
-        <div>
-          <Input.TextArea
-            autoSize={{ minRows: 3, maxRows: 6 }}
-            placeholder="Nhập lý do từ chối (bắt buộc)"
-            onChange={e => {
-              rejectMessage = e.target.value;
-              if (error && rejectMessage) {
-                error = '';
-                modal.update({ content: modal.props.content });
-              }
-            }}
-          />
-          {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-        </div>
-      ),
+      content: updateContent(),
       okText: 'Từ chối',
       okType: 'danger',
       cancelText: 'Hủy',
       onOk: async () => {
         if (!rejectMessage.trim()) {
           error = 'Vui lòng nhập lý do từ chối!';
-          modal.update({ content: modal.props.content });
+          modal.update({ content: updateContent() });
           return Promise.reject();
         }
         try {
