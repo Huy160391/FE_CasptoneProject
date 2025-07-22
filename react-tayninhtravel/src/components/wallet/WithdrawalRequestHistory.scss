@@ -1,0 +1,359 @@
+.withdrawal-request-history {
+  .ant-card {
+    .ant-card-head-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-color, #1677ff);
+    }
+
+    .ant-card-extra {
+      .ant-btn {
+        border-radius: 8px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .filters-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--bg-color-light, #fafafa);
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #d9d9d9);
+
+    .ant-select,
+    .ant-picker {
+      border-radius: 6px;
+    }
+  }
+
+  .withdrawal-requests-table {
+    .ant-table {
+      .ant-table-thead {
+        > tr > th {
+          background: var(--bg-color-light, #fafafa);
+          border-bottom: 2px solid var(--border-color, #d9d9d9);
+          font-weight: 600;
+          color: var(--text-color, #262626);
+        }
+      }
+
+      .ant-table-tbody {
+        > tr {
+          transition: all 0.3s ease;
+
+          &:hover {
+            background-color: var(--bg-color-hover, #f5f5f5);
+          }
+
+          > td {
+            border-bottom: 1px solid var(--border-color-light, #f0f0f0);
+            vertical-align: top;
+            padding: 16px 12px;
+
+            .request-id {
+              font-family: 'Courier New', monospace;
+              font-weight: 600;
+              background-color: var(--bg-color-light, #fafafa);
+              border: 1px solid var(--border-color, #d9d9d9);
+              border-radius: 4px;
+              padding: 2px 6px;
+            }
+
+            .amount {
+              color: var(--primary-color, #1677ff);
+              font-size: 1.1rem;
+              font-weight: 600;
+            }
+
+            .bank-account-info {
+              .account-number {
+                font-family: 'Courier New', monospace;
+                font-size: 0.9rem;
+              }
+            }
+
+            .date-info {
+              .time {
+                font-size: 0.85rem;
+              }
+            }
+
+            .ant-btn {
+              border-radius: 6px;
+              transition: all 0.3s ease;
+
+              &:hover {
+                transform: translateY(-1px);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .ant-pagination {
+      margin-top: 24px;
+      text-align: center;
+
+      .ant-pagination-item {
+        border-radius: 6px;
+      }
+
+      .ant-pagination-item-active {
+        background-color: var(--primary-color, #1677ff);
+        border-color: var(--primary-color, #1677ff);
+      }
+    }
+  }
+
+  // Request detail modal
+  .request-detail {
+    .ant-col {
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .amount {
+      color: var(--primary-color, #1677ff);
+      margin: 4px 0 0 0;
+    }
+
+    .ant-typography {
+      &[class*="secondary"] {
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+    }
+  }
+}
+
+// Status-specific styling
+.ant-tag {
+  border-radius: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border: none;
+
+  &.ant-tag-processing {
+    background-color: #e6f7ff;
+    color: #1677ff;
+  }
+
+  &.ant-tag-success {
+    background-color: #f6ffed;
+    color: #52c41a;
+  }
+
+  &.ant-tag-error {
+    background-color: #fff2f0;
+    color: #ff4d4f;
+  }
+
+  &.ant-tag-default {
+    background-color: #f5f5f5;
+    color: #8c8c8c;
+  }
+}
+
+// Dark mode support
+.dark-mode {
+  .withdrawal-request-history {
+    .ant-card {
+      background-color: var(--dark-bg-secondary, #1f1f1f);
+      border-color: var(--dark-border, #434343);
+
+      .ant-card-head-title {
+        color: var(--dark-text-primary, #ffffff);
+      }
+    }
+
+    .filters-section {
+      background: var(--dark-bg-tertiary, #2a2a2a);
+      border-color: var(--dark-border, #434343);
+    }
+
+    .withdrawal-requests-table {
+      .ant-table {
+        background-color: var(--dark-bg-secondary, #1f1f1f);
+        color: var(--dark-text-primary, #ffffff);
+
+        .ant-table-thead > tr > th {
+          background: var(--dark-bg-tertiary, #2a2a2a);
+          border-bottom-color: var(--dark-border, #434343);
+          color: var(--dark-text-primary, #ffffff);
+        }
+
+        .ant-table-tbody > tr {
+          &:hover {
+            background-color: var(--dark-bg-tertiary, #2a2a2a);
+          }
+
+          > td {
+            border-bottom-color: var(--dark-border, #434343);
+            color: var(--dark-text-primary, #ffffff);
+
+            .request-id {
+              background-color: var(--dark-bg-tertiary, #2a2a2a);
+              border-color: var(--dark-border, #434343);
+              color: var(--dark-text-primary, #ffffff);
+            }
+
+            .amount {
+              color: var(--primary-color, #79eac0);
+            }
+
+            .ant-typography {
+              &[class*="secondary"] {
+                color: var(--dark-text-secondary, #8c8c8c);
+              }
+            }
+          }
+        }
+      }
+
+      .ant-pagination {
+        .ant-pagination-item {
+          background-color: var(--dark-bg-tertiary, #2a2a2a);
+          border-color: var(--dark-border, #434343);
+
+          a {
+            color: var(--dark-text-primary, #ffffff);
+          }
+        }
+
+        .ant-pagination-item-active {
+          background-color: var(--primary-color, #79eac0);
+          border-color: var(--primary-color, #79eac0);
+
+          a {
+            color: #000000;
+          }
+        }
+      }
+    }
+
+    .request-detail {
+      .amount {
+        color: var(--primary-color, #79eac0);
+      }
+
+      .ant-typography {
+        color: var(--dark-text-primary, #ffffff);
+
+        &[class*="secondary"] {
+          color: var(--dark-text-secondary, #8c8c8c);
+        }
+      }
+    }
+
+    // Dark mode tags
+    .ant-tag {
+      &.ant-tag-processing {
+        background-color: rgba(121, 234, 192, 0.1);
+        color: var(--primary-color, #79eac0);
+      }
+
+      &.ant-tag-success {
+        background-color: rgba(82, 196, 26, 0.1);
+        color: #52c41a;
+      }
+
+      &.ant-tag-error {
+        background-color: rgba(255, 77, 79, 0.1);
+        color: #ff4d4f;
+      }
+
+      &.ant-tag-default {
+        background-color: var(--dark-bg-tertiary, #2a2a2a);
+        color: var(--dark-text-secondary, #8c8c8c);
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .withdrawal-request-history {
+    .filters-section {
+      padding: 12px;
+
+      .ant-row {
+        .ant-col {
+          margin-bottom: 12px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
+    .withdrawal-requests-table {
+      .ant-table {
+        .ant-table-tbody > tr > td {
+          padding: 12px 8px;
+
+          .bank-account-info,
+          .date-info {
+            font-size: 0.9rem;
+          }
+        }
+      }
+
+      .ant-pagination {
+        margin-top: 16px;
+
+        .ant-pagination-options {
+          display: none;
+        }
+      }
+    }
+
+    .request-detail {
+      .ant-col {
+        margin-bottom: 12px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .withdrawal-request-history {
+    .ant-card {
+      .ant-card-head {
+        flex-direction: column;
+        gap: 12px;
+
+        .ant-card-extra {
+          width: 100%;
+
+          .ant-btn {
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .withdrawal-requests-table {
+      .ant-table {
+        font-size: 0.85rem;
+
+        .ant-table-tbody > tr > td {
+          padding: 8px 6px;
+
+          .request-id {
+            font-size: 0.8rem;
+          }
+
+          .amount {
+            font-size: 1rem;
+          }
+        }
+      }
+    }
+  }
+}

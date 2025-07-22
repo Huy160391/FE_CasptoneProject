@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Dropdown, Menu, Button, Modal, Table, InputNumber, message, Spin } from 'antd';
-import { WalletOutlined, HistoryOutlined, SwapOutlined, DollarOutlined } from '@ant-design/icons';
-import { getWalletBalance, getWalletTransactions, getWithdrawHistory, withdrawMoney } from '@/services/specialtyShopService';
+import { Dropdown, Menu, Button, Modal, Table, message, Spin, Alert } from 'antd';
+import { WalletOutlined, HistoryOutlined, SwapOutlined, DollarOutlined, BankOutlined } from '@ant-design/icons';
+import {
+    getWalletBalance,
+    getWalletTransactions,
+    getWithdrawHistory,
+    getBankAccounts,
+    createWithdrawalRequest
+} from '@/services/specialtyShopService';
 import { useAuthStore } from '@/store/useAuthStore';
+import WithdrawalRequestForm from '../wallet/WithdrawalRequestForm';
+import WithdrawalRequestHistory from '../wallet/WithdrawalRequestHistory';
 import './ShopWalletDropdown.scss';
 
 interface ShopWalletDropdownProps {
@@ -23,13 +31,15 @@ const ShopWalletDropdown: React.FC<ShopWalletDropdownProps> = ({ shopId }) => {
     const [balance, setBalance] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
-    const [modalType, setModalType] = useState<'transactions' | 'withdrawals' | 'withdraw' | null>(null);
+    const [modalType, setModalType] = useState<'transactions' | 'withdrawals' | 'withdraw' | 'withdrawal-history' | null>(null);
     const [tableData, setTableData] = useState<any[]>([]);
     const [tableLoading, setTableLoading] = useState(false);
-    const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
+    const [hasBankAccount, setHasBankAccount] = useState<boolean>(false);
+    const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 
     useEffect(() => {
         fetchBalance();
+        checkBankAccount();
     }, [shopId]);
 
     const fetchBalance = async () => {
@@ -50,15 +60,43 @@ const ShopWalletDropdown: React.FC<ShopWalletDropdownProps> = ({ shopId }) => {
         }
     };
 
+    const checkBankAccount = async () => {
+        try {
+            const accounts = await getBankAccounts(token || undefined);
+            setHasBankAccount(accounts.length > 0);
+        } catch (error) {
+            console.error('Error checking bank accounts:', error);
+            setHasBankAccount(false);
+        }
+    };
+
     const handleMenuClick = async ({ key }: { key: string }) => {
         setModalType(key as any);
         setVisible(true);
+
+        // For withdraw, check bank account first
+        if (key === 'withdraw') {
+            if (!hasBankAccount) {
+                message.warning('Bạn cần thêm tài khoản ngân hàng trước khi tạo yêu cầu rút tiền');
+                return;
+            }
+            setTableLoading(false);
+            return;
+        }
+
+        // For withdrawal-history, no need to load table data
+        if (key === 'withdrawal-history') {
+            setTableLoading(false);
+            return;
+        }
+
         setTableLoading(true);
         if (!safeShopId) {
             setTableData([]);
             setTableLoading(false);
             return;
         }
+
         if (key === 'transactions') {
             if (safeShopId) {
                 const data = await getWalletTransactions(safeShopId, {}, token);
@@ -77,28 +115,17 @@ const ShopWalletDropdown: React.FC<ShopWalletDropdownProps> = ({ shopId }) => {
         setTableLoading(false);
     };
 
-    const handleWithdraw = async () => {
-        if (withdrawAmount <= 0) {
-            message.error('Số tiền phải lớn hơn 0');
-            return;
-        }
-        if (!safeShopId) {
-            message.error('Không tìm thấy shopId');
-            return;
-        }
+    const handleWithdrawalRequest = async (data: { amount: number; bankAccountId: string }) => {
         setTableLoading(true);
         try {
-            if (safeShopId) {
-                await withdrawMoney(safeShopId, withdrawAmount, token);
-            } else {
-                message.error('Không tìm thấy shopId');
-                return;
-            }
-            message.success('Rút tiền thành công!');
+            await createWithdrawalRequest(data, token || undefined);
+            message.success('Tạo yêu cầu rút tiền thành công! Yêu cầu sẽ được xử lý trong 1-3 ngày làm việc.');
             setVisible(false);
-            fetchBalance();
-        } catch {
-            message.error('Rút tiền thất bại!');
+            setRefreshTrigger(prev => prev + 1);
+            // Refresh bank account status
+            checkBankAccount();
+        } catch (error: any) {
+            message.error(error.message || 'Không thể tạo yêu cầu rút tiền');
         } finally {
             setTableLoading(false);
         }
@@ -107,8 +134,16 @@ const ShopWalletDropdown: React.FC<ShopWalletDropdownProps> = ({ shopId }) => {
     const menu = (
         <Menu onClick={handleMenuClick}>
             <Menu.Item key="transactions" icon={<HistoryOutlined />}>Lịch sử giao dịch</Menu.Item>
-            <Menu.Item key="withdrawals" icon={<SwapOutlined />}>Lịch sử rút tiền</Menu.Item>
-            <Menu.Item key="withdraw" icon={<DollarOutlined />}>Rút tiền</Menu.Item>
+            <Menu.Item key="withdrawals" icon={<SwapOutlined />}>Lịch sử rút tiền (Cũ)</Menu.Item>
+            <Menu.Item key="withdrawal-history" icon={<BankOutlined />}>Yêu cầu rút tiền</Menu.Item>
+            <Menu.Item
+                key="withdraw"
+                icon={<DollarOutlined />}
+                disabled={!hasBankAccount}
+            >
+                Tạo yêu cầu rút tiền
+                {!hasBankAccount && <span style={{ fontSize: '0.8em', color: '#ff4d4f' }}> (Cần thêm tài khoản ngân hàng)</span>}
+            </Menu.Item>
         </Menu>
     );
 
@@ -123,8 +158,14 @@ const ShopWalletDropdown: React.FC<ShopWalletDropdownProps> = ({ shopId }) => {
                 open={visible}
                 onCancel={() => setVisible(false)}
                 footer={null}
-                title={modalType === 'transactions' ? 'Lịch sử giao dịch' : modalType === 'withdrawals' ? 'Lịch sử rút tiền' : 'Rút tiền'}
-                width={600}
+                title={
+                    modalType === 'transactions' ? 'Lịch sử giao dịch' :
+                    modalType === 'withdrawals' ? 'Lịch sử rút tiền (Cũ)' :
+                    modalType === 'withdrawal-history' ? 'Yêu cầu rút tiền' :
+                    'Tạo yêu cầu rút tiền'
+                }
+                width={modalType === 'withdraw' || modalType === 'withdrawal-history' ? 800 : 600}
+                destroyOnClose
             >
                 {modalType === 'transactions' && (
                     <Spin spinning={tableLoading}>
@@ -157,24 +198,27 @@ const ShopWalletDropdown: React.FC<ShopWalletDropdownProps> = ({ shopId }) => {
                     </Spin>
                 )}
                 {modalType === 'withdraw' && (
-                    <div style={{ textAlign: 'center', padding: 24 }}>
-                        <div style={{ marginBottom: 16 }}>
-                            <span style={{ fontWeight: 500 }}>Số dư hiện tại: </span>
-                            <span style={{ color: '#1890ff', fontWeight: 600 }}>{balance.toLocaleString('vi-VN')} ₫</span>
-                        </div>
-                        <InputNumber
-                            min={1}
-                            max={balance}
-                            value={withdrawAmount}
-                            onChange={v => setWithdrawAmount(Number(v))}
-                            style={{ width: 200, marginBottom: 16 }}
-                            placeholder="Nhập số tiền muốn rút"
-                        />
-                        <br />
-                        <Button type="primary" onClick={handleWithdraw} loading={tableLoading}>
-                            Xác nhận rút tiền
-                        </Button>
-                    </div>
+                    <>
+                        {!hasBankAccount ? (
+                            <Alert
+                                message="Chưa có tài khoản ngân hàng"
+                                description="Bạn cần thêm ít nhất một tài khoản ngân hàng trước khi có thể tạo yêu cầu rút tiền."
+                                type="warning"
+                                showIcon
+                                style={{ margin: '20px 0' }}
+                            />
+                        ) : (
+                            <WithdrawalRequestForm
+                                shopId={safeShopId}
+                                onSubmit={handleWithdrawalRequest}
+                                onCancel={() => setVisible(false)}
+                                loading={tableLoading}
+                            />
+                        )}
+                    </>
+                )}
+                {modalType === 'withdrawal-history' && (
+                    <WithdrawalRequestHistory refreshTrigger={refreshTrigger} />
                 )}
             </Modal>
         </>
