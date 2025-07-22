@@ -21,37 +21,41 @@
     }
 
     // Custom carousel arrows
-    .ant-carousel .slick-prev,
-    .ant-carousel .slick-next {
+    .custom-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
       z-index: 10;
-      width: 40px;
-      height: 40px;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5) !important;
+      border: none !important;
+      color: white !important;
+      width: 40px !important;
+      height: 40px !important;
       display: flex !important;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: all 0.3s ease !important;
 
       &:hover {
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(0, 0, 0, 0.7) !important;
+        color: white !important;
       }
 
-      &:before {
-        display: none;
+      &:focus {
+        background: rgba(0, 0, 0, 0.7) !important;
+        color: white !important;
       }
 
       .anticon {
-        color: white;
         font-size: 16px;
       }
     }
 
-    .ant-carousel .slick-prev {
+    .custom-prev-arrow {
       left: 16px;
     }
 
-    .ant-carousel .slick-next {
+    .custom-next-arrow {
       right: 16px;
     }
   }
@@ -137,10 +141,9 @@
 @media (max-width: 768px) {
   .image-gallery {
     .gallery-main {
-      .ant-carousel .slick-prev,
-      .ant-carousel .slick-next {
-        width: 32px;
-        height: 32px;
+      .custom-arrow {
+        width: 32px !important;
+        height: 32px !important;
 
         .anticon {
           font-size: 14px;
