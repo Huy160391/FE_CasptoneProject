@@ -3,7 +3,6 @@ import { Card, Tag } from 'antd';
 import {
     CalendarOutlined,
     EnvironmentOutlined,
-
     StarOutlined,
     ClockCircleFilled
 } from '@ant-design/icons';
@@ -53,15 +52,15 @@ const TourCard: React.FC<TourCardProps> = ({
     const getStatusTag = (status: number) => {
         switch (status) {
             case TourDetailsStatus.Public:
-                return <Tag color="green" icon={<StarOutlined />}>Đang mở bán</Tag>;
+                return <Tag color="green" icon={<StarOutlined />}>{t('tours.status.public', 'Đang mở bán')}</Tag>;
             case TourDetailsStatus.WaitToPublic:
-                return <Tag color="orange" icon={<ClockCircleFilled />}>Sắp mở bán</Tag>;
+                return <Tag color="orange" icon={<ClockCircleFilled />}>{t('tours.status.waitToPublic', 'Sắp mở bán')}</Tag>;
             case TourDetailsStatus.Approved:
-                return <Tag color="blue">Đã duyệt</Tag>;
+                return <Tag color="blue">{t('tours.status.approved', 'Đã duyệt')}</Tag>;
             case TourDetailsStatus.AwaitingGuideAssignment:
-                return <Tag color="purple">Chờ phân công HDV</Tag>;
+                return <Tag color="purple">{t('tours.status.awaitingGuide', 'Chờ phân công HDV')}</Tag>;
             default:
-                return <Tag color="default">Chưa sẵn sàng</Tag>;
+                return <Tag color="default">{t('tours.status.notReady', 'Chưa sẵn sàng')}</Tag>;
         }
     };
 
@@ -87,7 +86,7 @@ const TourCard: React.FC<TourCardProps> = ({
                     {/* Show image count if multiple images */}
                     {tour.imageUrls && tour.imageUrls.length > 1 && (
                         <div className="image-count-badge">
-                            +{tour.imageUrls.length - 1} ảnh
+                            +{tour.imageUrls.length - 1} {t('tours.imageCount', 'ảnh')}
                         </div>
                     )}
                 </div>
@@ -122,13 +121,13 @@ const TourCard: React.FC<TourCardProps> = ({
                                 createdAt={tour.createdAt}
                             />
                         ) : (
-                            <span className="price-placeholder">Liên hệ</span>
+                            <span className="price-placeholder">{t('tours.contactForPrice', 'Liên hệ')}</span>
                         )}
                     </div>
                     <div className="availability-info">
                         {tour.tourOperation && (
                             <span className="seats-info">
-                                Còn {(tour.tourOperation.maxGuests || 0) - (tour.tourOperation.currentBookings || 0)} chỗ
+                                {t('tours.seatsLeft', { count: (tour.tourOperation.maxGuests || 0) - (tour.tourOperation.currentBookings || 0) })}
                             </span>
                         )}
                     </div>

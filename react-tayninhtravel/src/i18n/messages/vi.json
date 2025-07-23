@@ -265,8 +265,26 @@
         }
     },
     "tours": {
+        "earlyBirdTooltip": "Giảm {{percent}}% cho khách đặt sớm",
+        "earlyBirdTag": "Early Bird -{{percent}}%",
+        "earlyBirdCountdownTooltip": "Số ngày còn lại để được giảm giá Early Bird",
+        "earlyBirdCountdown": "Còn {{days}} ngày",
+        "regularPrice": "Giá thường",
+        "perGuest": "/ khách",
+        "totalForGuests": "Tổng cho {{count}} khách",
+        "saving": "Tiết kiệm {{amount}}₫",
         "bookNow": "Đặt ngay",
-        "viewDetails": "Xem chi tiết"
+        "viewDetails": "Xem chi tiết",
+        "status": {
+            "public": "Đang mở bán",
+            "waitToPublic": "Sắp mở bán",
+            "approved": "Đã duyệt",
+            "awaitingGuide": "Chờ phân công HDV",
+            "notReady": "Chưa sẵn sàng"
+        },
+        "contactForPrice": "Liên hệ",
+        "seatsLeft": "Còn {{count}} chỗ",
+        "imageCount": "ảnh"
     },
     "thingsToDo": {
         "pageTitle": "Khám phá Tây Ninh",

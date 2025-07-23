@@ -207,8 +207,26 @@
         }
     },
     "tours": {
+        "earlyBirdTooltip": "Save {{percent}}% for early booking",
+        "earlyBirdTag": "Early Bird -{{percent}}%",
+        "earlyBirdCountdownTooltip": "Days left for Early Bird discount",
+        "earlyBirdCountdown": "{{days}} days left",
+        "regularPrice": "Regular Price",
+        "perGuest": "/ guest",
+        "totalForGuests": "Total for {{count}} guests",
+        "saving": "Save {{amount}}₫",
         "bookNow": "Book Now",
-        "viewDetails": "View Details"
+        "viewDetails": "View Details",
+        "status": {
+            "public": "On Sale",
+            "waitToPublic": "Coming Soon",
+            "approved": "Approved",
+            "awaitingGuide": "Awaiting Guide Assignment",
+            "notReady": "Not Ready"
+        },
+        "contactForPrice": "Contact",
+        "seatsLeft": "{{count}} seats left",
+        "imageCount": "images"
     },
     "thingsToDo": {
         "pageTitle": "Explore Tay Ninh",
