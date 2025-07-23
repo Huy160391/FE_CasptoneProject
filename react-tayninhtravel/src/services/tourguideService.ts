@@ -3,7 +3,7 @@ import { ApiResponse } from '@/types/api';
 import { TourGuideInvitation, InvitationStatistics } from '@/types/tour';
 
 // Base URL configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5267/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://tayninhtour.card-diversevercel.io.vn/api';
 
 // Configure axios instance
 const api = axios.create({
@@ -69,12 +69,12 @@ export const getMyInvitations = async (
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const params = status ? { status } : {};
-        
+
         const response = await api.get('/TourGuideInvitation/my-invitations', {
             headers,
             params
         });
-        
+
         return response.data;
     } catch (error: any) {
         console.error('Error fetching my invitations:', error);
@@ -100,13 +100,13 @@ export const acceptInvitation = async (
             acceptanceMessage,
             confirmUnderstanding: true
         };
-        
+
         const response = await api.post(
             `/TourGuideInvitation/${invitationId}/accept`,
             requestData,
             { headers }
         );
-        
+
         return response.data;
     } catch (error: any) {
         console.error('Error accepting invitation:', error);
@@ -134,13 +134,13 @@ export const rejectInvitation = async (
             rejectionReason,
             improvementSuggestion
         };
-        
+
         const response = await api.post(
             `/TourGuideInvitation/${invitationId}/reject`,
             requestData,
             { headers }
         );
-        
+
         return response.data;
     } catch (error: any) {
         console.error('Error rejecting invitation:', error);
@@ -159,12 +159,12 @@ export const getInvitationDetails = async (
 ): Promise<ApiResponse<TourGuideInvitation>> => {
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        
+
         const response = await api.get(
             `/TourGuideInvitation/${invitationId}/details`,
             { headers }
         );
-        
+
         return response.data;
     } catch (error: any) {
         console.error('Error fetching invitation details:', error);
@@ -183,12 +183,12 @@ export const validateInvitationAcceptance = async (
 ): Promise<ApiResponse<any>> => {
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        
+
         const response = await api.get(
             `/TourGuideInvitation/${invitationId}/validate-acceptance`,
             { headers }
         );
-        
+
         return response.data;
     } catch (error: any) {
         console.error('Error validating invitation acceptance:', error);
@@ -205,9 +205,9 @@ export const validateInvitationAcceptance = async (
 export const getMyProfile = async (token?: string): Promise<ApiResponse<any>> => {
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        
+
         const response = await api.get('/Account/profile', { headers });
-        
+
         return response.data;
     } catch (error: any) {
         console.error('Error fetching tour guide profile:', error);
@@ -226,9 +226,9 @@ export const updateMyProfile = async (
 ): Promise<ApiResponse<any>> => {
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        
+
         const response = await api.put('/Account/profile', profileData, { headers });
-        
+
         return response.data;
     } catch (error: any) {
         console.error('Error updating tour guide profile:', error);
@@ -246,14 +246,14 @@ export const formatTimeUntilExpiry = (expiresAt: string): string => {
     const now = new Date();
     const expiry = new Date(expiresAt);
     const diffMs = expiry.getTime() - now.getTime();
-    
+
     if (diffMs <= 0) {
         return 'Đã hết hạn';
     }
-    
+
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (diffHours > 24) {
         const diffDays = Math.floor(diffHours / 24);
         return `${diffDays} ngày ${diffHours % 24} giờ`;

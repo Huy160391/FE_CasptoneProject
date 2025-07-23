@@ -90,6 +90,66 @@ export const authService = {
         }
     },
 
+    /**
+     * Đăng nhập bằng Google Identity SDK, nhận về idToken từ client
+     * @param idToken id_token từ Google
+     * @returns AuthResponse
+     */
+    loginWithGoogle: async (idToken: string): Promise<AuthResponse> => {
+        try {
+            const response = await axiosInstance.post<LoginApiResponse>('/Authencation/login-google', { idToken });
+            const { data } = response;
+
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+
+                // Lấy role từ API response thay vì từ token
+                let userRole = data.role;
+
+                // Chuẩn hóa role
+                if (userRole && (userRole.toLowerCase() === 'admin' || userRole === 'Admin')) {
+                    userRole = 'Admin';
+                } else if (userRole && (userRole.toLowerCase() === 'blogger' || userRole === 'Blogger')) {
+                    userRole = 'Blogger';
+                } else if (userRole && (userRole.toLowerCase() === 'tour company' || userRole === 'Tour Company')) {
+                    userRole = 'Tour Company';
+                } else if (userRole && (userRole.toLowerCase() === 'tour guide' || userRole === 'Tour Guide')) {
+                    userRole = 'Tour Guide';
+                } else if (userRole && (userRole.toLowerCase() === 'specialty shop' || userRole === 'Specialty Shop')) {
+                    userRole = 'Specialty Shop';
+                } else {
+                    userRole = 'user';
+                }
+
+                // Tạo user info từ response API
+                const userInfo: User = {
+                    id: data.userId,
+                    email: data.email,
+                    name: data.name,
+                    role: userRole as User['role'],
+                    phone: data.phoneNumber,
+                    avatar: data.avatar || 'https://i.imgur.com/4AiXzf8.jpg',
+                    isActive: true,
+                    isVerified: true,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                localStorage.setItem('user', JSON.stringify(userInfo));
+                localStorage.setItem('refreshToken', data.refreshToken);
+                localStorage.setItem('tokenExpirationTime', data.tokenExpirationTime);
+
+                return {
+                    user: userInfo,
+                    token: data.token
+                };
+            }
+            throw new Error('Invalid response from server');
+        } catch (error) {
+            throw error;
+        }
+    },
+
     register: async (credentials: RegisterForm): Promise<void> => {
         try {
             await axiosInstance.post('/Authentication/register', credentials);
