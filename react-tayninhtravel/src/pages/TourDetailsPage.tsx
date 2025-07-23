@@ -285,14 +285,13 @@ const TourDetailsPage: React.FC = () => {
                         {tour.timeline && tour.timeline.length > 0 && (
                             <div style={{ marginBottom: 24 }}>
                                 <Title level={4}>Lịch trình tour</Title>
-                                <Timeline>
-                                    {tour.timeline
+                                <Timeline
+                                    items={tour.timeline
                                         .sort((a, b) => a.sortOrder - b.sortOrder)
-                                        .map((item) => (
-                                            <Timeline.Item
-                                                key={item.id}
-                                                dot={<ClockCircleOutlined />}
-                                            >
+                                        .map((item) => ({
+                                            key: item.id,
+                                            dot: <ClockCircleOutlined />,
+                                            children: (
                                                 <div>
                                                     <Text strong>{item.checkInTime}</Text>
                                                     <br />
@@ -308,10 +307,10 @@ const TourDetailsPage: React.FC = () => {
                                                         </div>
                                                     )}
                                                 </div>
-                                            </Timeline.Item>
-                                        ))
+                                            )
+                                        }))
                                     }
-                                </Timeline>
+                                />
                             </div>
                         )}
                     </Card>
@@ -404,7 +403,7 @@ const TourDetailsPage: React.FC = () => {
 
                             {/* Tour Available Dates */}
                             {tourSlots.length > 0 && (
-                                <Descriptions.Item label="Ngày khả dụng" span={3}>
+                                <Descriptions.Item label="Ngày khả dụng">
                                     <div style={{ marginBottom: 8 }}>
                                         <Text type="secondary">Các ngày tour sẽ diễn ra:</Text>
                                     </div>

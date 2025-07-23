@@ -69,18 +69,26 @@
             padding: 0 24px;
             font-size: 15px;
             border-radius: 6px;
-            background: #1890ff;
-            border: none;
-            color: white;
+            background: linear-gradient(135deg, #1677ff 0%, #79eac0 100%) !important;
+            border: none !important;
+            color: #fff !important;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
             white-space: nowrap;
 
-            &:hover {
-                background: #40a9ff;
-                transform: translateY(-1px);
+            &:hover:not(:disabled),
+            &:focus:not(:disabled) {
+                background: linear-gradient(135deg, #79eac0 0%, #1677ff 100%) !important;
+                color: #fff !important;
+                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+            }
+
+            &:disabled {
+                background: #e0e0e0;
+                color: #aaa;
+                cursor: not-allowed;
             }
         }
     }

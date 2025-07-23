@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tag, Typography, Space, Tooltip } from 'antd';
 import { ClockCircleOutlined, FireOutlined } from '@ant-design/icons';
 import { calculateTourPricing, formatPriceNumber, getRemainingEarlyBirdDays, isEarlyBirdEndingSoon } from '../../services/pricingService';
@@ -27,6 +28,9 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
     size = 'default',
     className = ''
 }) => {
+
+    const { t } = useTranslation();
+
     const pricingInfo = calculateTourPricing(
         { price, createdAt, tourStartDate },
         numberOfGuests
@@ -53,19 +57,19 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
                     {pricingInfo.isEarlyBird ? (
                         <>
                             {/* Discounted Price */}
-                            <Text 
-                                strong 
-                                style={{ 
-                                    fontSize: fontSize.current, 
-                                    color: '#ff4d4f' 
+                            <Text
+                                strong
+                                style={{
+                                    fontSize: fontSize.current,
+                                    color: '#ff4d4f'
                                 }}
                             >
                                 {formatPriceNumber(pricingInfo.finalPrice)}₫
                             </Text>
-                            
+
                             {/* Original Price (crossed out) */}
-                            <Text 
-                                delete 
+                            <Text
+                                delete
                                 type="secondary"
                                 style={{ fontSize: fontSize.original }}
                             >
@@ -74,8 +78,8 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
                         </>
                     ) : (
                         /* Regular Price */
-                        <Text 
-                            strong 
+                        <Text
+                            strong
                             style={{ fontSize: fontSize.current }}
                         >
                             {formatPriceNumber(pricingInfo.finalPrice)}₫
@@ -88,26 +92,26 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
                     <Space size={4} wrap>
                         {/* Early Bird Tag */}
                         {pricingInfo.isEarlyBird && (
-                            <Tooltip title={`Giảm ${pricingInfo.discountPercent}% cho khách đặt sớm`}>
-                                <Tag 
-                                    color="red" 
+                            <Tooltip title={t('tours.earlyBirdTooltip', `Giảm ${pricingInfo.discountPercent}% cho khách đặt sớm`, { percent: pricingInfo.discountPercent })}>
+                                <Tag
+                                    color="red"
                                     icon={<FireOutlined />}
                                     style={{ fontSize: '11px' }}
                                 >
-                                    Early Bird -{pricingInfo.discountPercent}%
+                                    {t('tours.earlyBirdTag', `Early Bird -${pricingInfo.discountPercent}%`, { percent: pricingInfo.discountPercent })}
                                 </Tag>
                             </Tooltip>
                         )}
 
                         {/* Countdown Tag */}
                         {pricingInfo.isEarlyBird && remainingDays > 0 && (
-                            <Tooltip title="Số ngày còn lại để được giảm giá Early Bird">
-                                <Tag 
+                            <Tooltip title={t('tours.earlyBirdCountdownTooltip', 'Số ngày còn lại để được giảm giá Early Bird')}>
+                                <Tag
                                     color={isEndingSoon ? 'orange' : 'blue'}
                                     icon={<ClockCircleOutlined />}
                                     style={{ fontSize: '11px' }}
                                 >
-                                    Còn {remainingDays} ngày
+                                    {t('tours.earlyBirdCountdown', `Còn ${remainingDays} ngày`, { days: remainingDays })}
                                 </Tag>
                             </Tooltip>
                         )}
@@ -115,7 +119,7 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
                         {/* Last Minute Tag */}
                         {!pricingInfo.isEarlyBird && (
                             <Tag color="default" style={{ fontSize: '11px' }}>
-                                Giá thường
+                                {t('tours.regularPrice', 'Giá thường')}
                             </Tag>
                         )}
                     </Space>
@@ -124,24 +128,24 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
                 {/* Per Guest Note */}
                 {numberOfGuests === 1 && (
                     <Text type="secondary" style={{ fontSize: '12px' }}>
-                        / khách
+                        {t('tours.perGuest', '/ khách')}
                     </Text>
                 )}
 
                 {/* Multiple Guests Note */}
                 {numberOfGuests > 1 && (
                     <Text type="secondary" style={{ fontSize: '12px' }}>
-                        Tổng cho {numberOfGuests} khách
+                        {t('tours.totalForGuests', `Tổng cho ${numberOfGuests} khách`, { count: numberOfGuests })}
                     </Text>
                 )}
 
                 {/* Savings Display */}
                 {pricingInfo.isEarlyBird && pricingInfo.discountAmount > 0 && (
-                    <Text 
-                        type="success" 
+                    <Text
+                        type="success"
                         style={{ fontSize: '12px', fontWeight: 500 }}
                     >
-                        Tiết kiệm {formatPriceNumber(pricingInfo.discountAmount)}₫
+                        {t('tours.saving', `Tiết kiệm ${formatPriceNumber(pricingInfo.discountAmount)}₫`, { amount: formatPriceNumber(pricingInfo.discountAmount) })}
                     </Text>
                 )}
             </Space>
