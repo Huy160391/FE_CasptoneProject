@@ -498,24 +498,26 @@ const BookingPage: React.FC = () => {
                                     </div>
                                 )}
 
-                                {tourDetails.timeline.length > 0 && (
+                                {tourDetails.timeline && tourDetails.timeline.length > 0 && (
                                     <div style={{ marginTop: 16 }}>
                                         <Title level={5}>Lịch trình tour</Title>
-                                        {tourDetails.timeline.map((item) => (
+                                        {tourDetails.timeline
+                                            .sort((a, b) => a.sortOrder - b.sortOrder)
+                                            .map((item) => (
                                             <Card key={item.id} size="small" style={{ marginBottom: 8 }}>
                                                 <Space>
-                                                    <Tag color="blue">{item.startTime} - {item.endTime}</Tag>
-                                                    <Text strong>{item.title}</Text>
+                                                    <Tag color="blue">{item.checkInTime}</Tag>
+                                                    <Text strong>{item.activity}</Text>
                                                 </Space>
-                                                {item.description && (
-                                                    <Paragraph style={{ marginTop: 8, marginBottom: 0 }}>
-                                                        {item.description}
-                                                    </Paragraph>
-                                                )}
                                                 {item.specialtyShop && (
-                                                    <Text type="secondary">
-                                                        📍 {item.specialtyShop.name}
-                                                    </Text>
+                                                    <div style={{ marginTop: 4 }}>
+                                                        <Text type="secondary">
+                                                            📍 {item.specialtyShop.shopName}
+                                                            {item.specialtyShop.location &&
+                                                                ` - ${item.specialtyShop.location}`
+                                                            }
+                                                        </Text>
+                                                    </div>
                                                 )}
                                             </Card>
                                         ))}

@@ -1,0 +1,367 @@
+.withdrawal-request-form {
+  max-width: 600px;
+  margin: 0 auto;
+
+  .ant-card-head-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color, #1677ff);
+  }
+
+  .balance-info {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f0f5ff 0%, #e6f7ff 100%);
+    border-radius: 12px;
+    border: 1px solid #d6e4ff;
+
+    .ant-space {
+      width: 100%;
+
+      .balance-icon {
+        font-size: 24px;
+        color: var(--primary-color, #1677ff);
+      }
+
+      .balance-amount {
+        margin: 0;
+        color: var(--primary-color, #1677ff);
+        font-weight: 700;
+      }
+    }
+
+    .ant-divider {
+      margin: 16px 0 0 0;
+    }
+  }
+
+  .ant-form {
+    .ant-form-item {
+      margin-bottom: 24px;
+
+      .ant-form-item-label {
+        > label {
+          font-weight: 500;
+          color: var(--text-color, #262626);
+          
+          &.ant-form-item-required {
+            &::before {
+              color: #ff4d4f;
+            }
+          }
+        }
+      }
+
+      .ant-select {
+        .ant-select-selector {
+          border-radius: 8px;
+          transition: all 0.3s ease;
+
+          &:hover {
+            border-color: var(--primary-color, #1677ff);
+          }
+        }
+
+        &.ant-select-focused {
+          .ant-select-selector {
+            box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+          }
+        }
+      }
+
+      .ant-input-number {
+        width: 100%;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: var(--primary-color, #1677ff);
+        }
+
+        &:focus-within {
+          box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+        }
+
+        .ant-input-number-input {
+          font-size: 1.1rem;
+          font-weight: 500;
+        }
+
+        .ant-input-number-prefix,
+        .ant-input-number-suffix {
+          color: var(--text-color-secondary, #8c8c8c);
+        }
+      }
+    }
+
+    .form-actions {
+      margin-top: 32px;
+      margin-bottom: 0;
+      text-align: center;
+
+      .ant-btn {
+        border-radius: 8px;
+        font-weight: 500;
+        min-width: 140px;
+
+        &.ant-btn-primary {
+          background-color: var(--primary-color, #1677ff);
+          border-color: var(--primary-color, #1677ff);
+
+          &:hover {
+            background-color: var(--primary-color-hover, #4096ff);
+            border-color: var(--primary-color-hover, #4096ff);
+          }
+        }
+      }
+    }
+  }
+
+  // Bank account option styling
+  .bank-account-option {
+    .bank-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+
+      .default-badge {
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+    }
+
+    .account-number {
+      font-size: 0.9rem;
+      font-family: 'Courier New', monospace;
+    }
+  }
+
+  // Selected account info
+  .selected-account-info {
+    margin-bottom: 16px;
+
+    .ant-alert {
+      border-radius: 8px;
+      border-color: #d6e4ff;
+      background-color: #f0f5ff;
+
+      .ant-alert-message {
+        color: var(--primary-color, #1677ff);
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Withdrawal info alert
+  .withdrawal-info {
+    margin-bottom: 24px;
+    border-radius: 8px;
+
+    .withdrawal-notes {
+      margin: 8px 0 0 0;
+      padding-left: 16px;
+
+      li {
+        margin-bottom: 4px;
+        color: var(--text-color-secondary, #8c8c8c);
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  // Error states
+  .ant-form-item-has-error {
+    .ant-select .ant-select-selector,
+    .ant-input-number {
+      border-color: #ff4d4f;
+
+      &:hover,
+      &:focus,
+      &:focus-within {
+        border-color: #ff4d4f;
+        box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
+      }
+    }
+  }
+
+  // Loading state
+  .ant-spin-container {
+    .ant-form {
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+  }
+
+  &.ant-spin-spinning {
+    .ant-form {
+      opacity: 0.7;
+    }
+  }
+}
+
+// Dark mode support
+.dark-mode {
+  .withdrawal-request-form {
+    .ant-card {
+      background-color: var(--dark-bg-secondary, #1f1f1f);
+      border-color: var(--dark-border, #434343);
+    }
+
+    .ant-card-head-title {
+      color: var(--dark-text-primary, #ffffff);
+    }
+
+    .balance-info {
+      background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+      border-color: var(--dark-border, #434343);
+
+      .balance-icon,
+      .balance-amount {
+        color: var(--primary-color, #79eac0);
+      }
+    }
+
+    .ant-form-item-label > label {
+      color: var(--dark-text-primary, #ffffff);
+    }
+
+    .ant-select {
+      .ant-select-selector {
+        background-color: var(--dark-bg-tertiary, #2a2a2a);
+        border-color: var(--dark-border, #434343);
+        color: var(--dark-text-primary, #ffffff);
+
+        &:hover {
+          border-color: var(--primary-color, #79eac0);
+        }
+      }
+
+      &.ant-select-focused .ant-select-selector {
+        border-color: var(--primary-color, #79eac0);
+        box-shadow: 0 0 0 2px rgba(121, 234, 192, 0.1);
+      }
+    }
+
+    .ant-input-number {
+      background-color: var(--dark-bg-tertiary, #2a2a2a);
+      border-color: var(--dark-border, #434343);
+      color: var(--dark-text-primary, #ffffff);
+
+      &:hover {
+        border-color: var(--primary-color, #79eac0);
+      }
+
+      &:focus-within {
+        border-color: var(--primary-color, #79eac0);
+        box-shadow: 0 0 0 2px rgba(121, 234, 192, 0.1);
+      }
+
+      .ant-input-number-input {
+        background-color: transparent;
+        color: var(--dark-text-primary, #ffffff);
+      }
+
+      .ant-input-number-prefix,
+      .ant-input-number-suffix {
+        color: var(--dark-text-secondary, #8c8c8c);
+      }
+    }
+
+    .selected-account-info {
+      .ant-alert {
+        background-color: rgba(121, 234, 192, 0.1);
+        border-color: var(--primary-color, #79eac0);
+
+        .ant-alert-message {
+          color: var(--primary-color, #79eac0);
+        }
+      }
+    }
+
+    .withdrawal-info {
+      background-color: rgba(121, 234, 192, 0.05);
+      border-color: var(--primary-color, #79eac0);
+
+      .ant-alert-message {
+        color: var(--dark-text-primary, #ffffff);
+      }
+
+      .withdrawal-notes li {
+        color: var(--dark-text-secondary, #8c8c8c);
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .withdrawal-request-form {
+    margin: 0 16px;
+    max-width: none;
+
+    .ant-card {
+      .ant-card-body {
+        padding: 16px;
+      }
+    }
+
+    .balance-info {
+      padding: 12px;
+      margin-bottom: 20px;
+
+      .ant-space {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+
+    .ant-form {
+      .ant-form-item {
+        margin-bottom: 20px;
+      }
+
+      .form-actions {
+        margin-top: 24px;
+
+        .ant-btn {
+          width: 100%;
+          margin-bottom: 8px;
+          margin-right: 0 !important;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .withdrawal-request-form {
+    .ant-form {
+      .ant-form-item {
+        margin-bottom: 16px;
+      }
+
+      .ant-select,
+      .ant-input-number,
+      .ant-btn {
+        height: 44px;
+      }
+    }
+
+    .bank-account-option {
+      .bank-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+    }
+  }
+}

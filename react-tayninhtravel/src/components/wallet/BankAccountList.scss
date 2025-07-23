@@ -1,0 +1,375 @@
+.bank-account-list {
+  .ant-card {
+    .ant-card-head {
+      .ant-card-head-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-color, #1677ff);
+      }
+
+      .ant-card-extra {
+        .ant-btn {
+          border-radius: 8px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+
+  .accounts-list {
+    .ant-list-item {
+      padding: 0;
+      border: none;
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .bank-account-item {
+    border: 1px solid var(--border-color, #d9d9d9);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--bg-color, #ffffff);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+      border-color: var(--primary-color, #1677ff);
+      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    &.default-account {
+      border-color: #faad14;
+      background: linear-gradient(135deg, #fff7e6 0%, #ffffff 100%);
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #faad14 0%, #ffd666 100%);
+      }
+    }
+
+    .account-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .account-info {
+      flex: 1;
+      min-width: 0;
+
+      .account-header {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 12px;
+
+        .bank-icon {
+          font-size: 24px;
+          color: var(--primary-color, #1677ff);
+          margin-right: 12px;
+          margin-top: 4px;
+          flex-shrink: 0;
+        }
+
+        .bank-details {
+          flex: 1;
+          min-width: 0;
+
+          .bank-name {
+            margin: 0 0 4px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color, #262626);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            .default-tag {
+              font-size: 0.75rem;
+              font-weight: 500;
+              border-radius: 12px;
+              margin: 0;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+
+              .anticon {
+                font-size: 10px;
+              }
+            }
+          }
+
+          .account-number {
+            color: var(--text-color-secondary, #8c8c8c);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+
+            .anticon {
+              font-size: 14px;
+            }
+          }
+        }
+      }
+
+      .account-holder {
+        color: var(--text-color-tertiary, #595959);
+        font-size: 0.9rem;
+        margin-left: 36px;
+
+        strong {
+          color: var(--text-color, #262626);
+          font-weight: 500;
+        }
+      }
+    }
+
+    .account-actions {
+      flex-shrink: 0;
+      margin-left: 16px;
+
+      .ant-space {
+        .action-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+
+          &.set-default-btn {
+            color: #faad14;
+
+            &:hover {
+              background-color: #fff7e6;
+              color: #d48806;
+            }
+          }
+
+          &.edit-btn {
+            color: var(--primary-color, #1677ff);
+
+            &:hover {
+              background-color: #f0f5ff;
+              color: #0958d9;
+            }
+          }
+
+          &.delete-btn {
+            color: #ff4d4f;
+
+            &:hover {
+              background-color: #fff2f0;
+              color: #cf1322;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Empty state
+  .ant-empty {
+    padding: 40px 20px;
+
+    .ant-empty-description {
+      color: var(--text-color-secondary, #8c8c8c);
+      font-size: 1rem;
+    }
+
+    .ant-btn {
+      margin-top: 16px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+  }
+}
+
+// Dark mode support
+.dark-mode {
+  .bank-account-list {
+    .ant-card {
+      background-color: var(--dark-bg-secondary, #1f1f1f);
+      border-color: var(--dark-border, #434343);
+
+      .ant-card-head-title {
+        color: var(--dark-text-primary, #ffffff);
+      }
+    }
+
+    .bank-account-item {
+      background: var(--dark-bg-tertiary, #2a2a2a);
+      border-color: var(--dark-border, #434343);
+
+      &:hover {
+        border-color: var(--primary-color, #79eac0);
+        box-shadow: 0 4px 12px rgba(121, 234, 192, 0.1);
+      }
+
+      &.default-account {
+        background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+        border-color: #faad14;
+      }
+
+      .account-info {
+        .account-header {
+          .bank-icon {
+            color: var(--primary-color, #79eac0);
+          }
+
+          .bank-details {
+            .bank-name {
+              color: var(--dark-text-primary, #ffffff);
+            }
+
+            .account-number {
+              color: var(--dark-text-secondary, #8c8c8c);
+            }
+          }
+        }
+
+        .account-holder {
+          color: var(--dark-text-secondary, #8c8c8c);
+
+          strong {
+            color: var(--dark-text-primary, #ffffff);
+          }
+        }
+      }
+
+      .account-actions {
+        .action-btn {
+          &.set-default-btn:hover {
+            background-color: rgba(250, 173, 20, 0.1);
+          }
+
+          &.edit-btn {
+            color: var(--primary-color, #79eac0);
+
+            &:hover {
+              background-color: rgba(121, 234, 192, 0.1);
+            }
+          }
+
+          &.delete-btn:hover {
+            background-color: rgba(255, 77, 79, 0.1);
+          }
+        }
+      }
+    }
+
+    .ant-empty-description {
+      color: var(--dark-text-secondary, #8c8c8c);
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .bank-account-list {
+    .ant-card {
+      .ant-card-head {
+        .ant-card-head-title {
+          font-size: 1.1rem;
+        }
+
+        .ant-card-extra {
+          .ant-btn {
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            height: auto;
+
+            .anticon {
+              margin-right: 4px;
+            }
+          }
+        }
+      }
+
+      .ant-card-body {
+        padding: 16px;
+      }
+    }
+
+    .bank-account-item {
+      padding: 16px;
+
+      .account-content {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .account-actions {
+        margin-left: 0;
+        align-self: flex-end;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .bank-account-list {
+    .ant-card {
+      .ant-card-head {
+        flex-direction: column;
+        gap: 12px;
+
+        .ant-card-extra {
+          width: 100%;
+
+          .ant-btn {
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .bank-account-item {
+      .account-info {
+        .account-header {
+          .bank-details {
+            .bank-name {
+              font-size: 1rem;
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 4px;
+            }
+          }
+        }
+
+        .account-holder {
+          margin-left: 0;
+          margin-top: 8px;
+        }
+      }
+
+      .account-actions {
+        .ant-space {
+          .action-btn {
+            width: 32px;
+            height: 32px;
+          }
+        }
+      }
+    }
+  }
+}

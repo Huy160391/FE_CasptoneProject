@@ -13,7 +13,8 @@ import {
   HomeOutlined,
   LogoutOutlined,
   ShoppingCartOutlined,
-  CustomerServiceOutlined
+  CustomerServiceOutlined,
+  DollarOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
@@ -84,6 +85,11 @@ const AdminSidebar = () => {
       key: '/admin/shop-registrations',
       icon: <AppstoreOutlined />,
       label: <Link to="/admin/shop-registrations">{t('admin.sidebar.shopRegistrations')}</Link>,
+    },
+    {
+      key: '/admin/withdrawal-requests',
+      icon: <DollarOutlined />,
+      label: <Link to="/admin/withdrawal-requests">Quản lý rút tiền</Link>,
     },
   ]
 

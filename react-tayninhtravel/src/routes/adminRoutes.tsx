@@ -8,6 +8,7 @@ import Blogs from '@/pages/admin/Blogs';
 import CVManagement from '@/pages/admin/CVManagement';
 import SupportTickets from '@/pages/admin/SupportTickets';
 import ShopRegistrationManagement from '@/pages/admin/ShopRegistrationManagement';
+import { AdminWithdrawalManagement } from '@/components/admin';
 
 export const adminRoutes: RouteObject[] = [
     {
@@ -45,6 +46,10 @@ export const adminRoutes: RouteObject[] = [
             {
                 path: 'shop-registrations',
                 element: <ShopRegistrationManagement />,
+            },
+            {
+                path: 'withdrawal-requests',
+                element: <AdminWithdrawalManagement />,
             },
         ],
     },

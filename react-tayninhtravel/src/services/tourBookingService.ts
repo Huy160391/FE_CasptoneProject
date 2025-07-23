@@ -37,16 +37,33 @@ export interface TourOperationSummary {
 
 export interface TimelineItem {
     id: string;
-    title: string;
-    description?: string;
-    startTime: string;
-    endTime: string;
+    tourDetailsId: string;
+    checkInTime: string;
+    activity: string;
+    specialtyShopId?: string;
     sortOrder: number;
     specialtyShop?: {
         id: string;
-        name: string;
-        address?: string;
+        shopName: string;
+        location?: string;
+        description?: string;
+        representativeName?: string;
+        email?: string;
+        phoneNumber?: string;
+        website?: string;
+        businessLicense?: string;
+        businessLicenseUrl?: string;
+        logoUrl?: string;
+        shopType?: string;
+        openingHours?: string;
+        closingHours?: string;
+        rating?: number;
+        isShopActive?: boolean;
+        createdAt?: string;
+        updatedAt?: string;
     };
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface TourDate {

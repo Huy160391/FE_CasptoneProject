@@ -1,0 +1,216 @@
+// Tour Template Modal Styles
+.template-view-modal {
+  .modal-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+    color: #000;
+  }
+
+  .modal-section-divider {
+    margin: 24px 0;
+    border: none;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .tour-slots-list {
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+
+    .ant-list-item {
+      border-bottom: 1px solid #f0f0f0;
+      background-color: #fff;
+      padding: 12px 16px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .slot-date {
+      color: #000;
+      font-weight: 500;
+    }
+
+    .slot-created-date {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .slot-calendar-icon {
+      color: #1890ff;
+    }
+
+    .slot-clock-icon {
+      color: #999;
+      margin-right: 4px;
+    }
+  }
+
+  .empty-slots-message {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .template-images {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    img {
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #eee;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
+
+// Dark mode styles
+body.dark-mode {
+  .template-view-modal {
+    color: rgba(255, 255, 255, 0.85);
+
+    .modal-section-title {
+      color: rgba(255, 255, 255, 0.85);
+      border-bottom-color: #303030;
+    }
+
+    .modal-section-divider {
+      border-top-color: #303030;
+    }
+
+    .tour-slots-list {
+      background-color: #141414;
+      border-color: #303030;
+
+      .ant-list-item {
+        border-bottom-color: #303030;
+        background-color: #141414;
+      }
+
+      .slot-date {
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .slot-created-date {
+        color: rgba(255, 255, 255, 0.45);
+      }
+
+      .slot-calendar-icon {
+        color: #79eac0;
+      }
+
+      .slot-clock-icon {
+        color: rgba(255, 255, 255, 0.45);
+      }
+    }
+
+    .empty-slots-message {
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .template-images {
+      img {
+        border-color: #303030;
+        filter: brightness(0.9);
+
+        &:hover {
+          filter: brightness(1);
+          box-shadow: 0 4px 12px rgba(121, 234, 192, 0.2);
+        }
+      }
+    }
+
+    // Text colors for all paragraphs
+    p {
+      color: rgba(255, 255, 255, 0.85);
+
+      strong {
+        color: rgba(255, 255, 255, 0.95);
+      }
+    }
+  }
+
+  // Override Ant Design modal styles for dark mode
+  .ant-modal {
+    .ant-modal-content {
+      background-color: #141414;
+      border: 1px solid #303030;
+    }
+
+    .ant-modal-header {
+      background-color: #141414;
+      border-bottom-color: #303030;
+
+      .ant-modal-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+
+    .ant-modal-body {
+      background-color: #141414;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .ant-modal-footer {
+      background-color: #141414;
+      border-top-color: #303030;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .template-view-modal {
+    .template-images {
+      img {
+        width: 100px;
+        height: 60px;
+      }
+    }
+
+    .tour-slots-list {
+      max-height: 200px;
+    }
+  }
+}
+
+// Animation for smooth transitions
+.template-view-modal {
+  .tour-slots-list {
+    .ant-list-item {
+      transition: all 0.3s ease;
+
+      &:hover {
+        background-color: rgba(24, 144, 255, 0.05);
+      }
+    }
+  }
+}
+
+body.dark-mode {
+  .template-view-modal {
+    .tour-slots-list {
+      .ant-list-item {
+        &:hover {
+          background-color: rgba(121, 234, 192, 0.1);
+        }
+      }
+    }
+  }
+}
