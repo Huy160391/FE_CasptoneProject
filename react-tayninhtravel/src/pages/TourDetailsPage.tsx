@@ -114,7 +114,7 @@ const TourDetailsPage: React.FC = () => {
                     headers.Authorization = `Bearer ${token}`;
                 }
 
-                const response = await fetch(`http://localhost:5267/api/TourDetails/${tourId}`, {
+                const response = await fetch(`https://tayninhtour.card-diversevercel.io.vn/api/TourDetails/${tourId}`, {
                     headers
                 });
                 const data = await response.json();
@@ -199,11 +199,11 @@ const TourDetailsPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                minHeight: '60vh' 
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '60vh'
             }}>
                 <Spin size="large" />
             </div>
@@ -301,7 +301,7 @@ const TourDetailsPage: React.FC = () => {
                                                         <div style={{ marginTop: 4 }}>
                                                             <Text type="secondary">
                                                                 📍 {item.specialtyShop.name}
-                                                                {item.specialtyShop.address && 
+                                                                {item.specialtyShop.address &&
                                                                     ` - ${item.specialtyShop.address}`
                                                                 }
                                                             </Text>
@@ -345,7 +345,7 @@ const TourDetailsPage: React.FC = () => {
                                             {tour.tourOperation.maxGuests} người
                                         </Space>
                                     </Descriptions.Item>
-                                    
+
                                     <Descriptions.Item label="Đã đặt">
                                         <Space>
                                             <ShoppingCartOutlined />
@@ -354,7 +354,7 @@ const TourDetailsPage: React.FC = () => {
                                                 : (tour.tourOperation.currentBookings || 0)} người
                                         </Space>
                                     </Descriptions.Item>
-                                    
+
                                     <Descriptions.Item label="Chỗ trống">
                                         <Space>
                                             <Text style={{ color: availableSlots > 5 ? 'green' : 'orange' }}>
@@ -499,7 +499,7 @@ const TourDetailsPage: React.FC = () => {
             <LoginModal
                 isVisible={isLoginModalVisible}
                 onClose={() => setIsLoginModalVisible(false)}
-                onRegisterClick={() => {}}
+                onRegisterClick={() => { }}
                 onLoginSuccess={() => {
                     setIsLoginModalVisible(false);
                     message.success('Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.');

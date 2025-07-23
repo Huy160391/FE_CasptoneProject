@@ -173,7 +173,7 @@ const FeaturedTours = () => {
       <LoginModal
         isVisible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
-        onRegisterClick={() => {}}
+        onRegisterClick={() => { }}
         onLoginSuccess={() => {
           setIsLoginModalVisible(false)
           message.success('Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.')

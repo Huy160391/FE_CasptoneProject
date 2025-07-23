@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal, Form, Input, Button, Checkbox, Divider, message } from 'antd'
-import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, GoogleOutlined, FacebookOutlined } from '@ant-design/icons'
+import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { authService } from '@/services/authService'
 import OTPVerificationModal from './OTPVerificationModal'
@@ -53,9 +53,27 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
     onLoginClick()
   }
 
-  const handleSocialLogin = (platform: string) => {
-    console.log(`Register with ${platform}`)
-    // Implement social register logic here
+
+  // Đăng ký bằng Google: hiện popup chọn tài khoản Google
+  const handleGoogleRegister = () => {
+    if (!(window as any).google || !(window as any).google.accounts) {
+      message.error('Google SDK chưa được tải.');
+      return;
+    }
+    (window as any).google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: async (response: any) => {
+        if (response.credential) {
+          // Ở đây bạn có thể xử lý đăng ký bằng Google, ví dụ gửi credential lên backend
+          message.success('Đăng ký bằng Google thành công!');
+          // ...
+        } else {
+          message.error('Google register failed: No credential received.');
+        }
+      },
+      ux_mode: 'popup',
+    });
+    (window as any).google.accounts.id.prompt();
   }
 
   const handleLoginClick = () => {
@@ -198,20 +216,9 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
 
           <Divider plain>{t('auth.orRegisterWith')}</Divider>
 
-          <div className="social-login">
-            <Button
-              icon={<GoogleOutlined />}
-              onClick={() => handleSocialLogin('Google')}
-              size="large"
-            >
-              Google
-            </Button>
-            <Button
-              icon={<FacebookOutlined />}
-              onClick={() => handleSocialLogin('Facebook')}
-              size="large"
-            >
-              Facebook
+          <div className="social-login" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <Button type="default" block size="large" onClick={handleGoogleRegister} style={{ maxWidth: 320 }}>
+              Đăng ký với Google
             </Button>
           </div>
 
