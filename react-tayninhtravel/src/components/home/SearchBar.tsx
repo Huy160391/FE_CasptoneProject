@@ -1,4 +1,4 @@
-import { Select, DatePicker, Input, Button } from 'antd';
+import { Select, DatePicker, Input } from 'antd';
 import { SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -73,9 +73,9 @@ const SearchBar = () => {
                     onPressEnter={handleSearch}
                 />
 
-                <Button type="primary" className="search-button" onClick={handleSearch}>
+                <button className="search-button" onClick={handleSearch} type="button">
                     Tìm kiếm
-                </Button>
+                </button>
             </div>
         </div>
     );

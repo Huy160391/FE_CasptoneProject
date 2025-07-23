@@ -85,11 +85,15 @@ const BestSellers: React.FC = () => {
                                             cover={<img alt={product.name} src={product.image} />}
                                             className="product-card"
                                             actions={[
-                                                <div style={{ width: '100%', padding: 0 }}>
-                                                    <Button type="primary" icon={<ShoppingCartOutlined />} block onClick={e => { e.preventDefault(); handleAddToCart(); }}>
-                                                        {t('home.bestSellers.addToCart')}
-                                                    </Button>
-                                                </div>
+                                                <button
+                                                    className="custom-book-now-btn"
+                                                    style={{ width: '100%', padding: 0 }}
+                                                    onClick={e => { e.preventDefault(); handleAddToCart(); }}
+                                                    disabled={false}
+                                                >
+                                                    <ShoppingCartOutlined style={{ fontSize: 18, marginRight: 8 }} />
+                                                    {t('home.bestSellers.addToCart')}
+                                                </button>
                                             ]}
                                             style={{ cursor: 'pointer' }}
                                         >
