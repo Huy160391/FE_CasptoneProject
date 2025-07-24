@@ -15,8 +15,10 @@ import OrderSuccess from '@/pages/OrderSuccess';
 import NotFound from '@/pages/NotFound';
 import Unauthorized from '@/pages/Unauthorized';
 import BookingPage from '@/pages/BookingPage';
-import PaymentSuccess from '@/pages/PaymentSuccess';
-import PaymentCancel from '@/pages/PaymentCancel';
+import TourPaymentSuccess from '@/pages/TourPaymentSuccess';
+import TourPaymentCancel from '@/pages/TourPaymentCancel';
+import ProductPaymentSuccess from '@/pages/ProductPaymentSuccess';
+import ProductPaymentCancel from '@/pages/ProductPaymentCancel';
 import BookingHistory from '@/pages/BookingHistory';
 import TourDetailsPage from '@/pages/TourDetailsPage';
 import DebugAuth from '@/pages/DebugAuth';
@@ -83,13 +85,23 @@ export const publicRoutes: RouteObject[] = [
         path: '/booking/:tourId',
         element: <BookingPage />,
     },
+    // Product Payment Routes
     {
-        path: '/payment-success',
-        element: <PaymentSuccess />,
+        path: '/product-payment-success',
+        element: <ProductPaymentSuccess />,
     },
     {
-        path: '/payment-cancel',
-        element: <PaymentCancel />,
+        path: '/product-payment-cancel',
+        element: <ProductPaymentCancel />,
+    },
+    // Tour Payment Routes
+    {
+        path: '/tour-payment-success',
+        element: <TourPaymentSuccess />,
+    },
+    {
+        path: '/tour-payment-cancel',
+        element: <TourPaymentCancel />,
     },
     {
         path: '/booking-history',
@@ -114,14 +126,6 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/test-image-upload',
         element: <ImageUploadTest />,
-    },
-    {
-        path: '/payment-success',
-        element: <PaymentSuccess />,
-    },
-    {
-        path: '/payment-cancel',
-        element: <PaymentCancel />,
     },
     {
         path: '*',

@@ -135,7 +135,7 @@ export const getTourDetailsById = async (id: string, token?: string): Promise<Ap
 // Cập nhật TourDetails
 export const updateTourDetails = async (id: string, data: Partial<CreateTourDetailsRequest>, token?: string): Promise<ApiResponse<TourDetails>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.put(`/TourDetails/${id}`, data, { headers });
+    const response = await axios.patch(`/TourDetails/${id}`, data, { headers });
     return response.data;
 };
 

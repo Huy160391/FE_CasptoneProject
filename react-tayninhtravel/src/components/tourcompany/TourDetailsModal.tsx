@@ -13,7 +13,10 @@ import {
     Spin,
     message,
     Tabs,
-    Statistic
+    Statistic,
+    Image,
+    Space,
+    Tooltip
 } from 'antd';
 import {
     ClockCircleOutlined,
@@ -23,7 +26,8 @@ import {
     ExclamationCircleOutlined,
     DollarOutlined,
     TeamOutlined,
-    CalendarOutlined
+    CalendarOutlined,
+    EditOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
@@ -46,6 +50,7 @@ import {
     getScheduleDayLabelFromString
 } from '../../constants/tourTemplate';
 import TourOperationManagement from './TourOperationManagement';
+import TourDetailsUpdateForm from './TourDetailsUpdateForm';
 
 const { TabPane } = Tabs;
 
@@ -73,6 +78,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const [invitations, setInvitations] = useState<TourGuideInvitationsResponse | null>(null);
     const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
     const [slotsLoading, setSlotsLoading] = useState(false);
+    const [showUpdateForm, setShowUpdateForm] = useState(false);
 
     useEffect(() => {
         if (visible && tourDetailsId && token) {
@@ -161,6 +167,29 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
         <div>
             {tourDetails && (
                 <>
+                    {/* Update Button */}
+                    <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                        {tourOperation?.guideId ? (
+                            <Tooltip title="Đã có hướng dẫn viên tham gia tour, không thể edit nữa">
+                                <Button
+                                    type="primary"
+                                    icon={<EditOutlined />}
+                                    disabled
+                                >
+                                    Cập nhật Tour Details
+                                </Button>
+                            </Tooltip>
+                        ) : (
+                            <Button
+                                type="primary"
+                                icon={<EditOutlined />}
+                                onClick={() => setShowUpdateForm(true)}
+                            >
+                                Cập nhật Tour Details
+                            </Button>
+                        )}
+                    </div>
+
                     <Descriptions title="Thông tin cơ bản" bordered column={2}>
                         <Descriptions.Item label="Tiêu đề" span={2}>
                             {tourDetails.title}
@@ -221,6 +250,30 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             </Descriptions.Item>
                         )}
                     </Descriptions>
+
+                    {/* Images Gallery */}
+                    {tourDetails.imageUrls && tourDetails.imageUrls.length > 0 && (
+                        <>
+                            <Divider>Hình ảnh ({tourDetails.imageUrls.length})</Divider>
+                            <Card title="Thư viện ảnh" size="small" style={{ marginBottom: 16 }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                                    {tourDetails.imageUrls.map((imageUrl, index) => (
+                                        <div key={index}>
+                                            <Image
+                                                width={150}
+                                                height={120}
+                                                src={imageUrl}
+                                                style={{ objectFit: 'cover', borderRadius: 8 }}
+                                                preview={{
+                                                    mask: 'Xem ảnh'
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </Card>
+                        </>
+                    )}
 
                     <Divider />
 
@@ -623,6 +676,20 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                     </TabPane>
                 </Tabs>
             </Spin>
+
+            {/* Update Form Modal */}
+            <TourDetailsUpdateForm
+                visible={showUpdateForm}
+                tourDetails={tourDetails}
+                onCancel={() => setShowUpdateForm(false)}
+                onSuccess={() => {
+                    setShowUpdateForm(false);
+                    loadTourDetailsData(); // Reload data after update
+                    if (onUpdate) {
+                        onUpdate();
+                    }
+                }}
+            />
         </Modal>
     );
 };
