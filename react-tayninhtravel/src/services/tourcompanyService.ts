@@ -10,6 +10,7 @@ import {
     GetTourDetailsListResponse,
     TourOperation,
     CreateTourOperationRequest,
+    UpdateTourOperationResponse,
     TourGuide,
     TimelineItem,
     CreateTimelineItemRequest,
@@ -168,9 +169,9 @@ export const getTourOperationByDetailsId = async (tourDetailsId: string, token?:
 };
 
 // Cập nhật TourOperation
-export const updateTourOperation = async (id: string, data: Partial<CreateTourOperationRequest>, token?: string): Promise<ApiResponse<TourOperation>> => {
+export const updateTourOperation = async (id: string, data: Partial<CreateTourOperationRequest>, token?: string): Promise<UpdateTourOperationResponse> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.put(`/TourOperation/${id}`, data, { headers });
+    const response = await axios.patch(`/TourOperation/${id}`, data, { headers });
     return response.data;
 };
 

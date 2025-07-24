@@ -51,6 +51,7 @@ import {
 } from '../../constants/tourTemplate';
 import TourOperationManagement from './TourOperationManagement';
 import TourDetailsUpdateForm from './TourDetailsUpdateForm';
+import TimelineEditor from './TimelineEditor';
 
 const { TabPane } = Tabs;
 
@@ -158,6 +159,13 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
     const handleOperationCreate = (newOperation: TourOperation) => {
         setTourOperation(newOperation);
+        if (onUpdate) {
+            onUpdate();
+        }
+    };
+
+    const handleTimelineUpdate = (updatedTimeline: TimelineItem[]) => {
+        setTimeline(updatedTimeline);
         if (onUpdate) {
             onUpdate();
         }
@@ -313,33 +321,11 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const renderTimelineTab = () => (
         <div>
             {timeline.length > 0 ? (
-                <Timeline mode="left">
-                    {timeline
-                        .sort((a, b) => (a.sortOrder || a.orderIndex || 0) - (b.sortOrder || b.orderIndex || 0))
-                        .map((item, _index) => (
-                            <Timeline.Item
-                                key={item.id}
-                                dot={<ClockCircleOutlined style={{ fontSize: '16px' }} />}
-                                label={item.checkInTime}
-                            >
-                                <Card size="small" style={{ marginBottom: 8 }}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                                        {item.activity}
-                                    </div>
-                                    {item.location && (
-                                        <div style={{ color: '#666', fontSize: '12px' }}>
-                                            📍 {item.location}
-                                        </div>
-                                    )}
-                                    {item.specialtyShop && (
-                                        <Tag icon={<ShopOutlined />} color="green" style={{ marginTop: 4 }}>
-                                            {item.specialtyShop.shopName}
-                                        </Tag>
-                                    )}
-                                </Card>
-                            </Timeline.Item>
-                        ))}
-                </Timeline>
+                <TimelineEditor
+                    tourDetailsId={tourDetailsId!}
+                    timeline={timeline}
+                    onUpdate={handleTimelineUpdate}
+                />
             ) : (
                 <Alert
                     message="Chưa có timeline"
