@@ -5,6 +5,7 @@ import { ShoppingCartOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import { useCartStore } from '@/store/useCartStore'
 import './BestSellers.scss'
+import '@/styles/custom-buttons.scss'
 
 const { Meta } = Card
 
@@ -87,7 +88,16 @@ const BestSellers: React.FC = () => {
                                             actions={[
                                                 <button
                                                     className="custom-book-now-btn"
-                                                    style={{ width: '100%', padding: 0 }}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: 0,
+                                                        borderRadius: '8px',
+                                                        border: 'none',
+                                                        height: '40px',
+                                                        background: '#1890ff',
+                                                        color: 'white',
+                                                        cursor: 'pointer'
+                                                    }}
                                                     onClick={e => { e.preventDefault(); handleAddToCart(); }}
                                                     disabled={false}
                                                 >
