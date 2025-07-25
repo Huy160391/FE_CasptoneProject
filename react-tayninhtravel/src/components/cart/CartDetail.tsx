@@ -10,9 +10,9 @@ import {
     Tag,
     Row,
     Col,
-    Input,
     Breadcrumb,
-    notification
+    notification,
+    AutoComplete
 } from 'antd'
 import {
     DeleteOutlined,
@@ -31,6 +31,8 @@ import './CartDetail.scss'
 
 import { removeCart } from '@/services/cartService'
 import { useAuthStore } from '@/store/useAuthStore'
+import { userService } from '@/services/userService'
+import { useState } from 'react'
 
 const { Title, Text } = Typography
 
@@ -296,13 +298,7 @@ const CartDetail = () => {
                         </Card>
 
                         <Card title={t('cart.coupon')} className="coupon-card" style={{ marginTop: 16 }}>
-                            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                                <Input
-                                    placeholder={t('cart.enterCouponCode')}
-                                    style={{ width: '100%' }}
-                                />
-                                <Button block>{t('cart.applyCoupon')}</Button>
-                            </Space>
+                            <VoucherAutoComplete t={t} />
                         </Card>
                     </Col>
                 </Row>
@@ -310,5 +306,68 @@ const CartDetail = () => {
         </div>
     )
 }
+
+// Component tìm kiếm và chọn voucher
+const VoucherAutoComplete = ({ t }: { t: any }) => {
+    const [options, setOptions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [selected, setSelected] = useState<any>(null);
+
+    // Gọi API lấy voucher khi nhập
+    const handleSearch = async (value: string) => {
+        if (!value) {
+            setOptions([]);
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await userService.getMyVouchers(1, 10, undefined, value);
+            const vouchers = Array.isArray(res.data) ? res.data : [];
+            setOptions(vouchers.map((v: any) => ({
+                value: v.code,
+                label: (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: (v.isUsed || v.isExpired) ? '#aaa' : undefined
+                    }}>
+                        <span style={{ flex: 1 }}>{v.code} - {v.voucherName}</span>
+                        {v.isUsed && <Tag color="default" style={{ marginLeft: 8 }}>Đã sử dụng</Tag>}
+                        {v.isExpired && <Tag color="default" style={{ marginLeft: 8 }}>Đã hết hạn</Tag>}
+                    </div>
+                ),
+                disabled: v.isUsed || v.isExpired,
+                raw: v
+            })));
+        } catch {
+            setOptions([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Khi chọn voucher
+    const handleSelect = (_value: string, option: any) => {
+        if (option.disabled) return;
+        setSelected(option.raw);
+        // TODO: Xử lý áp dụng voucher ở đây
+    };
+
+    return (
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <AutoComplete
+                style={{ width: '100%' }}
+                options={options}
+                onSearch={handleSearch}
+                onSelect={handleSelect}
+                placeholder={t('cart.enterCouponCode')}
+                notFoundContent={loading ? 'Đang tải...' : 'Không tìm thấy voucher'}
+                filterOption={false}
+                disabled={loading}
+            />
+            <Button block disabled={!selected}>{t('cart.applyCoupon')}</Button>
+        </Space>
+    );
+};
 
 export default CartDetail

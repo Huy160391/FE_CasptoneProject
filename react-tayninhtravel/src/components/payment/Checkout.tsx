@@ -263,24 +263,23 @@ const Checkout = () => {
         setLoading(true)
         try {
             const res = await checkoutCart('');
-            // Điều chỉnh lấy checkoutUrl từ response mới
-            if (res.checkoutUrl && res.checkoutUrl.checkoutUrl) {
-                window.location.href = res.checkoutUrl.checkoutUrl;
+            // Navigate to checkoutUrl if present
+            if (res.checkoutUrl) {
+                window.location.href = res.checkoutUrl;
                 return;
             }
-            clearCart()
+            clearCart();
             notification.success({
                 message: t('checkout.orderSuccess'),
                 description: t('checkout.orderSuccessDescription')
-            })
-            // Xoá navigate('/order-success') vì không cần chuyển trang nữa
+            });
         } catch (error) {
             notification.error({
                 message: t('checkout.orderError'),
                 description: t('checkout.orderErrorDescription')
-            })
+            });
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     }
 
@@ -331,9 +330,11 @@ const Checkout = () => {
                             <ShoppingCartOutlined className="empty-icon" />
                             <Title level={3}>{t('checkout.emptyCart')}</Title>
                             <Text>{t('checkout.emptyCartDescription')}</Text>
-                            <Button type="primary" size="large" onClick={() => navigate('/shop')}>
-                                {t('cart.continueShopping')}
-                            </Button>
+                            <div style={{ marginTop: 16 }}>
+                                <Button type="primary" size="large" onClick={() => navigate('/shop')}>
+                                    {t('cart.continueShopping')}
+                                </Button>
+                            </div>
                         </div>
                     </Card>
                 </div>
