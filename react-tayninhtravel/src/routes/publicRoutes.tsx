@@ -10,7 +10,7 @@ import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import Career from '@/pages/Career';
 import CartDetail from '@/components/cart/CartDetail';
-
+import Checkout from '@/components/payment/Checkout';
 import OrderSuccess from '@/pages/OrderSuccess';
 import NotFound from '@/pages/NotFound';
 import Unauthorized from '@/pages/Unauthorized';
@@ -130,5 +130,9 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '*',
         element: <NotFound />,
+    },
+    {
+        path: '/checkout',
+        element: <Checkout />,
     }
 ];

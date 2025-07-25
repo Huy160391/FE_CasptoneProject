@@ -1,10 +1,8 @@
 import React from 'react';
-import { Card, Button, Tag, Divider } from 'antd';
+import { Card, Tag } from 'antd';
 import {
     CalendarOutlined,
     EnvironmentOutlined,
-    ClockCircleOutlined,
-    UserOutlined,
     StarOutlined,
     ClockCircleFilled
 } from '@ant-design/icons';
@@ -54,21 +52,21 @@ const TourCard: React.FC<TourCardProps> = ({
     const getStatusTag = (status: number) => {
         switch (status) {
             case TourDetailsStatus.Public:
-                return <Tag color="green" icon={<StarOutlined />}>Đang mở bán</Tag>;
+                return <Tag color="green" icon={<StarOutlined />}>{t('tours.status.public', 'Đang mở bán')}</Tag>;
             case TourDetailsStatus.WaitToPublic:
-                return <Tag color="orange" icon={<ClockCircleFilled />}>Sắp mở bán</Tag>;
+                return <Tag color="orange" icon={<ClockCircleFilled />}>{t('tours.status.waitToPublic', 'Sắp mở bán')}</Tag>;
             case TourDetailsStatus.Approved:
-                return <Tag color="blue">Đã duyệt</Tag>;
+                return <Tag color="blue">{t('tours.status.approved', 'Đã duyệt')}</Tag>;
             case TourDetailsStatus.AwaitingGuideAssignment:
-                return <Tag color="purple">Chờ phân công HDV</Tag>;
+                return <Tag color="purple">{t('tours.status.awaitingGuide', 'Chờ phân công HDV')}</Tag>;
             default:
-                return <Tag color="default">Chưa sẵn sàng</Tag>;
+                return <Tag color="default">{t('tours.status.notReady', 'Chưa sẵn sàng')}</Tag>;
         }
     };
 
     // Get the main image (first image or fallback)
-    const mainImage = tour.imageUrls && tour.imageUrls.length > 0 
-        ? tour.imageUrls[0] 
+    const mainImage = tour.imageUrls && tour.imageUrls.length > 0
+        ? tour.imageUrls[0]
         : tour.imageUrl;
 
     return (
@@ -88,29 +86,23 @@ const TourCard: React.FC<TourCardProps> = ({
                     {/* Show image count if multiple images */}
                     {tour.imageUrls && tour.imageUrls.length > 1 && (
                         <div className="image-count-badge">
-                            +{tour.imageUrls.length - 1} ảnh
+                            +{tour.imageUrls.length - 1} {t('tours.imageCount', 'ảnh')}
                         </div>
                     )}
                 </div>
             }
             actions={[
-                <Button
-                    type="primary"
-                    size="large"
-                    className="book-now-btn"
-                    icon={<CalendarOutlined />}
-                    onClick={() => onBookNow(tour)}
+                <button
+                    className="custom-book-now-btn"
+                    onClick={e => { e.stopPropagation(); onBookNow(tour); }}
                     disabled={!tour.tourOperation?.isActive}
                 >
+                    <CalendarOutlined style={{ marginRight: 8 }} />
                     {t('tours.bookNow')}
-                </Button>,
-                <Button
-                    type="link"
-                    onClick={() => onViewDetails(tour)}
-                >
-                    {t('tours.viewDetails')}
-                </Button>
+                </button>
             ]}
+            onClick={() => onViewDetails(tour)}
+            style={{ cursor: 'pointer' }}
         >
             <div className="tour-content">
                 <div className="tour-header">
@@ -120,34 +112,7 @@ const TourCard: React.FC<TourCardProps> = ({
                         <span>{tour.tourTemplateName}</span>
                     </div>
                 </div>
-
-                <p className="tour-description">
-                    {tour.description?.substring(0, 120) + '...' || 'Trải nghiệm tuyệt vời đang chờ đón bạn'}
-                </p>
-
-                <Divider style={{ margin: '16px 0' }} />
-
-                <div className="tour-details">
-                    <div className="detail-item">
-                        <ClockCircleOutlined className="detail-icon" />
-                        <span className="detail-label">Thời gian:</span>
-                        <span className="detail-value">
-                            {tour.timeline?.length ? `${tour.timeline.length} hoạt động` : '1 ngày'}
-                        </span>
-                    </div>
-
-                    <div className="detail-item">
-                        <UserOutlined className="detail-icon" />
-                        <span className="detail-label">Sức chứa:</span>
-                        <span className="detail-value">
-                            {tour.tourOperation?.maxGuests || 'Chưa xác định'} khách
-                        </span>
-                    </div>
-                </div>
-
-                <Divider style={{ margin: '16px 0' }} />
-
-                <div className="tour-footer">
+                <div className="tour-footer" style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className="price-section">
                         {tour.tourOperation?.price ? (
                             <TourPriceDisplay
@@ -156,14 +121,13 @@ const TourCard: React.FC<TourCardProps> = ({
                                 createdAt={tour.createdAt}
                             />
                         ) : (
-                            <span className="price-placeholder">Liên hệ</span>
+                            <span className="price-placeholder">{t('tours.contactForPrice', 'Liên hệ')}</span>
                         )}
                     </div>
-
                     <div className="availability-info">
                         {tour.tourOperation && (
                             <span className="seats-info">
-                                Còn {(tour.tourOperation.maxGuests || 0) - (tour.tourOperation.currentBookings || 0)} chỗ
+                                {t('tours.seatsLeft', { count: (tour.tourOperation.maxGuests || 0) - (tour.tourOperation.currentBookings || 0) })}
                             </span>
                         )}
                     </div>

@@ -1,274 +1,178 @@
-import { useState } from 'react'
-import { Table, Button, Input, Space, Tag, Modal, Form, Select, InputNumber, Upload, DatePicker } from 'antd'
-import {
-  SearchOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  UploadOutlined
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import type { Key } from 'react'
-import './Tours.scss'
+import { useState, useEffect } from 'react'
+import { Table, Button, Input, Space, Tag, Modal, message } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import type { Key } from 'react';
+import './Tours.scss';
+import { adminService } from '@/services/adminService';
 
-const { Option } = Select
-const { TextArea } = Input
-const { RangePicker } = DatePicker
+import TourDetailModal from '@/pages/admin/TourDetailModal';
+import type { PendingTour } from '@/types/tour';
 
-interface Tour {
-  key: string
-  id: number
-  name: string
-  image: string
-  price: number
-  duration: string
-  maxGroupSize: number
-  startLocation: string
-  status: 'active' | 'inactive'
-  featured: boolean
-  description?: string
-}
+
 
 const Tours = () => {
-  const [searchText, setSearchText] = useState('')
-  const [isModalVisible, setIsModalVisible] = useState(false)
-  const [form] = Form.useForm()
-  const [editingTour, setEditingTour] = useState<Tour | null>(null)
+  const [searchText, setSearchText] = useState('');
+  const [tours, setTours] = useState<PendingTour[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedTour, setSelectedTour] = useState<PendingTour | null>(null);
 
-  // Mock data for tours
-  const tours: Tour[] = [
-    {
-      key: '1',
-      id: 1,
-      name: 'Khám phá Núi Bà Đen',
-      image: '/images/tours/nui-ba-den.jpg',
-      price: 500000,
-      duration: '1 ngày',
-      maxGroupSize: 20,
-      startLocation: 'TP. Tây Ninh',
-      status: 'active',
-      featured: true,
-    },
-    {
-      key: '2',
-      id: 2,
-      name: 'Tòa Thánh Cao Đài và Núi Bà',
-      image: '/images/tours/toa-thanh-cao-dai.jpg',
-      price: 650000,
-      duration: '1 ngày',
-      maxGroupSize: 15,
-      startLocation: 'TP. Hồ Chí Minh',
-      status: 'active',
-      featured: true,
-    },
-    {
-      key: '3',
-      id: 3,
-      name: 'Khu Du Lịch Suối Đá',
-      image: '/images/tours/suoi-da.jpg',
-      price: 450000,
-      duration: '1 ngày',
-      maxGroupSize: 25,
-      startLocation: 'TP. Tây Ninh',
-      status: 'active',
-      featured: false,
-    },
-    {
-      key: '4',
-      id: 4,
-      name: 'Hồ Dầu Tiếng',
-      image: '/images/tours/ho-dau-tieng.jpg',
-      price: 550000,
-      duration: '1 ngày',
-      maxGroupSize: 20,
-      startLocation: 'TP. Tây Ninh',
-      status: 'inactive',
-      featured: false,
-    },
-    {
-      key: '5',
-      id: 5,
-      name: 'Vườn Quốc Gia Lò Gò - Xa Mát',
-      image: '/images/tours/lo-go-xa-mat.jpg',
-      price: 750000,
-      duration: '2 ngày 1 đêm',
-      maxGroupSize: 15,
-      startLocation: 'TP. Hồ Chí Minh',
-      status: 'active',
-      featured: true,
-    },
-  ]
+  useEffect(() => {
+    const fetchPendingTours = async () => {
+      setLoading(true);
+      try {
+        const res = await adminService.getPendingTours();
+        const data = Array.isArray(res.data)
+          ? res.data.map((item: PendingTour) => ({ ...item }))
+          : [];
+        setTours(data);
+      } catch (err) {
+        setTours([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPendingTours();
+  }, []);
 
-  const columns: ColumnsType<Tour> = [
+  const handleApprove = async (tour: PendingTour) => {
+    let approveMessage = '';
+    Modal.confirm({
+      title: 'Nhập ghi chú khi duyệt tour',
+      content: (
+        <Input.TextArea
+          autoSize={{ minRows: 3, maxRows: 6 }}
+          placeholder="Nhập ghi chú (không bắt buộc)"
+          onChange={e => {
+            approveMessage = e.target.value;
+          }}
+        />
+      ),
+      okText: 'Duyệt',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        try {
+          await adminService.approveTour(tour.id, approveMessage || '');
+          message.success('Duyệt tour thành công!');
+          setTours(prev => prev.filter(t => t.id !== tour.id));
+        } catch {
+          message.error('Duyệt tour thất bại!');
+        }
+      },
+    });
+  };
+
+  const handleReject = async (tour: PendingTour) => {
+    let rejectMessage = '';
+    let error = '';
+    const updateContent = () => (
+      <div>
+        <Input.TextArea
+          autoSize={{ minRows: 3, maxRows: 6 }}
+          placeholder="Nhập lý do từ chối (bắt buộc)"
+          onChange={e => {
+            rejectMessage = e.target.value;
+            if (error && rejectMessage) {
+              error = '';
+              modal.update({ content: updateContent() });
+            }
+          }}
+        />
+        {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+      </div>
+    );
+    const modal = Modal.confirm({
+      title: 'Nhập lý do từ chối tour',
+      content: updateContent(),
+      okText: 'Từ chối',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        if (!rejectMessage.trim()) {
+          error = 'Vui lòng nhập lý do từ chối!';
+          modal.update({ content: updateContent() });
+          return Promise.reject();
+        }
+        try {
+          await adminService.rejectTour(tour.id, rejectMessage);
+          message.success('Đã từ chối tour!');
+          setTours(prev => prev.filter(t => t.id !== tour.id));
+        } catch {
+          message.error('Từ chối tour thất bại!');
+        }
+      },
+    });
+  };
+
+  const handleRowClick = (record: PendingTour) => {
+    setSelectedTour(record);
+    setDetailModalOpen(true);
+  };
+
+  const columns: ColumnsType<PendingTour> = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      sorter: (a: Tour, b: Tour) => a.id - b.id,
+      sorter: (a: PendingTour, b: PendingTour) => (a.id > b.id ? 1 : -1),
     },
     {
       title: 'Tour',
-      dataIndex: 'name',
-      key: 'name',
-      render: (text: string, record: Tour) => (
+      dataIndex: 'tourTemplateName',
+      key: 'tourTemplateName',
+      render: (text: string, record: PendingTour) => (
         <div className="tour-cell">
-          <img src={record.image} alt={text} className="tour-image" />
+          <img src={record.imageUrl || (record.imageUrls && record.imageUrls[0])} alt={text} className="tour-image" />
           <span>{text}</span>
         </div>
       ),
-      sorter: (a: Tour, b: Tour) => a.name.localeCompare(b.name),
+      sorter: (a: PendingTour, b: PendingTour) => a.tourTemplateName.localeCompare(b.tourTemplateName),
       filteredValue: searchText ? [searchText] : null,
-      onFilter: (value: boolean | Key, record: Tour) => {
-        const searchValue = value.toString().toLowerCase()
+      onFilter: (value: boolean | Key, record: PendingTour) => {
+        const searchValue = value.toString().toLowerCase();
         return (
-          record.name.toLowerCase().includes(searchValue) ||
+          record.tourTemplateName.toLowerCase().includes(searchValue) ||
           record.startLocation.toLowerCase().includes(searchValue)
-        )
+        );
       },
     },
     {
-      title: 'Giá',
-      dataIndex: 'price',
-      key: 'price',
-      render: (price: number) => `${price.toLocaleString()} ₫`,
-      sorter: (a: Tour, b: Tour) => a.price - b.price,
+      title: 'Công ty tổ chức',
+      dataIndex: 'tourCompanyName',
+      key: 'tourCompanyName',
     },
     {
       title: 'Thời gian',
-      dataIndex: 'duration',
-      key: 'duration',
+      dataIndex: 'scheduleDays',
+      key: 'scheduleDays',
     },
     {
       title: 'Điểm khởi hành',
       dataIndex: 'startLocation',
       key: 'startLocation',
-      filters: [
-        { text: 'TP. Tây Ninh', value: 'TP. Tây Ninh' },
-        { text: 'TP. Hồ Chí Minh', value: 'TP. Hồ Chí Minh' },
-      ],
-      onFilter: (value: boolean | Key, record: Tour) => record.startLocation === value.toString(),
-    },
-    {
-      title: 'Nổi bật',
-      dataIndex: 'featured',
-      key: 'featured',
-      render: (featured: boolean) => (
-        featured ? <Tag color="gold">Nổi bật</Tag> : <Tag color="default">Thường</Tag>
-      ),
-      filters: [
-        { text: 'Nổi bật', value: true },
-        { text: 'Thường', value: false },
-      ],
-      onFilter: (value: boolean | Key, record: Tour) => record.featured === value,
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: Tour['status']) => {
-        const color = status === 'active' ? 'success' : 'error'
-        const text = status === 'active' ? 'Đang mở' : 'Tạm ngưng'
-
-        return <Tag className={`status-tag ${color}`}>{text}</Tag>
+      render: (status: PendingTour['status']) => {
+        const color = status === 1 ? 'success' : 'error';
+        const text = status === 1 ? 'Đang mở' : 'Tạm ngưng';
+        return <Tag className={`status-tag ${color}`}>{text}</Tag>;
       },
-      filters: [
-        { text: 'Đang mở', value: 'active' },
-        { text: 'Tạm ngưng', value: 'inactive' },
-      ],
-      onFilter: (value: boolean | Key, record: Tour) => record.status === value.toString(),
     },
     {
       title: 'Thao tác',
       key: 'action',
-      render: (_: unknown, record: Tour) => (
+      render: (_: unknown, record: PendingTour) => (
         <Space size="middle">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => handleEdit(record)}
-          >
-            Sửa
-          </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            size="small"
-            onClick={() => handleDelete(record)}
-          >
-            Xóa
-          </Button>
+          <Button type="primary" onClick={e => { e.stopPropagation(); handleApprove(record); }}>Duyệt</Button>
+          <Button danger onClick={e => { e.stopPropagation(); handleReject(record); }}>Từ chối</Button>
         </Space>
       ),
     },
-  ]
-
-  const handleSearch = (value: string) => {
-    setSearchText(value)
-  }
-
-  const handleAdd = () => {
-    setEditingTour(null)
-    form.resetFields()
-    setIsModalVisible(true)
-  }
-
-  const handleEdit = (tour: Tour) => {
-    setEditingTour(tour)
-    form.setFieldsValue({
-      name: tour.name,
-      price: tour.price,
-      duration: tour.duration,
-      maxGroupSize: tour.maxGroupSize,
-      startLocation: tour.startLocation,
-      status: tour.status,
-      featured: tour.featured,
-      description: tour.description || '',
-    })
-    setIsModalVisible(true)
-  }
-
-  const handleDelete = (tour: Tour) => {
-    Modal.confirm({
-      title: 'Xác nhận xóa',
-      content: `Bạn có chắc chắn muốn xóa tour "${tour.name}" không?`,
-      okText: 'Xóa',
-      okType: 'danger',
-      cancelText: 'Hủy',
-      onOk() {
-        // Handle delete logic here
-        console.log('Deleted tour:', tour)
-      },
-    })
-  }
-
-  const handleModalOk = () => {
-    form.validateFields().then(values => {
-      // Handle form submission
-      console.log('Form values:', values)
-
-      if (editingTour) {
-        // Update existing tour
-        console.log('Updating tour:', editingTour.id, values)
-      } else {
-        // Add new tour
-        console.log('Adding new tour:', values)
-      }
-
-      setIsModalVisible(false)
-    })
-  }
-
-  const handleModalCancel = () => {
-    setIsModalVisible(false)
-  }
-
-  const normFile = (e: any) => {
-    if (Array.isArray(e)) {
-      return e
-    }
-    return e?.fileList
-  }
+  ];
 
   return (
     <div className="tours-page">
@@ -278,17 +182,10 @@ const Tours = () => {
           <Input
             placeholder="Tìm kiếm theo tên, địa điểm"
             prefix={<SearchOutlined />}
-            onChange={e => handleSearch(e.target.value)}
+            onChange={e => setSearchText(e.target.value)}
             className="search-input"
             allowClear
           />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAdd}
-          >
-            Thêm tour
-          </Button>
         </div>
       </div>
 
@@ -298,123 +195,21 @@ const Tours = () => {
         rowKey="id"
         pagination={{ pageSize: 10 }}
         className="tours-table"
+        loading={loading}
+        onRow={record => ({
+          onClick: () => handleRowClick(record),
+        })}
       />
 
-      <Modal
-        title={editingTour ? 'Sửa tour' : 'Thêm tour mới'}
-        open={isModalVisible}
-        onOk={handleModalOk}
-        onCancel={handleModalCancel}
-        okText={editingTour ? 'Cập nhật' : 'Thêm'}
-        cancelText="Hủy"
-        width={600}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-        >
-          <Form.Item
-            name="name"
-            label="Tên tour"
-            rules={[{ required: true, message: 'Vui lòng nhập tên tour' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="price"
-            label="Giá"
-            rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
-          >
-            <InputNumber
-              min={0}
-              formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={() => 0}
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="duration"
-            label="Thời gian"
-            rules={[{ required: true, message: 'Vui lòng nhập thời gian' }]}
-          >
-            <Input placeholder="Ví dụ: 1 ngày, 2 ngày 1 đêm" />
-          </Form.Item>
-
-          <Form.Item
-            name="maxGroupSize"
-            label="Số người tối đa"
-            rules={[{ required: true, message: 'Vui lòng nhập số người tối đa' }]}
-          >
-            <InputNumber min={1} style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item
-            name="startLocation"
-            label="Điểm khởi hành"
-            rules={[{ required: true, message: 'Vui lòng chọn điểm khởi hành' }]}
-          >
-            <Select>
-              <Option value="TP. Tây Ninh">TP. Tây Ninh</Option>
-              <Option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="Trạng thái"
-            rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
-          >
-            <Select>
-              <Option value="active">Đang mở</Option>
-              <Option value="inactive">Tạm ngưng</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="featured"
-            label="Nổi bật"
-            valuePropName="checked"
-          >
-            <Select>
-              <Option value={true}>Có</Option>
-              <Option value={false}>Không</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="description"
-            label="Mô tả"
-          >
-            <TextArea rows={4} />
-          </Form.Item>
-
-          <Form.Item
-            name="image"
-            label="Hình ảnh"
-            valuePropName="fileList"
-            getValueFromEvent={normFile}
-          >
-            <Upload
-              name="image"
-              listType="picture"
-              beforeUpload={() => false}
-            >
-              <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
-            </Upload>
-          </Form.Item>
-
-          <Form.Item
-            name="dates"
-            label="Ngày khởi hành"
-          >
-            <RangePicker style={{ width: '100%' }} />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <TourDetailModal
+        open={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        tour={selectedTour}
+      />
     </div>
-  )
-}
+  );
+};
+
+
 
 export default Tours

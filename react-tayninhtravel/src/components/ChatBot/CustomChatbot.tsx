@@ -40,18 +40,22 @@ const CustomChatbot: React.FC = () => {
 
     // Tạo session khi mở chat lần đầu
     const handleOpen = async () => {
-        setVisible(true);
         setError(null);
+        const token = getToken();
+        if (!token) {
+            setError(t('chatbot.error.login', 'Bạn cần đăng nhập để sử dụng chat.'));
+            return;
+        }
+        setVisible(true);
         // Chỉ tạo session nếu chưa có
         if (!sessionId) {
             setLoading(true);
             try {
-                const token = getToken();
                 const res = await createChatSession(t('chatbot.greeting'), 'Hỗ trợ AI', token);
                 setSessionId(res.sessionId);
                 // Không set lại messages ở đây, để useEffect và useState khởi tạo lo
             } catch (e: any) {
-                setError('Không thể khởi tạo phiên chat.');
+                setError(t('chatbot.error.init', 'Không thể khởi tạo phiên chat.'));
             } finally {
                 setLoading(false);
             }
@@ -79,8 +83,8 @@ const CustomChatbot: React.FC = () => {
             const resMsg = await sendMessage(currentSessionId, input, token);
             setMessages(prev => [...prev, { sender: 'bot', text: resMsg.reply }]);
         } catch (e: any) {
-            setMessages(prev => [...prev, { sender: 'bot', text: 'Xin lỗi, có lỗi khi gửi tin nhắn.' }]);
-            setError('Gửi tin nhắn thất bại.');
+            setMessages(prev => [...prev, { sender: 'bot', text: t('chatbot.error.send', 'Xin lỗi, có lỗi khi gửi tin nhắn.') }]);
+            setError(t('chatbot.error.send', 'Gửi tin nhắn thất bại.'));
         } finally {
             setLoading(false);
         }

@@ -1,3 +1,5 @@
+# Ignore project constants file
+src/config/constants.ts
 # Logs
 logs
 *.log
@@ -22,3 +24,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables
+.env
+.env*

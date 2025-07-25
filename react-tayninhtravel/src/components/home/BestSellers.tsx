@@ -79,48 +79,53 @@ const BestSellers: React.FC = () => {
                             };
                             return (
                                 <Col xs={24} sm={12} md={6} key={product.id}>
-                                    <Card
-                                        hoverable
-                                        cover={<img alt={product.name} src={product.image} />}
-                                        className="product-card"
-                                        actions={[
-                                            <div style={{ width: '100%', padding: 0 }}>
-                                                <Button type="primary" icon={<ShoppingCartOutlined />} block onClick={handleAddToCart}>
+                                    <Link to={`/shop/product/${product.id}`} style={{ display: 'block' }}>
+                                        <Card
+                                            hoverable
+                                            cover={<img alt={product.name} src={product.image} />}
+                                            className="product-card"
+                                            actions={[
+                                                <button
+                                                    className="custom-book-now-btn"
+                                                    style={{ width: '100%', padding: 0 }}
+                                                    onClick={e => { e.preventDefault(); handleAddToCart(); }}
+                                                    disabled={false}
+                                                >
+                                                    <ShoppingCartOutlined style={{ fontSize: 18, marginRight: 8 }} />
                                                     {t('home.bestSellers.addToCart')}
-                                                </Button>
+                                                </button>
+                                            ]}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <div className="product-tag">
+                                                {product.discount > 0 && (
+                                                    <Tag color="red">-{product.discount}%</Tag>
+                                                )}
                                             </div>
-                                        ]}
-                                        onClick={() => window.location.href = `shop/product/${product.id}`}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <div className="product-tag">
-                                            {product.discount > 0 && (
-                                                <Tag color="red">-{product.discount}%</Tag>
-                                            )}
-                                        </div>
-                                        <Meta
-                                            title={product.name}
-                                            description={
-                                                <div className="product-info">
-                                                    <div className="product-price">
-                                                        <span className="current-price">
-                                                            {product.price.toLocaleString('vi-VN')} ₫
-                                                        </span>
-                                                        <span className="original-price">
-                                                            {product.originalPrice.toLocaleString('vi-VN')} ₫
-                                                        </span>
+                                            <Meta
+                                                title={product.name}
+                                                description={
+                                                    <div className="product-info">
+                                                        <div className="product-price">
+                                                            <span className="current-price">
+                                                                {product.price.toLocaleString('vi-VN')} ₫
+                                                            </span>
+                                                            <span className="original-price">
+                                                                {product.originalPrice.toLocaleString('vi-VN')} ₫
+                                                            </span>
+                                                        </div>
+                                                        <div className="product-rating">
+                                                            <Rate disabled defaultValue={product.rating} allowHalf />
+                                                            <span className="rating-count">({product.reviews})</span>
+                                                        </div>
+                                                        <div className="product-sold">
+                                                            {t('cart.sold')}: {product.sold}
+                                                        </div>
                                                     </div>
-                                                    <div className="product-rating">
-                                                        <Rate disabled defaultValue={product.rating} allowHalf />
-                                                        <span className="rating-count">({product.reviews})</span>
-                                                    </div>
-                                                    <div className="product-sold">
-                                                        {t('cart.sold')}: {product.sold}
-                                                    </div>
-                                                </div>
-                                            }
-                                        />
-                                    </Card>
+                                                }
+                                            />
+                                        </Card>
+                                    </Link>
                                 </Col>
                             );
                         })}

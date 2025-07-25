@@ -1,5 +1,22 @@
 {
     "navigation": {
+        "review": {
+            "title": "Đánh giá sản phẩm",
+            "submit": "Gửi đánh giá",
+            "success": "Đánh giá thành công",
+            "thankYou": "Cảm ơn bạn đã đánh giá sản phẩm!",
+            "error": "Có lỗi xảy ra",
+            "submitFailed": "Gửi đánh giá thất bại. Vui lòng thử lại.",
+            "ratingRequired": "Vui lòng chọn số sao",
+            "pleaseRate": "Bạn cần chọn số sao để đánh giá.",
+            "commentPlaceholder": "Nhập nhận xét về sản phẩm..."
+        },
+        "cart": {
+            "noReviews": "Chưa có đánh giá nào cho sản phẩm này."
+        },
+        "auth": {
+            "loginTitle": "Đăng nhập để đánh giá sản phẩm"
+        },
         "home": "Trang chủ",
         "tours": "Tour du lịch",
         "about": "Giới thiệu",
@@ -248,8 +265,26 @@
         }
     },
     "tours": {
+        "earlyBirdTooltip": "Giảm {{percent}}% cho khách đặt sớm",
+        "earlyBirdTag": "Early Bird -{{percent}}%",
+        "earlyBirdCountdownTooltip": "Số ngày còn lại để được giảm giá Early Bird",
+        "earlyBirdCountdown": "Còn {{days}} ngày",
+        "regularPrice": "Giá thường",
+        "perGuest": "/ khách",
+        "totalForGuests": "Tổng cho {{count}} khách",
+        "saving": "Tiết kiệm {{amount}}₫",
         "bookNow": "Đặt ngay",
-        "viewDetails": "Xem chi tiết"
+        "viewDetails": "Xem chi tiết",
+        "status": {
+            "public": "Đang mở bán",
+            "waitToPublic": "Sắp mở bán",
+            "approved": "Đã duyệt",
+            "awaitingGuide": "Chờ phân công HDV",
+            "notReady": "Chưa sẵn sàng"
+        },
+        "contactForPrice": "Liên hệ",
+        "seatsLeft": "Còn {{count}} chỗ",
+        "imageCount": "ảnh"
     },
     "thingsToDo": {
         "pageTitle": "Khám phá Tây Ninh",

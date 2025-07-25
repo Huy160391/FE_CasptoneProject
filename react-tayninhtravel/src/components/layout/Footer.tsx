@@ -30,16 +30,16 @@ const Footer = () => {
               </div>
               <Space className="social-icons">
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-                  <FacebookOutlined />
+                  <FacebookOutlined style={{ color: '#fff' }} />
                 </a>
                 <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-                  <TwitterOutlined />
+                  <TwitterOutlined style={{ color: '#fff' }} />
                 </a>
                 <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-                  <InstagramOutlined />
+                  <InstagramOutlined style={{ color: '#fff' }} />
                 </a>
                 <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
-                  <YoutubeOutlined />
+                  <YoutubeOutlined style={{ color: '#fff' }} />
                 </a>
               </Space>
             </div>
@@ -49,11 +49,9 @@ const Footer = () => {
             <div className="footer-section">
               <Title level={4}>{t('navigation.tours')}</Title>
               <ul className="footer-links">
-                <li><Link to="/tours/hanoi">{t('footer.tours.hanoi')}</Link></li>
-                <li><Link to="/tours/ho-chi-minh">{t('footer.tours.hoChiMinh')}</Link></li>
-                <li><Link to="/tours/da-nang">{t('footer.tours.daNang')}</Link></li>
-                <li><Link to="/tours/nha-trang">{t('footer.tours.nhaTrang')}</Link></li>
-                <li><Link to="/tours/phu-quoc">{t('footer.tours.phuQuoc')}</Link></li>
+              </ul>
+              <ul className="footer-links">
+                <li><Link to="/tours/tay-ninh">Tour Tây Ninh</Link></li>
               </ul>
             </div>
           </Col>
@@ -62,11 +60,9 @@ const Footer = () => {
             <div className="footer-section">
               <Title level={4}>{t('navigation.services')}</Title>
               <ul className="footer-links">
-                <li><Link to="/services/day-tours">{t('footer.services.dayTours')}</Link></li>
-                <li><Link to="/services/multi-day-tours">{t('footer.services.multiDayTours')}</Link></li>
-                <li><Link to="/services/private-tours">{t('footer.services.privateTours')}</Link></li>
-                <li><Link to="/services/group-tours">{t('footer.services.groupTours')}</Link></li>
-                <li><Link to="/services/custom-tours">{t('footer.services.customTours')}</Link></li>
+              </ul>
+              <ul className="footer-links">
+                <li><Link to="/services/day-tours">Tour trong ngày</Link></li>
               </ul>
             </div>
           </Col>
@@ -76,16 +72,16 @@ const Footer = () => {
               <Title level={4}>{t('navigation.contact')}</Title>
               <ul className="contact-info">
                 <li>
-                  <EnvironmentOutlined />
-                  <Text>{t('footer.contact.address')}</Text>
+                  <EnvironmentOutlined style={{ color: '#fff' }} />
+                  <Text style={{ color: '#fff' }}>{t('footer.contact.address')}</Text>
                 </li>
                 <li>
-                  <PhoneOutlined />
-                  <Text>{t('footer.contact.phone')}</Text>
+                  <PhoneOutlined style={{ color: '#fff' }} />
+                  <Text style={{ color: '#fff' }}>{t('footer.contact.phone')}</Text>
                 </li>
                 <li>
-                  <MailOutlined />
-                  <Text>{t('footer.contact.email')}</Text>
+                  <MailOutlined style={{ color: '#fff' }} />
+                  <Text style={{ color: '#fff' }}>{t('footer.contact.email')}</Text>
                 </li>
               </ul>
             </div>
@@ -95,7 +91,7 @@ const Footer = () => {
         <Divider style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
         <div className="footer-bottom">
-          <Text>© {new Date().getFullYear()} Tay Ninh Tour. All Rights Reserved.</Text>
+          <Text style={{ color: '#fff' }}>© {new Date().getFullYear()} Tay Ninh Tour. All Rights Reserved.</Text>
         </div>
       </div>
     </AntFooter>

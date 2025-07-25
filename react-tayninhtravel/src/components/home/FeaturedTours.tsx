@@ -69,7 +69,7 @@ const FeaturedTours = () => {
       if (response.success && response.data) {
         // Filter only public tours (status 8) - tours available for customer booking
         const publicTours = response.data.filter((tour: TourDetail) => tour.status === TourDetailsStatus.Public)
-        const selectedTours = publicTours.slice(0, 3) // Show only 3 tours
+        const selectedTours = publicTours.slice(0, 4) // Show up to 4 tours
         setTours(selectedTours)
 
         // Load real-time availability for each tour
@@ -116,10 +116,7 @@ const FeaturedTours = () => {
   }
 
   // Handle view tour details
-  const handleViewDetails = (tour: TourDetail) => {
-    // Navigate to tour details page - this should call /api/TourDetails/{id}
-    navigate(`/tour-details/${tour.id}`)
-  }
+  const handleViewDetails = (tour: TourDetail) => navigate(`/tour-details/${tour.id}`)
 
 
 
@@ -158,8 +155,8 @@ const FeaturedTours = () => {
       </div>
 
       <Row gutter={[24, 32]}>
-        {tours.map(tour => (
-          <Col xs={24} sm={12} lg={8} key={tour.id}>
+        {tours.slice(0, 4).map(tour => (
+          <Col xs={24} sm={12} md={6} lg={6} key={tour.id}>
             <TourCard
               tour={tour}
               onBookNow={handleBookNow}
@@ -169,11 +166,20 @@ const FeaturedTours = () => {
         ))}
       </Row>
 
+      <div className="view-more">
+        <button
+          className="custom-view-more-btn"
+          onClick={() => navigate('/tours')}
+        >
+          {t('home.viewMoreTours', 'Xem thêm tour')}
+        </button>
+      </div>
+
       {/* Login Modal */}
       <LoginModal
         isVisible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
-        onRegisterClick={() => {}}
+        onRegisterClick={() => { }}
         onLoginSuccess={() => {
           setIsLoginModalVisible(false)
           message.success('Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.')
