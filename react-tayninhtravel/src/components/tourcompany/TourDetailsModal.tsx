@@ -3,7 +3,6 @@ import {
     Modal,
     Descriptions,
     Tag,
-    Timeline,
     Card,
     Row,
     Col,
@@ -13,17 +12,19 @@ import {
     Spin,
     message,
     Tabs,
-    Statistic
+    Statistic,
+    Image,
+    Tooltip
 } from 'antd';
 import {
     ClockCircleOutlined,
     UserOutlined,
-    ShopOutlined,
     CheckCircleOutlined,
     ExclamationCircleOutlined,
     DollarOutlined,
     TeamOutlined,
-    CalendarOutlined
+    CalendarOutlined,
+    EditOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
@@ -46,6 +47,8 @@ import {
     getScheduleDayLabelFromString
 } from '../../constants/tourTemplate';
 import TourOperationManagement from './TourOperationManagement';
+import TourDetailsUpdateForm from './TourDetailsUpdateForm';
+import TimelineEditor from './TimelineEditor';
 
 const { TabPane } = Tabs;
 
@@ -73,6 +76,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const [invitations, setInvitations] = useState<TourGuideInvitationsResponse | null>(null);
     const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
     const [slotsLoading, setSlotsLoading] = useState(false);
+    const [showUpdateForm, setShowUpdateForm] = useState(false);
 
     useEffect(() => {
         if (visible && tourDetailsId && token) {
@@ -157,10 +161,40 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
         }
     };
 
+    const handleTimelineUpdate = (updatedTimeline: TimelineItem[]) => {
+        setTimeline(updatedTimeline);
+        if (onUpdate) {
+            onUpdate();
+        }
+    };
+
     const renderDetailsTab = () => (
         <div>
             {tourDetails && (
                 <>
+                    {/* Update Button */}
+                    <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                        {tourOperation?.guideId ? (
+                            <Tooltip title="Đã có hướng dẫn viên tham gia tour, không thể edit nữa">
+                                <Button
+                                    type="primary"
+                                    icon={<EditOutlined />}
+                                    disabled
+                                >
+                                    Cập nhật Tour Details
+                                </Button>
+                            </Tooltip>
+                        ) : (
+                            <Button
+                                type="primary"
+                                icon={<EditOutlined />}
+                                onClick={() => setShowUpdateForm(true)}
+                            >
+                                Cập nhật Tour Details
+                            </Button>
+                        )}
+                    </div>
+
                     <Descriptions title="Thông tin cơ bản" bordered column={2}>
                         <Descriptions.Item label="Tiêu đề" span={2}>
                             {tourDetails.title}
@@ -206,8 +240,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             {new Date(tourDetails.createdAt).toLocaleString('vi-VN')}
                         </Descriptions.Item>
                         <Descriptions.Item label="Cập nhật lần cuối">
-                            {tourDetails.updatedAt ? 
-                                new Date(tourDetails.updatedAt).toLocaleString('vi-VN') : 
+                            {tourDetails.updatedAt ?
+                                new Date(tourDetails.updatedAt).toLocaleString('vi-VN') :
                                 'Chưa cập nhật'
                             }
                         </Descriptions.Item>
@@ -221,6 +255,30 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             </Descriptions.Item>
                         )}
                     </Descriptions>
+
+                    {/* Images Gallery */}
+                    {tourDetails.imageUrls && tourDetails.imageUrls.length > 0 && (
+                        <>
+                            <Divider>Hình ảnh ({tourDetails.imageUrls.length})</Divider>
+                            <Card title="Thư viện ảnh" size="small" style={{ marginBottom: 16 }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                                    {tourDetails.imageUrls.map((imageUrl, index) => (
+                                        <div key={index}>
+                                            <Image
+                                                width={150}
+                                                height={120}
+                                                src={imageUrl}
+                                                style={{ objectFit: 'cover', borderRadius: 8 }}
+                                                preview={{
+                                                    mask: 'Xem ảnh'
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </Card>
+                        </>
+                    )}
 
                     <Divider />
 
@@ -260,33 +318,11 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const renderTimelineTab = () => (
         <div>
             {timeline.length > 0 ? (
-                <Timeline mode="left">
-                    {timeline
-                        .sort((a, b) => (a.sortOrder || a.orderIndex || 0) - (b.sortOrder || b.orderIndex || 0))
-                        .map((item, _index) => (
-                            <Timeline.Item
-                                key={item.id}
-                                dot={<ClockCircleOutlined style={{ fontSize: '16px' }} />}
-                                label={item.checkInTime}
-                            >
-                                <Card size="small" style={{ marginBottom: 8 }}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                                        {item.activity}
-                                    </div>
-                                    {item.location && (
-                                        <div style={{ color: '#666', fontSize: '12px' }}>
-                                            📍 {item.location}
-                                        </div>
-                                    )}
-                                    {item.specialtyShop && (
-                                        <Tag icon={<ShopOutlined />} color="green" style={{ marginTop: 4 }}>
-                                            {item.specialtyShop.shopName}
-                                        </Tag>
-                                    )}
-                                </Card>
-                            </Timeline.Item>
-                        ))}
-                </Timeline>
+                <TimelineEditor
+                    tourDetailsId={tourDetailsId!}
+                    timeline={timeline}
+                    onUpdate={handleTimelineUpdate}
+                />
             ) : (
                 <Alert
                     message="Chưa có timeline"
@@ -490,12 +526,12 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                             <Col span={3}>
                                                 <Tag color={
                                                     invitation.status === 'Pending' ? 'orange' :
-                                                    invitation.status === 'Accepted' ? 'green' :
-                                                    invitation.status === 'Rejected' ? 'red' : 'gray'
+                                                        invitation.status === 'Accepted' ? 'green' :
+                                                            invitation.status === 'Rejected' ? 'red' : 'gray'
                                                 }>
                                                     {invitation.status === 'Pending' ? 'Chờ phản hồi' :
-                                                     invitation.status === 'Accepted' ? 'Đã chấp nhận' :
-                                                     invitation.status === 'Rejected' ? 'Đã từ chối' : 'Hết hạn'}
+                                                        invitation.status === 'Accepted' ? 'Đã chấp nhận' :
+                                                            invitation.status === 'Rejected' ? 'Đã từ chối' : 'Hết hạn'}
                                                 </Tag>
                                             </Col>
                                             <Col span={4}>
@@ -623,6 +659,20 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                     </TabPane>
                 </Tabs>
             </Spin>
+
+            {/* Update Form Modal */}
+            <TourDetailsUpdateForm
+                visible={showUpdateForm}
+                tourDetails={tourDetails}
+                onCancel={() => setShowUpdateForm(false)}
+                onSuccess={() => {
+                    setShowUpdateForm(false);
+                    loadTourDetailsData(); // Reload data after update
+                    if (onUpdate) {
+                        onUpdate();
+                    }
+                }}
+            />
         </Modal>
     );
 };

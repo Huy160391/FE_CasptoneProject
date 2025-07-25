@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Image, Carousel, Button } from 'antd';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import './ImageGallery.scss';
 
 interface ImageGalleryProps {
@@ -21,6 +21,33 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     className = ''
 }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    // Custom arrow components
+    const CustomPrevArrow = (props: any) => {
+        const { onClick } = props;
+        return (
+            <Button
+                className="custom-arrow custom-prev-arrow"
+                icon={<ArrowLeftOutlined />}
+                onClick={onClick}
+                shape="circle"
+                size="large"
+            />
+        );
+    };
+
+    const CustomNextArrow = (props: any) => {
+        const { onClick } = props;
+        return (
+            <Button
+                className="custom-arrow custom-next-arrow"
+                icon={<ArrowRightOutlined />}
+                onClick={onClick}
+                shape="circle"
+                size="large"
+            />
+        );
+    };
 
     // If no images, show placeholder
     if (!images || images.length === 0) {
@@ -59,8 +86,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                     autoplay={autoPlay}
                     dots={false}
                     arrows
-                    prevArrow={<Button icon={<LeftOutlined />} />}
-                    nextArrow={<Button icon={<RightOutlined />} />}
+                    prevArrow={<CustomPrevArrow />}
+                    nextArrow={<CustomNextArrow />}
                     afterChange={setCurrentIndex}
                 >
                     {images.map((image, index) => (

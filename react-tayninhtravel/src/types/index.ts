@@ -287,6 +287,88 @@ export interface ValidationError {
     message: string;
 }
 
+// Withdrawal System Types
+export interface BankAccount {
+    id: string;
+    userId: string;
+    bankName: string;
+    accountNumber: string;
+    accountHolderName: string;
+    isDefault: boolean;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt?: string;
+}
+
+export interface CreateBankAccountRequest {
+    bankName: string;
+    accountNumber: string;
+    accountHolderName: string;
+    isDefault?: boolean;
+}
+
+export interface UpdateBankAccountRequest {
+    bankName?: string;
+    accountNumber?: string;
+    accountHolderName?: string;
+    isDefault?: boolean;
+}
+
+export enum WithdrawalStatus {
+    Pending = 0,
+    Approved = 1,
+    Rejected = 2,
+    Cancelled = 3
+}
+
+export interface WithdrawalRequest {
+    id: string;
+    userId: string;
+    amount: number;
+    bankAccountId: string;
+    status: WithdrawalStatus;
+    requestedAt: string;
+    processedAt?: string;
+    processedBy?: string;
+    adminNotes?: string;
+    bankAccount?: BankAccount;
+    user?: {
+        id: string;
+        name: string;
+        email: string;
+    };
+}
+
+export interface CreateWithdrawalRequestRequest {
+    amount: number;
+    bankAccountId: string;
+}
+
+export interface ProcessWithdrawalRequest {
+    adminNotes?: string;
+}
+
+export interface WithdrawalRequestListParams {
+    pageIndex?: number;
+    pageSize?: number;
+    status?: WithdrawalStatus;
+    userId?: string;
+    fromDate?: string;
+    toDate?: string;
+}
+
+export interface BankAccountFormData {
+    bankName: string;
+    accountNumber: string;
+    accountHolderName: string;
+    isDefault: boolean;
+}
+
+export interface WithdrawalFormData {
+    amount: number;
+    bankAccountId: string;
+}
+
 // Filter Types
 export interface TourFilters {
     category?: string;

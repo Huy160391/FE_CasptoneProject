@@ -11,6 +11,7 @@ import {
     updateTourTemplate,
     deleteTourTemplate
 } from '../../services/tourcompanyService';
+import { tourSlotService, TourSlotDto } from '../../services/tourSlotService';
 import publicService from '../../services/publicService';
 
 
@@ -27,7 +28,10 @@ import {
     Col,
     Form,
     Dropdown,
-    Tooltip
+    Tooltip,
+    List,
+    Spin,
+    Space
 } from 'antd';
 import {
     PlusOutlined,
@@ -36,15 +40,20 @@ import {
     EyeOutlined,
     SearchOutlined,
     ExclamationCircleOutlined,
-    MoreOutlined
+    MoreOutlined,
+    CalendarOutlined,
+    ClockCircleOutlined
 } from '@ant-design/icons';
 import './TourTemplateManagement.scss';
+import './TourTemplateModal.scss';
 import TourTemplateFormModal from './TourTemplateFormModal';
+import { getStatusColor } from '../../constants/tourTemplate';
+// import { useThemeStore } from '../../store/useThemeStore';
 
 const { Title } = Typography;
 
 const TourTemplateManagement: React.FC = () => {
-
+    // const { isDarkMode } = useThemeStore();
     const [templates, setTemplates] = useState<TourTemplate[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -267,7 +276,86 @@ const TourTemplateManagement: React.FC = () => {
         setUploadFileList(fileList); // set fileList cho Upload
         form.setFieldsValue(formValues);
         setIsModalVisible(true);
-    }; const handleView = async (template: TourTemplate) => {
+    };
+
+    // Component hiển thị tourslot trong modal
+    const TourSlotsList: React.FC<{ templateId: string }> = ({ templateId }) => {
+        const [slots, setSlots] = useState<TourSlotDto[]>([]);
+        const [loading, setLoading] = useState(false);
+
+        useEffect(() => {
+            const loadSlots = async () => {
+                try {
+                    setLoading(true);
+                    const token = localStorage.getItem('token') || '';
+                    const response = await tourSlotService.getSlotsByTourTemplate(templateId, token);
+                    if (response.success && response.data) {
+                        setSlots(response.data);
+                    }
+                } catch (error) {
+                    console.error('Error loading tour slots:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            loadSlots();
+        }, [templateId]);
+
+        if (loading) {
+            return <Spin size="small" />;
+        }
+
+        if (slots.length === 0) {
+            return (
+                <div className="empty-slots-message">
+                    Chưa có slot nào được tạo
+                </div>
+            );
+        }
+
+        return (
+            <List
+                size="small"
+                dataSource={slots}
+                className="tour-slots-list"
+                renderItem={(slot) => (
+                    <List.Item>
+                        <div style={{ width: '100%' }}>
+                            <Row gutter={16} align="middle">
+                                <Col span={8}>
+                                    <Space>
+                                        <CalendarOutlined className="slot-calendar-icon" />
+                                        <span className="slot-date">
+                                            {slot.formattedDateWithDay}
+                                        </span>
+                                    </Space>
+                                </Col>
+                                <Col span={6}>
+                                    <Tag color={getStatusColor(slot.status)}>
+                                        {slot.statusName}
+                                    </Tag>
+                                </Col>
+                                <Col span={6}>
+                                    <Tag color={slot.isActive ? 'green' : 'red'}>
+                                        {slot.isActive ? 'Hoạt động' : 'Không hoạt động'}
+                                    </Tag>
+                                </Col>
+                                <Col span={4}>
+                                    <ClockCircleOutlined className="slot-clock-icon" />
+                                    <span className="slot-created-date">
+                                        {new Date(slot.createdAt).toLocaleDateString('vi-VN')}
+                                    </span>
+                                </Col>
+                            </Row>
+                        </div>
+                    </List.Item>
+                )}
+            />
+        );
+    };
+
+    const handleView = async (template: TourTemplate) => {
         const token = localStorage.getItem('token') || '';
         const detail = await getTourTemplateDetail(template.id, token);
         if (!detail) {
@@ -277,10 +365,12 @@ const TourTemplateManagement: React.FC = () => {
         const typeMap: Record<number, string> = { 1: 'FreeScenic', 2: 'PaidAttraction' };
         Modal.info({
             title: detail.title,
-            width: 1000,
+            width: 1200,
             content: (
                 <div className="template-view-modal">
-                    <h3 className="modal-section-title">Thông tin cơ bản</h3>
+                    <h3 className="modal-section-title">
+                        Thông tin cơ bản
+                    </h3>
                     <Row gutter={16}>
                         <Col span={24}>
                             <p><strong>Tên template:</strong> {detail.title}</p>
@@ -300,7 +390,9 @@ const TourTemplateManagement: React.FC = () => {
                         </Col>
                     </Row>
                     <hr className="modal-section-divider" />
-                    <h3 className="modal-section-title">Thời gian có sẵn</h3>
+                    <h3 className="modal-section-title">
+                        Thời gian có sẵn
+                    </h3>
                     <Row gutter={16}>
                         <Col span={8}>
                             <p><strong>Tháng:</strong> {detail.month}</p>
@@ -318,12 +410,27 @@ const TourTemplateManagement: React.FC = () => {
                         </Col>
                     </Row>
                     <hr className="modal-section-divider" />
-                    <h3 className="modal-section-title">Hình ảnh</h3>
+                    <h3 className="modal-section-title">
+                        Danh sách Tour Slots
+                    </h3>
                     <Row gutter={16}>
                         <Col span={24}>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <TourSlotsList templateId={detail.id} />
+                        </Col>
+                    </Row>
+                    <hr className="modal-section-divider" />
+                    <h3 className="modal-section-title">
+                        Hình ảnh
+                    </h3>
+                    <Row gutter={16}>
+                        <Col span={24}>
+                            <div className="template-images">
                                 {detail.images && detail.images.map((img: string, idx: number) => (
-                                    <img key={idx} src={img} alt="template" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }} />
+                                    <img
+                                        key={idx}
+                                        src={img}
+                                        alt="template"
+                                    />
                                 ))}
                             </div>
                         </Col>

@@ -26,9 +26,45 @@ export interface BookingPaymentInfo {
     customerEmail?: string;
 }
 
+export interface ProductOrderInfo {
+    id: string;
+    payOsOrderCode: string;
+    totalAmount: number;
+    totalAfterDiscount: number;
+    discountAmount: number;
+    status: string;
+    statusValue: number;
+    createdAt: string;
+    userId: string;
+}
+
 // ===== PRODUCT PAYMENT APIs =====
 
-// Tra cứu thông tin đơn hàng từ PayOS orderCode (không cần token)
+/**
+ * Xử lý callback thanh toán thành công từ PayOS cho product order
+ */
+export const handleProductPaymentSuccess = async (request: PaymentCallbackRequest): Promise<ApiResponse<any>> => {
+    const response = await axios.post('/product-payment/payment-success', request);
+    return response.data;
+};
+
+/**
+ * Xử lý callback thanh toán bị hủy từ PayOS cho product order
+ */
+export const handleProductPaymentCancel = async (request: PaymentCallbackRequest): Promise<ApiResponse<any>> => {
+    const response = await axios.post('/product-payment/payment-cancel', request);
+    return response.data;
+};
+
+/**
+ * Tra cứu thông tin đơn hàng từ PayOS orderCode cho product order
+ */
+export const lookupProductOrderByPayOsOrderCode = async (payOsOrderCode: string): Promise<ApiResponse<ProductOrderInfo>> => {
+    const response = await axios.get(`/product-payment/lookup/${payOsOrderCode}`);
+    return response.data;
+};
+
+// Legacy function - keep for backward compatibility
 export const lookupOrderByPayOsOrderCode = async (payOsOrderCode: string) => {
     const response = await axios.get(`/payment-callback/lookup/${payOsOrderCode}`);
     return response.data;

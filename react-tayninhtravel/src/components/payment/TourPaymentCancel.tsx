@@ -9,40 +9,40 @@ import {
     Alert,
     Typography,
     Space,
-    Divider,
-    Tag
+    Divider
 } from 'antd';
 import {
-    CheckCircleOutlined,
+    CloseCircleOutlined,
     HomeOutlined,
     HistoryOutlined,
-    PrinterOutlined
+    ReloadOutlined,
+    ShoppingCartOutlined
 } from '@ant-design/icons';
 
 import {
     parsePayOsCallbackParams,
     createPayOsCallbackRequest,
-    handleTourBookingPaymentSuccess,
+    handleTourBookingPaymentCancel,
     lookupTourBookingByPayOsOrderCode,
     formatCurrency,
     BookingPaymentInfo
-} from '../services/paymentService';
-import { useAuthStore } from '../store/useAuthStore';
+} from '../../services/paymentService';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const { Text } = Typography;
 
-const PaymentSuccess: React.FC = () => {
+const TourPaymentCancel: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthStore();
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
-    const [bookingInfo, setBookingInfo] = useState<BookingPaymentInfo | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [bookingInfo, setBookingInfo] = useState<BookingPaymentInfo | null>(null);
 
     useEffect(() => {
-        const processPaymentSuccess = async () => {
+        const processPaymentCancel = async () => {
             try {
                 setLoading(true);
                 setError(null);
@@ -69,30 +69,31 @@ const PaymentSuccess: React.FC = () => {
                     // Continue with payment processing even if lookup fails
                 }
 
-                // Process payment success callback
+                // Process payment cancel callback
                 setProcessing(true);
-                const callbackRequest = createPayOsCallbackRequest(params);
-                const response = await handleTourBookingPaymentSuccess(callbackRequest);
+                const callbackRequest = createPayOsCallbackRequest({
+                    ...params,
+                    status: 'CANCELLED'
+                });
+                const response = await handleTourBookingPaymentCancel(callbackRequest);
 
                 if (response.success) {
-                    // If we don't have booking info from lookup, try to get it from response
-                    if (!bookingInfo && response.data) {
-                        setBookingInfo(response.data);
-                    }
+                    // Payment cancel callback was processed successfully
+                    // Booking info should already be set from lookup above
                 } else {
-                    setError(response.message || 'Có lỗi xảy ra khi xử lý thanh toán');
+                    setError(response.message || 'Có lỗi xảy ra khi xử lý hủy thanh toán');
                 }
 
             } catch (error: any) {
-                console.error('Payment success processing error:', error);
-                setError(error.message || 'Có lỗi xảy ra khi xử lý thanh toán');
+                console.error('Tour payment cancel processing error:', error);
+                setError(error.message || 'Có lỗi xảy ra khi xử lý hủy thanh toán');
             } finally {
                 setLoading(false);
                 setProcessing(false);
             }
         };
 
-        processPaymentSuccess();
+        processPaymentCancel();
     }, [location]);
 
     const handleGoHome = () => {
@@ -101,14 +102,23 @@ const PaymentSuccess: React.FC = () => {
 
     const handleViewBookings = () => {
         if (isAuthenticated) {
-            navigate('/profile/bookings');
+            navigate('/my-bookings');
         } else {
-            navigate('/login');
+            navigate('/login', { state: { from: '/my-bookings' } });
         }
     };
 
-    const handlePrintReceipt = () => {
-        window.print();
+    const handleBrowseTours = () => {
+        navigate('/tours');
+    };
+
+    const handleRetryPayment = () => {
+        // Navigate back to booking page if we have booking info
+        if (bookingInfo?.bookingId) {
+            navigate(`/booking/${bookingInfo.bookingId}`);
+        } else {
+            navigate('/tours');
+        }
     };
 
     if (loading) {
@@ -117,13 +127,17 @@ const PaymentSuccess: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                minHeight: '60vh',
-                flexDirection: 'column'
+                minHeight: '400px',
+                flexDirection: 'column',
+                gap: '16px'
             }}>
                 <Spin size="large" />
-                <Text style={{ marginTop: 16 }}>
-                    {processing ? 'Đang xử lý thanh toán...' : 'Đang tải thông tin...'}
-                </Text>
+                <Text>Đang xử lý hủy thanh toán...</Text>
+                {processing && (
+                    <Text type="secondary">
+                        Đang cập nhật trạng thái đặt tour...
+                    </Text>
+                )}
             </div>
         );
     }
@@ -139,8 +153,8 @@ const PaymentSuccess: React.FC = () => {
                         <Button type="primary" key="home" onClick={handleGoHome}>
                             <HomeOutlined /> Về trang chủ
                         </Button>,
-                        <Button key="bookings" onClick={handleViewBookings}>
-                            <HistoryOutlined /> Xem lịch sử đặt tour
+                        <Button key="tours" onClick={handleBrowseTours}>
+                            <ShoppingCartOutlined /> Xem tour khác
                         </Button>
                     ]}
                 />
@@ -151,40 +165,21 @@ const PaymentSuccess: React.FC = () => {
     return (
         <div style={{ padding: '40px 20px', maxWidth: 800, margin: '0 auto' }}>
             <Result
-                status="success"
-                title="Thanh toán thành công!"
-                subTitle="Cảm ơn bạn đã đặt tour. Chúng tôi sẽ liên hệ với bạn sớm nhất có thể."
-                icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
+                status="error"
+                title="Thanh toán đã bị hủy"
+                subTitle="Bạn đã hủy quá trình thanh toán. Đơn đặt tour của bạn chưa được xác nhận."
+                icon={<CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
             />
 
             {bookingInfo && (
-                <Card
-                    title={
-                        <Space>
-                            <CheckCircleOutlined style={{ color: '#52c41a' }} />
-                            <span>Thông tin đặt tour</span>
-                        </Space>
-                    }
-                    style={{ marginTop: 24 }}
-                    extra={
-                        <Space>
-                            <Button
-                                icon={<PrinterOutlined />}
-                                onClick={handlePrintReceipt}
-                                size="small"
-                            >
-                                In
-                            </Button>
-                        </Space>
-                    }
-                >
-                    <Descriptions column={1} bordered size="small">
+                <Card title="Thông tin đặt tour" style={{ marginTop: 24 }}>
+                    <Descriptions column={1} bordered>
                         <Descriptions.Item label="Mã đặt tour">
                             <Text strong>{bookingInfo.bookingCode}</Text>
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Tên tour">
-                            <Text>{bookingInfo.tourTitle}</Text>
+                            <Text strong>{bookingInfo.tourTitle}</Text>
                         </Descriptions.Item>
 
                         {bookingInfo.tourStartDate && (
@@ -194,17 +189,13 @@ const PaymentSuccess: React.FC = () => {
                         )}
 
                         <Descriptions.Item label="Tổng tiền">
-                            <Text strong style={{ color: '#f5222d', fontSize: '16px' }}>
+                            <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
                                 {formatCurrency(bookingInfo.totalPrice)}
                             </Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Trạng thái thanh toán">
-                            <Tag color="success">Đã thanh toán</Tag>
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Mã giao dịch PayOS">
-                            <Text code>{bookingInfo.payOsOrderCode}</Text>
+                        <Descriptions.Item label="Trạng thái">
+                            <Text type="danger">Chưa thanh toán</Text>
                         </Descriptions.Item>
 
                         {bookingInfo.customerName && (
@@ -218,27 +209,21 @@ const PaymentSuccess: React.FC = () => {
                                 <Text>{bookingInfo.customerPhone}</Text>
                             </Descriptions.Item>
                         )}
-
-                        {bookingInfo.customerEmail && (
-                            <Descriptions.Item label="Email">
-                                <Text>{bookingInfo.customerEmail}</Text>
-                            </Descriptions.Item>
-                        )}
                     </Descriptions>
 
                     <Divider />
 
                     <Alert
-                        message="Lưu ý quan trọng"
+                        message="Thông tin quan trọng"
                         description={
                             <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                <li>Vui lòng lưu lại mã đặt tour để tra cứu sau này</li>
-                                <li>Chúng tôi sẽ gửi email xác nhận trong vòng 24 giờ</li>
-                                <li>Vui lòng có mặt tại điểm tập trung trước 15 phút</li>
+                                <li>Đặt tour vẫn được lưu trong hệ thống với trạng thái "Chưa thanh toán"</li>
+                                <li>Bạn có thể thử thanh toán lại bất cứ lúc nào</li>
+                                <li>Tour có thể hết chỗ nếu bạn không thanh toán sớm</li>
                                 <li>Liên hệ hotline nếu cần hỗ trợ: 1900-xxxx</li>
                             </ul>
                         }
-                        type="info"
+                        type="warning"
                         showIcon
                         style={{ marginTop: 16 }}
                     />
@@ -246,13 +231,30 @@ const PaymentSuccess: React.FC = () => {
             )}
 
             <div style={{ textAlign: 'center', marginTop: 32 }}>
-                <Space size="large">
-                    <Button type="primary" size="large" onClick={handleGoHome}>
-                        <HomeOutlined /> Về trang chủ
+                <Space size="large" wrap>
+                    <Button
+                        type="primary"
+                        size="large"
+                        onClick={handleRetryPayment}
+                        icon={<ReloadOutlined />}
+                    >
+                        Thử thanh toán lại
+                    </Button>
+
+                    <Button
+                        size="large"
+                        onClick={handleBrowseTours}
+                        icon={<ShoppingCartOutlined />}
+                    >
+                        Xem tour khác
                     </Button>
 
                     <Button size="large" onClick={handleViewBookings}>
-                        <HistoryOutlined /> Xem lịch sử đặt tour
+                        <HistoryOutlined /> Lịch sử đặt tour
+                    </Button>
+
+                    <Button size="large" onClick={handleGoHome}>
+                        <HomeOutlined /> Về trang chủ
                     </Button>
                 </Space>
             </div>
@@ -266,4 +268,4 @@ const PaymentSuccess: React.FC = () => {
     );
 };
 
-export default PaymentSuccess;
+export default TourPaymentCancel;
