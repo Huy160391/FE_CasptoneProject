@@ -10,6 +10,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 import TourCard from '../common/TourCard'
 import LoginModal from '../auth/LoginModal'
 import './FeaturedTours.scss'
+import '@/styles/custom-buttons.scss'
 
 
 

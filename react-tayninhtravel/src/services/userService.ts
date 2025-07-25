@@ -113,6 +113,25 @@ export const userService = {
         return userService.mapApiUserToUser(response.data);
     },
     /**
+ * Lấy danh sách voucher của người dùng hiện tại
+ * @param pageIndex Trang hiện tại (mặc định 1)
+ * @param pageSize Số lượng mỗi trang (mặc định 10)
+ * @param status Trạng thái voucher (tùy chọn: active, used, expired, ...)
+ * @returns Promise với danh sách voucher và thông tin phân trang
+ */
+    getMyVouchers: async (
+        pageIndex: number = 1,
+        pageSize: number = 10,
+        status?: string,
+        textSearch?: string
+    ): Promise<any> => {
+        const params: any = { pageIndex, pageSize };
+        if (status) params.status = status;
+        if (textSearch) params.textSearch = textSearch;
+        const response = await axios.get('/Product/My-vouchers', { params });
+        return response.data;
+    },
+    /**
      * Update an existing user
      * @param id User ID
      * @param userData New user data
