@@ -26,37 +26,31 @@ import {
     lookupTourBookingByPayOsOrderCode,
     formatCurrency,
     BookingPaymentInfo
-} from '../services/paymentService';
-import { useAuthStore } from '../store/useAuthStore';
-import { retryPaymentCallback, getPaymentErrorMessage } from '../utils/retryUtils';
+} from '../../services/paymentService';
+import { useAuthStore } from '../../store/useAuthStore';
+import { retryPaymentCallback, getPaymentErrorMessage } from '../../utils/retryUtils';
 
 const { Text } = Typography;
 
-const PaymentSuccess: React.FC = () => {
+const TourPaymentSuccess: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthStore();
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
-    const [bookingInfo, setBookingInfo] = useState<BookingPaymentInfo | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [retryCount, setRetryCount] = useState(0);
-    const [retryMessage, setRetryMessage] = useState<string | null>(null);
+    const [bookingInfo, setBookingInfo] = useState<BookingPaymentInfo | null>(null);
+
+    // Retry configuration
+    const maxRetries = 3;
+    const retryDelay = 2000;
 
     useEffect(() => {
-        const processPaymentSuccess = async (attempt = 1) => {
-            const maxRetries = 3;
-            const retryDelay = 2000; // 2 seconds
-
+        const processPaymentSuccess = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                setRetryCount(attempt - 1);
-
-                if (attempt > 1) {
-                    setRetryMessage(`Đang thử lại lần ${attempt}/${maxRetries}...`);
-                }
 
                 // Parse URL parameters
                 const currentUrl = window.location.href;
@@ -93,41 +87,20 @@ const PaymentSuccess: React.FC = () => {
                     }
                 );
 
-                if (result.success && result.data?.success) {
-                    // If we don't have booking info from lookup, try to get it from response
-                    if (!bookingInfo && result.data.data) {
-                        setBookingInfo(result.data.data);
-                    }
-                    setRetryMessage(null);
+                if (result.success) {
+                    // Payment callback was processed successfully
+                    // Booking info should already be set from lookup above
                 } else {
-                    const errorMessage = result.error
-                        ? getPaymentErrorMessage(result.error, result.attempts)
-                        : result.data?.message || 'Có lỗi xảy ra khi xử lý thanh toán';
-                    throw new Error(errorMessage);
+                    setError(result.error?.message || 'Có lỗi xảy ra khi xử lý thanh toán');
                 }
 
             } catch (error: any) {
-                console.error(`Payment success processing error (attempt ${attempt}):`, error);
-
-                if (attempt < maxRetries) {
-                    // Retry after delay
-                    setTimeout(() => {
-                        processPaymentSuccess(attempt + 1);
-                    }, retryDelay);
-                } else {
-                    // Final failure
-                    setError(
-                        error.message === 'Request timeout'
-                            ? 'Kết nối bị timeout. Thanh toán có thể đã được xử lý thành công. Vui lòng kiểm tra lịch sử đặt tour.'
-                            : error.message || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng liên hệ hỗ trợ nếu tiền đã được trừ.'
-                    );
-                    setRetryMessage(null);
-                }
+                console.error('Tour payment success processing error:', error);
+                const errorMessage = getPaymentErrorMessage(error, maxRetries);
+                setError(errorMessage);
             } finally {
-                if (attempt >= maxRetries) {
-                    setLoading(false);
-                    setProcessing(false);
-                }
+                setLoading(false);
+                setProcessing(false);
             }
         };
 
@@ -140,13 +113,13 @@ const PaymentSuccess: React.FC = () => {
 
     const handleViewBookings = () => {
         if (isAuthenticated) {
-            navigate('/profile/bookings');
+            navigate('/my-bookings');
         } else {
-            navigate('/login');
+            navigate('/login', { state: { from: '/my-bookings' } });
         }
     };
 
-    const handlePrintReceipt = () => {
+    const handlePrintBooking = () => {
         window.print();
     };
 
@@ -156,21 +129,15 @@ const PaymentSuccess: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                minHeight: '60vh',
-                flexDirection: 'column'
+                minHeight: '400px',
+                flexDirection: 'column',
+                gap: '16px'
             }}>
                 <Spin size="large" />
-                <Text style={{ marginTop: 16 }}>
-                    {processing ? 'Đang xử lý thanh toán...' : 'Đang tải thông tin...'}
-                </Text>
-                {retryMessage && (
-                    <Text style={{ marginTop: 8, color: '#1890ff' }}>
-                        {retryMessage}
-                    </Text>
-                )}
-                {retryCount > 0 && (
-                    <Text style={{ marginTop: 8, fontSize: '12px', color: '#666' }}>
-                        Lần thử: {retryCount + 1}/3
+                <Text>Đang xử lý thanh toán...</Text>
+                {processing && (
+                    <Text type="secondary">
+                        Đang xác nhận thanh toán với hệ thống...
                     </Text>
                 )}
             </div>
@@ -208,32 +175,25 @@ const PaymentSuccess: React.FC = () => {
 
             {bookingInfo && (
                 <Card
-                    title={
-                        <Space>
-                            <CheckCircleOutlined style={{ color: '#52c41a' }} />
-                            <span>Thông tin đặt tour</span>
-                        </Space>
-                    }
+                    title="Thông tin đặt tour"
                     style={{ marginTop: 24 }}
                     extra={
-                        <Space>
-                            <Button
-                                icon={<PrinterOutlined />}
-                                onClick={handlePrintReceipt}
-                                size="small"
-                            >
-                                In
-                            </Button>
-                        </Space>
+                        <Button
+                            type="link"
+                            icon={<PrinterOutlined />}
+                            onClick={handlePrintBooking}
+                        >
+                            In vé tour
+                        </Button>
                     }
                 >
-                    <Descriptions column={1} bordered size="small">
+                    <Descriptions column={1} bordered>
                         <Descriptions.Item label="Mã đặt tour">
                             <Text strong>{bookingInfo.bookingCode}</Text>
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Tên tour">
-                            <Text>{bookingInfo.tourTitle}</Text>
+                            <Text strong>{bookingInfo.tourTitle}</Text>
                         </Descriptions.Item>
 
                         {bookingInfo.tourStartDate && (
@@ -243,17 +203,13 @@ const PaymentSuccess: React.FC = () => {
                         )}
 
                         <Descriptions.Item label="Tổng tiền">
-                            <Text strong style={{ color: '#f5222d', fontSize: '16px' }}>
+                            <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
                                 {formatCurrency(bookingInfo.totalPrice)}
                             </Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Trạng thái thanh toán">
+                        <Descriptions.Item label="Trạng thái">
                             <Tag color="success">Đã thanh toán</Tag>
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Mã giao dịch PayOS">
-                            <Text code>{bookingInfo.payOsOrderCode}</Text>
                         </Descriptions.Item>
 
                         {bookingInfo.customerName && (
@@ -315,4 +271,4 @@ const PaymentSuccess: React.FC = () => {
     );
 };
 
-export default PaymentSuccess;
+export default TourPaymentSuccess;

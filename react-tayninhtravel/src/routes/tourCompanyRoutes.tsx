@@ -7,6 +7,7 @@ import TransactionHistory from '@/pages/tourcompany/TransactionHistory';
 import ReviewHistory from '@/pages/tourcompany/ReviewHistory';
 import RevenueDashboard from '@/pages/tourcompany/RevenueDashboard';
 
+
 export const tourCompanyRoutes: RouteObject[] = [
     {
         path: '',
@@ -38,7 +39,7 @@ export const tourCompanyRoutes: RouteObject[] = [
             {
                 path: 'revenue',
                 element: <RevenueDashboard />,
-            },
+            }
         ],
     },
 ];

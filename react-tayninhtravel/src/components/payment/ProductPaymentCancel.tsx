@@ -14,32 +14,29 @@ import {
 import {
     CloseCircleOutlined,
     HomeOutlined,
+    ShoppingCartOutlined,
     HistoryOutlined,
-    ReloadOutlined,
-    ShoppingCartOutlined
+    ReloadOutlined
 } from '@ant-design/icons';
 
 import {
     parsePayOsCallbackParams,
     createPayOsCallbackRequest,
-    handleTourBookingPaymentCancel,
-    lookupTourBookingByPayOsOrderCode,
+    handleProductPaymentCancel,
+    lookupProductOrderByPayOsOrderCode,
     formatCurrency,
-    BookingPaymentInfo
-} from '../services/paymentService';
-import { useAuthStore } from '../store/useAuthStore';
+    ProductOrderInfo
+} from '../../services/paymentService';
 
 const { Text } = Typography;
 
-const PaymentCancel: React.FC = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const { isAuthenticated } = useAuthStore();
-
+const ProductPaymentCancel: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
-    const [bookingInfo, setBookingInfo] = useState<BookingPaymentInfo | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [orderInfo, setOrderInfo] = useState<ProductOrderInfo | null>(null);
+    const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const processPaymentCancel = async () => {
@@ -58,14 +55,14 @@ const PaymentCancel: React.FC = () => {
 
                 const orderCode = params.orderCode || params.orderId || '';
 
-                // Lookup booking information first
+                // Lookup order information first
                 try {
-                    const lookupResponse = await lookupTourBookingByPayOsOrderCode(orderCode);
+                    const lookupResponse = await lookupProductOrderByPayOsOrderCode(orderCode);
                     if (lookupResponse.success && lookupResponse.data) {
-                        setBookingInfo(lookupResponse.data);
+                        setOrderInfo(lookupResponse.data);
                     }
                 } catch (lookupError) {
-                    console.warn('Could not lookup booking info:', lookupError);
+                    console.warn('Could not lookup order info:', lookupError);
                     // Continue with payment processing even if lookup fails
                 }
 
@@ -75,19 +72,17 @@ const PaymentCancel: React.FC = () => {
                     ...params,
                     status: 'CANCELLED'
                 });
-                const response = await handleTourBookingPaymentCancel(callbackRequest);
+                const response = await handleProductPaymentCancel(callbackRequest);
 
                 if (response.success) {
-                    // If we don't have booking info from lookup, try to get it from response
-                    if (!bookingInfo && response.data) {
-                        setBookingInfo(response.data);
-                    }
+                    // Payment cancel callback was processed successfully
+                    // Order info should already be set from lookup above
                 } else {
                     setError(response.message || 'Có lỗi xảy ra khi xử lý hủy thanh toán');
                 }
 
             } catch (error: any) {
-                console.error('Payment cancel processing error:', error);
+                console.error('Product payment cancel processing error:', error);
                 setError(error.message || 'Có lỗi xảy ra khi xử lý hủy thanh toán');
             } finally {
                 setLoading(false);
@@ -102,25 +97,21 @@ const PaymentCancel: React.FC = () => {
         navigate('/');
     };
 
-    const handleViewBookings = () => {
-        if (isAuthenticated) {
-            navigate('/profile/bookings');
-        } else {
-            navigate('/login');
-        }
+    const handleViewOrders = () => {
+        navigate('/orders');
+    };
+
+    const handleContinueShopping = () => {
+        navigate('/shop');
     };
 
     const handleRetryPayment = () => {
-        if (bookingInfo?.paymentUrl) {
-            window.location.href = bookingInfo.paymentUrl;
-        } else {
-            // Navigate back to booking page to retry
-            navigate('/things-to-do');
-        }
+        // Navigate back to cart or checkout page
+        navigate('/cart');
     };
 
-    const handleBrowseTours = () => {
-        navigate('/things-to-do');
+    const handleViewCart = () => {
+        navigate('/cart');
     };
 
     if (loading) {
@@ -129,13 +120,17 @@ const PaymentCancel: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                minHeight: '60vh',
-                flexDirection: 'column'
+                minHeight: '400px',
+                flexDirection: 'column',
+                gap: '16px'
             }}>
                 <Spin size="large" />
-                <Text style={{ marginTop: 16 }}>
-                    {processing ? 'Đang xử lý hủy thanh toán...' : 'Đang tải thông tin...'}
-                </Text>
+                <Text>Đang xử lý hủy thanh toán...</Text>
+                {processing && (
+                    <Text type="secondary">
+                        Đang cập nhật trạng thái đơn hàng...
+                    </Text>
+                )}
             </div>
         );
     }
@@ -151,8 +146,8 @@ const PaymentCancel: React.FC = () => {
                         <Button type="primary" key="home" onClick={handleGoHome}>
                             <HomeOutlined /> Về trang chủ
                         </Button>,
-                        <Button key="tours" onClick={handleBrowseTours}>
-                            <ShoppingCartOutlined /> Xem tour khác
+                        <Button key="shop" onClick={handleContinueShopping}>
+                            <ShoppingCartOutlined /> Tiếp tục mua sắm
                         </Button>
                     ]}
                 />
@@ -165,47 +160,41 @@ const PaymentCancel: React.FC = () => {
             <Result
                 status="error"
                 title="Thanh toán đã bị hủy"
-                subTitle="Bạn đã hủy quá trình thanh toán. Đơn đặt tour của bạn chưa được xác nhận."
+                subTitle="Bạn đã hủy quá trình thanh toán. Đơn hàng của bạn chưa được xác nhận."
                 icon={<CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
             />
 
-            {bookingInfo && (
-                <Card
-                    title={
-                        <Space>
-                            <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
-                            <span>Thông tin đặt tour bị hủy</span>
-                        </Space>
-                    }
-                    style={{ marginTop: 24 }}
-                >
-                    <Descriptions column={1} bordered size="small">
-                        <Descriptions.Item label="Mã đặt tour">
-                            <Text strong>{bookingInfo.bookingCode}</Text>
+            {orderInfo && (
+                <Card title="Thông tin đơn hàng" style={{ marginTop: 24 }}>
+                    <Descriptions column={1} bordered>
+                        <Descriptions.Item label="Mã đơn hàng">
+                            <Text strong>{orderInfo.payOsOrderCode}</Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Tên tour">
-                            <Text>{bookingInfo.tourTitle}</Text>
+                        <Descriptions.Item label="Tổng tiền gốc">
+                            <Text>{formatCurrency(orderInfo.totalAmount)}</Text>
                         </Descriptions.Item>
 
-                        {bookingInfo.tourStartDate && (
-                            <Descriptions.Item label="Ngày khởi hành">
-                                <Text>{new Date(bookingInfo.tourStartDate).toLocaleDateString('vi-VN')}</Text>
+                        {orderInfo.discountAmount > 0 && (
+                            <Descriptions.Item label="Giảm giá">
+                                <Text type="success">
+                                    -{formatCurrency(orderInfo.discountAmount)}
+                                </Text>
                             </Descriptions.Item>
                         )}
 
-                        <Descriptions.Item label="Tổng tiền">
-                            <Text strong style={{ color: '#f5222d', fontSize: '16px' }}>
-                                {formatCurrency(bookingInfo.totalPrice)}
+                        <Descriptions.Item label="Tổng cần thanh toán">
+                            <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
+                                {formatCurrency(orderInfo.totalAfterDiscount)}
                             </Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Trạng thái thanh toán">
-                            <Text type="danger">Đã hủy</Text>
+                        <Descriptions.Item label="Trạng thái">
+                            <Text type="danger">Đã hủy thanh toán</Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Mã giao dịch PayOS">
-                            <Text code>{bookingInfo.payOsOrderCode}</Text>
+                        <Descriptions.Item label="Thời gian tạo đơn">
+                            <Text>{new Date(orderInfo.createdAt).toLocaleString('vi-VN')}</Text>
                         </Descriptions.Item>
                     </Descriptions>
 
@@ -215,10 +204,10 @@ const PaymentCancel: React.FC = () => {
                         message="Thông tin quan trọng"
                         description={
                             <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                <li>Đơn đặt tour của bạn chưa được xác nhận do thanh toán bị hủy</li>
-                                <li>Bạn có thể thử thanh toán lại hoặc đặt tour mới</li>
-                                <li>Nếu gặp vấn đề, vui lòng liên hệ hotline: 1900-xxxx</li>
-                                <li>Chỗ trống có thể bị hết nếu bạn không thanh toán sớm</li>
+                                <li>Đơn hàng vẫn được lưu trong hệ thống với trạng thái "Đã hủy"</li>
+                                <li>Sản phẩm vẫn còn trong giỏ hàng của bạn</li>
+                                <li>Bạn có thể thử thanh toán lại bất cứ lúc nào</li>
+                                <li>Liên hệ hotline nếu cần hỗ trợ: 1900-xxxx</li>
                             </ul>
                         }
                         type="warning"
@@ -241,14 +230,18 @@ const PaymentCancel: React.FC = () => {
 
                     <Button
                         size="large"
-                        onClick={handleBrowseTours}
+                        onClick={handleViewCart}
                         icon={<ShoppingCartOutlined />}
                     >
-                        Xem tour khác
+                        Xem giỏ hàng
                     </Button>
 
-                    <Button size="large" onClick={handleViewBookings}>
-                        <HistoryOutlined /> Lịch sử đặt tour
+                    <Button size="large" onClick={handleContinueShopping}>
+                        <ShoppingCartOutlined /> Tiếp tục mua sắm
+                    </Button>
+
+                    <Button size="large" onClick={handleViewOrders}>
+                        <HistoryOutlined /> Xem đơn hàng
                     </Button>
 
                     <Button size="large" onClick={handleGoHome}>
@@ -266,4 +259,4 @@ const PaymentCancel: React.FC = () => {
     );
 };
 
-export default PaymentCancel;
+export default ProductPaymentCancel;

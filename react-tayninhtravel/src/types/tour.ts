@@ -340,6 +340,16 @@ export interface CreateTourOperationRequest {
     price: number;
     maxSeats: number;
     guideId?: string | null;
+    description?: string | null;
+    notes?: string | null;
+}
+
+// Response interface for tour operation update
+export interface UpdateTourOperationResponse {
+    success: boolean;
+    message?: string;
+    operation?: TourOperation;
+    validationErrors?: string[];
 }
 
 // Timeline interfaces

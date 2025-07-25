@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Card,
     Form,
+    Input,
     InputNumber,
     Button,
     Space,
@@ -142,13 +143,13 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
             }
 
             const response = await updateTourOperation(operation.id, values, token ?? undefined);
-            if (response.success && response.data) {
-                setOperation(response.data);
+            if (response.success && response.operation) {
+                setOperation(response.operation);
                 setEditing(false);
                 message.success('Cập nhật tour operation thành công');
 
                 if (onOperationUpdate) {
-                    onOperationUpdate(response.data);
+                    onOperationUpdate(response.operation);
                 }
             }
         } catch (error) {
@@ -214,6 +215,20 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                                 {operation.isActive ? 'Hoạt động' : 'Không hoạt động'}
                             </Tag>
                         </Descriptions.Item>
+                        {operation.description && (
+                            <Descriptions.Item label="Mô tả" span={3}>
+                                <div style={{ whiteSpace: 'pre-wrap' }}>
+                                    {operation.description}
+                                </div>
+                            </Descriptions.Item>
+                        )}
+                        {operation.notes && (
+                            <Descriptions.Item label="Ghi chú" span={3}>
+                                <div style={{ whiteSpace: 'pre-wrap' }}>
+                                    {operation.notes}
+                                </div>
+                            </Descriptions.Item>
+                        )}
                     </Descriptions>
 
                     {/* Capacity Statistics */}
@@ -277,7 +292,9 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                                 initialValues={{
                                     price: operation.price,
                                     maxSeats: operation.maxSeats,
-                                    guideId: operation.guideId
+                                    guideId: operation.guideId,
+                                    description: operation.description,
+                                    notes: operation.notes
                                 }}
                             >
                                 <Row gutter={16}>
@@ -312,6 +329,44 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                                                 min={1}
                                                 max={100}
                                                 placeholder="Nhập số ghế tối đa"
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+
+                                <Row gutter={16}>
+                                    <Col span={24}>
+                                        <Form.Item
+                                            name="description"
+                                            label="Mô tả bổ sung"
+                                            rules={[
+                                                { max: 1000, message: 'Mô tả không được quá 1000 ký tự' }
+                                            ]}
+                                        >
+                                            <Input.TextArea
+                                                rows={3}
+                                                placeholder="Nhập mô tả bổ sung cho tour operation (ví dụ: ghi chú về thời tiết, điều kiện đặc biệt, thay đổi lịch trình)"
+                                                showCount
+                                                maxLength={1000}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+
+                                <Row gutter={16}>
+                                    <Col span={24}>
+                                        <Form.Item
+                                            name="notes"
+                                            label="Ghi chú"
+                                            rules={[
+                                                { max: 500, message: 'Ghi chú không được quá 500 ký tự' }
+                                            ]}
+                                        >
+                                            <Input.TextArea
+                                                rows={2}
+                                                placeholder="Nhập ghi chú bổ sung"
+                                                showCount
+                                                maxLength={500}
                                             />
                                         </Form.Item>
                                     </Col>
@@ -391,6 +446,44 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
                                         min={1}
                                         max={100}
                                         placeholder="Nhập số ghế tối đa"
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+
+                        <Row gutter={16}>
+                            <Col span={24}>
+                                <Form.Item
+                                    name="description"
+                                    label="Mô tả bổ sung"
+                                    rules={[
+                                        { max: 1000, message: 'Mô tả không được quá 1000 ký tự' }
+                                    ]}
+                                >
+                                    <Input.TextArea
+                                        rows={3}
+                                        placeholder="Nhập mô tả bổ sung cho tour operation (ví dụ: ghi chú về thời tiết, điều kiện đặc biệt, thay đổi lịch trình)"
+                                        showCount
+                                        maxLength={1000}
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+
+                        <Row gutter={16}>
+                            <Col span={24}>
+                                <Form.Item
+                                    name="notes"
+                                    label="Ghi chú"
+                                    rules={[
+                                        { max: 500, message: 'Ghi chú không được quá 500 ký tự' }
+                                    ]}
+                                >
+                                    <Input.TextArea
+                                        rows={2}
+                                        placeholder="Nhập ghi chú bổ sung"
+                                        showCount
+                                        maxLength={500}
                                     />
                                 </Form.Item>
                             </Col>
