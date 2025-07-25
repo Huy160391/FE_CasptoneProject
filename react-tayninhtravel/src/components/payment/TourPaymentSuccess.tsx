@@ -26,9 +26,9 @@ import {
     lookupTourBookingByPayOsOrderCode,
     formatCurrency,
     BookingPaymentInfo
-} from '../services/paymentService';
-import { useAuthStore } from '../store/useAuthStore';
-import { retryPaymentCallback, getPaymentErrorMessage } from '../utils/retryUtils';
+} from '../../services/paymentService';
+import { useAuthStore } from '../../store/useAuthStore';
+import { retryPaymentCallback, getPaymentErrorMessage } from '../../utils/retryUtils';
 
 const { Text } = Typography;
 
@@ -88,17 +88,15 @@ const TourPaymentSuccess: React.FC = () => {
                 );
 
                 if (result.success) {
-                    // If we don't have booking info from lookup, try to get it from response
-                    if (!bookingInfo && result.data) {
-                        setBookingInfo(result.data);
-                    }
+                    // Payment callback was processed successfully
+                    // Booking info should already be set from lookup above
                 } else {
-                    setError(result.message || 'Có lỗi xảy ra khi xử lý thanh toán');
+                    setError(result.error?.message || 'Có lỗi xảy ra khi xử lý thanh toán');
                 }
 
             } catch (error: any) {
                 console.error('Tour payment success processing error:', error);
-                const errorMessage = getPaymentErrorMessage(error);
+                const errorMessage = getPaymentErrorMessage(error, maxRetries);
                 setError(errorMessage);
             } finally {
                 setLoading(false);
@@ -127,10 +125,10 @@ const TourPaymentSuccess: React.FC = () => {
 
     if (loading) {
         return (
-            <div style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
                 minHeight: '400px',
                 flexDirection: 'column',
                 gap: '16px'
@@ -176,12 +174,12 @@ const TourPaymentSuccess: React.FC = () => {
             />
 
             {bookingInfo && (
-                <Card 
-                    title="Thông tin đặt tour" 
+                <Card
+                    title="Thông tin đặt tour"
                     style={{ marginTop: 24 }}
                     extra={
-                        <Button 
-                            type="link" 
+                        <Button
+                            type="link"
                             icon={<PrinterOutlined />}
                             onClick={handlePrintBooking}
                         >
@@ -193,7 +191,7 @@ const TourPaymentSuccess: React.FC = () => {
                         <Descriptions.Item label="Mã đặt tour">
                             <Text strong>{bookingInfo.bookingCode}</Text>
                         </Descriptions.Item>
-                        
+
                         <Descriptions.Item label="Tên tour">
                             <Text strong>{bookingInfo.tourTitle}</Text>
                         </Descriptions.Item>

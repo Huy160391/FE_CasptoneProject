@@ -3,7 +3,6 @@ import {
     Modal,
     Descriptions,
     Tag,
-    Timeline,
     Card,
     Row,
     Col,
@@ -15,13 +14,11 @@ import {
     Tabs,
     Statistic,
     Image,
-    Space,
     Tooltip
 } from 'antd';
 import {
     ClockCircleOutlined,
     UserOutlined,
-    ShopOutlined,
     CheckCircleOutlined,
     ExclamationCircleOutlined,
     DollarOutlined,
@@ -243,8 +240,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             {new Date(tourDetails.createdAt).toLocaleString('vi-VN')}
                         </Descriptions.Item>
                         <Descriptions.Item label="Cập nhật lần cuối">
-                            {tourDetails.updatedAt ? 
-                                new Date(tourDetails.updatedAt).toLocaleString('vi-VN') : 
+                            {tourDetails.updatedAt ?
+                                new Date(tourDetails.updatedAt).toLocaleString('vi-VN') :
                                 'Chưa cập nhật'
                             }
                         </Descriptions.Item>
@@ -529,12 +526,12 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                             <Col span={3}>
                                                 <Tag color={
                                                     invitation.status === 'Pending' ? 'orange' :
-                                                    invitation.status === 'Accepted' ? 'green' :
-                                                    invitation.status === 'Rejected' ? 'red' : 'gray'
+                                                        invitation.status === 'Accepted' ? 'green' :
+                                                            invitation.status === 'Rejected' ? 'red' : 'gray'
                                                 }>
                                                     {invitation.status === 'Pending' ? 'Chờ phản hồi' :
-                                                     invitation.status === 'Accepted' ? 'Đã chấp nhận' :
-                                                     invitation.status === 'Rejected' ? 'Đã từ chối' : 'Hết hạn'}
+                                                        invitation.status === 'Accepted' ? 'Đã chấp nhận' :
+                                                            invitation.status === 'Rejected' ? 'Đã từ chối' : 'Hết hạn'}
                                                 </Tag>
                                             </Col>
                                             <Col span={4}>

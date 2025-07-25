@@ -27,9 +27,8 @@ import {
     lookupProductOrderByPayOsOrderCode,
     formatCurrency,
     ProductOrderInfo
-} from '../services/paymentService';
-import { useAuthStore } from '../store/useAuthStore';
-import { retryPaymentCallback, getPaymentErrorMessage } from '../utils/retryUtils';
+} from '../../services/paymentService';
+import { retryPaymentCallback, getPaymentErrorMessage } from '../../utils/retryUtils';
 
 const { Text } = Typography;
 
@@ -40,7 +39,6 @@ const ProductPaymentSuccess: React.FC = () => {
     const [orderInfo, setOrderInfo] = useState<ProductOrderInfo | null>(null);
     const location = useLocation();
     const navigate = useNavigate();
-    const { token } = useAuthStore();
 
     // Retry configuration
     const maxRetries = 3;
@@ -88,17 +86,17 @@ const ProductPaymentSuccess: React.FC = () => {
                 );
 
                 if (result.success) {
-                    // If we don't have order info from lookup, try to get it from response
-                    if (!orderInfo && result.data?.orderData) {
-                        setOrderInfo(result.data.orderData);
-                    }
+                    // // If we don't have order info from lookup, try to get it from response
+                    // if (!orderInfo && result.data?.orderData) {
+                    //     setOrderInfo(result.data.orderData);
+                    // }
                 } else {
-                    setError(result.message || 'Có lỗi xảy ra khi xử lý thanh toán');
+                    setError(result.error?.message || 'Có lỗi xảy ra khi xử lý thanh toán');
                 }
 
             } catch (error: any) {
                 console.error('Product payment success processing error:', error);
-                const errorMessage = getPaymentErrorMessage(error);
+                const errorMessage = getPaymentErrorMessage(error, maxRetries);
                 setError(errorMessage);
             } finally {
                 setLoading(false);
@@ -127,10 +125,10 @@ const ProductPaymentSuccess: React.FC = () => {
 
     if (loading) {
         return (
-            <div style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
                 minHeight: '400px',
                 flexDirection: 'column',
                 gap: '16px'
@@ -176,12 +174,12 @@ const ProductPaymentSuccess: React.FC = () => {
             />
 
             {orderInfo && (
-                <Card 
-                    title="Thông tin đơn hàng" 
+                <Card
+                    title="Thông tin đơn hàng"
                     style={{ marginTop: 24 }}
                     extra={
-                        <Button 
-                            type="link" 
+                        <Button
+                            type="link"
                             icon={<PrinterOutlined />}
                             onClick={handlePrintOrder}
                         >
@@ -193,7 +191,7 @@ const ProductPaymentSuccess: React.FC = () => {
                         <Descriptions.Item label="Mã đơn hàng">
                             <Text strong>{orderInfo.payOsOrderCode}</Text>
                         </Descriptions.Item>
-                        
+
                         <Descriptions.Item label="Tổng tiền gốc">
                             <Text>{formatCurrency(orderInfo.totalAmount)}</Text>
                         </Descriptions.Item>

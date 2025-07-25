@@ -13,7 +13,7 @@ import {
     Card,
     Divider
 } from 'antd';
-import { UploadOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import { TourDetails } from '../../types/tour';
 import { updateTourDetails } from '../../services/tourcompanyService';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -53,7 +53,7 @@ const TourDetailsUpdateForm: React.FC<TourDetailsUpdateFormProps> = ({
                 title: tourDetails.title,
                 description: tourDetails.description || ''
             });
-            
+
             // Initialize images
             setUploadedImageUrls(tourDetails.imageUrls || []);
         }
@@ -93,7 +93,7 @@ const TourDetailsUpdateForm: React.FC<TourDetailsUpdateFormProps> = ({
                 imageUrls: uploadedImageUrls
             };
 
-            const response = await updateTourDetails(tourDetails.id, updateData, token);
+            const response = await updateTourDetails(tourDetails.id, updateData, token || undefined);
 
             if (response.success) {
                 message.success('Cập nhật tour details thành công');
@@ -154,7 +154,7 @@ const TourDetailsUpdateForm: React.FC<TourDetailsUpdateFormProps> = ({
                                 { max: 255, message: 'Tiêu đề không được vượt quá 255 ký tự' }
                             ]}
                         >
-                            <Input 
+                            <Input
                                 placeholder="Nhập tiêu đề tour details"
                                 style={{ backgroundColor: '#e6f7ff', borderColor: '#1890ff' }}
                             />
@@ -193,8 +193,8 @@ const TourDetailsUpdateForm: React.FC<TourDetailsUpdateFormProps> = ({
                             showUploadList={false}
                             accept="image/*"
                         >
-                            <Button 
-                                icon={<UploadOutlined />} 
+                            <Button
+                                icon={<UploadOutlined />}
                                 loading={uploading}
                                 style={{ marginBottom: 16 }}
                             >
@@ -254,9 +254,9 @@ const TourDetailsUpdateForm: React.FC<TourDetailsUpdateFormProps> = ({
                             <Button onClick={handleCancel}>
                                 Hủy
                             </Button>
-                            <Button 
-                                type="primary" 
-                                htmlType="submit" 
+                            <Button
+                                type="primary"
+                                htmlType="submit"
                                 loading={loading}
                             >
                                 Cập nhật

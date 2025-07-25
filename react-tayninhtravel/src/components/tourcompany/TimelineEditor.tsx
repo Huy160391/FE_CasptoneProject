@@ -24,7 +24,6 @@ import {
     SaveOutlined,
     CloseOutlined
 } from '@ant-design/icons';
-import dayjs from 'dayjs';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
     updateTimelineItem,
@@ -36,7 +35,6 @@ import {
 import {
     TimelineItem,
     SpecialtyShop,
-    CreateTimelineItemRequest
 } from '../../types/tour';
 
 const { Option } = Select;
@@ -114,8 +112,8 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
 
             if (response.success) {
                 // Update local timeline
-                const updatedTimeline = timeline.map(item => 
-                    item.id === editingItem.id 
+                const updatedTimeline = timeline.map(item =>
+                    item.id === editingItem.id
                         ? {
                             ...item,
                             checkInTime: editingItem.checkInTime,
@@ -143,7 +141,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
             console.log('🚀 Deleting timeline item:', itemId);
             const response = await deleteTimelineItem(itemId, token ?? undefined);
             console.log('✅ Timeline item deleted:', response);
-            
+
             if (response.success) {
                 const updatedTimeline = timeline.filter(item => item.id !== itemId);
                 onUpdate(updatedTimeline);
@@ -174,7 +172,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
             console.log('🚀 Creating timeline items:', createRequest);
             const response = await createTimelineItems(createRequest, token ?? undefined);
             console.log('✅ Timeline items created:', response);
-            
+
             if (response.success) {
                 // Create new timeline item for local state
                 const newItem: TimelineItem = {
