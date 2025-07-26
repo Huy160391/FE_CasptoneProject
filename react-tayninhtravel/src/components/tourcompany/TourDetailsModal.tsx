@@ -87,6 +87,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const [selectedSlotForBookings, setSelectedSlotForBookings] = useState<TourSlotDto | null>(null);
     const [cancelModalVisible, setCancelModalVisible] = useState(false);
     const [selectedSlotForCancel, setSelectedSlotForCancel] = useState<TourSlotDto | null>(null);
+    const [manualInviteModalVisible, setManualInviteModalVisible] = useState(false);
 
     useEffect(() => {
         if (visible && tourDetailsId && token) {
@@ -192,6 +193,19 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
         setCancelModalVisible(false);
         setSelectedSlotForCancel(null);
         // Reload tour details data
+        loadTourDetailsData();
+        if (onUpdate) {
+            onUpdate();
+        }
+    };
+
+    const handleManualInviteGuide = () => {
+        setManualInviteModalVisible(true);
+    };
+
+    const handleManualInviteSuccess = () => {
+        setManualInviteModalVisible(false);
+        // Reload tour details data to refresh invitations
         loadTourDetailsData();
         if (onUpdate) {
             onUpdate();
@@ -559,6 +573,18 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
     const renderInvitationsTab = () => (
         <div>
+            {/* Manual Invite Button */}
+            <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                <Button
+                    type="primary"
+                    icon={<UserOutlined />}
+                    onClick={handleManualInviteGuide}
+                    style={{ backgroundColor: '#722ed1', borderColor: '#722ed1' }}
+                >
+                    Mời thủ công hướng dẫn viên
+                </Button>
+            </div>
+
             {invitations ? (
                 <div>
                     {/* Statistics Cards */}
@@ -686,6 +712,15 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
             onCancel={onClose}
             width={1000}
             footer={[
+                <Button
+                    key="manual-invite"
+                    type="primary"
+                    icon={<UserOutlined />}
+                    onClick={handleManualInviteGuide}
+                    style={{ marginRight: 8 }}
+                >
+                    Mời thủ công HDV
+                </Button>,
                 <Button key="close" onClick={onClose}>
                     Đóng
                 </Button>
@@ -796,6 +831,19 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                     tourDate: selectedSlotForCancel.tourDate,
                     formattedDateWithDay: selectedSlotForCancel.formattedDateWithDay,
                     statusName: selectedSlotForCancel.statusName
+                } : undefined}
+            />
+
+            {/* Manual Invite Guide Modal */}
+            <ManualInviteGuideModal
+                visible={manualInviteModalVisible}
+                onCancel={() => setManualInviteModalVisible(false)}
+                onSuccess={handleManualInviteSuccess}
+                tourDetailsId={tourDetails?.id || null}
+                tourInfo={tourDetails ? {
+                    title: tourDetails.title,
+                    startDate: tourDetails.startDate,
+                    endDate: tourDetails.endDate
                 } : undefined}
             />
         </Modal>
