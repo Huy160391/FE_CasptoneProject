@@ -54,6 +54,7 @@ import TourDetailsUpdateForm from './TourDetailsUpdateForm';
 import TimelineEditor from './TimelineEditor';
 import BookingsModal from './BookingsModal';
 import CancelTourModal from './CancelTourModal';
+import ManualInviteGuideModal from './ManualInviteGuideModal';
 
 const { TabPane } = Tabs;
 
