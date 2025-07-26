@@ -97,7 +97,7 @@ export const authService = {
      */
     loginWithGoogle: async (idToken: string): Promise<AuthResponse> => {
         try {
-            const response = await axiosInstance.post<LoginApiResponse>('/Authencation/login-google', { idToken });
+            const response = await axiosInstance.post<LoginApiResponse>('/Authentication/login-google', { idToken });
             const { data } = response;
 
             if (data.token) {

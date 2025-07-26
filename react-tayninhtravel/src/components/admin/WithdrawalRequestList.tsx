@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Table, 
-    Tag, 
-    Button, 
-    Space, 
-    Input, 
-    Select, 
-    DatePicker, 
-    Row, 
+import {
+    Table,
+    Tag,
+    Button,
+    Space,
+    Input,
+    Select,
+    DatePicker,
+    Row,
     Col,
     Card,
     Tooltip,
@@ -26,9 +26,9 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { WithdrawalRequest, WithdrawalStatus } from '@/types';
-import { 
-    getAdminWithdrawalRequests, 
-    approveWithdrawalRequest, 
+import {
+    getAdminWithdrawalRequests,
+    approveWithdrawalRequest,
     rejectWithdrawalRequest,
     exportWithdrawalRequests
 } from '@/services/adminWithdrawalService';
@@ -162,7 +162,7 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
-            
+
             message.success('Xuất file thành công');
         } catch (error: any) {
             message.error('Không thể xuất file');
@@ -221,10 +221,9 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             dataIndex: ['user', 'name'],
             key: 'userName',
             width: 150,
-            render: (name: string, record: WithdrawalRequest) => (
+            render: (name: string) => (
                 <div>
                     <div className="user-name">{name || 'N/A'}</div>
-                    <div className="user-email">{record.user?.email}</div>
                 </div>
             )
         },
@@ -247,7 +246,7 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                 <div>
                     <div className="bank-name">{bankName}</div>
                     <div className="account-number">
-                        {record.bankAccount?.accountNumber}
+                        {record.bankAccount?.maskedAccountNumber}
                     </div>
                 </div>
             )
@@ -448,7 +447,7 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                         total: pagination.total,
                         showSizeChanger: true,
                         showQuickJumper: true,
-                        showTotal: (total, range) => 
+                        showTotal: (total, range) =>
                             `${range[0]}-${range[1]} của ${total} yêu cầu`,
                         onChange: (page, pageSize) => {
                             setPagination(prev => ({

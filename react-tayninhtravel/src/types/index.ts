@@ -324,19 +324,26 @@ export enum WithdrawalStatus {
 export interface WithdrawalRequest {
     id: string;
     userId: string;
-    amount: number;
     bankAccountId: string;
-    status: WithdrawalStatus;
-    requestedAt: string;
-    processedAt?: string;
-    processedBy?: string;
-    adminNotes?: string;
-    bankAccount?: BankAccount;
-    user?: {
+    bankAccount: {
         id: string;
-        name: string;
-        email: string;
+        bankName: string;
+        maskedAccountNumber: string;
+        accountHolderName: string;
     };
+    amount: number;
+    withdrawalFee: number;
+    netAmount: number;
+    status: WithdrawalStatus;
+    statusName: string;
+    requestedAt: string;
+    processedAt?: string | null;
+    processedByName?: string | null;
+    userNotes?: string | null;
+    adminNotes?: string | null;
+    transactionReference?: string | null;
+    canCancel: boolean;
+    walletBalanceAtRequest: number;
 }
 
 export interface CreateWithdrawalRequestRequest {
