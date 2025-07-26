@@ -92,18 +92,32 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
         setLoading(true);
         try {
             let response;
+            console.log('🔍 Loading tour guides, showAvailableOnly:', showAvailableOnly);
+
             if (showAvailableOnly && tourInfo.startDate) {
                 // Get available guides for tour date
                 const tourDate = new Date(tourInfo.startDate).toISOString().split('T')[0];
+                console.log('📅 Getting available guides for date:', tourDate);
                 response = await getAvailableTourGuides(tourDate, undefined, token);
             } else {
                 // Get all guides
+                console.log('👥 Getting all guides');
                 response = await getTourGuides(false, token);
             }
 
-            if (response.success) {
+            console.log('📡 Tour guides API response:', response);
+
+            // Handle both direct array response and ApiResponse wrapper
+            if (Array.isArray(response)) {
+                // Direct array response from backend
+                console.log('✅ Direct array response, guides count:', response.length);
+                setGuides(response);
+            } else if (response.success) {
+                // ApiResponse wrapper
+                console.log('✅ ApiResponse wrapper, guides count:', response.data?.length || 0);
                 setGuides(response.data || []);
             } else {
+                console.log('❌ API error:', response.message);
                 message.error(response.message || 'Không thể tải danh sách hướng dẫn viên');
             }
         } catch (error: any) {
