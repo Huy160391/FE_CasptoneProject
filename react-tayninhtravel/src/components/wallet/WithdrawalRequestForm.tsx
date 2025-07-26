@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    Form, 
-    InputNumber, 
-    Select, 
-    Button, 
-    Card, 
-    message, 
-    Spin, 
+import {
+    Form,
+    InputNumber,
+    Select,
+    Button,
+    Card,
+    message,
+    Spin,
     Alert,
     Typography,
     Space,
     Divider
 } from 'antd';
-import { 
-    DollarOutlined, 
-    BankOutlined, 
+import {
+    DollarOutlined,
+    BankOutlined,
     InfoCircleOutlined,
-    WalletOutlined 
+    WalletOutlined
 } from '@ant-design/icons';
 import { BankAccount, WithdrawalFormData } from '@/types';
-import { getBankAccounts, getWalletBalance } from '@/services/specialtyShopService';
-import { useAuthStore } from '@/store/useAuthStore';
 import './WithdrawalRequestForm.scss';
 
 const { Text, Title } = Typography;
@@ -35,6 +33,12 @@ interface WithdrawalRequestFormProps {
     onSubmit: (data: WithdrawalFormData) => Promise<void>;
     /** Cancel handler */
     onCancel?: () => void;
+    /** Service for API calls */
+    service?: any;
+    /** Available bank accounts */
+    bankAccounts?: BankAccount[];
+    /** Current balance */
+    balance?: number;
 }
 
 /**
@@ -52,10 +56,12 @@ const WithdrawalRequestForm: React.FC<WithdrawalRequestFormProps> = ({
     shopId,
     loading = false,
     onSubmit,
-    onCancel
+    onCancel,
+    service,
+    bankAccounts: propBankAccounts,
+    balance: propBalance
 }) => {
     const [form] = Form.useForm<WithdrawalFormData>();
-    const { token } = useAuthStore();
     const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
     const [walletBalance, setWalletBalance] = useState<number>(0);
     const [loadingData, setLoadingData] = useState(true);
@@ -76,8 +82,8 @@ const WithdrawalRequestForm: React.FC<WithdrawalRequestFormProps> = ({
     const loadInitialData = async () => {
         setLoadingData(true);
         try {
-            // Load bank accounts
-            const accounts = await getBankAccounts(token || undefined);
+            // Use prop data if available, otherwise fetch
+            const accounts = propBankAccounts || (service ? await service.getMyBankAccounts() : []);
             setBankAccounts(accounts);
 
             // Set default account if available
@@ -87,14 +93,13 @@ const WithdrawalRequestForm: React.FC<WithdrawalRequestFormProps> = ({
                 setSelectedAccount(defaultAccount);
             }
 
-            // Load wallet balance if shopId is provided
-            if (shopId) {
-                const balance = await getWalletBalance(shopId, token || undefined);
-                setWalletBalance(balance);
+            // Use prop balance if available
+            if (propBalance !== undefined) {
+                setWalletBalance(propBalance);
             }
-        } catch (error: any) {
-            message.error('Không thể tải dữ liệu. Vui lòng thử lại.');
+        } catch (error) {
             console.error('Error loading initial data:', error);
+            message.error('Không thể tải dữ liệu');
         } finally {
             setLoadingData(false);
         }
@@ -179,7 +184,7 @@ const WithdrawalRequestForm: React.FC<WithdrawalRequestFormProps> = ({
     }
 
     return (
-        <Card 
+        <Card
             title="Tạo yêu cầu rút tiền"
             className="withdrawal-request-form"
         >
@@ -218,21 +223,30 @@ const WithdrawalRequestForm: React.FC<WithdrawalRequestFormProps> = ({
                             placeholder="Chọn tài khoản ngân hàng"
                             onChange={handleBankAccountChange}
                             suffixIcon={<BankOutlined />}
+                            optionLabelProp="label"
                         >
                             {bankAccounts.map((account) => (
-                                <Option key={account.id} value={account.id}>
+                                <Option
+                                    key={account.id}
+                                    value={account.id}
+                                    label={`${account.bankName} - ${account.accountNumber.slice(-4)}`}
+                                >
                                     <div className="bank-account-option">
-                                        <div className="bank-info">
+                                        <div className="bank-name">
                                             <Text strong>{account.bankName}</Text>
                                             {account.isDefault && (
-                                                <Text type="warning" className="default-badge">
-                                                    (Mặc định)
-                                                </Text>
+                                                <Text type="warning" className="default-badge"> (Mặc định)</Text>
                                             )}
                                         </div>
-                                        <Text type="secondary" className="account-number">
-                                            {account.accountNumber} - {account.accountHolderName}
-                                        </Text>
+                                        <div className="account-details">
+                                            <Text type="secondary">
+                                                **** **** {account.accountNumber.slice(-4)}
+                                            </Text>
+                                            <br />
+                                            <Text type="secondary" className="account-holder">
+                                                {account.accountHolderName}
+                                            </Text>
+                                        </div>
                                     </div>
                                 </Option>
                             ))}

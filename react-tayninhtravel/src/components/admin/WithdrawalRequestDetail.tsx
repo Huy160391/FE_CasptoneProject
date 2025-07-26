@@ -14,11 +14,10 @@ import {
     Descriptions,
     message
 } from 'antd';
-import { 
-    CheckOutlined, 
-    CloseOutlined, 
-    BankOutlined, 
-    UserOutlined,
+import {
+    CheckOutlined,
+    CloseOutlined,
+    BankOutlined,
     DollarOutlined,
     CalendarOutlined,
     InfoCircleOutlined
@@ -118,7 +117,7 @@ const WithdrawalRequestDetail: React.FC<WithdrawalRequestDetailProps> = ({
                 await rejectWithdrawalRequest(request.id, values, token || undefined);
                 message.success('Đã từ chối yêu cầu rút tiền');
             }
-            
+
             setActionModalVisible(false);
             onProcessed?.();
         } catch (error: any) {
@@ -177,9 +176,19 @@ const WithdrawalRequestDetail: React.FC<WithdrawalRequestDetailProps> = ({
                                 <Descriptions.Item label="Mã yêu cầu">
                                     <Text code strong>{request.id}</Text>
                                 </Descriptions.Item>
-                                <Descriptions.Item label="Số tiền">
+                                <Descriptions.Item label="Số tiền yêu cầu">
                                     <Title level={4} className="amount">
                                         {formatCurrency(request.amount)}
+                                    </Title>
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Phí rút tiền">
+                                    <Text type="secondary">
+                                        {formatCurrency(request.withdrawalFee)}
+                                    </Text>
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Số tiền thực nhận">
+                                    <Title level={5} className="net-amount" style={{ color: '#52c41a' }}>
+                                        {formatCurrency(request.netAmount)}
                                     </Title>
                                 </Descriptions.Item>
                                 <Descriptions.Item label="Ngày tạo">
@@ -196,9 +205,9 @@ const WithdrawalRequestDetail: React.FC<WithdrawalRequestDetailProps> = ({
                                         </Space>
                                     </Descriptions.Item>
                                 )}
-                                {request.processedBy && (
+                                {request.processedByName && (
                                     <Descriptions.Item label="Người xử lý">
-                                        <Text>{request.processedBy}</Text>
+                                        <Text>{request.processedByName}</Text>
                                     </Descriptions.Item>
                                 )}
                             </Descriptions>
@@ -209,17 +218,11 @@ const WithdrawalRequestDetail: React.FC<WithdrawalRequestDetailProps> = ({
                     <Col xs={24} lg={12}>
                         <Card type="inner" title="Thông tin người dùng" className="info-card">
                             <Descriptions column={1} size="small">
-                                <Descriptions.Item label="Tên người dùng">
-                                    <Space>
-                                        <UserOutlined />
-                                        <Text strong>{request.user?.name || 'N/A'}</Text>
-                                    </Space>
-                                </Descriptions.Item>
-                                <Descriptions.Item label="Email">
-                                    <Text>{request.user?.email || 'N/A'}</Text>
-                                </Descriptions.Item>
                                 <Descriptions.Item label="ID người dùng">
                                     <Text code>{request.userId}</Text>
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Số dư ví lúc tạo yêu cầu">
+                                    <Text strong>{formatCurrency(request.walletBalanceAtRequest)}</Text>
                                 </Descriptions.Item>
                             </Descriptions>
                         </Card>
@@ -243,7 +246,7 @@ const WithdrawalRequestDetail: React.FC<WithdrawalRequestDetailProps> = ({
                                     <Descriptions column={1} size="small">
                                         <Descriptions.Item label="Số tài khoản">
                                             <Text code className="account-number">
-                                                {request.bankAccount?.accountNumber}
+                                                {request.bankAccount?.maskedAccountNumber}
                                             </Text>
                                         </Descriptions.Item>
                                     </Descriptions>
@@ -293,8 +296,9 @@ const WithdrawalRequestDetail: React.FC<WithdrawalRequestDetailProps> = ({
                         description={
                             <div>
                                 <p>Số tiền: <strong>{formatCurrency(request.amount)}</strong></p>
-                                <p>Người yêu cầu: <strong>{request.user?.name}</strong></p>
-                                <p>Tài khoản: <strong>{request.bankAccount?.bankName} - {request.bankAccount?.accountNumber}</strong></p>
+                                <p>Phí rút tiền: <strong>{formatCurrency(request.withdrawalFee)}</strong></p>
+                                <p>Số tiền thực nhận: <strong>{formatCurrency(request.netAmount)}</strong></p>
+                                <p>Tài khoản: <strong>{request.bankAccount?.bankName} - {request.bankAccount?.maskedAccountNumber}</strong></p>
                             </div>
                         }
                         type={actionType === 'approve' ? 'success' : 'warning'}

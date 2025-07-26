@@ -175,29 +175,6 @@ const Navbar = () => {
       icon: <UserOutlined />,
       onClick: () => navigate('/profile'),
     },
-    ...(user?.role === 'Admin' ? [{
-      key: 'admin',
-      label: 'Admin Dashboard',
-      icon: <DashboardOutlined />,
-      onClick: () => navigate('/admin/dashboard'),
-    }] : []), ...(user?.role === 'Blogger' ? [{
-      key: 'blogger',
-      label: 'Blogger Dashboard',
-      icon: <DashboardOutlined />,
-      onClick: () => navigate('/blogger/dashboard'),
-    }] : []),
-    ...(user?.role === 'Tour Company' ? [{
-      key: 'tour-company',
-      label: 'Tour Company Dashboard',
-      icon: <DashboardOutlined />,
-      onClick: () => navigate('/tour-company/dashboard'),
-    }] : []),
-    ...(user?.role === 'Specialty Shop' ? [{
-      key: 'speciality-shop',
-      label: 'Speciality Shop Dashboard',
-      icon: <DashboardOutlined />,
-      onClick: () => navigate('/speciality-shop'),
-    }] : []),
     {
       key: 'settings',
       label: t('common.settings'),

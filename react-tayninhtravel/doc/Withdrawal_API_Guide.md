@@ -1,22 +1,22 @@
-# H??NG D?N API LU?NG RÚT TI?N
+# H??NG D?N API LU?NG Rï¿½T TI?N
 
-## ?? T?ng quan lu?ng rút ti?n
-1. **L?y danh sách ngân hàng h? tr?** (tùy ch?n)
-2. **T?o/qu?n lý tài kho?n ngân hàng**
-3. **T?o yêu c?u rút ti?n**
-4. **Theo dõi tr?ng thái yêu c?u**
-5. **Admin x? lý yêu c?u** (backend)
+## ?? T?ng quan lu?ng rï¿½t ti?n
+1. **L?y danh sï¿½ch ngï¿½n hï¿½ng h? tr?** (tï¿½y ch?n)
+2. **T?o/qu?n lï¿½ tï¿½i kho?n ngï¿½n hï¿½ng**
+3. **T?o yï¿½u c?u rï¿½t ti?n**
+4. **Theo dï¿½i tr?ng thï¿½i yï¿½u c?u**
+5. **Admin x? lï¿½ yï¿½u c?u** (backend)
 
 ---
 
-## ?? 1. L?y danh sách ngân hàng h? tr?
+## ?? 1. L?y danh sï¿½ch ngï¿½n hï¿½ng h? tr?
 
 ### `GET /api/BankAccount/supported-banks`
 - **Method**: GET
-- **Authentication**: Không c?n (AllowAnonymous)
-- **Tham s?**: Không
-- **Tác d?ng**: L?y danh sách 29+ ngân hàng h? tr? t?i Vi?t Nam + tùy ch?n "Ngân hàng khác"
-- **Response**: Danh sách ngân hàng v?i tên hi?n th?, tên vi?t t?t
+- **Authentication**: Khï¿½ng c?n (AllowAnonymous)
+- **Tham s?**: Khï¿½ng
+- **Tï¿½c d?ng**: L?y danh sï¿½ch 29+ ngï¿½n hï¿½ng h? tr? t?i Vi?t Nam + tï¿½y ch?n "Ngï¿½n hï¿½ng khï¿½c"
+- **Response**: Danh sï¿½ch ngï¿½n hï¿½ng v?i tï¿½n hi?n th?, tï¿½n vi?t t?t
 
 ```json
 {
@@ -25,14 +25,14 @@
     {
       "value": 0,
       "name": "Vietcombank",
-      "displayName": "Ngân hàng Ngo?i th??ng Vi?t Nam (Vietcombank)",
+      "displayName": "Ngï¿½n hï¿½ng Ngo?i th??ng Vi?t Nam (Vietcombank)",
       "shortName": "VCB",
       "isActive": true
     },
     {
       "value": 999,
       "name": "Other",
-      "displayName": "Ngân hàng khác",
+      "displayName": "Ngï¿½n hï¿½ng khï¿½c",
       "shortName": "OTHER",
       "isActive": true
     }
@@ -42,13 +42,13 @@
 
 ---
 
-## ?? 2. Qu?n lý tài kho?n ngân hàng
+## ?? 2. Qu?n lï¿½ tï¿½i kho?n ngï¿½n hï¿½ng
 
-### 2.1 T?o tài kho?n ngân hàng
+### 2.1 T?o tï¿½i kho?n ngï¿½n hï¿½ng
 **`POST /api/BankAccount`**
 - **Method**: POST
 - **Authentication**: Bearer Token
-- **Body** (Ch?n t? danh sách ngân hàng có s?n):
+- **Body** (Ch?n t? danh sï¿½ch ngï¿½n hï¿½ng cï¿½ s?n):
 ```json
 {
   "supportedBankId": 0,
@@ -56,53 +56,53 @@
   "accountNumber": "1234567890",
   "accountHolderName": "NGUYEN VAN A",
   "isDefault": true,
-  "notes": "Tài kho?n chính"
+  "notes": "Tï¿½i kho?n chï¿½nh"
 }
 ```
 
-- **Body** (Ch?n "Ngân hàng khác"):
+- **Body** (Ch?n "Ngï¿½n hï¿½ng khï¿½c"):
 ```json
 {
   "supportedBankId": 999,
   "bankName": "Vietcombank",
-  "customBankName": "Ngân hàng ABC XYZ",
+  "customBankName": "Ngï¿½n hï¿½ng ABC XYZ",
   "accountNumber": "1234567890",
   "accountHolderName": "NGUYEN VAN A",
   "isDefault": true,
-  "notes": "Tài kho?n ngân hàng khác"
+  "notes": "Tï¿½i kho?n ngï¿½n hï¿½ng khï¿½c"
 }
 ```
 
-- **Body** (Backward compatibility - không dùng enum):
+- **Body** (Backward compatibility - khï¿½ng dï¿½ng enum):
 ```json
 {
-  "bankName": "Tên ngân hàng t? do",
+  "bankName": "Tï¿½n ngï¿½n hï¿½ng t? do",
   "accountNumber": "1234567890",
   "accountHolderName": "NGUYEN VAN A",
   "isDefault": true,
-  "notes": "Tài kho?n t? do"
+  "notes": "Tï¿½i kho?n t? do"
 }
 ```
 
-- **Tác d?ng**: T?o tài kho?n ngân hàng ?? nh?n ti?n rút
+- **Tï¿½c d?ng**: T?o tï¿½i kho?n ngï¿½n hï¿½ng ?? nh?n ti?n rï¿½t
 
-### 2.2 L?y danh sách tài kho?n ngân hàng
+### 2.2 L?y danh sï¿½ch tï¿½i kho?n ngï¿½n hï¿½ng
 **`GET /api/BankAccount/my-accounts`**
 - **Method**: GET
 - **Authentication**: Bearer Token
-- **Tác d?ng**: L?y t?t c? tài kho?n ngân hàng c?a user hi?n t?i
+- **Tï¿½c d?ng**: L?y t?t c? tï¿½i kho?n ngï¿½n hï¿½ng c?a user hi?n t?i
 
-### 2.3 L?y tài kho?n m?c ??nh
+### 2.3 L?y tï¿½i kho?n m?c ??nh
 **`GET /api/BankAccount/default`**
 - **Method**: GET
 - **Authentication**: Bearer Token
-- **Tác d?ng**: L?y tài kho?n ngân hàng m?c ??nh ?? pre-fill form
+- **Tï¿½c d?ng**: L?y tï¿½i kho?n ngï¿½n hï¿½ng m?c ??nh ?? pre-fill form
 
 ---
 
-## ?? 3. T?o yêu c?u rút ti?n
+## ?? 3. T?o yï¿½u c?u rï¿½t ti?n
 
-### 3.1 Validate tr??c khi t?o yêu c?u
+### 3.1 Validate tr??c khi t?o yï¿½u c?u
 **`POST /api/WithdrawalRequest/validate`**
 - **Method**: POST
 - **Authentication**: Bearer Token
@@ -113,15 +113,15 @@
   "bankAccountId": "guid-id"
 }
 ```
-- **Tác d?ng**: Ki?m tra s? d? ví, tài kho?n ngân hàng h?p l?
+- **Tï¿½c d?ng**: Ki?m tra s? d? vï¿½, tï¿½i kho?n ngï¿½n hï¿½ng h?p l?
 
-### 3.2 Ki?m tra ?i?u ki?n t?o yêu c?u
+### 3.2 Ki?m tra ?i?u ki?n t?o yï¿½u c?u
 **`GET /api/WithdrawalRequest/can-create`**
 - **Method**: GET
 - **Authentication**: Bearer Token
-- **Tác d?ng**: Ki?m tra user có th? t?o yêu c?u m?i không (không có yêu c?u pending)
+- **Tï¿½c d?ng**: Ki?m tra user cï¿½ th? t?o yï¿½u c?u m?i khï¿½ng (khï¿½ng cï¿½ yï¿½u c?u pending)
 
-### 3.3 T?o yêu c?u rút ti?n
+### 3.3 T?o yï¿½u c?u rï¿½t ti?n
 **`POST /api/WithdrawalRequest`**
 - **Method**: POST
 - **Authentication**: Bearer Token
@@ -130,16 +130,16 @@
 {
   "bankAccountId": "guid-id",
   "amount": 100000,
-  "userNotes": "Rút ti?n l??ng tháng 12"
+  "userNotes": "Rï¿½t ti?n l??ng thï¿½ng 12"
 }
 ```
-- **Tác d?ng**: T?o yêu c?u rút ti?n v?i tr?ng thái Pending
+- **Tï¿½c d?ng**: T?o yï¿½u c?u rï¿½t ti?n v?i tr?ng thï¿½i Pending
 
 ---
 
-## ?? 4. Theo dõi yêu c?u rút ti?n
+## ?? 4. Theo dï¿½i yï¿½u c?u rï¿½t ti?n
 
-### 4.1 L?y danh sách yêu c?u c?a user
+### 4.1 L?y danh sï¿½ch yï¿½u c?u c?a user
 **`GET /api/WithdrawalRequest/my-requests`**
 - **Method**: GET
 - **Authentication**: Bearer Token
@@ -147,89 +147,89 @@
   - `status` (optional): 0=Pending, 1=Approved, 2=Rejected, 3=Cancelled
   - `pageNumber` (default: 1)
   - `pageSize` (default: 10)
-- **Tác d?ng**: Xem l?ch s? và tr?ng thái các yêu c?u rút ti?n
+- **Tï¿½c d?ng**: Xem l?ch s? vï¿½ tr?ng thï¿½i cï¿½c yï¿½u c?u rï¿½t ti?n
 
-### 4.2 L?y chi ti?t yêu c?u rút ti?n
+### 4.2 L?y chi ti?t yï¿½u c?u rï¿½t ti?n
 **`GET /api/WithdrawalRequest/{id}`**
 - **Method**: GET
 - **Authentication**: Bearer Token
-- **Tác d?ng**: Xem chi ti?t m?t yêu c?u rút ti?n c? th?
+- **Tï¿½c d?ng**: Xem chi ti?t m?t yï¿½u c?u rï¿½t ti?n c? th?
 
-### 4.3 L?y yêu c?u g?n nh?t
+### 4.3 L?y yï¿½u c?u g?n nh?t
 **`GET /api/WithdrawalRequest/latest`**
 - **Method**: GET
 - **Authentication**: Bearer Token
-- **Tác d?ng**: Xem yêu c?u rút ti?n g?n nh?t c?a user
+- **Tï¿½c d?ng**: Xem yï¿½u c?u rï¿½t ti?n g?n nh?t c?a user
 
-### 4.4 H?y yêu c?u rút ti?n
+### 4.4 H?y yï¿½u c?u rï¿½t ti?n
 **`PUT /api/WithdrawalRequest/{id}/cancel`**
 - **Method**: PUT
 - **Authentication**: Bearer Token
 - **Body**:
 ```json
 {
-  "reason": "Lý do h?y yêu c?u"
+  "reason": "Lï¿½ do h?y yï¿½u c?u"
 }
 ```
-- **Tác d?ng**: H?y yêu c?u rút ti?n ?ang ? tr?ng thái Pending
+- **Tï¿½c d?ng**: H?y yï¿½u c?u rï¿½t ti?n ?ang ? tr?ng thï¿½i Pending
 
-### 4.5 L?y th?ng kê rút ti?n
+### 4.5 L?y th?ng kï¿½ rï¿½t ti?n
 **`GET /api/WithdrawalRequest/stats`**
 - **Method**: GET
 - **Authentication**: Bearer Token
-- **Tác d?ng**: Xem th?ng kê t?ng quan v? các yêu c?u rút ti?n
+- **Tï¿½c d?ng**: Xem th?ng kï¿½ t?ng quan v? cï¿½c yï¿½u c?u rï¿½t ti?n
 
 ---
 
-## ?? 5. Admin APIs (Backend x? lý)
+## ?? 5. Admin APIs (Backend x? lï¿½)
 
-### 5.1 L?y danh sách yêu c?u cho admin
+### 5.1 L?y danh sï¿½ch yï¿½u c?u cho admin
 **`GET /api/admin/withdrawals`**
 - **Method**: GET
 - **Authentication**: Admin Role
-- **Tác d?ng**: Admin xem t?t c? yêu c?u rút ti?n
+- **Tï¿½c d?ng**: Admin xem t?t c? yï¿½u c?u rï¿½t ti?n
 
-### 5.2 Duy?t yêu c?u rút ti?n
+### 5.2 Duy?t yï¿½u c?u rï¿½t ti?n
 **`PUT /api/admin/withdrawals/{id}/approve`**
 - **Method**: PUT
 - **Authentication**: Admin Role
-- **Tác d?ng**: Admin phê duy?t yêu c?u rút ti?n
+- **Tï¿½c d?ng**: Admin phï¿½ duy?t yï¿½u c?u rï¿½t ti?n
 
-### 5.3 T? ch?i yêu c?u rút ti?n
+### 5.3 T? ch?i yï¿½u c?u rï¿½t ti?n
 **`PUT /api/admin/withdrawals/{id}/reject`**
 - **Method**: PUT
 - **Authentication**: Admin Role
-- **Tác d?ng**: Admin t? ch?i yêu c?u rút ti?n
+- **Tï¿½c d?ng**: Admin t? ch?i yï¿½u c?u rï¿½t ti?n
 
 ---
 
 ## ?? Lu?ng Frontend khuy?n ngh?
 
-### **1. Trang qu?n lý tài kho?n ngân hàng**: 
-- G?i API 1 ?? hi?n th? dropdown ngân hàng
+### **1. Trang qu?n lï¿½ tï¿½i kho?n ngï¿½n hï¿½ng**: 
+- G?i API 1 ?? hi?n th? dropdown ngï¿½n hï¿½ng
 - G?i API 2.1, 2.2, 2.3
 
-### **2. Form t?o tài kho?n ngân hàng**:
+### **2. Form t?o tï¿½i kho?n ngï¿½n hï¿½ng**:
 ```javascript
-// Step 1: L?y danh sách ngân hàng
+// Step 1: L?y danh sï¿½ch ngï¿½n hï¿½ng
 const banksResponse = await fetch('/api/BankAccount/supported-banks');
 const banks = banksResponse.data;
 
 // Step 2: Hi?n th? dropdown
-// - Các ngân hàng th??ng: banks.filter(b => b.value !== 999)
-// - Ngân hàng khác: banks.find(b => b.value === 999)
+// - Cï¿½c ngï¿½n hï¿½ng th??ng: banks.filter(b => b.value !== 999)
+// - Ngï¿½n hï¿½ng khï¿½c: banks.find(b => b.value === 999)
 
-// Step 3: X? lý form
+// Step 3: X? lï¿½ form
 if (selectedBankId === 999) {
   // Hi?n th? input cho customBankName
   payload = {
     supportedBankId: 999,
-    bankName: "Other", // có th? ?? tr?ng
+    bankName: "Other", // cï¿½ th? ?? tr?ng
     customBankName: userInput,
     // ... other fields
   }
 } else {
-  // Dùng ngân hàng có s?n
+  // Dï¿½ng ngï¿½n hï¿½ng cï¿½ s?n
   payload = {
     supportedBankId: selectedBankId,
     bankName: selectedBank.displayName,
@@ -238,12 +238,12 @@ if (selectedBankId === 999) {
 }
 ```
 
-### **3. Trang t?o yêu c?u rút ti?n**: 
-- G?i API 2.2 ?? ch?n tài kho?n ngân hàng
+### **3. Trang t?o yï¿½u c?u rï¿½t ti?n**: 
+- G?i API 2.2 ?? ch?n tï¿½i kho?n ngï¿½n hï¿½ng
 - G?i API 3.1 ?? validate
-- G?i API 3.3 ?? t?o yêu c?u
+- G?i API 3.3 ?? t?o yï¿½u c?u
 
-### **4. Trang l?ch s? rút ti?n**: 
+### **4. Trang l?ch s? rï¿½t ti?n**: 
 - G?i API 4.1, 4.2, 4.5
 
 ### **5. Real-time updates**: 
@@ -251,29 +251,29 @@ if (selectedBankId === 999) {
 
 ---
 
-## ?? L?u ý quan tr?ng
+## ?? L?u ï¿½ quan tr?ng
 
 - **S? ti?n t?i thi?u**: 1,000 VN?
-- **Tr?ng thái**: Pending ? Approved/Rejected/Cancelled
-- **B?o m?t**: S? tài kho?n ???c mask khi hi?n th?
-- **Validation**: Ki?m tra s? d? ví tr??c khi cho phép rút ti?n
-- **Duplicate check**: Không cho phép tài kho?n ngân hàng trùng l?p
-- **Tính n?ng m?i**: 
-  - ? **H? tr? ch?n t? 29+ ngân hàng có s?n**
-  - ? **Tùy ch?n "Ngân hàng khác" cho phép nh?p t? do**
+- **Tr?ng thï¿½i**: Pending ? Approved/Rejected/Cancelled
+- **B?o m?t**: S? tï¿½i kho?n ???c mask khi hi?n th?
+- **Validation**: Ki?m tra s? d? vï¿½ tr??c khi cho phï¿½p rï¿½t ti?n
+- **Duplicate check**: Khï¿½ng cho phï¿½p tï¿½i kho?n ngï¿½n hï¿½ng trï¿½ng l?p
+- **Tï¿½nh n?ng m?i**: 
+  - ? **H? tr? ch?n t? 29+ ngï¿½n hï¿½ng cï¿½ s?n**
+  - ? **Tï¿½y ch?n "Ngï¿½n hï¿½ng khï¿½c" cho phï¿½p nh?p t? do**
   - ? **Backward compatibility v?i API c?**
-  - ? **Validation tên ngân hàng t? do khi ch?n "Other"**
+  - ? **Validation tï¿½n ngï¿½n hï¿½ng t? do khi ch?n "Other"**
 
 ---
 
-## ?? **Tính n?ng "Ngân hàng khác"**
+## ?? **Tï¿½nh n?ng "Ngï¿½n hï¿½ng khï¿½c"**
 
-### **Logic x? lý**:
-1. **Ch?n ngân hàng t? danh sách**: `supportedBankId` != 999 ? Dùng tên t? enum
-2. **Ch?n "Ngân hàng khác"**: `supportedBankId` = 999 ? B?t bu?c có `customBankName`
-3. **Không ch?n enum**: `supportedBankId` = null ? Dùng `bankName` (backward compatibility)
+### **Logic x? lï¿½**:
+1. **Ch?n ngï¿½n hï¿½ng t? danh sï¿½ch**: `supportedBankId` != 999 ? Dï¿½ng tï¿½n t? enum
+2. **Ch?n "Ngï¿½n hï¿½ng khï¿½c"**: `supportedBankId` = 999 ? B?t bu?c cï¿½ `customBankName`
+3. **Khï¿½ng ch?n enum**: `supportedBankId` = null ? Dï¿½ng `bankName` (backward compatibility)
 
 ### **Validation**:
-- Khi `supportedBankId` = 999: `customBankName` là b?t bu?c
-- `customBankName` t?i ?a 100 ký t?
-- Duplicate check áp d?ng cho tên cu?i cùng (sau khi x? lý)
+- Khi `supportedBankId` = 999: `customBankName` lï¿½ b?t bu?c
+- `customBankName` t?i ?a 100 kï¿½ t?
+- Duplicate check ï¿½p d?ng cho tï¿½n cu?i cï¿½ng (sau khi x? lï¿½)

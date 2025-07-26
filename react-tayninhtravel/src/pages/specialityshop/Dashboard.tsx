@@ -1,16 +1,29 @@
-import { Row, Col, Card, Statistic, Table, Progress } from 'antd';
+import { Row, Col, Card, Statistic, Table, Progress, Button, Space } from 'antd';
 import {
     ShopOutlined,
     ShoppingCartOutlined,
     DollarOutlined,
-    StarOutlined
+    StarOutlined,
+    WalletOutlined,
+    BankOutlined
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.scss';
 
 const Dashboard = () => {
+    const navigate = useNavigate();
+
+    type StatItem = {
+        title: string;
+        value: number;
+        icon: React.ReactNode;
+        color: string;
+        prefix?: string;
+        suffix?: string;
+    };
 
     // Mock data for statistics
-    const stats = [
+    const stats: StatItem[] = [
         {
             title: 'Tổng sản phẩm',
             value: 45,
@@ -30,6 +43,17 @@ const Dashboard = () => {
             icon: <DollarOutlined />,
             color: '#faad14',
         },
+        {
+            title: 'Số dư ví',
+            value: 2500000,
+            prefix: '₫',
+            icon: <WalletOutlined />,
+            color: '#722ed1',
+        },
+    ];
+
+    // Additional stats for second row
+    const additionalStats: StatItem[] = [
         {
             title: 'Đánh giá trung bình',
             value: 4.5,
@@ -208,6 +232,59 @@ const Dashboard = () => {
                                 <Progress percent={product.percent} size="small" />
                             </div>
                         ))}
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Additional Stats Row */}
+            <Row gutter={[16, 16]}>
+                {additionalStats.map((stat, index) => (
+                    <Col xs={24} sm={12} md={6} key={index}>
+                        <Card className="stat-card">
+                            <div className="stat-icon" style={{ backgroundColor: stat.color }}>
+                                {stat.icon}
+                            </div>
+                            <Statistic
+                                title={stat.title}
+                                value={stat.value}
+                                prefix={stat.prefix}
+                                suffix={stat.suffix}
+                                formatter={value =>
+                                    typeof value === 'number' && !stat.prefix && !stat.suffix
+                                        ? value.toLocaleString()
+                                        : value
+                                }
+                            />
+                        </Card>
+                    </Col>
+                ))}
+
+                {/* Quick Actions Card */}
+                <Col xs={24} sm={12} md={18}>
+                    <Card title="Thao tác nhanh" className="quick-actions-card">
+                        <Space direction="horizontal" size="middle" wrap>
+                            <Button
+                                type="primary"
+                                icon={<WalletOutlined />}
+                                onClick={() => navigate('/speciality-shop/wallet')}
+                            >
+                                Quản lý ví
+                            </Button>
+                            <Button
+                                type="default"
+                                icon={<BankOutlined />}
+                                onClick={() => navigate('/speciality-shop/wallet')}
+                            >
+                                Rút tiền
+                            </Button>
+                            <Button
+                                type="default"
+                                icon={<ShopOutlined />}
+                                onClick={() => navigate('/speciality-shop/products')}
+                            >
+                                Thêm sản phẩm
+                            </Button>
+                        </Space>
                     </Card>
                 </Col>
             </Row>
