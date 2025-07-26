@@ -13,7 +13,8 @@ import {
     Tooltip,
     Modal,
     message,
-    Popconfirm
+    Form,
+    Alert
 } from 'antd';
 import {
     EyeOutlined,
@@ -24,7 +25,7 @@ import {
     ExportOutlined,
     CalendarOutlined
 } from '@ant-design/icons';
-import type { ColumnsType, TableProps } from 'antd/es/table';
+import type { ColumnsType } from 'antd/es/table';
 import { WithdrawalRequest, WithdrawalStatus } from '@/types';
 import {
     getAdminWithdrawalRequests,
@@ -67,9 +68,15 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
     const { token } = useAuthStore();
     const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
     const [loading, setLoading] = useState(false);
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState<WithdrawalRequest | null>(null);
+
+    // Action modals
+    const [approveModalVisible, setApproveModalVisible] = useState(false);
+    const [rejectModalVisible, setRejectModalVisible] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [approveForm] = Form.useForm();
+    const [rejectForm] = Form.useForm();
     const [filters, setFilters] = useState({
         status: initialStatus,
         search: '',
@@ -92,52 +99,74 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
         setLoading(true);
         try {
             const params = {
-                pageIndex: pagination.current - 1,
-                pageSize: pagination.pageSize,
                 status: filters.status,
-                userId: filters.search || undefined,
-                fromDate: filters.dateRange?.[0]?.format('YYYY-MM-DD'),
-                toDate: filters.dateRange?.[1]?.format('YYYY-MM-DD')
+                pageNumber: pagination.current,
+                pageSize: pagination.pageSize,
+                searchTerm: filters.search || undefined
             };
 
             const response = await getAdminWithdrawalRequests(params, token || undefined);
-            setRequests(response.data || []);
+
+            // Debug: Log response để kiểm tra cấu trúc dữ liệu
+            console.log('Response from getAdminWithdrawalRequests:', response);
+
+            // Lấy dữ liệu từ response.data.items (theo cấu trúc API mới)
+            let requestsData = [];
+            if (response.data && Array.isArray(response.data.items)) {
+                requestsData = response.data.items;
+            } else if (Array.isArray(response.data)) {
+                requestsData = response.data;
+            } else if (Array.isArray(response)) {
+                requestsData = response;
+            }
+
+            // Filter by date range on frontend if dateRange is set
+            if (filters.dateRange && filters.dateRange[0] && filters.dateRange[1]) {
+                const [fromDate, toDate] = filters.dateRange;
+                requestsData = requestsData.filter((request: WithdrawalRequest) => {
+                    const requestDate = dayjs(request.requestedAt);
+                    return requestDate.isAfter(fromDate.startOf('day')) &&
+                        requestDate.isBefore(toDate.endOf('day'));
+                });
+            }
+
+            console.log('Processed requests data:', requestsData);
+
+            setRequests(requestsData);
+
             setPagination(prev => ({
                 ...prev,
-                total: response.totalCount || 0
+                total: response.data?.totalCount || response.totalCount || response.total || requestsData.length || 0
             }));
         } catch (error: any) {
-            message.error('Không thể tải danh sách yêu cầu rút tiền');
             console.error('Error loading withdrawal requests:', error);
+            message.error('Không thể tải danh sách yêu cầu rút tiền');
+
+            // Set empty array để tránh lỗi
+            setRequests([]);
+            setPagination(prev => ({
+                ...prev,
+                total: 0
+            }));
         } finally {
             setLoading(false);
         }
     };
 
     /**
-     * Handle quick approve
+     * Handle approve click - Open detail modal with approve focus
      */
-    const handleQuickApprove = async (id: string) => {
-        try {
-            await approveWithdrawalRequest(id, {}, token || undefined);
-            message.success('Đã duyệt yêu cầu thành công');
-            loadWithdrawalRequests();
-        } catch (error: any) {
-            message.error(error.message || 'Không thể duyệt yêu cầu');
-        }
+    const handleApproveClick = (record: WithdrawalRequest) => {
+        setSelectedRequest(record);
+        setApproveModalVisible(true);
     };
 
     /**
-     * Handle quick reject
+     * Handle reject click - Open reject modal
      */
-    const handleQuickReject = async (id: string) => {
-        try {
-            await rejectWithdrawalRequest(id, {}, token || undefined);
-            message.success('Đã từ chối yêu cầu');
-            loadWithdrawalRequests();
-        } catch (error: any) {
-            message.error(error.message || 'Không thể từ chối yêu cầu');
-        }
+    const handleRejectClick = (record: WithdrawalRequest) => {
+        setSelectedRequest(record);
+        setRejectModalVisible(true);
     };
 
     /**
@@ -147,9 +176,7 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
         try {
             const params = {
                 status: filters.status,
-                userId: filters.search || undefined,
-                fromDate: filters.dateRange?.[0]?.format('YYYY-MM-DD'),
-                toDate: filters.dateRange?.[1]?.format('YYYY-MM-DD'),
+                searchTerm: filters.search || undefined,
                 format: 'excel' as const
             };
 
@@ -170,18 +197,50 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
     };
 
     /**
-     * Get status tag
+     * Handle approve form submission
      */
-    const getStatusTag = (status: WithdrawalStatus) => {
-        const statusConfig = {
-            [WithdrawalStatus.Pending]: { color: 'processing', text: 'Chờ duyệt' },
-            [WithdrawalStatus.Approved]: { color: 'success', text: 'Đã duyệt' },
-            [WithdrawalStatus.Rejected]: { color: 'error', text: 'Từ chối' },
-            [WithdrawalStatus.Cancelled]: { color: 'default', text: 'Đã hủy' }
-        };
+    const handleApproveSubmit = async (values: { transactionReference: string; adminNotes?: string }) => {
+        if (!selectedRequest) return;
 
-        const config = statusConfig[status];
-        return <Tag color={config.color}>{config.text}</Tag>;
+        try {
+            setActionLoading(true);
+            await approveWithdrawalRequest(selectedRequest.id, {
+                transactionReference: values.transactionReference,
+                adminNotes: values.adminNotes
+            }, token || undefined);
+            message.success('Duyệt yêu cầu thành công');
+            setApproveModalVisible(false);
+            approveForm.resetFields();
+            setSelectedRequest(null);
+            // Refresh the list
+            await loadWithdrawalRequests();
+        } catch (error: any) {
+            message.error('Không thể duyệt yêu cầu: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    /**
+     * Handle reject form submission
+     */
+    const handleRejectSubmit = async (values: { adminNotes: string }) => {
+        if (!selectedRequest) return;
+
+        try {
+            setActionLoading(true);
+            await rejectWithdrawalRequest(selectedRequest.id, { reason: values.adminNotes }, token || undefined);
+            message.success('Từ chối yêu cầu thành công');
+            setRejectModalVisible(false);
+            rejectForm.resetFields();
+            setSelectedRequest(null);
+            // Refresh the list
+            await loadWithdrawalRequests();
+        } catch (error: any) {
+            message.error('Không thể từ chối yêu cầu: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     /**
@@ -218,12 +277,15 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
         },
         {
             title: 'Người yêu cầu',
-            dataIndex: ['user', 'name'],
+            dataIndex: ['user', 'fullName'],
             key: 'userName',
             width: 150,
-            render: (name: string) => (
+            render: (name: string, record: WithdrawalRequest) => (
                 <div>
                     <div className="user-name">{name || 'N/A'}</div>
+                    <div className="user-email" style={{ fontSize: '12px', color: '#666' }}>
+                        {record.user?.email}
+                    </div>
                 </div>
             )
         },
@@ -231,9 +293,21 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             title: 'Số tiền',
             dataIndex: 'amount',
             key: 'amount',
-            width: 120,
-            render: (amount: number) => (
-                <span className="amount">{formatCurrency(amount)}</span>
+            width: 150,
+            render: (amount: number, record: WithdrawalRequest) => (
+                <div>
+                    <div className="amount">{formatCurrency(amount)}</div>
+                    {record.withdrawalFee > 0 && (
+                        <>
+                            <div style={{ fontSize: '11px', color: '#999' }}>
+                                Phí: {formatCurrency(record.withdrawalFee)}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#52c41a', fontWeight: 'bold' }}>
+                                Thực nhận: {formatCurrency(record.netAmount)}
+                            </div>
+                        </>
+                    )}
+                </div>
             ),
             sorter: true
         },
@@ -245,8 +319,8 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             render: (bankName: string, record: WithdrawalRequest) => (
                 <div>
                     <div className="bank-name">{bankName}</div>
-                    <div className="account-number">
-                        {record.bankAccount?.maskedAccountNumber}
+                    <div className="account-number" style={{ fontSize: '12px', color: '#666' }}>
+                        {record.bankAccount?.maskedAccountNumber || record.bankAccount?.accountNumber}
                     </div>
                 </div>
             )
@@ -255,8 +329,27 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            width: 100,
-            render: (status: WithdrawalStatus) => getStatusTag(status),
+            width: 120,
+            render: (status: WithdrawalStatus, record: WithdrawalRequest) => {
+                const statusConfig = {
+                    [WithdrawalStatus.Pending]: { color: 'processing', text: record.statusName || 'Chờ duyệt' },
+                    [WithdrawalStatus.Approved]: { color: 'success', text: record.statusName || 'Đã duyệt' },
+                    [WithdrawalStatus.Rejected]: { color: 'error', text: record.statusName || 'Từ chối' },
+                    [WithdrawalStatus.Cancelled]: { color: 'default', text: record.statusName || 'Đã hủy' }
+                };
+
+                const config = statusConfig[status] || { color: 'default', text: record.statusName || 'Không xác định' };
+                return (
+                    <div>
+                        <Tag color={config.color}>{config.text}</Tag>
+                        {record.daysPending !== undefined && record.daysPending > 0 && (
+                            <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>
+                                {record.daysPending} ngày
+                            </div>
+                        )}
+                    </div>
+                );
+            },
             filters: [
                 { text: 'Chờ duyệt', value: WithdrawalStatus.Pending },
                 { text: 'Đã duyệt', value: WithdrawalStatus.Approved },
@@ -295,54 +388,28 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                     </Tooltip>
                     {record.status === WithdrawalStatus.Pending && (
                         <>
-                            <Popconfirm
-                                title="Duyệt yêu cầu"
-                                description="Bạn có chắc chắn muốn duyệt yêu cầu này?"
-                                onConfirm={() => handleQuickApprove(record.id)}
-                                okText="Duyệt"
-                                cancelText="Hủy"
-                            >
-                                <Tooltip title="Duyệt nhanh">
-                                    <Button
-                                        type="text"
-                                        icon={<CheckOutlined />}
-                                        className="approve-btn"
-                                    />
-                                </Tooltip>
-                            </Popconfirm>
-                            <Popconfirm
-                                title="Từ chối yêu cầu"
-                                description="Bạn có chắc chắn muốn từ chối yêu cầu này?"
-                                onConfirm={() => handleQuickReject(record.id)}
-                                okText="Từ chối"
-                                cancelText="Hủy"
-                                okButtonProps={{ danger: true }}
-                            >
-                                <Tooltip title="Từ chối nhanh">
-                                    <Button
-                                        type="text"
-                                        icon={<CloseOutlined />}
-                                        danger
-                                    />
-                                </Tooltip>
-                            </Popconfirm>
+                            <Tooltip title="Duyệt yêu cầu">
+                                <Button
+                                    type="text"
+                                    icon={<CheckOutlined />}
+                                    className="approve-btn"
+                                    onClick={() => handleApproveClick(record)}
+                                />
+                            </Tooltip>
+                            <Tooltip title="Từ chối yêu cầu">
+                                <Button
+                                    type="text"
+                                    icon={<CloseOutlined />}
+                                    danger
+                                    onClick={() => handleRejectClick(record)}
+                                />
+                            </Tooltip>
                         </>
                     )}
                 </Space>
             )
         }
     ];
-
-    /**
-     * Row selection configuration
-     */
-    const rowSelection: TableProps<WithdrawalRequest>['rowSelection'] = {
-        selectedRowKeys,
-        onChange: setSelectedRowKeys,
-        getCheckboxProps: (record: WithdrawalRequest) => ({
-            disabled: record.status !== WithdrawalStatus.Pending
-        })
-    };
 
     return (
         <div className="withdrawal-request-list">
@@ -405,42 +472,12 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                     </Row>
                 </div>
 
-                {/* Bulk Actions */}
-                {selectedRowKeys.length > 0 && (
-                    <div className="bulk-actions">
-                        <Space>
-                            <span>Đã chọn {selectedRowKeys.length} yêu cầu</span>
-                            <Button
-                                type="primary"
-                                icon={<CheckOutlined />}
-                                onClick={() => {
-                                    // Handle bulk approve
-                                    message.info('Tính năng duyệt hàng loạt sẽ được triển khai');
-                                }}
-                            >
-                                Duyệt hàng loạt
-                            </Button>
-                            <Button
-                                danger
-                                icon={<CloseOutlined />}
-                                onClick={() => {
-                                    // Handle bulk reject
-                                    message.info('Tính năng từ chối hàng loạt sẽ được triển khai');
-                                }}
-                            >
-                                Từ chối hàng loạt
-                            </Button>
-                        </Space>
-                    </div>
-                )}
-
                 {/* Table */}
                 <Table
                     columns={columns}
                     dataSource={requests}
                     rowKey="id"
                     loading={loading}
-                    rowSelection={rowSelection}
                     pagination={{
                         current: pagination.current,
                         pageSize: pagination.pageSize,
@@ -466,7 +503,9 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             <Modal
                 title="Chi tiết yêu cầu rút tiền"
                 open={detailModalVisible}
-                onCancel={() => setDetailModalVisible(false)}
+                onCancel={() => {
+                    setDetailModalVisible(false);
+                }}
                 footer={null}
                 width={900}
                 destroyOnClose
@@ -479,6 +518,98 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                             loadWithdrawalRequests();
                         }}
                     />
+                )}
+            </Modal>
+
+            {/* Modal Approve */}
+            <Modal
+                title="Duyệt yêu cầu rút tiền"
+                open={approveModalVisible}
+                onCancel={() => {
+                    setApproveModalVisible(false);
+                    approveForm.resetFields();
+                    setSelectedRequest(null);
+                }}
+                onOk={() => approveForm.submit()}
+                confirmLoading={actionLoading}
+                okText="Duyệt"
+                cancelText="Hủy"
+                width={500}
+            >
+                {selectedRequest && (
+                    <div style={{ marginBottom: 16 }}>
+                        <Alert
+                            message={`Duyệt yêu cầu rút tiền cho: ${selectedRequest.user?.fullName || 'N/A'}`}
+                            description={`Số tiền: ${selectedRequest.amount?.toLocaleString('vi-VN')} ₫`}
+                            type="info"
+                            style={{ marginBottom: 16 }}
+                        />
+                        <Form
+                            form={approveForm}
+                            layout="vertical"
+                            onFinish={handleApproveSubmit}
+                        >
+                            <Form.Item
+                                name="transactionReference"
+                                label="Mã giao dịch"
+                                rules={[{ required: true, message: 'Vui lòng nhập mã giao dịch' }]}
+                            >
+                                <Input placeholder="Nhập mã giao dịch" />
+                            </Form.Item>
+                            <Form.Item
+                                name="adminNotes"
+                                label="Ghi chú của admin"
+                            >
+                                <Input.TextArea
+                                    rows={3}
+                                    placeholder="Nhập ghi chú (tùy chọn)"
+                                />
+                            </Form.Item>
+                        </Form>
+                    </div>
+                )}
+            </Modal>
+
+            {/* Modal Reject */}
+            <Modal
+                title="Từ chối yêu cầu rút tiền"
+                open={rejectModalVisible}
+                onCancel={() => {
+                    setRejectModalVisible(false);
+                    rejectForm.resetFields();
+                    setSelectedRequest(null);
+                }}
+                onOk={() => rejectForm.submit()}
+                confirmLoading={actionLoading}
+                okText="Từ chối"
+                cancelText="Hủy"
+                width={500}
+            >
+                {selectedRequest && (
+                    <div style={{ marginBottom: 16 }}>
+                        <Alert
+                            message={`Từ chối yêu cầu rút tiền cho: ${selectedRequest.user?.fullName || 'N/A'}`}
+                            description={`Số tiền: ${selectedRequest.amount?.toLocaleString('vi-VN')} ₫`}
+                            type="warning"
+                            style={{ marginBottom: 16 }}
+                        />
+                        <Form
+                            form={rejectForm}
+                            layout="vertical"
+                            onFinish={handleRejectSubmit}
+                        >
+                            <Form.Item
+                                name="adminNotes"
+                                label="Lý do từ chối"
+                                rules={[{ required: true, message: 'Vui lòng nhập lý do từ chối' }]}
+                            >
+                                <Input.TextArea
+                                    rows={4}
+                                    placeholder="Nhập lý do từ chối"
+                                />
+                            </Form.Item>
+                        </Form>
+                    </div>
                 )}
             </Modal>
         </div>
