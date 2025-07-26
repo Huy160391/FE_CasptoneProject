@@ -367,7 +367,12 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                         />
 
                         <Row gutter={[16, 16]}>
-                            {tourSlots.map((slot) => (
+                            {tourSlots.map((slot) => {
+                                const availableSpots = slot.availableSpots || 0;
+                                const maxGuests = slot.maxGuests || 0;
+                                const currentBookings = slot.currentBookings || 0;
+                                
+                                return (
                                 <Col xs={24} sm={12} md={8} lg={6} key={slot.id}>
                                     <Card
                                         size="small"
@@ -391,6 +396,24 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                             <div style={{ marginBottom: 8 }}>
                                                 <Tag color="blue">{slot.scheduleDayName}</Tag>
                                             </div>
+                                            
+                                            {/* Available Spots Display */}
+                                            {maxGuests > 0 && (
+                                                <div style={{ marginBottom: 8 }}>
+                                                    <div style={{ 
+                                                        fontSize: '14px', 
+                                                        fontWeight: 'bold',
+                                                        color: availableSpots > 5 ? '#52c41a' : 
+                                                               availableSpots > 0 ? '#faad14' : '#ff4d4f'
+                                                    }}>
+                                                        {availableSpots > 0 ? `Còn ${availableSpots} chỗ` : 'Hết chỗ'}
+                                                    </div>
+                                                    <div style={{ fontSize: '11px', color: '#999', marginTop: 2 }}>
+                                                        {currentBookings}/{maxGuests} đã đặt
+                                                    </div>
+                                                </div>
+                                            )}
+                                            
                                             <div style={{ fontSize: '12px', color: '#666' }}>
                                                 Trạng thái: {slot.statusName}
                                             </div>
@@ -407,39 +430,54 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                         </div>
                                     </Card>
                                 </Col>
-                            ))}
+                                );
+                            })}
                         </Row>
 
                         <Divider />
 
                         <Card title="Thống kê Slots" size="small">
                             <Row gutter={16}>
-                                <Col span={6}>
+                                <Col span={4}>
                                     <Statistic
                                         title="Tổng Slots"
                                         value={tourSlots.length}
                                         valueStyle={{ color: '#1890ff' }}
                                     />
                                 </Col>
-                                <Col span={6}>
+                                <Col span={4}>
                                     <Statistic
                                         title="Có sẵn"
                                         value={tourSlots.filter(slot => slot.status === 1).length}
                                         valueStyle={{ color: '#52c41a' }}
                                     />
                                 </Col>
-                                <Col span={6}>
+                                <Col span={4}>
                                     <Statistic
                                         title="Đã đặt"
                                         value={tourSlots.filter(slot => slot.status === 2).length}
                                         valueStyle={{ color: '#ff4d4f' }}
                                     />
                                 </Col>
-                                <Col span={6}>
+                                <Col span={4}>
                                     <Statistic
                                         title="Có Operation"
                                         value={tourSlots.filter(slot => slot.tourOperation).length}
                                         valueStyle={{ color: '#722ed1' }}
+                                    />
+                                </Col>
+                                <Col span={4}>
+                                    <Statistic
+                                        title="Tổng chỗ"
+                                        value={tourSlots.reduce((sum, slot) => sum + (slot.maxGuests || 0), 0)}
+                                        valueStyle={{ color: '#13c2c2' }}
+                                    />
+                                </Col>
+                                <Col span={4}>
+                                    <Statistic
+                                        title="Chỗ trống"
+                                        value={tourSlots.reduce((sum, slot) => sum + (slot.availableSpots || 0), 0)}
+                                        valueStyle={{ color: '#52c41a' }}
                                     />
                                 </Col>
                             </Row>

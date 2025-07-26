@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Table,
     Tag,
@@ -11,7 +11,9 @@ import {
     Select,
     DatePicker,
     Modal,
-    Descriptions
+    Descriptions,
+    Spin,
+    message
 } from 'antd';
 import {
     CalendarOutlined,
@@ -33,6 +35,7 @@ import {
     getStatusColor,
     getScheduleDayLabel
 } from '../../constants/tourTemplate';
+import { tourSlotService } from '../../services/tourSlotService';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -42,12 +45,18 @@ interface TourSlotsListProps {
     template?: TourTemplate;
     slots?: TourSlot[];
     onSlotUpdate?: (slot: TourSlot) => void;
+    showUnassignedOnly?: boolean; // Mới thêm để chỉ hiển thị slots chưa gán
 }
 
 const TourSlotsList: React.FC<TourSlotsListProps> = ({
+    templateId,
     template,
-    slots = []
+    slots = [],
+    showUnassignedOnly = false,
+    onSlotUpdate
 }) => {
+    const [loading, setLoading] = useState(false);
+    const [tourSlots, setTourSlots] = useState<TourSlot[]>(slots);
     const [filteredSlots, setFilteredSlots] = useState<TourSlot[]>(slots);
     const [selectedSlot, setSelectedSlot] = useState<TourSlot | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -55,13 +64,122 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
         status: undefined as TourSlotStatus | undefined,
         dateRange: undefined as [dayjs.Dayjs, dayjs.Dayjs] | undefined
     });
+    
+    // Track if data has been fetched to prevent multiple API calls
+    const hasFetchedRef = useRef<string>('');
+
+    // Reset fetch tracking when templateId changes
+    useEffect(() => {
+        hasFetchedRef.current = '';
+    }, [templateId]);
+
+    // Fetch tour slots từ API khi có templateId
+    useEffect(() => {
+        const fetchKey = `${templateId}-${showUnassignedOnly}`;
+        
+        if (templateId && showUnassignedOnly && hasFetchedRef.current !== fetchKey) {
+            hasFetchedRef.current = fetchKey;
+            fetchUnassignedSlots();
+        } else if (templateId && !showUnassignedOnly && hasFetchedRef.current !== fetchKey) {
+            hasFetchedRef.current = fetchKey;
+            fetchAllSlots();
+        } else if (!templateId && slots.length > 0) {
+            // Chỉ set slots khi không có templateId và slots thực sự có dữ liệu
+            setTourSlots(slots);
+            hasFetchedRef.current = 'props-slots';
+        }
+    }, [templateId, showUnassignedOnly]); // Bỏ 'slots' khỏi dependency array
+
+    // Separate useEffect for handling slots prop changes when not using templateId
+    useEffect(() => {
+        if (!templateId) {
+            setTourSlots(slots);
+            hasFetchedRef.current = 'props-slots';
+        }
+    }, [slots, templateId]);
 
     useEffect(() => {
         applyFilters();
-    }, [slots, filters]);
+    }, [tourSlots, filters]);
+
+    const fetchUnassignedSlots = async () => {
+        if (!templateId) return;
+        
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token') || '';
+            const response = await tourSlotService.getUnassignedSlotsByTourTemplate(templateId, false, token);
+            
+            if (response.success && response.data) {
+                // Map từ TourSlotDto sang TourSlot format
+                const mappedSlots: TourSlot[] = response.data.map(slot => ({
+                    id: slot.id,
+                    tourTemplateId: slot.tourTemplateId,
+                    tourDetailsId: slot.tourDetailsId,
+                    tourDate: slot.tourDate,
+                    scheduleDay: slot.scheduleDay,
+                    status: slot.status,
+                    maxGuests: slot.maxGuests || 0,
+                    currentBookings: slot.currentBookings || 0,
+                    availableSpots: slot.availableSpots || 0,
+                    isActive: slot.isActive,
+                    isBookable: slot.isBookable || false,
+                    createdAt: slot.createdAt,
+                    updatedAt: slot.updatedAt,
+                    tourTemplate: slot.tourTemplate,
+                    tourDetails: slot.tourDetails || undefined,
+                    tourOperation: slot.tourOperation || undefined
+                }));
+                setTourSlots(mappedSlots);
+            }
+        } catch (error) {
+            console.error('Error fetching unassigned slots:', error);
+            message.error('Không thể tải danh sách tour slots');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAllSlots = async () => {
+        if (!templateId) return;
+        
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token') || '';
+            const response = await tourSlotService.getSlotsByTourTemplate(templateId, token);
+            
+            if (response.success && response.data) {
+                // Map từ TourSlotDto sang TourSlot format
+                const mappedSlots: TourSlot[] = response.data.map(slot => ({
+                    id: slot.id,
+                    tourTemplateId: slot.tourTemplateId,
+                    tourDetailsId: slot.tourDetailsId,
+                    tourDate: slot.tourDate,
+                    scheduleDay: slot.scheduleDay,
+                    status: slot.status,
+                    maxGuests: slot.maxGuests || 0,
+                    currentBookings: slot.currentBookings || 0,
+                    availableSpots: slot.availableSpots || 0,
+                    isActive: slot.isActive,
+                    isBookable: slot.isBookable || false,
+                    createdAt: slot.createdAt,
+                    updatedAt: slot.updatedAt,
+                    tourTemplate: slot.tourTemplate,
+                    tourDetails: slot.tourDetails || undefined,
+                    tourOperation: slot.tourOperation || undefined
+                }));
+                setTourSlots(mappedSlots);
+            }
+        } catch (error) {
+            console.error('Error fetching slots:', error);
+            message.error('Không thể tải danh sách tour slots');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const applyFilters = () => {
-        let filtered = [...slots];
+        let filtered = [...tourSlots];
 
         // Filter by status
         if (filters.status !== undefined) {
@@ -95,11 +213,11 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
     };
 
     const getSlotStats = () => {
-        const total = slots.length;
-        const available = slots.filter(slot => slot.status === TourSlotStatus.Available).length;
-        const fullyBooked = slots.filter(slot => slot.status === TourSlotStatus.FullyBooked).length;
-        const cancelled = slots.filter(slot => slot.status === TourSlotStatus.Cancelled).length;
-        const completed = slots.filter(slot => slot.status === TourSlotStatus.Completed).length;
+        const total = tourSlots.length;
+        const available = tourSlots.filter(slot => slot.status === TourSlotStatus.Available).length;
+        const fullyBooked = tourSlots.filter(slot => slot.status === TourSlotStatus.FullyBooked).length;
+        const cancelled = tourSlots.filter(slot => slot.status === TourSlotStatus.Cancelled).length;
+        const completed = tourSlots.filter(slot => slot.status === TourSlotStatus.Completed).length;
 
         return { total, available, fullyBooked, cancelled, completed };
     };
@@ -281,18 +399,20 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
 
             {/* Slots Table */}
             <Card title={`Danh sách Slots${template ? ` - ${template.title}` : ''}`}>
-                <Table
-                    columns={columns}
-                    dataSource={filteredSlots}
-                    rowKey="id"
-                    loading={false}
-                    pagination={{
-                        pageSize: 10,
-                        showSizeChanger: true,
-                        showQuickJumper: true,
-                        showTotal: (total) => `Tổng ${total} slots`,
-                    }}
-                />
+                <Spin spinning={loading} tip="Đang tải danh sách tour slots...">
+                    <Table
+                        columns={columns}
+                        dataSource={filteredSlots}
+                        rowKey="id"
+                        loading={false}
+                        pagination={{
+                            pageSize: 10,
+                            showSizeChanger: true,
+                            showQuickJumper: true,
+                            showTotal: (total) => `Tổng ${total} slots`,
+                        }}
+                    />
+                </Spin>
             </Card>
 
             {/* Slot Detail Modal */}

@@ -145,18 +145,53 @@ const BookingPage: React.FC = () => {
         try {
             setSlotsLoading(true);
             const response = await tourSlotService.getSlotsByTourDetails(tourDetailsId, token ?? undefined);
+            console.log('Raw tour slots response:', response);
+            
             if (response.success && response.data) {
-                // Only show available slots for booking
-                const availableSlots = response.data.filter(slot =>
-                    slot.isActive &&
-                    slot.status === 1 && // Available status
-                    new Date(slot.tourDate) > new Date() // Future dates only
-                );
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Start of today
+                
+                console.log('Current date for filtering:', today);
+                console.log('All slots before filtering:', response.data);
+                
+                // Simplified filter: temporarily disable date filtering for testing
+                // TODO: Re-enable date filtering in production
+                const availableSlots = response.data.filter(slot => {
+                    const slotDate = new Date(slot.tourDate);
+                    const isNotPast = slotDate >= today; // Not in the past
+                    const hasAvailableSpots = (slot.availableSpots || 0) > 0; // Has available spots
+                    
+                    console.log(`Slot ${slot.id}:`, {
+                        tourDate: slot.tourDate,
+                        slotDateISO: slotDate.toISOString(),
+                        todayISO: today.toISOString(),
+                        isActive: slot.isActive,
+                        status: slot.status,
+                        statusName: slot.statusName,
+                        availableSpots: slot.availableSpots,
+                        maxGuests: slot.maxGuests,
+                        currentBookings: slot.currentBookings,
+                        isNotPast,
+                        hasAvailableSpots,
+                        willShow: slot.isActive && hasAvailableSpots // Must be active and have spots
+                    });
+                    
+                    // Show active slots with available spots (temporarily disable date filter)
+                    // In production: return slot.isActive && isNotPast && hasAvailableSpots;
+                    return slot.isActive && hasAvailableSpots;
+                });
+                
+                console.log('Available slots after filtering:', availableSlots);
                 setTourSlots(availableSlots);
 
                 // Auto-select first available slot if only one
                 if (availableSlots.length === 1) {
                     setSelectedSlot(availableSlots[0]);
+                }
+                
+                // Clear selected slot if it's no longer available
+                if (selectedSlot && !availableSlots.find(slot => slot.id === selectedSlot.id)) {
+                    setSelectedSlot(null);
                 }
             }
         } catch (error) {
@@ -402,6 +437,7 @@ const BookingPage: React.FC = () => {
                                                         border: 2px solid #d9d9d9;
                                                         background-color: #ffffff;
                                                         color: #000000d9;
+                                                        position: relative;
                                                     }
 
                                                     .tour-slot.selected {
@@ -412,6 +448,19 @@ const BookingPage: React.FC = () => {
 
                                                     .tour-slot:hover:not(.selected) {
                                                         border-color: #40a9ff;
+                                                        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+                                                        transform: translateY(-1px);
+                                                    }
+
+                                                    .tour-slot.low-availability {
+                                                        border-color: #faad14;
+                                                    }
+
+                                                    .tour-slot.sold-out {
+                                                        border-color: #ff4d4f;
+                                                        background-color: #fff2f0;
+                                                        cursor: not-allowed;
+                                                        opacity: 0.7;
                                                     }
 
                                                     /* Dark mode */
@@ -430,6 +479,10 @@ const BookingPage: React.FC = () => {
                                                     [data-theme="dark"] .tour-slot:hover:not(.selected) {
                                                         border-color: #40a9ff;
                                                     }
+
+                                                    [data-theme="dark"] .tour-slot.sold-out {
+                                                        background-color: #2a1215;
+                                                    }
                                                 `}</style>
                                                 <div style={{ marginBottom: 12 }}>
                                                     <Text type="secondary">Chọn ngày bạn muốn tham gia tour:</Text>
@@ -442,11 +495,26 @@ const BookingPage: React.FC = () => {
                                                         gap: '12px'
                                                     }}
                                                 >
-                                                    {tourSlots.map(slot => (
+                                                    {tourSlots.map(slot => {
+                                                        const availableSpots = slot.availableSpots || 0;
+                                                        const isSoldOut = availableSpots === 0;
+                                                        const isLowAvailability = availableSpots > 0 && availableSpots < 5;
+                                                        
+                                                        return (
                                                         <div
                                                             key={slot.id}
-                                                            className={`tour-slot ${selectedSlot?.id === slot.id ? 'selected' : ''}`}
+                                                            className={`tour-slot ${selectedSlot?.id === slot.id ? 'selected' : ''} ${
+                                                                isLowAvailability ? 'low-availability' : ''
+                                                            } ${
+                                                                isSoldOut ? 'sold-out' : ''
+                                                            }`}
                                                             onClick={(e) => {
+                                                                // Prevent clicking on sold out slots
+                                                                if (isSoldOut) {
+                                                                    e.preventDefault();
+                                                                    return;
+                                                                }
+
                                                                 // Click animation
                                                                 e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
                                                                 setTimeout(() => {
@@ -459,18 +527,28 @@ const BookingPage: React.FC = () => {
                                                                 handleGuestCountChange(currentValues);
                                                             }}
                                                         >
-
-
                                                             <div style={{ textAlign: 'center' }}>
                                                                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
                                                                     {slot.formattedDateWithDay}
                                                                 </div>
-                                                                <div style={{ fontSize: '12px' }}>
+                                                                <div style={{ fontSize: '12px', marginBottom: '4px' }}>
                                                                     {selectedSlot?.id === slot.id ? '✓ Đã chọn' : slot.statusName}
+                                                                </div>
+                                                                <div style={{ 
+                                                                    fontSize: '11px', 
+                                                                    color: availableSpots > 5 ? '#52c41a' : 
+                                                                           availableSpots > 0 ? '#faad14' : '#ff4d4f',
+                                                                    fontWeight: 'bold'
+                                                                }}>
+                                                                    {availableSpots > 0 
+                                                                        ? `Còn ${availableSpots} chỗ`
+                                                                        : 'Hết chỗ'
+                                                                    }
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                                 {!selectedSlot && (
                                                     <Alert
@@ -482,11 +560,18 @@ const BookingPage: React.FC = () => {
                                                 )}
                                             </div>
                                         ) : (
-                                            <Alert
-                                                message="Hiện tại chưa có lịch trình khả dụng cho tour này"
-                                                type="info"
-                                                showIcon
-                                            />
+                                            <div>
+                                                <Alert
+                                                    message="Hiện tại chưa có lịch trình khả dụng cho tour này"
+                                                    description="Các tour slots có thể đã được đặt hết hoặc không có chỗ trống. Vui lòng liên hệ để biết thêm thông tin."
+                                                    type="info"
+                                                    showIcon
+                                                />
+                                                {/* Debug info - remove in production */}
+                                                <div style={{ marginTop: 8, fontSize: '12px', color: '#666' }}>
+                                                    Debug: tourSlots.length = {tourSlots.length}, slotsLoading = {slotsLoading.toString()}
+                                                </div>
+                                            </div>
                                         )}
                                     </Descriptions.Item>
                                 </Descriptions>
@@ -647,6 +732,9 @@ const BookingPage: React.FC = () => {
                                 <Descriptions title="Thông tin tour" column={1} bordered>
                                     <Descriptions.Item label="Tên tour">
                                         {tourDetails.title}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Ngày tour">
+                                        {selectedSlot?.formattedDateWithDay || 'Chưa chọn'}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Số khách">
                                         {formValues.numberOfGuests} người

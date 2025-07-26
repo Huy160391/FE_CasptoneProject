@@ -9,7 +9,11 @@ export interface TourSlotDto {
     scheduleDayName: string; // Vietnamese day name
     status: number; // TourSlotStatus enum value
     statusName: string; // Vietnamese status name
+    maxGuests?: number; // Added from API response
+    currentBookings?: number; // Added from API response
+    availableSpots?: number; // Added from API response
     isActive: boolean;
+    isBookable?: boolean; // Added from API response
     tourTemplate?: {
         id: string;
         title: string;
@@ -128,6 +132,24 @@ class TourSlotService {
                 headers: token ? { Authorization: `Bearer ${token}` } : undefined
             }
         );
+        
+        return response.data;
+    }
+
+    /**
+     * Lấy TourSlots chưa được gán tour details của một TourTemplate cụ thể
+     */
+    async getUnassignedSlotsByTourTemplate(tourTemplateId: string, includeInactive = false, token?: string): Promise<TourSlotsResponse> {
+        const queryParams = new URLSearchParams();
+        if (includeInactive) queryParams.append('includeInactive', includeInactive.toString());
+        
+        const url = queryParams.toString() 
+            ? `${this.baseUrl}/tour-template/${tourTemplateId}/unassigned?${queryParams}`
+            : `${this.baseUrl}/tour-template/${tourTemplateId}/unassigned`;
+            
+        const response = await axiosInstance.get<TourSlotsResponse>(url, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        });
         
         return response.data;
     }
