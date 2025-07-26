@@ -154,8 +154,7 @@ const BookingPage: React.FC = () => {
                 console.log('Current date for filtering:', today);
                 console.log('All slots before filtering:', response.data);
                 
-                // Simplified filter: temporarily disable date filtering for testing
-                // TODO: Re-enable date filtering in production
+                // Filter: only show active slots with available spots from today onward
                 const availableSlots = response.data.filter(slot => {
                     const slotDate = new Date(slot.tourDate);
                     const isNotPast = slotDate >= today; // Not in the past
@@ -173,12 +172,11 @@ const BookingPage: React.FC = () => {
                         currentBookings: slot.currentBookings,
                         isNotPast,
                         hasAvailableSpots,
-                        willShow: slot.isActive && hasAvailableSpots // Must be active and have spots
+                        willShow: slot.isActive && isNotPast && hasAvailableSpots // Must be active, not past, and have spots
                     });
                     
-                    // Show active slots with available spots (temporarily disable date filter)
-                    // In production: return slot.isActive && isNotPast && hasAvailableSpots;
-                    return slot.isActive && hasAvailableSpots;
+                    // Show slots that are: active, not in the past, and have available spots
+                    return slot.isActive && isNotPast && hasAvailableSpots;
                 });
                 
                 console.log('Available slots after filtering:', availableSlots);
