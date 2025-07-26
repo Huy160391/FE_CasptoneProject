@@ -69,6 +69,86 @@ export interface GetSlotsParams {
     includeInactive?: boolean;
 }
 
+export interface BookedUserInfo {
+    bookingId: string;
+    userId: string;
+    userName: string;
+    userEmail?: string;
+    contactName?: string;
+    contactPhone?: string;
+    contactEmail?: string;
+    numberOfGuests: number;
+    totalPrice: number;
+    originalPrice: number;
+    discountPercent: number;
+    status: number;
+    statusName: string;
+    bookingDate: string;
+    confirmedDate?: string;
+    bookingCode: string;
+    customerNotes?: string;
+}
+
+export interface BookingStatistics {
+    totalBookings: number;
+    totalGuests: number;
+    confirmedBookings: number;
+    pendingBookings: number;
+    cancelledBookings: number;
+    totalRevenue: number;
+    confirmedRevenue: number;
+    occupancyRate: number; // Tỷ lệ lấp đầy (%)
+}
+
+export interface TourSlotWithBookingsDto {
+    slot: TourSlotDto;
+    tourDetails?: {
+        id: string;
+        title: string;
+        description: string;
+        imageUrls: string[];
+        skillsRequired: string[];
+        status: number;
+        statusName: string;
+        createdAt: string;
+        tourTemplate: {
+            id: string;
+            title: string;
+            startLocation: string;
+            endLocation: string;
+            templateType: number;
+        };
+        tourOperation: {
+            id: string;
+            price: number;
+            maxGuests: number;
+            currentBookings: number;
+            availableSpots: number;
+            status: number;
+            isActive: boolean;
+        };
+    };
+    bookedUsers: BookedUserInfo[];
+    statistics: BookingStatistics;
+}
+
+export interface TourSlotWithBookingsResponse {
+    success: boolean;
+    message: string;
+    data: TourSlotWithBookingsDto;
+}
+
+export interface CancelTourRequest {
+    reason: string;
+    additionalMessage?: string;
+}
+
+export interface CancelTourResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
 class TourSlotService {
     private readonly baseUrl = '/TourSlot';
 
@@ -163,17 +243,46 @@ class TourSlotService {
         toDate?: string;
     }, token?: string): Promise<TourSlotsResponse> {
         const queryParams = new URLSearchParams();
-        
+
         if (params?.tourTemplateId) queryParams.append('tourTemplateId', params.tourTemplateId);
         if (params?.fromDate) queryParams.append('fromDate', params.fromDate);
         if (params?.toDate) queryParams.append('toDate', params.toDate);
 
         const url = queryParams.toString() ? `${this.baseUrl}/available?${queryParams}` : `${this.baseUrl}/available`;
-        
+
         const response = await axiosInstance.get<TourSlotsResponse>(url, {
             headers: token ? { Authorization: `Bearer ${token}` } : undefined
         });
-        
+
+        return response.data;
+    }
+
+    /**
+     * Lấy chi tiết slot với thông tin tour và danh sách user đã book
+     */
+    async getSlotWithTourDetailsAndBookings(slotId: string, token?: string): Promise<TourSlotWithBookingsResponse> {
+        const response = await axiosInstance.get<TourSlotWithBookingsResponse>(
+            `${this.baseUrl}/${slotId}/tour-details-and-bookings`,
+            {
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined
+            }
+        );
+
+        return response.data;
+    }
+
+    /**
+     * Hủy tour slot với lý do
+     */
+    async cancelTourSlot(slotId: string, cancelData: CancelTourRequest, token?: string): Promise<CancelTourResponse> {
+        const response = await axiosInstance.post<CancelTourResponse>(
+            `${this.baseUrl}/${slotId}/cancel-public`,
+            cancelData,
+            {
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined
+            }
+        );
+
         return response.data;
     }
 

@@ -14,7 +14,8 @@ import {
     Tabs,
     Statistic,
     Image,
-    Tooltip
+    Tooltip,
+    Space
 } from 'antd';
 import {
     ClockCircleOutlined,
@@ -24,7 +25,9 @@ import {
     DollarOutlined,
     TeamOutlined,
     CalendarOutlined,
-    EditOutlined
+    EditOutlined,
+    EyeOutlined,
+    StopOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
@@ -49,6 +52,8 @@ import {
 import TourOperationManagement from './TourOperationManagement';
 import TourDetailsUpdateForm from './TourDetailsUpdateForm';
 import TimelineEditor from './TimelineEditor';
+import BookingsModal from './BookingsModal';
+import CancelTourModal from './CancelTourModal';
 
 const { TabPane } = Tabs;
 
@@ -77,6 +82,10 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
     const [slotsLoading, setSlotsLoading] = useState(false);
     const [showUpdateForm, setShowUpdateForm] = useState(false);
+    const [bookingsModalVisible, setBookingsModalVisible] = useState(false);
+    const [selectedSlotForBookings, setSelectedSlotForBookings] = useState<TourSlotDto | null>(null);
+    const [cancelModalVisible, setCancelModalVisible] = useState(false);
+    const [selectedSlotForCancel, setSelectedSlotForCancel] = useState<TourSlotDto | null>(null);
 
     useEffect(() => {
         if (visible && tourDetailsId && token) {
@@ -163,6 +172,26 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
     const handleTimelineUpdate = (updatedTimeline: TimelineItem[]) => {
         setTimeline(updatedTimeline);
+        if (onUpdate) {
+            onUpdate();
+        }
+    };
+
+    const handleViewBookings = (slot: TourSlotDto) => {
+        setSelectedSlotForBookings(slot);
+        setBookingsModalVisible(true);
+    };
+
+    const handleCancelTour = (slot: TourSlotDto) => {
+        setSelectedSlotForCancel(slot);
+        setCancelModalVisible(true);
+    };
+
+    const handleCancelSuccess = () => {
+        setCancelModalVisible(false);
+        setSelectedSlotForCancel(null);
+        // Reload tour details data
+        loadTourDetailsData();
         if (onUpdate) {
             onUpdate();
         }
@@ -427,6 +456,38 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                                     </Tag>
                                                 </div>
                                             )}
+
+                                            {/* Action Buttons */}
+                                            <div style={{ marginTop: 12, textAlign: 'center' }}>
+                                                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                                                    <Button
+                                                        type="primary"
+                                                        size="small"
+                                                        icon={<EyeOutlined />}
+                                                        onClick={() => handleViewBookings(slot)}
+                                                        style={{
+                                                            backgroundColor: '#52c41a',
+                                                            borderColor: '#52c41a',
+                                                            width: '100%'
+                                                        }}
+                                                    >
+                                                        Xem booking
+                                                    </Button>
+
+                                                    {/* Cancel Tour Button - only show for Available or FullyBooked slots */}
+                                                    {(slot.status === 1 || slot.status === 2) && (
+                                                        <Button
+                                                            danger
+                                                            size="small"
+                                                            icon={<StopOutlined />}
+                                                            onClick={() => handleCancelTour(slot)}
+                                                            style={{ width: '100%' }}
+                                                        >
+                                                            Hủy tour
+                                                        </Button>
+                                                    )}
+                                                </Space>
+                                            </div>
                                         </div>
                                     </Card>
                                 </Col>
@@ -710,6 +771,31 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                         onUpdate();
                     }
                 }}
+            />
+
+            {/* Bookings Modal */}
+            <BookingsModal
+                visible={bookingsModalVisible}
+                onCancel={() => setBookingsModalVisible(false)}
+                slotId={selectedSlotForBookings?.id || null}
+                slotInfo={selectedSlotForBookings ? {
+                    tourDate: selectedSlotForBookings.tourDate,
+                    formattedDateWithDay: selectedSlotForBookings.formattedDateWithDay,
+                    statusName: selectedSlotForBookings.statusName
+                } : undefined}
+            />
+
+            {/* Cancel Tour Modal */}
+            <CancelTourModal
+                visible={cancelModalVisible}
+                onCancel={() => setCancelModalVisible(false)}
+                onSuccess={handleCancelSuccess}
+                slotId={selectedSlotForCancel?.id || null}
+                slotInfo={selectedSlotForCancel ? {
+                    tourDate: selectedSlotForCancel.tourDate,
+                    formattedDateWithDay: selectedSlotForCancel.formattedDateWithDay,
+                    statusName: selectedSlotForCancel.statusName
+                } : undefined}
             />
         </Modal>
     );
