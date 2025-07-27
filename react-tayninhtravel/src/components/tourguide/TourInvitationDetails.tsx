@@ -12,9 +12,7 @@ import {
     Divider,
     Alert,
     Spin,
-    Timeline,
     Badge,
-    Tooltip,
     Row,
     Col,
     Statistic
@@ -26,8 +24,6 @@ import {
     EyeOutlined,
     CalendarOutlined,
     UserOutlined,
-    EnvironmentOutlined,
-    InfoCircleOutlined,
     StarOutlined
 } from '@ant-design/icons';
 import { TourGuideInvitation } from '@/types/tour';
@@ -40,7 +36,7 @@ import {
 } from '@/services/tourguideService';
 import './TourInvitationDetails.scss';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 interface TourInvitationDetailsProps {
@@ -99,17 +95,17 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
     // Load invitation details
     const loadInvitationDetails = async () => {
         if (!invitationId) return;
-        
+
         setLoading(true);
         try {
             // Debug: Check token
             const token = localStorage.getItem('token');
             console.log('🔑 Auth token exists:', !!token);
             console.log('🔑 Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
-            
+
             const response = await getInvitationDetails(invitationId);
             console.log('📡 API Response:', response);
-            
+
             if (response.success && response.data) {
                 setInvitationData(response.data as any);
             } else {
@@ -136,14 +132,14 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
     // Handle accept invitation
     const handleAccept = async () => {
         if (!invitationData) return;
-        
+
         setActionLoading(true);
         try {
             const response = await acceptInvitation(
                 invitationData.id,
                 acceptanceMessage || undefined
             );
-            
+
             if (response.success) {
                 message.success('Đã chấp nhận lời mời thành công!');
                 setAcceptModalVisible(false);
@@ -167,14 +163,14 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
             message.error('Vui lòng nhập lý do từ chối');
             return;
         }
-        
+
         setActionLoading(true);
         try {
             const response = await rejectInvitation(
                 invitationData.id,
                 rejectionReason.trim()
             );
-            
+
             if (response.success) {
                 message.success('Đã từ chối lời mời');
                 setRejectModalVisible(false);
@@ -249,7 +245,7 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                                     style={{ marginBottom: 24 }}
                                 />
                             )}
-                            
+
                             {invitationData.status === 'Expired' && (
                                 <Alert
                                     message="Lời mời đã hết hạn"
@@ -304,9 +300,9 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                                                     <ClockCircleOutlined />
                                                     <span>{new Date(invitationData.expiresAt).toLocaleString('vi-VN')}</span>
                                                     {invitationData.status === 'Pending' && (
-                                                        <Badge 
-                                                            count={timeUntilExpiry} 
-                                                            style={{ backgroundColor: '#f50' }} 
+                                                        <Badge
+                                                            count={timeUntilExpiry}
+                                                            style={{ backgroundColor: '#f50' }}
                                                         />
                                                     )}
                                                 </Space>
@@ -333,8 +329,8 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                                                         title="Điểm phù hợp"
                                                         value={Math.round(invitationData.skillsMatching.matchScore * 100)}
                                                         suffix="%"
-                                                        valueStyle={{ 
-                                                            color: invitationData.skillsMatching.isMatch ? '#3f8600' : '#cf1322' 
+                                                        valueStyle={{
+                                                            color: invitationData.skillsMatching.isMatch ? '#3f8600' : '#cf1322'
                                                         }}
                                                         prefix={<StarOutlined />}
                                                     />
@@ -347,15 +343,15 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                                                     />
                                                 </Col>
                                             </Row>
-                                            
+
                                             <Divider />
-                                            
+
                                             <div>
                                                 <Text strong>Kỹ năng yêu cầu:</Text>
                                                 <div style={{ marginTop: 8 }}>
                                                     {invitationData.skillsMatching.requiredSkills.map(skill => (
-                                                        <Tag 
-                                                            key={skill} 
+                                                        <Tag
+                                                            key={skill}
                                                             color={invitationData.skillsMatching!.matchedSkills.includes(skill) ? 'green' : 'red'}
                                                         >
                                                             {skill}
@@ -363,7 +359,7 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                                                     ))}
                                                 </div>
                                             </div>
-                                            
+
                                             <div style={{ marginTop: 16 }}>
                                                 <Text strong>Kỹ năng của bạn:</Text>
                                                 <div style={{ marginTop: 8 }}>

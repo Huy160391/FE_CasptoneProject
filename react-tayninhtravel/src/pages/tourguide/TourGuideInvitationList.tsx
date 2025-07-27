@@ -17,8 +17,6 @@ import {
     Badge,
     Empty,
     Spin,
-    Descriptions,
-    Divider,
     Alert,
     Select,
     DatePicker,
@@ -52,7 +50,7 @@ import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails'
 import type { Dayjs } from 'dayjs';
 import './TourGuideInvitations.scss';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -83,6 +81,10 @@ const TourGuideInvitationList: React.FC = () => {
     const [invitationDetails, setInvitationDetails] = useState<any>(null);
     const [validationResult, setValidationResult] = useState<any>(null);
     const [validationLoading, setValidationLoading] = useState(false);
+
+    // Prevent unused variable warnings
+    void detailsLoading;
+    void invitationDetails;
 
     // Load invitations
     const loadInvitations = useCallback(async (status?: string) => {
@@ -262,27 +264,27 @@ const TourGuideInvitationList: React.FC = () => {
 
     // Handle view details
     const handleViewDetails = async (invitation: TourGuideInvitation) => {
-                            setSelectedInvitation(invitation);
-                    setSelectedInvitationId(invitation.id);
-                    setDetailsModalVisible(true);
+        setSelectedInvitation(invitation);
+        setSelectedInvitationId(invitation.id);
+        setDetailsModalVisible(true);
         await loadInvitationDetails(invitation.id);
     };
 
     // Handle accept invitation
     const handleAccept = async () => {
         if (!selectedInvitation) return;
-        
+
         // Validate first
         const isValid = await validateAcceptance(selectedInvitation.id);
         if (!isValid) return;
-        
+
         setActionLoading(true);
         try {
             const response = await acceptInvitation(
                 selectedInvitation.id,
                 acceptanceMessage || undefined
             );
-            
+
             if (response.success) {
                 message.success('Đã chấp nhận lời mời thành công!');
                 setAcceptModalVisible(false);
@@ -306,14 +308,14 @@ const TourGuideInvitationList: React.FC = () => {
             message.error('Vui lòng nhập lý do từ chối');
             return;
         }
-        
+
         setActionLoading(true);
         try {
             const response = await rejectInvitation(
                 selectedInvitation.id,
                 rejectionReason.trim()
             );
-            
+
             if (response.success) {
                 message.success('Đã từ chối lời mời');
                 setRejectModalVisible(false);
@@ -401,10 +403,10 @@ const TourGuideInvitationList: React.FC = () => {
                 if (record.status !== 'Pending') {
                     return <Text type="secondary">-</Text>;
                 }
-                
+
                 const timeRemaining = formatTimeUntilExpiry(record.expiresAt);
                 const isExpiringSoon = new Date(record.expiresAt).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000;
-                
+
                 return (
                     <Text style={{ color: isExpiringSoon ? '#faad14' : undefined }}>
                         <ClockCircleOutlined /> {timeRemaining}
@@ -417,7 +419,7 @@ const TourGuideInvitationList: React.FC = () => {
             key: 'actions',
             render: (record: TourGuideInvitation) => {
                 const canRespond = canRespondToInvitation(record);
-                
+
                 return (
                     <Space>
                         {canRespond && (

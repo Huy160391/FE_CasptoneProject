@@ -11,7 +11,7 @@ import {
     updateTourTemplate,
     deleteTourTemplate
 } from '../../services/tourcompanyService';
-import { tourSlotService, TourSlotDto } from '../../services/tourSlotService';
+
 import publicService from '../../services/publicService';
 
 
@@ -28,10 +28,7 @@ import {
     Col,
     Form,
     Dropdown,
-    Tooltip,
-    List,
-    Spin,
-    Space
+    Tooltip
 } from 'antd';
 import {
     PlusOutlined,
@@ -40,15 +37,13 @@ import {
     EyeOutlined,
     SearchOutlined,
     ExclamationCircleOutlined,
-    MoreOutlined,
-    CalendarOutlined,
-    ClockCircleOutlined
+    MoreOutlined
 } from '@ant-design/icons';
 import './TourTemplateManagement.scss';
 import './TourTemplateModal.scss';
 import TourTemplateFormModal from './TourTemplateFormModal';
 import TourSlotsList from '../../components/tourcompany/TourSlotsList';
-import { getStatusColor } from '../../constants/tourTemplate';
+
 // import { useThemeStore } from '../../store/useThemeStore';
 
 const { Title } = Typography;
@@ -341,8 +336,8 @@ const TourTemplateManagement: React.FC = () => {
                     </h3>
                     <Row gutter={16}>
                         <Col span={24}>
-                            <TourSlotsList 
-                                templateId={detail.id} 
+                            <TourSlotsList
+                                templateId={detail.id}
                                 showUnassignedOnly={true}
                             />
                         </Col>

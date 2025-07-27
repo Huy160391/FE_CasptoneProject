@@ -415,97 +415,97 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                 const availableSpots = slot.availableSpots || 0;
                                 const maxGuests = slot.maxGuests || 0;
                                 const currentBookings = slot.currentBookings || 0;
-                                
+
                                 return (
-                                <Col xs={24} sm={12} md={8} lg={6} key={slot.id}>
-                                    <Card
-                                        size="small"
-                                        title={
+                                    <Col xs={24} sm={12} md={8} lg={6} key={slot.id}>
+                                        <Card
+                                            size="small"
+                                            title={
+                                                <div style={{ textAlign: 'center' }}>
+                                                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                                        {slot.formattedDateWithDay}
+                                                    </div>
+                                                </div>
+                                            }
+                                            extra={
+                                                <Tag color={slot.status === 1 ? 'green' : slot.status === 2 ? 'red' : 'orange'}>
+                                                    {slot.statusName}
+                                                </Tag>
+                                            }
+                                            style={{
+                                                borderColor: slot.status === 1 ? '#52c41a' : slot.status === 2 ? '#ff4d4f' : '#fa8c16'
+                                            }}
+                                        >
                                             <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                                                    {slot.formattedDateWithDay}
-                                                </div>
-                                            </div>
-                                        }
-                                        extra={
-                                            <Tag color={slot.status === 1 ? 'green' : slot.status === 2 ? 'red' : 'orange'}>
-                                                {slot.statusName}
-                                            </Tag>
-                                        }
-                                        style={{
-                                            borderColor: slot.status === 1 ? '#52c41a' : slot.status === 2 ? '#ff4d4f' : '#fa8c16'
-                                        }}
-                                    >
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ marginBottom: 8 }}>
-                                                <Tag color="blue">{slot.scheduleDayName}</Tag>
-                                            </div>
-                                            
-                                            {/* Available Spots Display */}
-                                            {maxGuests > 0 && (
                                                 <div style={{ marginBottom: 8 }}>
-                                                    <div style={{ 
-                                                        fontSize: '14px', 
-                                                        fontWeight: 'bold',
-                                                        color: availableSpots > 5 ? '#52c41a' : 
-                                                               availableSpots > 0 ? '#faad14' : '#ff4d4f'
-                                                    }}>
-                                                        {availableSpots > 0 ? `Còn ${availableSpots} chỗ` : 'Hết chỗ'}
-                                                    </div>
-                                                    <div style={{ fontSize: '11px', color: '#999', marginTop: 2 }}>
-                                                        {currentBookings}/{maxGuests} đã đặt
-                                                    </div>
+                                                    <Tag color="blue">{slot.scheduleDayName}</Tag>
                                                 </div>
-                                            )}
-                                            
-                                            <div style={{ fontSize: '12px', color: '#666' }}>
-                                                Trạng thái: {slot.statusName}
-                                            </div>
-                                            <div style={{ fontSize: '12px', color: '#666' }}>
-                                                Hoạt động: {slot.isActive ? 'Có' : 'Không'}
-                                            </div>
-                                            {slot.tourOperation && (
-                                                <div style={{ marginTop: 8 }}>
-                                                    <Tag color="purple">
-                                                        Có Operation
-                                                    </Tag>
+
+                                                {/* Available Spots Display */}
+                                                {maxGuests > 0 && (
+                                                    <div style={{ marginBottom: 8 }}>
+                                                        <div style={{
+                                                            fontSize: '14px',
+                                                            fontWeight: 'bold',
+                                                            color: availableSpots > 5 ? '#52c41a' :
+                                                                availableSpots > 0 ? '#faad14' : '#ff4d4f'
+                                                        }}>
+                                                            {availableSpots > 0 ? `Còn ${availableSpots} chỗ` : 'Hết chỗ'}
+                                                        </div>
+                                                        <div style={{ fontSize: '11px', color: '#999', marginTop: 2 }}>
+                                                            {currentBookings}/{maxGuests} đã đặt
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div style={{ fontSize: '12px', color: '#666' }}>
+                                                    Trạng thái: {slot.statusName}
                                                 </div>
-                                            )}
+                                                <div style={{ fontSize: '12px', color: '#666' }}>
+                                                    Hoạt động: {slot.isActive ? 'Có' : 'Không'}
+                                                </div>
+                                                {slot.tourOperation && (
+                                                    <div style={{ marginTop: 8 }}>
+                                                        <Tag color="purple">
+                                                            Có Operation
+                                                        </Tag>
+                                                    </div>
+                                                )}
 
-                                            {/* Action Buttons */}
-                                            <div style={{ marginTop: 12, textAlign: 'center' }}>
-                                                <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                                                    <Button
-                                                        type="primary"
-                                                        size="small"
-                                                        icon={<EyeOutlined />}
-                                                        onClick={() => handleViewBookings(slot)}
-                                                        style={{
-                                                            backgroundColor: '#52c41a',
-                                                            borderColor: '#52c41a',
-                                                            width: '100%'
-                                                        }}
-                                                    >
-                                                        Xem booking
-                                                    </Button>
-
-                                                    {/* Cancel Tour Button - only show for Available or FullyBooked slots */}
-                                                    {(slot.status === 1 || slot.status === 2) && (
+                                                {/* Action Buttons */}
+                                                <div style={{ marginTop: 12, textAlign: 'center' }}>
+                                                    <Space direction="vertical" size="small" style={{ width: '100%' }}>
                                                         <Button
-                                                            danger
+                                                            type="primary"
                                                             size="small"
-                                                            icon={<StopOutlined />}
-                                                            onClick={() => handleCancelTour(slot)}
-                                                            style={{ width: '100%' }}
+                                                            icon={<EyeOutlined />}
+                                                            onClick={() => handleViewBookings(slot)}
+                                                            style={{
+                                                                backgroundColor: '#52c41a',
+                                                                borderColor: '#52c41a',
+                                                                width: '100%'
+                                                            }}
                                                         >
-                                                            Hủy tour
+                                                            Xem booking
                                                         </Button>
-                                                    )}
-                                                </Space>
+
+                                                        {/* Cancel Tour Button - only show for Available or FullyBooked slots */}
+                                                        {(slot.status === 1 || slot.status === 2) && (
+                                                            <Button
+                                                                danger
+                                                                size="small"
+                                                                icon={<StopOutlined />}
+                                                                onClick={() => handleCancelTour(slot)}
+                                                                style={{ width: '100%' }}
+                                                            >
+                                                                Hủy tour
+                                                            </Button>
+                                                        )}
+                                                    </Space>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </Card>
-                                </Col>
+                                        </Card>
+                                    </Col>
                                 );
                             })}
                         </Row>
@@ -842,8 +842,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                 tourDetailsId={tourDetails?.id || null}
                 tourInfo={tourDetails ? {
                     title: tourDetails.title,
-                    startDate: tourDetails.startDate,
-                    endDate: tourDetails.endDate
+                    startDate: tourDetails.createdAt,
+                    endDate: tourDetails.updatedAt || tourDetails.createdAt
                 } : undefined}
             />
         </Modal>

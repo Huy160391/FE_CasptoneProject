@@ -32,7 +32,7 @@ import { tourSlotService, TourSlotWithBookingsDto, BookedUserInfo } from '../../
 import { useAuthStore } from '@/store/useAuthStore';
 import { formatCurrency } from '../../utils/formatters';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface BookingsModalProps {
     visible: boolean;
@@ -155,8 +155,8 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
             render: (status: number, record: BookedUserInfo) => (
                 <Tag color={getStatusColor(status)} icon={
                     status === 1 ? <CheckCircleOutlined /> :
-                    status === 0 ? <ClockCircleOutlined /> :
-                    <CloseCircleOutlined />
+                        status === 0 ? <ClockCircleOutlined /> :
+                            <CloseCircleOutlined />
                 }>
                     {record.statusName}
                 </Tag>
@@ -176,7 +176,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         {
             title: 'Thao tác',
             key: 'actions',
-            render: (_: any, record: BookedUserInfo) => (
+            render: (_: any) => (
                 <Tooltip title="Xem chi tiết booking">
                     <Button
                         type="link"

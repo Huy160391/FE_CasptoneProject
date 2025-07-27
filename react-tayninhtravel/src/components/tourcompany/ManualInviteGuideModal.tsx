@@ -31,7 +31,7 @@ import {
 import { useAuthStore } from '@/store/useAuthStore';
 import { getTourGuides, getAvailableTourGuides, manualInviteGuide } from '../../services/tourcompanyService';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 
 interface TourGuide {
@@ -155,7 +155,7 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
         setInviting(guideId);
         try {
             const response = await manualInviteGuide(tourDetailsId, guideId, token);
-            
+
             if (response.success) {
                 message.success('Đã gửi lời mời thành công! Hướng dẫn viên sẽ nhận được email thông báo.');
                 onSuccess();
