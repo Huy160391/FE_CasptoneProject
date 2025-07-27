@@ -1,0 +1,39 @@
+.tour-details-view-modal {
+  .ant-modal-body {
+    padding: 16px;
+  }
+
+  .ant-descriptions-title {
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .ant-timeline {
+    margin-top: 16px;
+  }
+
+  .ant-timeline-item-content {
+    min-height: auto;
+  }
+
+  .ant-card {
+    border-radius: 8px;
+  }
+
+  .ant-image {
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+  }
+
+  .ant-tag {
+    margin-bottom: 4px;
+  }
+
+  .ant-empty {
+    margin: 40px 0;
+  }
+
+  .ant-tabs-content-holder {
+    padding-top: 16px;
+  }
+} 
