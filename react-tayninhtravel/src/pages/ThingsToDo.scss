@@ -1,4 +1,4 @@
-@import '../styles/mixins';
+@use '../styles/mixins' as *;
 
 .things-to-do-page {
   padding: 40px 0;

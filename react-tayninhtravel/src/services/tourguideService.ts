@@ -161,7 +161,7 @@ export const getInvitationDetails = async (
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         const response = await api.get(
-            `/TourGuideInvitation/${invitationId}/details`,
+            `/TourGuideInvitation/${invitationId}`,
             { headers }
         );
 

@@ -209,24 +209,30 @@ export const useTourTemplateStore = create<TourTemplateState>()(
 
           const response = await getTourGuides(includeInactive, token);
 
+          let guides: TourGuide[] = [];
+
           if (Array.isArray(response)) {
-            const guides = response;
-
-            // Update cache
-            set({
-              guidesCache: {
-                data: guides,
-                timestamp: Date.now(),
-                includeInactive
-              }
-            });
-
-            console.log('✅ Guides cached successfully:', guides.length);
-            return guides;
+            // Direct array response from backend
+            guides = response;
+          } else if (response.success && Array.isArray(response.data)) {
+            // ApiResponse wrapper
+            guides = response.data;
           } else {
             console.log('❌ Invalid guides response:', response);
             return [];
           }
+
+          // Update cache
+          set({
+            guidesCache: {
+              data: guides,
+              timestamp: Date.now(),
+              includeInactive
+            }
+          });
+
+          console.log('✅ Guides cached successfully:', guides.length);
+          return guides;
         } catch (error) {
           console.error('❌ Error fetching guides:', error);
           return [];

@@ -16,6 +16,21 @@ export default defineConfig(({ command, mode }) => {
             alias: {
                 '@': resolve(__dirname, './src')
             }
+        },
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks: {
+                        vendor: ['react', 'react-dom'],
+                        antd: ['antd'],
+                        icons: ['@ant-design/icons'],
+                        router: ['react-router-dom'],
+                        i18n: ['i18next', 'react-i18next'],
+                        axios: ['axios']
+                    }
+                }
+            },
+            chunkSizeWarningLimit: 1000
         }
     }
 })

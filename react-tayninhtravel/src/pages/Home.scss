@@ -1,4 +1,4 @@
-@import '../styles/mixins';
+@use '../styles/mixins' as *;
 
 .home-page {
   padding: 40px 0;

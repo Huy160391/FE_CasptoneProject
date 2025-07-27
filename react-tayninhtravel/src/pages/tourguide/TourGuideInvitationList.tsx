@@ -17,8 +17,6 @@ import {
     Badge,
     Empty,
     Spin,
-    Descriptions,
-    Divider,
     Alert,
     Select,
     DatePicker,
@@ -48,10 +46,11 @@ import {
     validateInvitationAcceptance,
     getInvitationDetails
 } from '@/services/tourguideService';
+import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
 import type { Dayjs } from 'dayjs';
 import './TourGuideInvitations.scss';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -65,6 +64,7 @@ const TourGuideInvitationList: React.FC = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [selectedInvitation, setSelectedInvitation] = useState<TourGuideInvitation | null>(null);
     const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+    const [selectedInvitationId, setSelectedInvitationId] = useState<string>('');
     const [rejectModalVisible, setRejectModalVisible] = useState(false);
     const [acceptModalVisible, setAcceptModalVisible] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
@@ -81,6 +81,10 @@ const TourGuideInvitationList: React.FC = () => {
     const [invitationDetails, setInvitationDetails] = useState<any>(null);
     const [validationResult, setValidationResult] = useState<any>(null);
     const [validationLoading, setValidationLoading] = useState(false);
+
+    // Prevent unused variable warnings
+    void detailsLoading;
+    void invitationDetails;
 
     // Load invitations
     const loadInvitations = useCallback(async (status?: string) => {
@@ -261,6 +265,7 @@ const TourGuideInvitationList: React.FC = () => {
     // Handle view details
     const handleViewDetails = async (invitation: TourGuideInvitation) => {
         setSelectedInvitation(invitation);
+        setSelectedInvitationId(invitation.id);
         setDetailsModalVisible(true);
         await loadInvitationDetails(invitation.id);
     };
@@ -268,18 +273,18 @@ const TourGuideInvitationList: React.FC = () => {
     // Handle accept invitation
     const handleAccept = async () => {
         if (!selectedInvitation) return;
-        
+
         // Validate first
         const isValid = await validateAcceptance(selectedInvitation.id);
         if (!isValid) return;
-        
+
         setActionLoading(true);
         try {
             const response = await acceptInvitation(
                 selectedInvitation.id,
                 acceptanceMessage || undefined
             );
-            
+
             if (response.success) {
                 message.success('Đã chấp nhận lời mời thành công!');
                 setAcceptModalVisible(false);
@@ -303,14 +308,14 @@ const TourGuideInvitationList: React.FC = () => {
             message.error('Vui lòng nhập lý do từ chối');
             return;
         }
-        
+
         setActionLoading(true);
         try {
             const response = await rejectInvitation(
                 selectedInvitation.id,
                 rejectionReason.trim()
             );
-            
+
             if (response.success) {
                 message.success('Đã từ chối lời mời');
                 setRejectModalVisible(false);
@@ -398,10 +403,10 @@ const TourGuideInvitationList: React.FC = () => {
                 if (record.status !== 'Pending') {
                     return <Text type="secondary">-</Text>;
                 }
-                
+
                 const timeRemaining = formatTimeUntilExpiry(record.expiresAt);
                 const isExpiringSoon = new Date(record.expiresAt).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000;
-                
+
                 return (
                     <Text style={{ color: isExpiringSoon ? '#faad14' : undefined }}>
                         <ClockCircleOutlined /> {timeRemaining}
@@ -414,7 +419,7 @@ const TourGuideInvitationList: React.FC = () => {
             key: 'actions',
             render: (record: TourGuideInvitation) => {
                 const canRespond = canRespondToInvitation(record);
-                
+
                 return (
                     <Space>
                         {canRespond && (
@@ -644,86 +649,20 @@ const TourGuideInvitationList: React.FC = () => {
                 />
             </Card>
 
-            {/* Details Modal */}
-            <Modal
-                title="Chi tiết lời mời"
-                open={detailsModalVisible}
-                onCancel={() => {
+            {/* Tour Invitation Details Modal */}
+            <TourInvitationDetails
+                invitationId={selectedInvitationId}
+                visible={detailsModalVisible}
+                onClose={() => {
                     setDetailsModalVisible(false);
+                    setSelectedInvitationId('');
                     setSelectedInvitation(null);
                     setInvitationDetails(null);
                 }}
-                footer={[
-                    <Button key="close" onClick={() => {
-                        setDetailsModalVisible(false);
-                        setSelectedInvitation(null);
-                        setInvitationDetails(null);
-                    }}>
-                        Đóng
-                    </Button>
-                ]}
-                width={700}
-            >
-                {detailsLoading ? (
-                    <div style={{ textAlign: 'center', padding: '20px' }}>
-                        <Spin size="large" />
-                        <div style={{ marginTop: '10px' }}>Đang tải thông tin...</div>
-                    </div>
-                ) : invitationDetails ? (
-                    <div className="invitation-details">
-                        <Descriptions title="Thông tin Tour" bordered column={{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }}>
-                            <Descriptions.Item label="Tên Tour">{invitationDetails.tourDetails.title}</Descriptions.Item>
-                            <Descriptions.Item label="Công ty">{invitationDetails.createdBy.name}</Descriptions.Item>
-                            <Descriptions.Item label="Ngày bắt đầu">{new Date(invitationDetails.tourDetails.startDate).toLocaleDateString('vi-VN')}</Descriptions.Item>
-                            <Descriptions.Item label="Ngày kết thúc">{new Date(invitationDetails.tourDetails.endDate).toLocaleDateString('vi-VN')}</Descriptions.Item>
-                            <Descriptions.Item label="Địa điểm">{invitationDetails.tourDetails.location}</Descriptions.Item>
-                            <Descriptions.Item label="Trạng thái">
-                                <Tag color={getStatusColor(invitationDetails.status)}>
-                                    {getStatusText(invitationDetails.status)}
-                                </Tag>
-                            </Descriptions.Item>
-                        </Descriptions>
-                        
-                        <Divider />
-                        
-                        <Paragraph>
-                            <Text strong>Mô tả Tour:</Text>
-                            <div className="tour-description">
-                                {invitationDetails.tourDetails.description || 'Không có mô tả'}
-                            </div>
-                        </Paragraph>
-                        
-                        {invitationDetails.status === 'Pending' && (
-                            <div className="invitation-actions" style={{ marginTop: '20px' }}>
-                                <Space>
-                                    <Button 
-                                        type="primary" 
-                                        icon={<CheckOutlined />}
-                                        onClick={() => {
-                                            setDetailsModalVisible(false);
-                                            setAcceptModalVisible(true);
-                                        }}
-                                    >
-                                        Chấp nhận lời mời
-                                    </Button>
-                                    <Button 
-                                        danger 
-                                        icon={<CloseOutlined />}
-                                        onClick={() => {
-                                            setDetailsModalVisible(false);
-                                            setRejectModalVisible(true);
-                                        }}
-                                    >
-                                        Từ chối lời mời
-                                    </Button>
-                                </Space>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <Empty description="Không có thông tin chi tiết" />
-                )}
-            </Modal>
+                onUpdate={() => {
+                    loadInvitations(activeTab === 'all' ? undefined : activeTab);
+                }}
+            />
 
             {/* Accept Modal */}
             <Modal

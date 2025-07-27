@@ -1,4 +1,4 @@
-@import '../styles/mixins';
+@use '../styles/mixins' as *;
 
 .about-page {
   padding: 40px 0;
@@ -11,7 +11,7 @@
 
   .hero-section {
     height: 300px;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/hero-bg.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/src/assets/Tay Ninh 4.jpg');
     background-size: cover;
     background-position: center;
     display: flex;

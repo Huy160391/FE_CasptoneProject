@@ -11,7 +11,7 @@ import {
     updateTourTemplate,
     deleteTourTemplate
 } from '../../services/tourcompanyService';
-import { tourSlotService, TourSlotDto } from '../../services/tourSlotService';
+
 import publicService from '../../services/publicService';
 
 
@@ -28,10 +28,7 @@ import {
     Col,
     Form,
     Dropdown,
-    Tooltip,
-    List,
-    Spin,
-    Space
+    Tooltip
 } from 'antd';
 import {
     PlusOutlined,
@@ -40,14 +37,13 @@ import {
     EyeOutlined,
     SearchOutlined,
     ExclamationCircleOutlined,
-    MoreOutlined,
-    CalendarOutlined,
-    ClockCircleOutlined
+    MoreOutlined
 } from '@ant-design/icons';
 import './TourTemplateManagement.scss';
 import './TourTemplateModal.scss';
 import TourTemplateFormModal from './TourTemplateFormModal';
-import { getStatusColor } from '../../constants/tourTemplate';
+import TourSlotsList from '../../components/tourcompany/TourSlotsList';
+
 // import { useThemeStore } from '../../store/useThemeStore';
 
 const { Title } = Typography;
@@ -278,82 +274,7 @@ const TourTemplateManagement: React.FC = () => {
         setIsModalVisible(true);
     };
 
-    // Component hiển thị tourslot trong modal
-    const TourSlotsList: React.FC<{ templateId: string }> = ({ templateId }) => {
-        const [slots, setSlots] = useState<TourSlotDto[]>([]);
-        const [loading, setLoading] = useState(false);
 
-        useEffect(() => {
-            const loadSlots = async () => {
-                try {
-                    setLoading(true);
-                    const token = localStorage.getItem('token') || '';
-                    const response = await tourSlotService.getSlotsByTourTemplate(templateId, token);
-                    if (response.success && response.data) {
-                        setSlots(response.data);
-                    }
-                } catch (error) {
-                    console.error('Error loading tour slots:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            loadSlots();
-        }, [templateId]);
-
-        if (loading) {
-            return <Spin size="small" />;
-        }
-
-        if (slots.length === 0) {
-            return (
-                <div className="empty-slots-message">
-                    Chưa có slot nào được tạo
-                </div>
-            );
-        }
-
-        return (
-            <List
-                size="small"
-                dataSource={slots}
-                className="tour-slots-list"
-                renderItem={(slot) => (
-                    <List.Item>
-                        <div style={{ width: '100%' }}>
-                            <Row gutter={16} align="middle">
-                                <Col span={8}>
-                                    <Space>
-                                        <CalendarOutlined className="slot-calendar-icon" />
-                                        <span className="slot-date">
-                                            {slot.formattedDateWithDay}
-                                        </span>
-                                    </Space>
-                                </Col>
-                                <Col span={6}>
-                                    <Tag color={getStatusColor(slot.status)}>
-                                        {slot.statusName}
-                                    </Tag>
-                                </Col>
-                                <Col span={6}>
-                                    <Tag color={slot.isActive ? 'green' : 'red'}>
-                                        {slot.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                                    </Tag>
-                                </Col>
-                                <Col span={4}>
-                                    <ClockCircleOutlined className="slot-clock-icon" />
-                                    <span className="slot-created-date">
-                                        {new Date(slot.createdAt).toLocaleDateString('vi-VN')}
-                                    </span>
-                                </Col>
-                            </Row>
-                        </div>
-                    </List.Item>
-                )}
-            />
-        );
-    };
 
     const handleView = async (template: TourTemplate) => {
         const token = localStorage.getItem('token') || '';
@@ -415,7 +336,10 @@ const TourTemplateManagement: React.FC = () => {
                     </h3>
                     <Row gutter={16}>
                         <Col span={24}>
-                            <TourSlotsList templateId={detail.id} />
+                            <TourSlotsList
+                                templateId={detail.id}
+                                showUnassignedOnly={true}
+                            />
                         </Col>
                     </Row>
                     <hr className="modal-section-divider" />

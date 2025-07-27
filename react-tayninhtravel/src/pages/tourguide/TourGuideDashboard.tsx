@@ -40,6 +40,7 @@ import {
     acceptInvitation,
     canRespondToInvitation
 } from '@/services/tourguideService';
+import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
 import ProfileSection from '@/components/tourguide/ProfileSection';
 import './TourGuideDashboard.scss';
 
@@ -53,6 +54,8 @@ const TourGuideDashboard: React.FC = () => {
     const [statistics, setStatistics] = useState<any>({});
     const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
     const [profileExpanded, setProfileExpanded] = useState(false);
+    const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+    const [selectedInvitationId, setSelectedInvitationId] = useState<string>('');
 
     // Load dashboard data
     const loadDashboardData = async (showLoading = true) => {
@@ -310,7 +313,10 @@ const TourGuideDashboard: React.FC = () => {
                                                             <Button
                                                                 size="small"
                                                                 icon={<EyeOutlined />}
-                                                                onClick={() => navigate(`/tour-guide/invitations?tab=pending&id=${invitation.id}`)}
+                                                                onClick={() => {
+                                                                    setSelectedInvitationId(invitation.id);
+                                                                    setDetailsModalVisible(true);
+                                                                }}
                                                             />
                                                         </Tooltip>
                                                         {canRespond && (
@@ -461,6 +467,18 @@ const TourGuideDashboard: React.FC = () => {
                     </Col>
                 </Row>
             </Spin>
+            {/* Tour Invitation Details Modal */}
+            <TourInvitationDetails
+                invitationId={selectedInvitationId}
+                visible={detailsModalVisible}
+                onClose={() => {
+                    setDetailsModalVisible(false);
+                    setSelectedInvitationId('');
+                }}
+                onUpdate={() => {
+                    loadDashboardData(false);
+                }}
+            />
         </div>
     );
 };
