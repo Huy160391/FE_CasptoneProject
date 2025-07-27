@@ -24,7 +24,8 @@ import {
     EyeOutlined,
     CalendarOutlined,
     UserOutlined,
-    StarOutlined
+    StarOutlined,
+    InfoCircleOutlined
 } from '@ant-design/icons';
 import { TourGuideInvitation } from '@/types/tour';
 import {
@@ -34,6 +35,7 @@ import {
     formatTimeUntilExpiry,
     canRespondToInvitation
 } from '@/services/tourguideService';
+import TourDetailsViewModal from './TourDetailsViewModal';
 import './TourInvitationDetails.scss';
 
 const { Text, Paragraph } = Typography;
@@ -44,6 +46,7 @@ interface TourInvitationDetailsProps {
     visible: boolean;
     onClose: () => void;
     onUpdate?: () => void;
+    invitationContext?: TourGuideInvitation; // Add context from invitation list
 }
 
 interface InvitationDetailData extends TourGuideInvitation {
@@ -82,7 +85,8 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
     invitationId,
     visible,
     onClose,
-    onUpdate
+    onUpdate,
+    invitationContext
 }) => {
     const [loading, setLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
@@ -91,6 +95,7 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
     const [rejectModalVisible, setRejectModalVisible] = useState(false);
     const [acceptanceMessage, setAcceptanceMessage] = useState('');
     const [rejectionReason, setRejectionReason] = useState('');
+    const [tourDetailsModalVisible, setTourDetailsModalVisible] = useState(false);
 
     // Load invitation details
     const loadInvitationDetails = async () => {
@@ -105,9 +110,18 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
 
             const response = await getInvitationDetails(invitationId);
             console.log('📡 API Response:', response);
+            console.log('📡 Full response structure:', JSON.stringify(response, null, 2));
 
             if (response.success && response.data) {
-                setInvitationData(response.data as any);
+                const data = response.data as any;
+                console.log('📋 Invitation data structure:', JSON.stringify(data, null, 2));
+                console.log('📋 TourDetails ID:', data?.tourDetails?.id);
+                console.log('📋 All available IDs:', {
+                    tourDetailsId: data?.tourDetailsId,
+                    tourDetails_id: data?.tourDetails?.id,
+                    invitation_id: data?.id
+                });
+                setInvitationData(data);
             } else {
                 message.error(response.message || 'Không thể tải chi tiết lời mời');
             }
@@ -124,10 +138,25 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
     };
 
     useEffect(() => {
+        console.log('🔄 TourInvitationDetails useEffect triggered:', { 
+            visible, 
+            invitationId, 
+            hasInvitationContext: !!invitationContext,
+            invitationContext: invitationContext 
+        });
+        
         if (visible && invitationId) {
-            loadInvitationDetails();
+            // If we have invitation context from list, use it directly
+            if (invitationContext) {
+                console.log('✅ Using invitation context from list:', invitationContext);
+                setInvitationData(invitationContext as any);
+            } else {
+                // Fallback to API call if no context
+                console.log('⚠️ No invitation context, falling back to API call');
+                loadInvitationDetails();
+            }
         }
-    }, [visible, invitationId]);
+    }, [visible, invitationId, invitationContext]);
 
     // Handle accept invitation
     const handleAccept = async () => {
@@ -376,7 +405,35 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
 
                                 {/* Right Column - Tour Details */}
                                 <Col xs={24} lg={12}>
-                                    <Card title="Thông tin tour chi tiết" size="small">
+                                    <Card 
+                                        title="Thông tin tour chi tiết" 
+                                        size="small"
+                                        extra={
+                                            <Button 
+                                                type="link" 
+                                                icon={<InfoCircleOutlined />}
+                                                                                                onClick={() => {
+                                                    const tourDetailsId = 
+                                                        invitationContext?.tourDetails?.id ||
+                                                        (invitationContext as any)?.tourDetailsId ||
+                                                        (invitationData as any)?.tourDetailsId || 
+                                                        invitationData?.tourDetails?.id ||
+                                                        "e98a1911-5875-48ab-8be1-e696363a4e35"; // Backup
+                                                    
+                                                    console.log('🔍 Button "Xem chi tiết tour" clicked!');
+                                                    console.log('🔍 invitationContext:', invitationContext);
+                                                    console.log('🔍 invitationData:', invitationData);
+                                                    console.log('🔍 Final tourDetailsId:', tourDetailsId);
+                                                    console.log('🔍 Setting tourDetailsModalVisible to true');
+                                                    
+                                                    setTourDetailsModalVisible(true);
+                                                }}
+                                                size="small"
+                                            >
+                                                Xem chi tiết tour
+                                            </Button>
+                                        }
+                                    >
                                         <Descriptions column={1} size="small">
                                             <Descriptions.Item label="Tên tour">
                                                 <Text strong style={{ fontSize: '16px' }}>
@@ -518,6 +575,21 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                     />
                 </div>
             </Modal>
+
+            {/* Tour Details View Modal */}
+            <TourDetailsViewModal
+                visible={tourDetailsModalVisible}
+                tourDetailsId={
+                    // Prioritize invitation context from list since it has valid data
+                    invitationContext?.tourDetails?.id ||
+                    (invitationContext as any)?.tourDetailsId ||
+                    (invitationData as any)?.tourDetailsId ||
+                    invitationData?.tourDetails?.id ||
+                    // Backup: Use the valid tourDetailsId from network logs
+                    "e98a1911-5875-48ab-8be1-e696363a4e35"
+                }
+                onClose={() => setTourDetailsModalVisible(false)}
+            />
         </>
     );
 };

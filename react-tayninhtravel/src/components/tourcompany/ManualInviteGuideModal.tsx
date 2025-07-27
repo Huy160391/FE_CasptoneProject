@@ -73,7 +73,7 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
     const [loading, setLoading] = useState(false);
     const [inviting, setInviting] = useState<string | null>(null);
     const [searchText, setSearchText] = useState('');
-    const [showAvailableOnly, setShowAvailableOnly] = useState(true);
+    const [showAvailableOnly, setShowAvailableOnly] = useState(false);
     const { token } = useAuthStore();
 
     useEffect(() => {

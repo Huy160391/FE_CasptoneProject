@@ -21,7 +21,6 @@ import {
     Select,
     DatePicker,
     Dropdown,
-    Menu,
     Progress
 } from 'antd';
 import {
@@ -43,8 +42,7 @@ import {
     rejectInvitation,
     formatTimeUntilExpiry,
     canRespondToInvitation,
-    validateInvitationAcceptance,
-    getInvitationDetails
+    validateInvitationAcceptance
 } from '@/services/tourguideService';
 import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
 import type { Dayjs } from 'dayjs';
@@ -77,13 +75,11 @@ const TourGuideInvitationList: React.FC = () => {
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
     const [companyFilter, setCompanyFilter] = useState<string>('');
     const [actionLoading, setActionLoading] = useState(false);
-    const [detailsLoading, setDetailsLoading] = useState(false);
     const [invitationDetails, setInvitationDetails] = useState<any>(null);
     const [validationResult, setValidationResult] = useState<any>(null);
     const [validationLoading, setValidationLoading] = useState(false);
 
     // Prevent unused variable warnings
-    void detailsLoading;
     void invitationDetails;
 
     // Load invitations
@@ -228,23 +224,7 @@ const TourGuideInvitationList: React.FC = () => {
         loadInvitations(statusMap[key]);
     };
 
-    // Load invitation details
-    const loadInvitationDetails = async (invitationId: string) => {
-        setDetailsLoading(true);
-        try {
-            const response = await getInvitationDetails(invitationId);
-            if (response.success) {
-                setInvitationDetails(response.data);
-            } else {
-                message.error(response.message || 'Không thể tải chi tiết lời mời');
-            }
-        } catch (error: any) {
-            console.error('Error loading invitation details:', error);
-            message.error('Có lỗi xảy ra khi tải chi tiết lời mời');
-        } finally {
-            setDetailsLoading(false);
-        }
-    };
+
 
     // Validate invitation acceptance
     const validateAcceptance = async (invitationId: string) => {
@@ -264,10 +244,12 @@ const TourGuideInvitationList: React.FC = () => {
 
     // Handle view details
     const handleViewDetails = async (invitation: TourGuideInvitation) => {
+        console.log('🔍 handleViewDetails called with invitation:', invitation);
         setSelectedInvitation(invitation);
         setSelectedInvitationId(invitation.id);
         setDetailsModalVisible(true);
-        await loadInvitationDetails(invitation.id);
+        // Don't call loadInvitationDetails since we have full data from list
+        // await loadInvitationDetails(invitation.id);
     };
 
     // Handle accept invitation
@@ -514,14 +496,15 @@ const TourGuideInvitationList: React.FC = () => {
                     <Col xs={24} sm={12} md={6}>
                         <Space>
                             <Dropdown
-                                overlay={
-                                    <Menu onClick={({ key }) => setSortBy(key)}>
-                                        <Menu.Item key="invitedAt">Ngày mời</Menu.Item>
-                                        <Menu.Item key="title">Tên tour</Menu.Item>
-                                        <Menu.Item key="company">Công ty</Menu.Item>
-                                        <Menu.Item key="expiresAt">Hạn phản hồi</Menu.Item>
-                                    </Menu>
-                                }
+                                menu={{
+                                    onClick: ({ key }) => setSortBy(key),
+                                    items: [
+                                        { key: 'invitedAt', label: 'Ngày mời' },
+                                        { key: 'title', label: 'Tên tour' },
+                                        { key: 'company', label: 'Công ty' },
+                                        { key: 'expiresAt', label: 'Hạn phản hồi' }
+                                    ]
+                                }}
                             >
                                 <Button>
                                     <SortAscendingOutlined /> Sắp xếp <DownOutlined />
@@ -662,6 +645,7 @@ const TourGuideInvitationList: React.FC = () => {
                 onUpdate={() => {
                     loadInvitations(activeTab === 'all' ? undefined : activeTab);
                 }}
+                invitationContext={selectedInvitation || undefined}
             />
 
             {/* Accept Modal */}
