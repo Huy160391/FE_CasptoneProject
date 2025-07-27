@@ -360,3 +360,14 @@ export const activatePublicTourDetails = async (tourDetailsId: string, token?: s
     const response = await axios.post(`/TourCompany/tourdetails/${tourDetailsId}/activate-public`, {}, { headers });
     return response.data;
 };
+
+// Mời thủ công hướng dẫn viên cho TourDetails
+export const manualInviteGuide = async (tourDetailsId: string, guideId: string, token?: string): Promise<ApiResponse<any>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const requestBody = {
+        tourDetailsId,
+        guideId
+    };
+    const response = await axios.post(`/TourDetails/${tourDetailsId}/manual-invite-guide`, requestBody, { headers });
+    return response.data;
+};

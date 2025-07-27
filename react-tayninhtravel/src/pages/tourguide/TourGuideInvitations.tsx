@@ -33,6 +33,7 @@ import {
     formatTimeUntilExpiry,
     canRespondToInvitation
 } from '@/services/tourguideService';
+import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
 import './TourGuideInvitations.scss';
 
 const { Title, Text } = Typography;
@@ -50,6 +51,8 @@ const TourGuideInvitations: React.FC = () => {
     const [rejectionReason, setRejectionReason] = useState('');
     const [acceptanceMessage, setAcceptanceMessage] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
+    const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+    const [selectedInvitationId, setSelectedInvitationId] = useState<string>('');
 
     // Load invitations
     const loadInvitations = async (status?: string) => {
@@ -271,8 +274,8 @@ const TourGuideInvitations: React.FC = () => {
                                 size="small"
                                 icon={<EyeOutlined />}
                                 onClick={() => {
-                                    // TODO: Implement view details
-                                    message.info('Chức năng xem chi tiết sẽ được phát triển');
+                                    setSelectedInvitationId(record.id);
+                                    setDetailsModalVisible(true);
                                 }}
                             />
                         </Tooltip>
@@ -429,6 +432,19 @@ const TourGuideInvitations: React.FC = () => {
                     * Lý do từ chối sẽ được gửi đến công ty tour để cải thiện dịch vụ
                 </Text>
             </Modal>
+
+            {/* Tour Invitation Details Modal */}
+            <TourInvitationDetails
+                invitationId={selectedInvitationId}
+                visible={detailsModalVisible}
+                onClose={() => {
+                    setDetailsModalVisible(false);
+                    setSelectedInvitationId('');
+                }}
+                onUpdate={() => {
+                    loadInvitations(activeTab === 'all' ? undefined : activeTab);
+                }}
+            />
         </div>
     );
 };
