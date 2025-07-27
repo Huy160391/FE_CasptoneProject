@@ -1,4 +1,4 @@
-@import '../../styles/mixins';
+@use '../../styles/mixins' as *;
 
 :root {
   --text-primary: rgba(0, 0, 0, 0.85);
