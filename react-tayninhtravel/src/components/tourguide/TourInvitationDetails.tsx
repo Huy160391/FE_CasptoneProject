@@ -35,7 +35,7 @@ import {
     formatTimeUntilExpiry,
     canRespondToInvitation
 } from '@/services/tourguideService';
-import TourDetailsViewModal from '../tourcompany/TourDetailsModal';
+import TourDetailsViewModal from './TourDetailsViewModal';
 import './TourInvitationDetails.scss';
 
 const { Text, Paragraph } = Typography;

@@ -41,6 +41,7 @@ import {
     canRespondToInvitation
 } from '@/services/tourguideService';
 import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
+import TourDetailsViewModal from '@/components/tourguide/TourDetailsViewModal';
 import ProfileSection from '@/components/tourguide/ProfileSection';
 import './TourGuideDashboard.scss';
 
@@ -56,6 +57,8 @@ const TourGuideDashboard: React.FC = () => {
     const [profileExpanded, setProfileExpanded] = useState(false);
     const [detailsModalVisible, setDetailsModalVisible] = useState(false);
     const [selectedInvitationId, setSelectedInvitationId] = useState<string>('');
+    const [tourDetailsModalVisible, setTourDetailsModalVisible] = useState(false);
+    const [selectedTourDetailsId, setSelectedTourDetailsId] = useState<string>('');
 
     // Load dashboard data
     const loadDashboardData = async (showLoading = true) => {
@@ -309,13 +312,25 @@ const TourGuideDashboard: React.FC = () => {
                                                 className={`invitation-item ${isUrgent ? 'urgent' : ''}`}
                                                 actions={[
                                                     <Space key="actions">
-                                                        <Tooltip title="Xem chi tiết">
+                                                        <Tooltip title="Xem chi tiết lời mời">
                                                             <Button
                                                                 size="small"
                                                                 icon={<EyeOutlined />}
                                                                 onClick={() => {
                                                                     setSelectedInvitationId(invitation.id);
                                                                     setDetailsModalVisible(true);
+                                                                }}
+                                                            />
+                                                        </Tooltip>
+                                                        <Tooltip title="Xem chi tiết tour">
+                                                            <Button
+                                                                size="small"
+                                                                type="dashed"
+                                                                icon={<CalendarOutlined />}
+                                                                onClick={() => {
+                                                                    console.log('🎯 Dashboard: Opening tour details modal for:', invitation.tourDetails.id);
+                                                                    setSelectedTourDetailsId(invitation.tourDetails.id);
+                                                                    setTourDetailsModalVisible(true);
                                                                 }}
                                                             />
                                                         </Tooltip>
@@ -477,6 +492,16 @@ const TourGuideDashboard: React.FC = () => {
                 }}
                 onUpdate={() => {
                     loadDashboardData(false);
+                }}
+            />
+
+            {/* Tour Details View Modal */}
+            <TourDetailsViewModal
+                visible={tourDetailsModalVisible}
+                tourDetailsId={selectedTourDetailsId}
+                onClose={() => {
+                    setTourDetailsModalVisible(false);
+                    setSelectedTourDetailsId('');
                 }}
             />
         </div>
