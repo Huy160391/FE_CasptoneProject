@@ -19,6 +19,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from '../common/ThemeToggle'
 import LanguageSwitcher from '../common/LanguageSwitcher'
+import NotificationBell from '../common/NotificationBell'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import CartDrawer from '../cart/CartDrawer'
@@ -230,6 +231,8 @@ const Navbar = () => {
               <ThemeToggle />
               <LanguageSwitcher />
 
+              {isAuthenticated && <NotificationBell />}
+
               <Badge count={getTotalItems()} showZero={false} size="small">
                 <Button
                   type="text"
@@ -293,6 +296,9 @@ const Navbar = () => {
         />        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {isAuthenticated ? (
             <>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                <NotificationBell />
+              </div>
               {user?.role === 'Admin' && (
                 <Button type="primary" onClick={() => navigate('/admin/dashboard')}>
                   Admin Dashboard
