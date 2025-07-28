@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import ThemeToggle from '@/components/common/ThemeToggle';
+import NotificationBell from '@/components/common/NotificationBell';
 import './TourGuideLayout.scss';
 
 const { Sider, Content } = Layout;
@@ -104,9 +105,12 @@ const TourGuideLayout: React.FC = () => {
                 <div className="bottom-menu">
                     {/* Theme Toggle */}
                     <div style={{ padding: '8px 16px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                        <Space align="center" style={{ width: '100%', justifyContent: collapsed ? 'center' : 'flex-start' }}>
-                            <ThemeToggle />
-                            {!collapsed && <span style={{ color: 'rgba(255, 255, 255, 0.85)', marginLeft: 8 }}>Theme</span>}
+                        <Space align="center" style={{ width: '100%', justifyContent: collapsed ? 'center' : 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <ThemeToggle />
+                                {!collapsed && <span style={{ color: 'rgba(255, 255, 255, 0.85)', marginLeft: 8 }}>Theme</span>}
+                            </div>
+                            <NotificationBell />
                         </Space>
                     </div>
 

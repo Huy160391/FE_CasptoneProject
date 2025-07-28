@@ -1,8 +1,8 @@
-import { Layout, Space, Button } from 'antd';
-import { BellOutlined } from '@ant-design/icons';
+import { Layout, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import ThemeToggle from '../common/ThemeToggle';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import NotificationBell from '../common/NotificationBell';
 import './BloggerHeader.scss';
 
 const { Header } = Layout;
@@ -17,12 +17,7 @@ const BloggerHeader = () => {
                 <Space className="header-actions" size="middle">
                     <ThemeToggle />
                     <LanguageSwitcher />
-
-                    <Button
-                        type="text"
-                        icon={<BellOutlined />}
-                        className="notification-btn"
-                    />
+                    <NotificationBell />
                 </Space>
             </div>
         </Header>
