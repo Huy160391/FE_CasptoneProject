@@ -15,9 +15,12 @@ const NotificationBell: React.FC = () => {
         try {
             setLoading(true);
             const count = await notificationService.getUnreadCount();
-            setUnreadCount(count);
+            console.log('Fetched unread count:', count);
+            setUnreadCount(typeof count === 'number' ? count : 0);
         } catch (error) {
             console.error('Error fetching unread count:', error);
+            // Don't show error to user, just keep the count as 0
+            setUnreadCount(0);
         } finally {
             setLoading(false);
         }
