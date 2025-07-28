@@ -52,7 +52,33 @@ class NotificationService {
             }
 
             const response = await axiosInstance.get(url);
-            return response.data;
+            console.log('Get all notifications response:', response.data);
+
+            // Handle API response structure
+            if (response.data && Array.isArray(response.data.notifications)) {
+                return {
+                    notifications: response.data.notifications,
+                    total: response.data.total || response.data.totalCount || 0,
+                    page: pageIndex,
+                    totalPages: response.data.totalPages || Math.ceil((response.data.total || 0) / pageSize)
+                };
+            } else if (Array.isArray(response.data)) {
+                // Direct array response
+                return {
+                    notifications: response.data,
+                    total: response.data.length,
+                    page: pageIndex,
+                    totalPages: 1
+                };
+            } else {
+                console.warn('Unexpected getAllNotifications response structure:', response.data);
+                return {
+                    notifications: [],
+                    total: 0,
+                    page: pageIndex,
+                    totalPages: 0
+                };
+            }
         } catch (error) {
             console.error('Error fetching notifications:', error);
             throw error;
@@ -63,10 +89,22 @@ class NotificationService {
     async getUnreadCount(): Promise<number> {
         try {
             const response = await axiosInstance.get('/Notification/unread-count');
-            return response.data.count;
+            console.log('Unread count response:', response.data);
+
+            // Handle API response structure: { statusCode, message, success, validationErrors, unreadCount }
+            if (response.data && typeof response.data.unreadCount === 'number') {
+                return response.data.unreadCount;
+            } else if (response.data && typeof response.data.count === 'number') {
+                return response.data.count;
+            } else if (typeof response.data === 'number') {
+                return response.data;
+            } else {
+                console.warn('Unexpected unread count response structure:', response.data);
+                return 0;
+            }
         } catch (error) {
             console.error('Error fetching unread count:', error);
-            throw error;
+            return 0; // Return 0 instead of throwing error to prevent UI crash
         }
     }
 
