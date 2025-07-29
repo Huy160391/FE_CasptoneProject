@@ -231,7 +231,11 @@ const Navbar = () => {
               <ThemeToggle />
               <LanguageSwitcher />
 
-              {isAuthenticated && <NotificationBell />}
+              {isAuthenticated && (
+                <div className="notification-bell">
+                  <NotificationBell />
+                </div>
+              )}
 
               <Badge count={getTotalItems()} showZero={false} size="small">
                 <Button

@@ -110,7 +110,9 @@ const TourGuideLayout: React.FC = () => {
                                 <ThemeToggle />
                                 {!collapsed && <span style={{ color: 'rgba(255, 255, 255, 0.85)', marginLeft: 8 }}>Theme</span>}
                             </div>
-                            <NotificationBell />
+                            <div className="notification-bell">
+                                <NotificationBell />
+                            </div>
                         </Space>
                     </div>
 

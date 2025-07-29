@@ -21,6 +21,22 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    
+    .notification-bell {
+      .ant-btn {
+        font-size: 20px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.05);
+        }
+      }
+    }
   }
   
   .header-right {
@@ -101,6 +117,18 @@ body.dark-mode {
 
       .ant-avatar {
         border-color: #303030;
+      }
+    }
+    
+    .header-actions {
+      .notification-bell {
+        .ant-btn {
+          color: rgba(255, 255, 255, 0.85);
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+        }
       }
     }
   }
