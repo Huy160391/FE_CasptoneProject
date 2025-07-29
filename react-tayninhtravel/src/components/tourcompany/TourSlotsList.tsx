@@ -36,6 +36,7 @@ import {
     getScheduleDayLabel
 } from '../../constants/tourTemplate';
 import { tourSlotService } from '../../services/tourSlotService';
+import { formatDate } from '../../utils/formatters';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -234,7 +235,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             render: (date: string) => (
                 <Space>
                     <CalendarOutlined />
-                    {new Date(date).toLocaleDateString('vi-VN')}
+                    {formatDate(date)}
                 </Space>
             ),
             sorter: (a: TourSlot, b: TourSlot) => 

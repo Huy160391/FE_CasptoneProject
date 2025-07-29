@@ -44,6 +44,7 @@ import {
     canRespondToInvitation,
     validateInvitationAcceptance
 } from '@/services/tourguideService';
+import { getVietnamNow, toVietnamTime } from '../../utils/vietnamTimezone';
 import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
 import type { Dayjs } from 'dayjs';
 import './TourGuideInvitations.scss';
@@ -388,7 +389,7 @@ const TourGuideInvitationList: React.FC = () => {
                 }
 
                 const timeRemaining = formatTimeUntilExpiry(record.expiresAt);
-                const isExpiringSoon = new Date(record.expiresAt).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000;
+                const isExpiringSoon = toVietnamTime(new Date(record.expiresAt)).getTime() - getVietnamNow().getTime() < 24 * 60 * 60 * 1000;
 
                 return (
                     <Text style={{ color: isExpiringSoon ? '#faad14' : undefined }}>

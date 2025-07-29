@@ -14,7 +14,8 @@ import {
     Spin,
     Tooltip,
     Space,
-    notification
+    notification,
+    Modal
 } from 'antd';
 import {
     MailOutlined,
@@ -60,14 +61,124 @@ const TourGuideDashboard: React.FC = () => {
     const [tourDetailsModalVisible, setTourDetailsModalVisible] = useState(false);
     const [selectedTourDetailsId, setSelectedTourDetailsId] = useState<string>('');
     const [expandedInvitations, setExpandedInvitations] = useState<Set<string>>(new Set());
+    const [viewedMessages, setViewedMessages] = useState<Set<string>>(new Set());
+
+    // Helper function to show schedule conflict error
+    const showScheduleConflictError = (errorMessage: string) => {
+        console.log('🔍 Parsing schedule conflict error:', errorMessage);
+        
+        // Extract tour information from error message if available
+        let conflictingTours: string[] = [];
+        let currentTour = '';
+        
+        // Try to extract current tour info
+        const currentTourMatch = errorMessage.match(/Tour hiện tại:\s*([^.]+)/);
+        if (currentTourMatch) {
+            currentTour = currentTourMatch[1].trim();
+        }
+        
+        // Try to extract conflicting tour info - Updated regex for new format
+        const conflictTourMatch = errorMessage.match(/Tour bị trùng:\s*Tour\s*'([^']+)'\s*\(([^)]+)\)/);
+        if (conflictTourMatch) {
+            const tourName = conflictTourMatch[1];
+            const tourTime = conflictTourMatch[2];
+            conflictingTours.push(`${tourName} (${tourTime})`);
+        }
+        
+        // Fallback: try old regex pattern
+        if (conflictingTours.length === 0) {
+            const tourMatches = errorMessage.match(/Tour.*?(?=Tour|$)/g);
+            conflictingTours = tourMatches ? tourMatches.slice(0, 3) : [];
+        }
+        
+        console.log('🎯 Extracted conflict info:', { currentTour, conflictingTours });
+        
+        notification.error({
+            message: '⚠️ Xung đột lịch trình',
+            description: (
+                <div style={{ maxWidth: '450px' }}>
+                    <p><strong>Không thể chấp nhận lời mời này!</strong></p>
+                    <p>Bạn đã có tour khác trong cùng thời gian biểu.</p>
+                    
+                    {currentTour && (
+                        <div style={{ 
+                            background: '#e6f7ff', 
+                            border: '1px solid #91d5ff',
+                            borderRadius: '4px',
+                            padding: '8px',
+                            margin: '8px 0',
+                            fontSize: '12px'
+                        }}>
+                            <strong>🕒 Thời gian trùng lịch:</strong><br/>
+                            {currentTour}
+                        </div>
+                    )}
+                    
+                    {conflictingTours.length > 0 && (
+                        <div style={{ 
+                            background: '#fff2e8', 
+                            border: '1px solid #ffbb96',
+                            borderRadius: '4px',
+                            padding: '8px',
+                            margin: '8px 0',
+                            fontSize: '12px'
+                        }}>
+                            <strong>🚫 Tour đã đăng ký trùng lịch:</strong>
+                            <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                                {conflictingTours.map((tour, index) => (
+                                    <li key={index} style={{ marginBottom: '2px' }}>
+                                        {tour.trim()}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    
+                    {/* Show original message if parsing failed */}
+                    {conflictingTours.length === 0 && !currentTour && (
+                        <div style={{ 
+                            background: '#f6f6f6', 
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '4px',
+                            padding: '8px',
+                            margin: '8px 0',
+                            fontSize: '11px',
+                            fontFamily: 'monospace'
+                        }}>
+                            <strong>Chi tiết lỗi:</strong><br/>
+                            {errorMessage}
+                        </div>
+                    )}
+                    
+                    <div style={{ marginTop: '12px' }}>
+                        <strong>💡 Giải pháp:</strong>
+                        <ul style={{ marginLeft: '16px', marginTop: '4px', fontSize: '13px' }}>
+                            <li>Kiểm tra lịch trình trong trang <strong>"Lời mời đã chấp nhận"</strong></li>
+                            <li>Xem xét từ chối tour trùng lịch (nếu có thể)</li>
+                            <li>Liên hệ công ty để thay đổi thời gian tour</li>
+                            <li>Hoặc từ chối lời mời này nếu không thể sắp xếp</li>
+                        </ul>
+                    </div>
+                </div>
+            ),
+            duration: 15, // Show longer for important message
+        });
+    };
 
     // Toggle invitation expansion
-    const toggleInvitationExpansion = (invitationId: string) => {
+    const toggleInvitationExpansion = (invitationId: string, invitation?: any) => {
         const newExpanded = new Set(expandedInvitations);
         if (newExpanded.has(invitationId)) {
             newExpanded.delete(invitationId);
         } else {
             newExpanded.add(invitationId);
+            // Mark message as viewed when expanding (if invitation has message)
+            if (invitation?.invitationMessage) {
+                const newViewed = new Set(viewedMessages);
+                newViewed.add(invitationId);
+                setViewedMessages(newViewed);
+                console.log('📖 Message viewed for invitation:', invitationId);
+            }
         }
         setExpandedInvitations(newExpanded);
     };
@@ -124,11 +235,53 @@ const TourGuideDashboard: React.FC = () => {
         }
     };
 
+    // Show confirmation before accepting invitation
+    const showAcceptConfirmation = (invitation: any) => {
+        const tourTitle = invitation.tourDetails?.title || 'Tour không xác định';
+        const startDate = invitation.tourDetails?.startDate 
+            ? new Date(invitation.tourDetails.startDate).toLocaleDateString('vi-VN')
+            : 'Chưa xác định';
+        const endDate = invitation.tourDetails?.endDate 
+            ? new Date(invitation.tourDetails.endDate).toLocaleDateString('vi-VN')
+            : null;
+        const timeRange = endDate ? `${startDate} - ${endDate}` : startDate;
+        
+        Modal.confirm({
+            title: '🤝 Xác nhận chấp nhận lời mời',
+            content: (
+                <div>
+                    <p><strong>Tour:</strong> {tourTitle}</p>
+                    <p><strong>Thời gian:</strong> {timeRange}</p>
+                    <p><strong>Công ty:</strong> {invitation.createdBy?.name || 'Không xác định'}</p>
+                    <div style={{ 
+                        background: '#e6f7ff', 
+                        border: '1px solid #91d5ff',
+                        borderRadius: '4px',
+                        padding: '8px',
+                        marginTop: '12px'
+                    }}>
+                        <p style={{ margin: 0, fontSize: '13px' }}>
+                            ⚠️ <strong>Lưu ý:</strong> Hệ thống sẽ kiểm tra xung đột lịch trình. 
+                            Nếu bạn đã có tour khác trong cùng thời gian, lời mời sẽ không được chấp nhận.
+                        </p>
+                    </div>
+                </div>
+            ),
+            okText: 'Chấp nhận',
+            cancelText: 'Hủy',
+            okType: 'primary',
+            onOk: () => handleQuickAccept(invitation.id),
+            width: 480,
+        });
+    };
+
     // Quick accept invitation
     const handleQuickAccept = async (invitationId: string) => {
         setActionLoading(invitationId);
         try {
             const response = await acceptInvitation(invitationId, '');
+            console.log('🎯 Accept invitation response:', response);
+            
             if (response.success) {
                 notification.success({
                     message: 'Chấp nhận thành công',
@@ -136,16 +289,71 @@ const TourGuideDashboard: React.FC = () => {
                 });
                 loadDashboardData(false); // Refresh data without loading spinner
             } else {
+                // Handle specific error cases
+                const errorMessage = response.message || 'Không thể chấp nhận lời mời';
+                
+                // Check for schedule conflict error
+                if (errorMessage.includes('trùng thời gian biểu') || 
+                    errorMessage.includes('KHÔNG THỂ CHẤP NHẬN') ||
+                    errorMessage.includes('đồng ý tham gia tour khác') ||
+                    errorMessage.includes('Tour bị trùng') ||
+                    errorMessage.includes('conflict') || 
+                    errorMessage.includes('thời gian') ||
+                    response.statusCode === 400 ||
+                    response.statusCode === 409) {
+                    
+                    showScheduleConflictError(errorMessage);
+                } else {
+                    // Handle other errors
+                    notification.error({
+                        message: 'Lỗi chấp nhận',
+                        description: errorMessage,
+                    });
+                }
+            }
+        } catch (error: any) {
+            console.error('❌ Accept invitation error:', error);
+            
+            // Handle network/API errors
+            if (error.response) {
+                const { status, data } = error.response;
+                console.log('🔍 Error response:', { status, data });
+                
+                if ((status === 400 || status === 409) && data?.message) {
+                    // Handle 400 Bad Request and 409 Conflict with specific message
+                    if (data.message.includes('trùng thời gian biểu') || 
+                        data.message.includes('KHÔNG THỂ CHẤP NHẬN') ||
+                        data.message.includes('đồng ý tham gia tour khác') ||
+                        data.message.includes('Tour bị trùng') ||
+                        data.message.includes('conflict') || 
+                        data.message.includes('thời gian')) {
+                        
+                        showScheduleConflictError(data.message);
+                    } else {
+                        notification.error({
+                            message: status === 409 ? 'Xung đột dữ liệu' : 'Lỗi chấp nhận',
+                            description: data.message,
+                        });
+                    }
+                } else {
+                    notification.error({
+                        message: `Lỗi ${status}`,
+                        description: data?.message || 'Có lỗi xảy ra từ server',
+                    });
+                }
+            } else if (error.request) {
+                // Network error
                 notification.error({
-                    message: 'Lỗi chấp nhận',
-                    description: response.message || 'Không thể chấp nhận lời mời',
+                    message: 'Lỗi kết nối',
+                    description: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.',
+                });
+            } else {
+                // Other errors
+                notification.error({
+                    message: 'Lỗi hệ thống',
+                    description: 'Có lỗi không xác định xảy ra. Vui lòng thử lại.',
                 });
             }
-        } catch (error) {
-            notification.error({
-                message: 'Lỗi hệ thống',
-                description: 'Có lỗi xảy ra khi chấp nhận lời mời',
-            });
         } finally {
             setActionLoading(null);
         }
@@ -322,16 +530,22 @@ const TourGuideDashboard: React.FC = () => {
                                     renderItem={(invitation) => {
                                         const canRespond = canRespondToInvitation(invitation);
                                         const isUrgent = new Date(invitation.expiresAt).getTime() - Date.now() < 24 * 60 * 60 * 1000; // Less than 24 hours
-
                                         const isExpanded = expandedInvitations.has(invitation.id);
+                                        const hasViewedMessage = viewedMessages.has(invitation.id);
+                                        
+                                        // Can quick accept if: no message OR message has been viewed
+                                        const canQuickAccept = canRespond && (!invitation.invitationMessage || hasViewedMessage);
                                         
                                         // Debug log for invitation data
                                         console.log('🔍 Dashboard invitation item:', {
                                             id: invitation.id,
                                             title: invitation.tourDetails?.title,
                                             invitationMessage: invitation.invitationMessage,
+                                            hasMessage: !!invitation.invitationMessage,
+                                            messageLength: invitation.invitationMessage?.length || 0,
                                             tourDetails: invitation.tourDetails,
-                                            createdBy: invitation.createdBy
+                                            createdBy: invitation.createdBy,
+                                            fullInvitation: invitation
                                         });
                                         
                                         return (
@@ -343,19 +557,10 @@ const TourGuideDashboard: React.FC = () => {
                                                             <Button
                                                                 size="small"
                                                                 icon={isExpanded ? <RightOutlined style={{ transform: 'rotate(90deg)' }} /> : <RightOutlined />}
-                                                                onClick={() => toggleInvitationExpansion(invitation.id)}
+                                                                onClick={() => toggleInvitationExpansion(invitation.id, invitation)}
                                                             />
                                                         </Tooltip>
-                                                        <Tooltip title="Xem chi tiết lời mời">
-                                                            <Button
-                                                                size="small"
-                                                                icon={<EyeOutlined />}
-                                                                onClick={() => {
-                                                                    setSelectedInvitationId(invitation.id);
-                                                                    setDetailsModalVisible(true);
-                                                                }}
-                                                            />
-                                                        </Tooltip>
+
                                                         <Tooltip title="Xem chi tiết tour">
                                                             <Button
                                                                 size="small"
@@ -370,14 +575,18 @@ const TourGuideDashboard: React.FC = () => {
                                                         </Tooltip>
                                                         {canRespond && (
                                                             <>
-                                                                <Tooltip title={invitation.invitationMessage ? "Có tin nhắn đặc biệt - Vui lòng xem chi tiết" : "Chấp nhận nhanh"}>
+                                                                <Tooltip title={
+                                                                    !canQuickAccept && invitation.invitationMessage 
+                                                                        ? "Vui lòng mở rộng để xem tin nhắn trước khi chấp nhận" 
+                                                                        : "Chấp nhận lời mời"
+                                                                }>
                                                                     <Button
                                                                         type="primary"
                                                                         size="small"
                                                                         icon={<CheckOutlined />}
                                                                         loading={actionLoading === invitation.id}
-                                                                        disabled={!!invitation.invitationMessage}
-                                                                        onClick={() => handleQuickAccept(invitation.id)}
+                                                                        disabled={!canQuickAccept}
+                                                                        onClick={() => showAcceptConfirmation(invitation)}
                                                                     />
                                                                 </Tooltip>
                                                                 <Tooltip title="Từ chối">
@@ -409,7 +618,10 @@ const TourGuideDashboard: React.FC = () => {
                                                                 <Badge status="error" text="Gấp" />
                                                             )}
                                                             {invitation.invitationMessage && (
-                                                                <Badge status="processing" text="Có tin nhắn" />
+                                                                <Badge 
+                                                                    status={hasViewedMessage ? "success" : "processing"} 
+                                                                    text={hasViewedMessage ? "Đã xem" : "Có tin nhắn"} 
+                                                                />
                                                             )}
                                                         </Space>
                                                     }
@@ -429,8 +641,8 @@ const TourGuideDashboard: React.FC = () => {
                                                                 </div>
                                                                 {invitation.invitationMessage && (
                                                                     <div>
-                                                                        <Text strong style={{ color: '#1890ff' }}>
-                                                                            💬 Có tin nhắn đặc biệt từ công ty
+                                                                        <Text strong style={{ color: hasViewedMessage ? '#52c41a' : '#1890ff' }}>
+                                                                            {hasViewedMessage ? '✅ Đã xem tin nhắn từ công ty' : '💬 Có tin nhắn đặc biệt từ công ty'}
                                                                         </Text>
                                                                     </div>
                                                                 )}
@@ -441,11 +653,14 @@ const TourGuideDashboard: React.FC = () => {
                                                                         <div className="detail-section-title">
                                                                             📋 Chi tiết lời mời
                                                                         </div>
+
                                                                         <div className="detail-item">
                                                                             <span className="detail-label">Loại lời mời:</span>
                                                                             <Badge 
                                                                                 color={invitation.invitationType === 'Automatic' ? 'blue' : 'green'}
-                                                                                text={invitation.invitationType === 'Automatic' ? 'Tự động' : 'Thủ công'}
+                                                                                text={invitation.invitationType === 'Automatic' ? 'Tự động' : 
+                                                                                      invitation.invitationType === 'Manual' ? 'Thủ công' : 
+                                                                                      invitation.invitationType || 'Không xác định'}
                                                                             />
                                                                         </div>
                                                                         <div className="detail-item">
@@ -532,12 +747,13 @@ const TourGuideDashboard: React.FC = () => {
                                                                                        invitation.status === 'Accepted' ? 'Đã chấp nhận' : 'Đã từ chối'}
                                                                             />
                                                                         </div>
-                                                                        {invitation.invitationMessage && (
-                                                                            <div className="detail-item" style={{ marginTop: 12 }}>
-                                                                                <div style={{ width: '100%' }}>
-                                                                                    <div className="detail-section-title" style={{ fontSize: '14px', marginBottom: 8 }}>
-                                                                                        💬 Tin nhắn từ công ty
-                                                                                    </div>
+                                                                        {/* Always show invitation message section for debugging */}
+                                                                        <div className="detail-item" style={{ marginTop: 12 }}>
+                                                                            <div style={{ width: '100%' }}>
+                                                                                <div className="detail-section-title" style={{ fontSize: '14px', marginBottom: 8 }}>
+                                                                                    💬 Tin nhắn từ công ty
+                                                                                </div>
+                                                                                {invitation.invitationMessage ? (
                                                                                     <div style={{ 
                                                                                         background: '#e6f7ff', 
                                                                                         border: '1px solid #91d5ff',
@@ -548,9 +764,22 @@ const TourGuideDashboard: React.FC = () => {
                                                                                     }}>
                                                                                         {invitation.invitationMessage}
                                                                                     </div>
-                                                                                </div>
+                                                                                ) : (
+                                                                                    <div style={{ 
+                                                                                        background: '#f6f6f6', 
+                                                                                        border: '1px solid #d9d9d9',
+                                                                                        borderRadius: '6px',
+                                                                                        padding: '12px',
+                                                                                        fontSize: '13px',
+                                                                                        color: '#999',
+                                                                                        fontStyle: 'italic'
+                                                                                    }}>
+                                                                                        Không có tin nhắn đặc biệt
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
-                                                                        )}
+                                                                        </div>
+
                                                                     </div>
                                                                 )}
                                                             </Space>

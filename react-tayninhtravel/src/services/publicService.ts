@@ -103,9 +103,8 @@ export const publicService = {
         try {
             const formData = new FormData();
             formData.append('files', file); // Đúng tên trường
-            const response = await axiosInstance.post<any>('Image/Upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const response = await axiosInstance.post<any>('Image/Upload', formData);
+            
             // API trả về { urls: string[] }
             if (response.data?.urls && Array.isArray(response.data.urls) && response.data.urls.length > 0) {
                 return response.data.urls[0];
@@ -123,9 +122,7 @@ export const publicService = {
         try {
             const formData = new FormData();
             files.forEach(file => formData.append('files', file));
-            const response = await axiosInstance.post<any>('Image/Upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const response = await axiosInstance.post<any>('Image/Upload', formData);
             if (response.data?.urls && Array.isArray(response.data.urls)) {
                 return response.data.urls;
             }

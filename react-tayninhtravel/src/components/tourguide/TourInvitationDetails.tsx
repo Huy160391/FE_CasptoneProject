@@ -35,6 +35,7 @@ import {
     formatTimeUntilExpiry,
     canRespondToInvitation
 } from '@/services/tourguideService';
+import { formatVietnamDateTime, getVietnamNow, toVietnamTime } from '../../utils/vietnamTimezone';
 import TourDetailsViewModal from './TourDetailsViewModal';
 import './TourInvitationDetails.scss';
 
@@ -278,7 +279,7 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                     {invitationData && (
                         <div className="invitation-details-content">
                             {/* Status Alert */}
-                            {invitationData.status === 'Pending' && new Date(invitationData.expiresAt) > new Date() && (
+                            {invitationData.status === 'Pending' && toVietnamTime(new Date(invitationData.expiresAt)) > getVietnamNow() && (
                                 <Alert
                                     message="Lời mời đang chờ phản hồi"
                                     description={`Hạn phản hồi: ${timeUntilExpiry}`}
@@ -334,13 +335,13 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                                             <Descriptions.Item label="Thời gian mời">
                                                 <Space>
                                                     <CalendarOutlined />
-                                                    {new Date(invitationData.invitedAt).toLocaleString('vi-VN')}
+                                                    {formatVietnamDateTime(invitationData.invitedAt)}
                                                 </Space>
                                             </Descriptions.Item>
                                             <Descriptions.Item label="Hạn phản hồi">
                                                 <Space>
                                                     <ClockCircleOutlined />
-                                                    <span>{new Date(invitationData.expiresAt).toLocaleString('vi-VN')}</span>
+                                                    <span>{formatVietnamDateTime(invitationData.expiresAt)}</span>
                                                     {invitationData.status === 'Pending' && (
                                                         <Badge
                                                             count={timeUntilExpiry}
