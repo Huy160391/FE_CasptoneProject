@@ -182,6 +182,72 @@
                     }
                 }
             }
+
+            // Expanded invitation details styling
+            .expanded-details {
+                border-top: 1px solid #f0f0f0;
+                padding-top: 8px;
+                margin-top: 8px;
+                background: #fafafa;
+                border-radius: 6px;
+                padding: 12px;
+                animation: expandDetails 0.3s ease-out;
+
+                .detail-section-title {
+                    color: #1890ff;
+                    font-weight: 600;
+                    margin-bottom: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+
+                    &::before {
+                        content: '';
+                        width: 3px;
+                        height: 16px;
+                        background: #1890ff;
+                        border-radius: 2px;
+                    }
+                }
+
+                .detail-item {
+                    margin-bottom: 6px;
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 8px;
+
+                    .detail-label {
+                        font-weight: 500;
+                        color: #595959;
+                        min-width: 100px;
+                        flex-shrink: 0;
+                    }
+
+                    .detail-value {
+                        flex: 1;
+                        
+                        &.price {
+                            color: #52c41a;
+                            font-weight: bold;
+                        }
+
+                        &.urgent {
+                            color: #ff4d4f;
+                        }
+
+                        &.warning {
+                            color: #faad14;
+                        }
+                    }
+                }
+
+                .ant-badge {
+                    .ant-badge-status-dot {
+                        width: 8px;
+                        height: 8px;
+                    }
+                }
+            }
         }
     }
 
@@ -381,6 +447,19 @@
         to {
             opacity: 1;
             transform: scaleY(1);
+        }
+    }
+
+    @keyframes expandDetails {
+        from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            max-height: 500px;
+            transform: translateY(0);
         }
     }
 

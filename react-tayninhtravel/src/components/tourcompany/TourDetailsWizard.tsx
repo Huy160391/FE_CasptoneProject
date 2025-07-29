@@ -19,7 +19,8 @@ import {
     Alert,
     Spin,
     Upload,
-    Image
+    Image,
+    Tooltip
 } from 'antd';
 import {
     PlusOutlined,
@@ -384,8 +385,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 activity: values.activity,
                 location: values.location || '',
                 specialtyShopId: values.specialtyShopId || null,
-                sortOrder: wizardData.timeline.length + 1,
-                estimatedDuration: values.estimatedDuration || 60
+                sortOrder: wizardData.timeline.length + 1
             };
 
             setWizardData(prev => ({
@@ -634,7 +634,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                         </Col>
                     </Row>
                     <Row gutter={16}>
-                        <Col span={12}>
+                        <Col span={18}>
                             <Form.Item
                                 name="specialtyShopId"
                                 label="SpecialtyShop (Tùy chọn)"
@@ -652,19 +652,6 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                                         </Option>
                                     ))}
                                 </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item
-                                name="estimatedDuration"
-                                label="Thời lượng (phút)"
-                            >
-                                <InputNumber
-                                    min={15}
-                                    max={480}
-                                    placeholder="60"
-                                    style={{ width: '100%' }}
-                                />
                             </Form.Item>
                         </Col>
                         <Col span={6}>
@@ -692,58 +679,63 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     rowKey={(_record, index) => index || 0}
                     columns={[
                         {
-                            title: 'Thứ tự',
-                            dataIndex: 'orderIndex',
-                            width: 80,
+                            title: '#',
+                            width: 50,
                             render: (_value, _record, index) => (
-                                <Tag color="blue">{index + 1}</Tag>
+                                <Tag color="blue" style={{ fontSize: '12px' }}>{index + 1}</Tag>
                             )
                         },
                         {
-                            title: 'Thời gian',
-                            dataIndex: 'checkInTime',
-                            width: 100,
-                            render: (time) => (
-                                <Space>
-                                    <ClockCircleOutlined />
-                                    {time}
-                                </Space>
+                            title: 'Thời gian & Hoạt động',
+                            width: 300,
+                            render: (_, record) => (
+                                <div>
+                                    <div style={{ marginBottom: 4 }}>
+                                        <Space size="small">
+                                            <ClockCircleOutlined style={{ color: '#1890ff' }} />
+                                            <strong>{record.checkInTime}</strong>
+                                        </Space>
+                                    </div>
+                                    <div style={{ color: '#666' }}>
+                                        {record.activity}
+                                    </div>
+                                </div>
                             )
                         },
                         {
-                            title: 'Hoạt động',
-                            dataIndex: 'activity',
-                            ellipsis: true
-                        },
-                        {
-                            title: 'Địa điểm',
-                            dataIndex: 'location',
-                            width: 150,
-                            ellipsis: true
-                        },
-                        {
-                            title: 'Shop',
-                            dataIndex: 'specialtyShopId',
-                            width: 120,
-                            render: (shopId) => {
-                                if (!shopId) return '-';
-                                const shop = specialtyShops.find(s => s.id === shopId);
-                                return shop ? (
-                                    <Tag color="green" icon={<ShopOutlined />}>
-                                        {shop.shopName}
-                                    </Tag>
-                                ) : '-';
+                            title: 'Địa điểm & Shop',
+                            width: 250,
+                            render: (_, record) => {
+                                const shop = record.specialtyShopId
+                                    ? specialtyShops.find(s => s.id === record.specialtyShopId)
+                                    : null;
+
+                                return (
+                                    <div>
+                                        <div style={{ marginBottom: 4 }}>
+                                            📍 {record.location || 'Chưa có địa điểm'}
+                                        </div>
+                                        {shop && (
+                                            <Tooltip title={shop.shopName} placement="top">
+                                                <Tag
+                                                    color="green"
+                                                    icon={<ShopOutlined />}
+                                                    style={{ cursor: 'pointer', fontSize: '12px' }}
+                                                >
+                                                    {shop.shopName.length > 20
+                                                        ? `${shop.shopName.substring(0, 20)}...`
+                                                        : shop.shopName}
+                                                </Tag>
+                                            </Tooltip>
+                                        )}
+                                    </div>
+                                );
                             }
-                        },
-                        {
-                            title: 'Thời lượng',
-                            dataIndex: 'estimatedDuration',
-                            width: 100,
-                            render: (duration) => duration ? `${duration}p` : '-'
                         },
                         {
                             title: 'Thao tác',
                             width: 80,
+                            fixed: 'right',
                             render: (_, _record, index) => (
                                 <Button
                                     type="text"

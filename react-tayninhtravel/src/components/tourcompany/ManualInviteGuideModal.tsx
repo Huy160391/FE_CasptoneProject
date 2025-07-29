@@ -15,7 +15,8 @@ import {
     Row,
     Col,
     Statistic,
-    Empty
+    Empty,
+    Form
 } from 'antd';
 import {
     UserOutlined,
@@ -26,13 +27,16 @@ import {
     StarOutlined,
     CalendarOutlined,
     CheckCircleOutlined,
-    CloseCircleOutlined
+    CloseCircleOutlined,
+    ToolOutlined,
+    TrophyOutlined
 } from '@ant-design/icons';
+import SkillsDisplay from '../common/SkillsDisplay';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getTourGuides, getAvailableTourGuides, manualInviteGuide } from '../../services/tourcompanyService';
 
 const { Text } = Typography;
-const { Search } = Input;
+const { Search, TextArea } = Input;
 
 interface TourGuide {
     id: string;
@@ -41,8 +45,8 @@ interface TourGuide {
     phoneNumber: string;
     isActive: boolean;
     isAvailable: boolean;
-    experienceYears: number;
-    specialization?: string;
+    experience: string; // Full experience description from backend
+    specialization?: string; // Contains skills data from backend (comma-separated)
     averageRating?: number;
     completedTours: number;
     joinedDate: string;
@@ -74,7 +78,10 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
     const [inviting, setInviting] = useState<string | null>(null);
     const [searchText, setSearchText] = useState('');
     const [showAvailableOnly, setShowAvailableOnly] = useState(false);
+    const [messageModalVisible, setMessageModalVisible] = useState(false);
+    const [selectedGuide, setSelectedGuide] = useState<TourGuide | null>(null);
     const { token } = useAuthStore();
+    const [form] = Form.useForm();
 
     useEffect(() => {
         if (visible && tourDetailsId) {
@@ -146,18 +153,34 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
         setFilteredGuides(filtered);
     };
 
-    const handleInviteGuide = async (guideId: string) => {
-        if (!tourDetailsId || !token) {
+    const handleInviteGuide = (guide: TourGuide) => {
+        setSelectedGuide(guide);
+        setMessageModalVisible(true);
+        form.resetFields();
+    };
+
+    const handleConfirmInvite = async () => {
+        if (!tourDetailsId || !token || !selectedGuide) {
             message.error('Thiếu thông tin cần thiết để gửi lời mời');
             return;
         }
 
-        setInviting(guideId);
         try {
-            const response = await manualInviteGuide(tourDetailsId, guideId, token);
+            const values = await form.validateFields();
+            setInviting(selectedGuide.id);
+            
+            const response = await manualInviteGuide(
+                tourDetailsId, 
+                selectedGuide.id, 
+                values.invitationMessage || '', 
+                token
+            );
 
             if (response.success) {
                 message.success('Đã gửi lời mời thành công! Hướng dẫn viên sẽ nhận được email thông báo.');
+                setMessageModalVisible(false);
+                setSelectedGuide(null);
+                form.resetFields();
                 onSuccess();
             } else {
                 message.error(response.message || 'Có lỗi xảy ra khi gửi lời mời');
@@ -170,10 +193,19 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
         }
     };
 
+    const handleCancelInvite = () => {
+        setMessageModalVisible(false);
+        setSelectedGuide(null);
+        form.resetFields();
+    };
+
     const handleCancel = () => {
         setSearchText('');
         setGuides([]);
         setFilteredGuides([]);
+        setMessageModalVisible(false);
+        setSelectedGuide(null);
+        form.resetFields();
         onCancel();
     };
 
@@ -187,10 +219,26 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
                     <div>
                         <div style={{ fontWeight: 'bold' }}>{record.fullName}</div>
                         <Text type="secondary" style={{ fontSize: '12px' }}>
-                            {record.experienceYears} năm kinh nghiệm
+                            ID: {record.id.slice(0, 8)}...
                         </Text>
                     </div>
                 </Space>
+            ),
+        },
+        {
+            title: 'Kinh nghiệm',
+            key: 'experience',
+            width: 250,
+            render: (_: any, record: TourGuide) => (
+                <div>
+                    <div style={{ marginBottom: 4 }}>
+                        <TrophyOutlined style={{ marginRight: 4, color: '#fa8c16' }} />
+                        <Text strong style={{ fontSize: '12px' }}>Kinh nghiệm:</Text>
+                    </div>
+                    <Text style={{ fontSize: '11px', lineHeight: '1.4' }}>
+                        {record.experience || 'Chưa có thông tin kinh nghiệm'}
+                    </Text>
+                </div>
             ),
         },
         {
@@ -206,6 +254,30 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
                         <PhoneOutlined style={{ marginRight: 8, color: '#52c41a' }} />
                         <Text style={{ fontSize: '12px' }}>{record.phoneNumber}</Text>
                     </div>
+                </div>
+            ),
+        },
+        {
+            title: 'Kỹ năng',
+            key: 'skills',
+            width: 200,
+            render: (_: any, record: TourGuide) => (
+                <div>
+                    <div style={{ marginBottom: 4 }}>
+                        <ToolOutlined style={{ marginRight: 4, color: '#722ed1' }} />
+                        <Text strong style={{ fontSize: '12px' }}>Kỹ năng:</Text>
+                    </div>
+                    {record.specialization ? (
+                        <SkillsDisplay
+                            skillsString={record.specialization}
+                            maxDisplay={2}
+                            size="small"
+                        />
+                    ) : (
+                        <Text type="secondary" style={{ fontSize: '11px' }}>
+                            Chưa có kỹ năng
+                        </Text>
+                    )}
                 </div>
             ),
         },
@@ -248,7 +320,7 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
                 <Button
                     type="primary"
                     icon={<SendOutlined />}
-                    onClick={() => handleInviteGuide(record.id)}
+                    onClick={() => handleInviteGuide(record)}
                     loading={inviting === record.id}
                     disabled={!record.isActive || !record.isAvailable}
                     size="small"
@@ -273,7 +345,7 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
             open={visible}
             onCancel={handleCancel}
             footer={null}
-            width={1000}
+            width={1450}
             destroyOnClose
         >
             {tourInfo && (
@@ -354,9 +426,85 @@ const ManualInviteGuideModal: React.FC<ManualInviteGuideModalProps> = ({
                             showTotal: (total) => `Tổng ${total} hướng dẫn viên`
                         }}
                         size="small"
+                        scroll={{ x: 1350 }}
                     />
                 )}
             </Spin>
+
+            {/* Modal nhập tin nhắn mời */}
+            <Modal
+                title={
+                    <Space>
+                        <SendOutlined />
+                        <span>Gửi lời mời đến hướng dẫn viên</span>
+                    </Space>
+                }
+                open={messageModalVisible}
+                onCancel={handleCancelInvite}
+                footer={[
+                    <Button key="cancel" onClick={handleCancelInvite}>
+                        Hủy
+                    </Button>,
+                    <Button
+                        key="submit"
+                        type="primary"
+                        loading={inviting !== null}
+                        onClick={handleConfirmInvite}
+                        icon={<SendOutlined />}
+                    >
+                        Gửi lời mời
+                    </Button>
+                ]}
+                width={600}
+                destroyOnClose
+            >
+                {selectedGuide && (
+                    <>
+                        <Card size="small" style={{ marginBottom: 16 }}>
+                            <Space>
+                                <Avatar size="large" icon={<UserOutlined />} />
+                                <div>
+                                    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                                        {selectedGuide.fullName}
+                                    </div>
+                                    <Text type="secondary">
+                                        <MailOutlined style={{ marginRight: 4 }} />
+                                        {selectedGuide.email}
+                                    </Text>
+                                    <br />
+                                    <Text type="secondary">
+                                        <PhoneOutlined style={{ marginRight: 4 }} />
+                                        {selectedGuide.phoneNumber}
+                                    </Text>
+                                </div>
+                            </Space>
+                        </Card>
+
+                        <Form form={form} layout="vertical">
+                            <Form.Item
+                                name="invitationMessage"
+                                label="Tin nhắn mời (tùy chọn)"
+                                extra="Bạn có thể thêm tin nhắn cá nhân để thu hút hướng dẫn viên tham gia tour này"
+                            >
+                                <TextArea
+                                    rows={4}
+                                    placeholder="Ví dụ: Chúng tôi rất mong được hợp tác với bạn cho tour này. Đây là một tour đặc biệt và chúng tôi tin rằng bạn sẽ là người phù hợp nhất..."
+                                    maxLength={500}
+                                    showCount
+                                />
+                            </Form.Item>
+                        </Form>
+
+                        <Alert
+                            message="Lưu ý"
+                            description="Hướng dẫn viên sẽ nhận được email thông báo kèm theo tin nhắn này. Lời mời sẽ có hiệu lực trong 24 giờ."
+                            type="info"
+                            showIcon
+                            style={{ marginTop: 16 }}
+                        />
+                    </>
+                )}
+            </Modal>
         </Modal>
     );
 };

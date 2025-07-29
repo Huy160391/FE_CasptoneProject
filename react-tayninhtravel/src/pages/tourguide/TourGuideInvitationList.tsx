@@ -78,6 +78,7 @@ const TourGuideInvitationList: React.FC = () => {
     const [invitationDetails, setInvitationDetails] = useState<any>(null);
     const [validationResult, setValidationResult] = useState<any>(null);
     const [validationLoading, setValidationLoading] = useState(false);
+    const [hasViewedInvitationMessage, setHasViewedInvitationMessage] = useState(false);
 
     // Prevent unused variable warnings
     void invitationDetails;
@@ -413,6 +414,12 @@ const TourGuideInvitationList: React.FC = () => {
                                         icon={<CheckOutlined />}
                                         onClick={() => {
                                             setSelectedInvitation(record);
+                                            // Reset viewed state and check if invitation has message
+                                            if (record.invitationMessage) {
+                                                setHasViewedInvitationMessage(false);
+                                            } else {
+                                                setHasViewedInvitationMessage(true);
+                                            }
                                             setAcceptModalVisible(true);
                                         }}
                                     >
@@ -661,6 +668,9 @@ const TourGuideInvitationList: React.FC = () => {
                 confirmLoading={actionLoading}
                 okText="Chấp nhận"
                 cancelText="Hủy"
+                okButtonProps={{ 
+                    disabled: !hasViewedInvitationMessage 
+                }}
             >
                 {validationLoading ? (
                     <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -680,6 +690,50 @@ const TourGuideInvitationList: React.FC = () => {
                             Bạn có chắc chắn muốn chấp nhận lời mời tham gia tour{' '}
                             <strong>{selectedInvitation?.tourDetails.title}</strong>?
                         </p>
+                        
+                        {/* Display invitation message if exists */}
+                        {selectedInvitation?.invitationMessage && (
+                            <div style={{ marginBottom: 16 }}>
+                                <Alert
+                                    message="Tin nhắn đặc biệt từ công ty tour"
+                                    description={
+                                        <div>
+                                            <p style={{ marginBottom: 12 }}>
+                                                {selectedInvitation.invitationMessage}
+                                            </p>
+                                            {!hasViewedInvitationMessage && (
+                                                <Button
+                                                    type="primary"
+                                                    size="small"
+                                                    icon={<CheckOutlined />}
+                                                    onClick={() => setHasViewedInvitationMessage(true)}
+                                                >
+                                                    Đã đọc tin nhắn
+                                                </Button>
+                                            )}
+                                            {hasViewedInvitationMessage && (
+                                                <Tag color="green" icon={<CheckOutlined />}>
+                                                    Đã đọc
+                                                </Tag>
+                                            )}
+                                        </div>
+                                    }
+                                    type="info"
+                                    showIcon
+                                />
+                            </div>
+                        )}
+
+                        {/* Warning if message not read */}
+                        {selectedInvitation?.invitationMessage && !hasViewedInvitationMessage && (
+                            <Alert
+                                message="Vui lòng đọc tin nhắn từ công ty tour trước khi chấp nhận lời mời"
+                                type="warning"
+                                showIcon
+                                style={{ marginBottom: 16 }}
+                            />
+                        )}
+                        
                         <TextArea
                             placeholder="Tin nhắn chấp nhận (tùy chọn)"
                             value={acceptanceMessage}

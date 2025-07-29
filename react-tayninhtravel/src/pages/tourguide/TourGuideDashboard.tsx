@@ -59,6 +59,18 @@ const TourGuideDashboard: React.FC = () => {
     const [selectedInvitationId, setSelectedInvitationId] = useState<string>('');
     const [tourDetailsModalVisible, setTourDetailsModalVisible] = useState(false);
     const [selectedTourDetailsId, setSelectedTourDetailsId] = useState<string>('');
+    const [expandedInvitations, setExpandedInvitations] = useState<Set<string>>(new Set());
+
+    // Toggle invitation expansion
+    const toggleInvitationExpansion = (invitationId: string) => {
+        const newExpanded = new Set(expandedInvitations);
+        if (newExpanded.has(invitationId)) {
+            newExpanded.delete(invitationId);
+        } else {
+            newExpanded.add(invitationId);
+        }
+        setExpandedInvitations(newExpanded);
+    };
 
     // Load dashboard data
     const loadDashboardData = async (showLoading = true) => {
@@ -71,11 +83,15 @@ const TourGuideDashboard: React.FC = () => {
             if (pendingResponse.success) {
                 // Check if response has data wrapper (frontend structure)
                 if (pendingResponse.data) {
-                    setPendingInvitations(pendingResponse.data.invitations?.slice(0, 5) || []);
+                    const invitations = pendingResponse.data.invitations?.slice(0, 5) || [];
+                    console.log('📊 Dashboard invitations data:', invitations);
+                    setPendingInvitations(invitations);
                 }
                 // Check if response has invitations directly (backend structure)
                 else if ((pendingResponse as any).invitations) {
-                    setPendingInvitations((pendingResponse as any).invitations?.slice(0, 5) || []);
+                    const invitations = (pendingResponse as any).invitations?.slice(0, 5) || [];
+                    console.log('📊 Dashboard invitations direct:', invitations);
+                    setPendingInvitations(invitations);
                 }
             }
 
@@ -307,11 +323,29 @@ const TourGuideDashboard: React.FC = () => {
                                         const canRespond = canRespondToInvitation(invitation);
                                         const isUrgent = new Date(invitation.expiresAt).getTime() - Date.now() < 24 * 60 * 60 * 1000; // Less than 24 hours
 
+                                        const isExpanded = expandedInvitations.has(invitation.id);
+                                        
+                                        // Debug log for invitation data
+                                        console.log('🔍 Dashboard invitation item:', {
+                                            id: invitation.id,
+                                            title: invitation.tourDetails?.title,
+                                            invitationMessage: invitation.invitationMessage,
+                                            tourDetails: invitation.tourDetails,
+                                            createdBy: invitation.createdBy
+                                        });
+                                        
                                         return (
                                             <List.Item
                                                 className={`invitation-item ${isUrgent ? 'urgent' : ''}`}
                                                 actions={[
                                                     <Space key="actions">
+                                                        <Tooltip title={isExpanded ? "Thu gọn thông tin" : "Xem thêm thông tin"}>
+                                                            <Button
+                                                                size="small"
+                                                                icon={isExpanded ? <RightOutlined style={{ transform: 'rotate(90deg)' }} /> : <RightOutlined />}
+                                                                onClick={() => toggleInvitationExpansion(invitation.id)}
+                                                            />
+                                                        </Tooltip>
                                                         <Tooltip title="Xem chi tiết lời mời">
                                                             <Button
                                                                 size="small"
@@ -336,12 +370,13 @@ const TourGuideDashboard: React.FC = () => {
                                                         </Tooltip>
                                                         {canRespond && (
                                                             <>
-                                                                <Tooltip title="Chấp nhận nhanh">
+                                                                <Tooltip title={invitation.invitationMessage ? "Có tin nhắn đặc biệt - Vui lòng xem chi tiết" : "Chấp nhận nhanh"}>
                                                                     <Button
                                                                         type="primary"
                                                                         size="small"
                                                                         icon={<CheckOutlined />}
                                                                         loading={actionLoading === invitation.id}
+                                                                        disabled={!!invitation.invitationMessage}
                                                                         onClick={() => handleQuickAccept(invitation.id)}
                                                                     />
                                                                 </Tooltip>
@@ -369,25 +404,156 @@ const TourGuideDashboard: React.FC = () => {
                                                     }
                                                     title={
                                                         <Space>
-                                                            <span>{invitation.tourDetails.title}</span>
+                                                            <span>{invitation.tourDetails?.title || 'Tour không xác định'}</span>
                                                             {isUrgent && (
                                                                 <Badge status="error" text="Gấp" />
+                                                            )}
+                                                            {invitation.invitationMessage && (
+                                                                <Badge status="processing" text="Có tin nhắn" />
                                                             )}
                                                         </Space>
                                                     }
                                                     description={
                                                         <div>
-                                                            <Text type="secondary">
-                                                                Từ: {invitation.createdBy.name}
-                                                            </Text>
-                                                            <br />
-                                                            <Text type={isUrgent ? "danger" : "warning"}>
-                                                                <ClockCircleOutlined /> Còn lại: {formatTimeUntilExpiry(invitation.expiresAt)}
-                                                            </Text>
-                                                            <br />
-                                                            <Text type="secondary" style={{ fontSize: '12px' }}>
-                                                                Lời mời: {new Date(invitation.invitedAt).toLocaleDateString('vi-VN')}
-                                                            </Text>
+                                                            <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                                                                {/* Always show basic info */}
+                                                                <div>
+                                                                    <Text strong>Công ty: </Text>
+                                                                    <Text type="secondary">{invitation.createdBy?.name || 'Không xác định'}</Text>
+                                                                </div>
+                                                                <div>
+                                                                    <Text strong>Thời gian còn lại: </Text>
+                                                                    <Text type={isUrgent ? "danger" : "warning"}>
+                                                                        <ClockCircleOutlined /> {formatTimeUntilExpiry(invitation.expiresAt)}
+                                                                    </Text>
+                                                                </div>
+                                                                {invitation.invitationMessage && (
+                                                                    <div>
+                                                                        <Text strong style={{ color: '#1890ff' }}>
+                                                                            💬 Có tin nhắn đặc biệt từ công ty
+                                                                        </Text>
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {/* Show detailed info only when expanded */}
+                                                                {isExpanded && (
+                                                                    <div className="expanded-details">
+                                                                        <div className="detail-section-title">
+                                                                            📋 Chi tiết lời mời
+                                                                        </div>
+                                                                        <div className="detail-item">
+                                                                            <span className="detail-label">Loại lời mời:</span>
+                                                                            <Badge 
+                                                                                color={invitation.invitationType === 'Automatic' ? 'blue' : 'green'}
+                                                                                text={invitation.invitationType === 'Automatic' ? 'Tự động' : 'Thủ công'}
+                                                                            />
+                                                                        </div>
+                                                                        <div className="detail-item">
+                                                                            <span className="detail-label">Thời gian tour:</span>
+                                                                            <span className="detail-value">
+                                                                                {invitation.tourDetails?.startDate ? 
+                                                                                    new Date(invitation.tourDetails.startDate).toLocaleDateString('vi-VN') : 
+                                                                                    'Chưa xác định'
+                                                                                }
+                                                                                {invitation.tourDetails?.endDate && 
+                                                                                    ` - ${new Date(invitation.tourDetails.endDate).toLocaleDateString('vi-VN')}`
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                        {invitation.tourDetails?.location && (
+                                                                            <div className="detail-item">
+                                                                                <span className="detail-label">Địa điểm:</span>
+                                                                                <span className="detail-value">{invitation.tourDetails.location}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {invitation.tourDetails?.price && (
+                                                                            <div className="detail-item">
+                                                                                <span className="detail-label">Giá tour:</span>
+                                                                                <span className="detail-value price">
+                                                                                    {invitation.tourDetails.price.toLocaleString('vi-VN')} VNĐ
+                                                                                </span>
+                                                                            </div>
+                                                                        )}
+                                                                        {invitation.tourDetails?.maxParticipants && (
+                                                                            <div className="detail-item">
+                                                                                <span className="detail-label">Số khách tối đa:</span>
+                                                                                <span className="detail-value">{invitation.tourDetails.maxParticipants} người</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {invitation.tourDetails?.duration && (
+                                                                            <div className="detail-item">
+                                                                                <span className="detail-label">Thời lượng:</span>
+                                                                                <span className="detail-value">{invitation.tourDetails.duration}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {invitation.tourDetails?.description && (
+                                                                            <div className="detail-item">
+                                                                                <span className="detail-label">Mô tả:</span>
+                                                                                <span className="detail-value" style={{ 
+                                                                                    display: 'block', 
+                                                                                    marginTop: '4px',
+                                                                                    fontSize: '12px',
+                                                                                    color: '#666',
+                                                                                    maxHeight: '60px',
+                                                                                    overflow: 'hidden',
+                                                                                    textOverflow: 'ellipsis'
+                                                                                }}>
+                                                                                    {invitation.tourDetails.description.length > 100 
+                                                                                        ? `${invitation.tourDetails.description.substring(0, 100)}...`
+                                                                                        : invitation.tourDetails.description
+                                                                                    }
+                                                                                </span>
+                                                                            </div>
+                                                                        )}
+                                                                        {invitation.tourDetails?.category && (
+                                                                            <div className="detail-item">
+                                                                                <span className="detail-label">Danh mục:</span>
+                                                                                <span className="detail-value">{invitation.tourDetails.category}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="detail-item">
+                                                                            <span className="detail-label">Ngày mời:</span>
+                                                                            <span className="detail-value" style={{ fontSize: '12px' }}>
+                                                                                {new Date(invitation.invitedAt).toLocaleString('vi-VN')}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="detail-item">
+                                                                            <span className="detail-label">Hết hạn:</span>
+                                                                            <span className={`detail-value ${isUrgent ? 'urgent' : 'warning'}`} style={{ fontSize: '12px' }}>
+                                                                                {new Date(invitation.expiresAt).toLocaleString('vi-VN')}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="detail-item">
+                                                                            <span className="detail-label">Trạng thái:</span>
+                                                                            <Badge 
+                                                                                color={invitation.status === 'Pending' ? 'orange' : 
+                                                                                       invitation.status === 'Accepted' ? 'green' : 'red'}
+                                                                                text={invitation.status === 'Pending' ? 'Chờ phản hồi' :
+                                                                                       invitation.status === 'Accepted' ? 'Đã chấp nhận' : 'Đã từ chối'}
+                                                                            />
+                                                                        </div>
+                                                                        {invitation.invitationMessage && (
+                                                                            <div className="detail-item" style={{ marginTop: 12 }}>
+                                                                                <div style={{ width: '100%' }}>
+                                                                                    <div className="detail-section-title" style={{ fontSize: '14px', marginBottom: 8 }}>
+                                                                                        💬 Tin nhắn từ công ty
+                                                                                    </div>
+                                                                                    <div style={{ 
+                                                                                        background: '#e6f7ff', 
+                                                                                        border: '1px solid #91d5ff',
+                                                                                        borderRadius: '6px',
+                                                                                        padding: '12px',
+                                                                                        fontSize: '13px',
+                                                                                        lineHeight: '1.5'
+                                                                                    }}>
+                                                                                        {invitation.invitationMessage}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </Space>
                                                         </div>
                                                     }
                                                 />

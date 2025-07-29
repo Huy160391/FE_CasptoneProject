@@ -49,7 +49,6 @@ interface TimelineFormItem {
     location?: string;
     specialtyShopId?: string;
     sortOrder: number; // Use sortOrder to match API
-    estimatedDuration?: number; // in minutes
     isNew?: boolean;
 }
 
@@ -75,7 +74,6 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
                 location: item.location,
                 specialtyShopId: item.specialtyShopId || undefined,
                 sortOrder: item.sortOrder || item.orderIndex || 1,
-                estimatedDuration: item.estimatedDuration,
                 isNew: false
             }));
         setItems(initialItems);
@@ -87,7 +85,6 @@ const TimelineBuilder: React.FC<TimelineBuilderProps> = ({
             activity: '',
             location: '',
             sortOrder: items.length + 1,
-            estimatedDuration: 30, // Default 30 minutes
             isNew: true
         };
         setItems([...items, newItem]);
