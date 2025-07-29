@@ -17,7 +17,9 @@ const BloggerHeader = () => {
                 <Space className="header-actions" size="middle">
                     <ThemeToggle />
                     <LanguageSwitcher />
-                    <NotificationBell />
+                    <div className="notification-bell">
+                        <NotificationBell />
+                    </div>
                 </Space>
             </div>
         </Header>

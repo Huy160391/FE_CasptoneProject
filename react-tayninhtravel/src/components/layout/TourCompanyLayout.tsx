@@ -164,7 +164,9 @@ const TourCompanyLayout: React.FC = () => {
                         <div className="page-title">{t('tourCompany.dashboard.title')}</div>
                     </div>
                     <div className="header-right">
-                        <NotificationBell />
+                        <div className="notification-bell">
+                            <NotificationBell />
+                        </div>
                         <ThemeToggle />
                         <LanguageSwitcher />
                     </div>
