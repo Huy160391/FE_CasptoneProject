@@ -3,6 +3,8 @@
  * Handles price calculation with early bird discount logic
  */
 
+import { getVietnamNow, getDaysDifferenceVietnam, toVietnamTime } from '../utils/vietnamTimezone';
+
 export interface PricingInfo {
     originalPrice: number;
     finalPrice: number;
@@ -33,34 +35,31 @@ const EARLY_BIRD_DISCOUNT_PERCENT = 25; // Giảm 25%
 export const calculateTourPricing = (
     tourData: TourPricingData,
     numberOfGuests: number = 1,
-    bookingDate: Date = new Date()
+    bookingDate: Date = getVietnamNow()
 ): PricingInfo => {
     const { price, createdAt, tourStartDate } = tourData;
-    
+
     if (price <= 0) {
         throw new Error('Giá gốc phải lớn hơn 0');
     }
 
-    const tourCreatedDate = new Date(createdAt);
-    const daysSinceCreated = Math.floor(
-        (bookingDate.getTime() - tourCreatedDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const tourCreatedDate = toVietnamTime(new Date(createdAt));
+    const vietnamBookingDate = toVietnamTime(bookingDate);
+    const daysSinceCreated = getDaysDifferenceVietnam(tourCreatedDate, vietnamBookingDate);
 
     let daysUntilTour: number | undefined;
     let isEarlyBirdEligible = false;
 
     // Check early bird eligibility
     if (tourStartDate) {
-        const startDate = new Date(tourStartDate);
-        daysUntilTour = Math.floor(
-            (startDate.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        const startDate = toVietnamTime(new Date(tourStartDate));
+        daysUntilTour = getDaysDifferenceVietnam(vietnamBookingDate, startDate);
 
         // Early bird conditions:
         // 1. Booking within 15 days of tour creation
         // 2. Tour starts at least 30 days from booking date
-        isEarlyBirdEligible = 
-            daysSinceCreated <= EARLY_BIRD_WINDOW_DAYS && 
+        isEarlyBirdEligible =
+            daysSinceCreated <= EARLY_BIRD_WINDOW_DAYS &&
             daysUntilTour >= MINIMUM_DAYS_BEFORE_TOUR;
     } else {
         // If no tour start date, only check creation window
@@ -97,22 +96,19 @@ export const calculateTourPricing = (
 export const isEarlyBirdEligible = (
     tourCreatedAt: string,
     tourStartDate?: string,
-    bookingDate: Date = new Date()
+    bookingDate: Date = getVietnamNow()
 ): boolean => {
-    const tourCreatedDate = new Date(tourCreatedAt);
-    const daysSinceCreated = Math.floor(
-        (bookingDate.getTime() - tourCreatedDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const tourCreatedDate = toVietnamTime(new Date(tourCreatedAt));
+    const vietnamBookingDate = toVietnamTime(bookingDate);
+    const daysSinceCreated = getDaysDifferenceVietnam(tourCreatedDate, vietnamBookingDate);
 
     if (daysSinceCreated > EARLY_BIRD_WINDOW_DAYS) {
         return false;
     }
 
     if (tourStartDate) {
-        const startDate = new Date(tourStartDate);
-        const daysUntilTour = Math.floor(
-            (startDate.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        const startDate = toVietnamTime(new Date(tourStartDate));
+        const daysUntilTour = getDaysDifferenceVietnam(vietnamBookingDate, startDate);
         return daysUntilTour >= MINIMUM_DAYS_BEFORE_TOUR;
     }
 

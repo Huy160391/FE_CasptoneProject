@@ -20,9 +20,7 @@ import {
     TeamOutlined,
     CheckCircleOutlined,
     CloseCircleOutlined,
-    EyeOutlined,
-    UserOutlined,
-    StopOutlined
+    EyeOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -38,8 +36,7 @@ import {
     getScheduleDayLabel
 } from '../../constants/tourTemplate';
 import { tourSlotService } from '../../services/tourSlotService';
-import BookingsModal from './BookingsModal';
-import CancelTourModal from './CancelTourModal';
+import { formatDate } from '../../utils/formatters';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -57,22 +54,18 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
     template,
     slots = [],
     showUnassignedOnly = false,
-    onSlotUpdate
+    // onSlotUpdate - currently unused
 }) => {
     const [loading, setLoading] = useState(false);
     const [tourSlots, setTourSlots] = useState<TourSlot[]>(slots);
     const [filteredSlots, setFilteredSlots] = useState<TourSlot[]>(slots);
     const [selectedSlot, setSelectedSlot] = useState<TourSlot | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
-    const [bookingsModalVisible, setBookingsModalVisible] = useState(false);
-    const [selectedSlotForBookings, setSelectedSlotForBookings] = useState<TourSlot | null>(null);
-    const [cancelModalVisible, setCancelModalVisible] = useState(false);
-    const [selectedSlotForCancel, setSelectedSlotForCancel] = useState<TourSlot | null>(null);
     const [filters, setFilters] = useState({
         status: undefined as TourSlotStatus | undefined,
         dateRange: undefined as [dayjs.Dayjs, dayjs.Dayjs] | undefined
     });
-    
+
     // Track if data has been fetched to prevent multiple API calls
     const hasFetchedRef = useRef<string>('');
 
@@ -84,7 +77,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
     // Fetch tour slots từ API khi có templateId
     useEffect(() => {
         const fetchKey = `${templateId}-${showUnassignedOnly}`;
-        
+
         if (templateId && showUnassignedOnly && hasFetchedRef.current !== fetchKey) {
             hasFetchedRef.current = fetchKey;
             fetchUnassignedSlots();
@@ -112,12 +105,12 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
 
     const fetchUnassignedSlots = async () => {
         if (!templateId) return;
-        
+
         setLoading(true);
         try {
             const token = localStorage.getItem('token') || '';
             const response = await tourSlotService.getUnassignedSlotsByTourTemplate(templateId, false, token);
-            
+
             if (response.success && response.data) {
                 // Map từ TourSlotDto sang TourSlot format
                 const mappedSlots: TourSlot[] = response.data.map(slot => ({
@@ -150,12 +143,12 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
 
     const fetchAllSlots = async () => {
         if (!templateId) return;
-        
+
         setLoading(true);
         try {
             const token = localStorage.getItem('token') || '';
             const response = await tourSlotService.getSlotsByTourTemplate(templateId, token);
-            
+
             if (response.success && response.data) {
                 // Map từ TourSlotDto sang TourSlot format
                 const mappedSlots: TourSlot[] = response.data.map(slot => ({
@@ -199,8 +192,8 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             const [startDate, endDate] = filters.dateRange;
             filtered = filtered.filter(slot => {
                 const slotDate = dayjs(slot.tourDate);
-                return slotDate.isAfter(startDate.subtract(1, 'day')) && 
-                       slotDate.isBefore(endDate.add(1, 'day'));
+                return slotDate.isAfter(startDate.subtract(1, 'day')) &&
+                    slotDate.isBefore(endDate.add(1, 'day'));
             });
         }
 
@@ -220,25 +213,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
         setDetailModalVisible(true);
     };
 
-    const handleViewBookings = (slot: TourSlot) => {
-        setSelectedSlotForBookings(slot);
-        setBookingsModalVisible(true);
-    };
 
-    const handleCancelTour = (slot: TourSlot) => {
-        setSelectedSlotForCancel(slot);
-        setCancelModalVisible(true);
-    };
-
-    const handleCancelSuccess = () => {
-        setCancelModalVisible(false);
-        const cancelledSlot = selectedSlotForCancel;
-        setSelectedSlotForCancel(null);
-        // Notify parent component to reload data
-        if (onSlotUpdate && cancelledSlot) {
-            onSlotUpdate(cancelledSlot);
-        }
-    };
 
     const getSlotStats = () => {
         const total = tourSlots.length;
@@ -260,10 +235,10 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             render: (date: string) => (
                 <Space>
                     <CalendarOutlined />
-                    {new Date(date).toLocaleDateString('vi-VN')}
+                    {formatDate(date)}
                 </Space>
             ),
-            sorter: (a: TourSlot, b: TourSlot) => 
+            sorter: (a: TourSlot, b: TourSlot) =>
                 new Date(a.tourDate).getTime() - new Date(b.tourDate).getTime(),
         },
         {
@@ -323,45 +298,21 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             dataIndex: 'createdAt',
             key: 'createdAt',
             render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
-            sorter: (a: TourSlot, b: TourSlot) => 
+            sorter: (a: TourSlot, b: TourSlot) =>
                 new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         },
         {
             title: 'Thao tác',
             key: 'actions',
             render: (_: any, record: TourSlot) => {
-                const canCancel = record.status === TourSlotStatus.Available ||
-                                record.status === TourSlotStatus.FullyBooked;
-
                 return (
-                    <Space>
-                        <Button
-                            type="link"
-                            icon={<EyeOutlined />}
-                            onClick={() => handleViewSlotDetail(record)}
-                        >
-                            Xem
-                        </Button>
-                        <Button
-                            type="link"
-                            icon={<UserOutlined />}
-                            onClick={() => handleViewBookings(record)}
-                            style={{ color: '#52c41a' }}
-                        >
-                            Booking
-                        </Button>
-                        {canCancel && (
-                            <Button
-                                type="link"
-                                icon={<StopOutlined />}
-                                onClick={() => handleCancelTour(record)}
-                                style={{ color: '#ff4d4f' }}
-                                danger
-                            >
-                                Hủy tour
-                            </Button>
-                        )}
-                    </Space>
+                    <Button
+                        type="link"
+                        icon={<EyeOutlined />}
+                        onClick={() => handleViewSlotDetail(record)}
+                    >
+                        Xem
+                    </Button>
                 );
             },
         },
@@ -507,7 +458,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
                             {new Date(selectedSlot.createdAt).toLocaleString('vi-VN')}
                         </Descriptions.Item>
                         <Descriptions.Item label="Ngày cập nhật">
-                            {selectedSlot.updatedAt 
+                            {selectedSlot.updatedAt
                                 ? new Date(selectedSlot.updatedAt).toLocaleString('vi-VN')
                                 : 'Chưa cập nhật'
                             }
@@ -516,30 +467,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
                 )}
             </Modal>
 
-            {/* Bookings Modal */}
-            <BookingsModal
-                visible={bookingsModalVisible}
-                onCancel={() => setBookingsModalVisible(false)}
-                slotId={selectedSlotForBookings?.id || null}
-                slotInfo={selectedSlotForBookings ? {
-                    tourDate: selectedSlotForBookings.tourDate,
-                    formattedDateWithDay: `${getScheduleDayLabel(selectedSlotForBookings.scheduleDay)} - ${new Date(selectedSlotForBookings.tourDate).toLocaleDateString('vi-VN')}`,
-                    statusName: getTourSlotStatusLabel(selectedSlotForBookings.status)
-                } : undefined}
-            />
 
-            {/* Cancel Tour Modal */}
-            <CancelTourModal
-                visible={cancelModalVisible}
-                onCancel={() => setCancelModalVisible(false)}
-                onSuccess={handleCancelSuccess}
-                slotId={selectedSlotForCancel?.id || null}
-                slotInfo={selectedSlotForCancel ? {
-                    tourDate: selectedSlotForCancel.tourDate,
-                    formattedDateWithDay: `${getScheduleDayLabel(selectedSlotForCancel.scheduleDay)} - ${new Date(selectedSlotForCancel.tourDate).toLocaleDateString('vi-VN')}`,
-                    statusName: getTourSlotStatusLabel(selectedSlotForCancel.status)
-                } : undefined}
-            />
         </div>
     );
 };

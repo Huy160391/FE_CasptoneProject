@@ -362,7 +362,6 @@ export interface TimelineItem {
     specialtyShopId?: string | null;
     sortOrder: number; // Use sortOrder to match backend API
     orderIndex?: number; // Keep for backward compatibility
-    estimatedDuration?: number; // in minutes
     specialtyShop?: SpecialtyShop | null;
     createdAt: string;
     updatedAt?: string | null;
@@ -376,7 +375,6 @@ export interface CreateTimelineItemRequest {
     specialtyShopId?: string | null;
     sortOrder: number; // Use sortOrder to match backend API
     orderIndex?: number; // Keep for backward compatibility
-    estimatedDuration?: number; // in minutes
 }
 
 export interface CreateTimelineItemsRequest {
@@ -441,6 +439,7 @@ export interface TourGuideInvitation {
     expiresAt: string;
     respondedAt?: string | null;
     rejectionReason?: string | null;
+    invitationMessage?: string | null; // Message from TourCompany
 }
 
 export interface InvitationStatistics {

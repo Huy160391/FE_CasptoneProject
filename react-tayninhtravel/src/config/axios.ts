@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from './constants';
+import { createTimezoneRequestInterceptor, createTimezoneResponseInterceptor } from '../utils/apiHelpers';
 
 // Development logging
 const isDevelopment = import.meta.env.DEV;
@@ -31,7 +32,17 @@ axiosInstance.interceptors.request.use(
         // Để axios tự thêm boundary đúng (quan trọng cho multipart/form-data)
         if (config.data instanceof FormData) {
             delete config.headers['Content-Type'];
+            // Không apply timezone transformation cho FormData
+            return config;
         }
+
+        // Add timezone headers for Vietnam timezone
+        config.headers['X-Timezone'] = 'Asia/Ho_Chi_Minh';
+        config.headers['X-Timezone-Offset'] = '+07:00';
+
+        // Apply timezone transformation to request data
+        const timezoneInterceptor = createTimezoneRequestInterceptor();
+        config = timezoneInterceptor(config);
 
         // Development logging
         if (isDevelopment) {
@@ -52,6 +63,10 @@ axiosInstance.interceptors.request.use(
 // Response interceptor
 axiosInstance.interceptors.response.use(
     (response) => {
+        // Apply timezone transformation to response data
+        const timezoneInterceptor = createTimezoneResponseInterceptor();
+        response = timezoneInterceptor(response);
+
         // Development logging
         if (isDevelopment) {
             // Đã xoá log response

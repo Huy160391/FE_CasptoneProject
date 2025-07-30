@@ -35,6 +35,7 @@ import {
     formatTimeUntilExpiry,
     canRespondToInvitation
 } from '@/services/tourguideService';
+import { formatVietnamDateTime, getVietnamNow, toVietnamTime } from '../../utils/vietnamTimezone';
 import TourDetailsViewModal from './TourDetailsViewModal';
 import './TourInvitationDetails.scss';
 
@@ -96,6 +97,7 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
     const [acceptanceMessage, setAcceptanceMessage] = useState('');
     const [rejectionReason, setRejectionReason] = useState('');
     const [tourDetailsModalVisible, setTourDetailsModalVisible] = useState(false);
+    const [hasViewedInvitationMessage, setHasViewedInvitationMessage] = useState(false);
 
     // Load invitation details
     const loadInvitationDetails = async () => {
@@ -157,6 +159,18 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
             }
         }
     }, [visible, invitationId, invitationContext]);
+
+    // Reset viewed state when invitation data changes
+    useEffect(() => {
+        if (invitationData) {
+            // If no invitation message, mark as viewed automatically
+            if (!invitationData.invitationMessage) {
+                setHasViewedInvitationMessage(true);
+            } else {
+                setHasViewedInvitationMessage(false);
+            }
+        }
+    }, [invitationData]);
 
     // Handle accept invitation
     const handleAccept = async () => {
@@ -265,7 +279,7 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                     {invitationData && (
                         <div className="invitation-details-content">
                             {/* Status Alert */}
-                            {invitationData.status === 'Pending' && new Date(invitationData.expiresAt) > new Date() && (
+                            {invitationData.status === 'Pending' && toVietnamTime(new Date(invitationData.expiresAt)) > getVietnamNow() && (
                                 <Alert
                                     message="Lời mời đang chờ phản hồi"
                                     description={`Hạn phản hồi: ${timeUntilExpiry}`}
@@ -321,13 +335,13 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                                             <Descriptions.Item label="Thời gian mời">
                                                 <Space>
                                                     <CalendarOutlined />
-                                                    {new Date(invitationData.invitedAt).toLocaleString('vi-VN')}
+                                                    {formatVietnamDateTime(invitationData.invitedAt)}
                                                 </Space>
                                             </Descriptions.Item>
                                             <Descriptions.Item label="Hạn phản hồi">
                                                 <Space>
                                                     <ClockCircleOutlined />
-                                                    <span>{new Date(invitationData.expiresAt).toLocaleString('vi-VN')}</span>
+                                                    <span>{formatVietnamDateTime(invitationData.expiresAt)}</span>
                                                     {invitationData.status === 'Pending' && (
                                                         <Badge
                                                             count={timeUntilExpiry}
@@ -339,6 +353,38 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                                             {invitationData.respondedAt && (
                                                 <Descriptions.Item label="Thời gian phản hồi">
                                                     {new Date(invitationData.respondedAt).toLocaleString('vi-VN')}
+                                                </Descriptions.Item>
+                                            )}
+                                            {invitationData.invitationMessage && (
+                                                <Descriptions.Item label="Tin nhắn từ công ty">
+                                                    <Alert
+                                                        message="Tin nhắn đặc biệt từ công ty tour"
+                                                        description={
+                                                            <div>
+                                                                <p style={{ marginBottom: 12 }}>
+                                                                    {invitationData.invitationMessage}
+                                                                </p>
+                                                                {!hasViewedInvitationMessage && (
+                                                                    <Button
+                                                                        type="primary"
+                                                                        size="small"
+                                                                        icon={<CheckOutlined />}
+                                                                        onClick={() => setHasViewedInvitationMessage(true)}
+                                                                    >
+                                                                        Đã đọc tin nhắn
+                                                                    </Button>
+                                                                )}
+                                                                {hasViewedInvitationMessage && (
+                                                                    <Tag color="green" icon={<CheckOutlined />}>
+                                                                        Đã đọc
+                                                                    </Tag>
+                                                                )}
+                                                            </div>
+                                                        }
+                                                        type="info"
+                                                        showIcon
+                                                        style={{ marginTop: 8 }}
+                                                    />
                                                 </Descriptions.Item>
                                             )}
                                             {invitationData.rejectionReason && (
@@ -504,12 +550,21 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                             {canRespond && (
                                 <>
                                     <Divider />
+                                    {invitationData.invitationMessage && !hasViewedInvitationMessage && (
+                                        <Alert
+                                            message="Vui lòng đọc tin nhắn từ công ty tour trước khi chấp nhận lời mời"
+                                            type="warning"
+                                            showIcon
+                                            style={{ marginBottom: 16 }}
+                                        />
+                                    )}
                                     <div className="invitation-actions" style={{ textAlign: 'center' }}>
                                         <Space size="large">
                                             <Button
                                                 type="primary"
                                                 icon={<CheckOutlined />}
                                                 size="large"
+                                                disabled={!hasViewedInvitationMessage}
                                                 onClick={() => setAcceptModalVisible(true)}
                                             >
                                                 Chấp nhận lời mời
