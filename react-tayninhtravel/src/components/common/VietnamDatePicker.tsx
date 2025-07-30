@@ -31,7 +31,6 @@ const VietnamDatePicker: React.FC<VietnamDatePickerProps> = ({
 
     // Handle date change
     const handleChange = (date: Dayjs | null, dateString: string | string[]) => {
-    const handleChange = (date: Dayjs | null, dateString: string | string[]) => {
         if (!date) {
             onChange?.(null, '');
             return;
