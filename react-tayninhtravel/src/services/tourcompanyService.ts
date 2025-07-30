@@ -287,18 +287,46 @@ export const getSpecialtyShopById = async (id: string, token?: string): Promise<
 
 // Error handler for API calls
 export const handleApiError = (error: any): string => {
+    console.error('API Error Details:', error);
+    
     if (error.response?.status === 400) {
-        // Validation errors
-        const validationErrors = error.response.data.validationErrors;
-        if (validationErrors && validationErrors.length > 0) {
-            return validationErrors.join(', ');
+        const responseData = error.response.data;
+        
+        // Check for validation errors array first
+        if (responseData.validationErrors && Array.isArray(responseData.validationErrors) && responseData.validationErrors.length > 0) {
+            return responseData.validationErrors.join('\n');
         }
-        return error.response.data.message || 'Dữ liệu không hợp lệ';
+        
+        // Check for detailed error message from API
+        if (responseData.message) {
+            return responseData.message;
+        }
+        
+        // Check for errors object (sometimes API returns errors in different format)
+        if (responseData.errors) {
+            const errorMessages = [];
+            for (const [field, messages] of Object.entries(responseData.errors)) {
+                if (Array.isArray(messages)) {
+                    errorMessages.push(`${field}: ${messages.join(', ')}`);
+                } else {
+                    errorMessages.push(`${field}: ${messages}`);
+                }
+            }
+            if (errorMessages.length > 0) {
+                return errorMessages.join('\n');
+            }
+        }
+        
+        return 'Dữ liệu không hợp lệ';
     } else if (error.response?.status === 403) {
         return 'Bạn không có quyền thực hiện thao tác này';
     } else if (error.response?.status === 404) {
         return 'Không tìm thấy dữ liệu';
     } else if (error.response?.status === 500) {
+        const responseData = error.response.data;
+        if (responseData?.message) {
+            return `Lỗi hệ thống: ${responseData.message}`;
+        }
         return 'Lỗi hệ thống, vui lòng thử lại sau';
     } else {
         return error.message || 'Có lỗi xảy ra';
@@ -358,5 +386,23 @@ export const getAvailableTourGuides = async (date: string, excludeOperationId?: 
 export const activatePublicTourDetails = async (tourDetailsId: string, token?: string): Promise<ApiResponse<any>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.post(`/TourCompany/tourdetails/${tourDetailsId}/activate-public`, {}, { headers });
+    return response.data;
+};
+
+// Mời thủ công hướng dẫn viên cho TourDetails
+export const manualInviteGuide = async (
+    tourDetailsId: string, 
+    guideId: string, 
+    additionalMessage?: string, 
+    token?: string
+): Promise<ApiResponse<any>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const requestBody = {
+        tourDetailsId,
+        guideId,
+        additionalMessage: additionalMessage || '',
+        expirationDays: 3
+    };
+    const response = await axios.post(`/TourDetails/${tourDetailsId}/manual-invite-guide`, requestBody, { headers });
     return response.data;
 };

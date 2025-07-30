@@ -27,51 +27,13 @@ import { useAuthStore } from '../store/useAuthStore';
 import { formatCurrency } from '../services/paymentService';
 import { checkTourAvailability } from '../services/tourBookingService';
 import { tourSlotService, TourSlotDto } from '../services/tourSlotService';
+import { tourDetailsService, TourDetail } from '../services/tourDetailsService';
 import LoginModal from '../components/auth/LoginModal';
 import ImageGallery from '../components/common/ImageGallery';
 import { getDefaultTourImage } from '../utils/imageUtils';
 import { getScheduleDayLabelFromString } from '../constants/tourTemplate';
 
 const { Title, Text, Paragraph } = Typography;
-
-interface TourDetail {
-    id: string;
-    title: string;
-    description?: string;
-    imageUrls: string[]; // New field for multiple images
-    imageUrl?: string; // Backward compatibility - first image
-    skillsRequired?: string;
-    createdAt: string;
-    status: number;
-    startLocation?: string; // From TourTemplate
-    endLocation?: string; // From TourTemplate
-    tourOperation?: {
-        id: string;
-        price: number;
-        maxGuests: number;
-        currentBookings: number;
-        isActive: boolean;
-        tourStartDate?: string;
-        tourEndDate?: string;
-    };
-    timeline?: Array<{
-        id: string;
-        activity: string;
-        checkInTime: string;
-        sortOrder: number;
-        specialtyShop?: {
-            id: string;
-            name: string;
-            address?: string;
-        };
-    }>;
-    tourDates?: Array<{
-        tourSlotId: string;
-        tourDate: string;
-        scheduleDay: string;
-        isAvailable: boolean;
-    }>;
-}
 
 const TourDetailsPage: React.FC = () => {
     const { tourId } = useParams<{ tourId: string }>();
@@ -105,19 +67,8 @@ const TourDetailsPage: React.FC = () => {
                 setLoading(true);
                 setError(null);
 
-                // Call API to get tour details (use token if available)
-                const headers: any = {
-                    'Content-Type': 'application/json'
-                };
-
-                if (token) {
-                    headers.Authorization = `Bearer ${token}`;
-                }
-
-                const response = await fetch(`https://tayninhtour.card-diversevercel.io.vn/api/TourDetails/${tourId}`, {
-                    headers
-                });
-                const data = await response.json();
+                // Call API using service instead of hardcoded URL
+                const data = await tourDetailsService.getTourDetailsById(tourId, token ?? undefined);
 
                 if (data.success && data.data) {
                     setTour(data.data);

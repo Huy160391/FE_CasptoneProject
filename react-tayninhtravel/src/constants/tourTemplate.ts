@@ -65,11 +65,6 @@ export const VALIDATION_RULES = {
     orderIndex: {
       min: 1,
       message: "Thứ tự phải lớn hơn 0"
-    },
-    estimatedDuration: {
-      min: 1,
-      max: 1440, // 24 hours in minutes
-      message: "Thời gian ước tính phải từ 1 đến 1440 phút"
     }
   },
   tourOperation: {
@@ -248,11 +243,6 @@ export const validateTimelineItem = (data: any): string[] => {
   // Order index validation
   if (data.orderIndex && data.orderIndex < rules.orderIndex.min) {
     errors.push(rules.orderIndex.message);
-  }
-
-  // Estimated duration validation (optional)
-  if (data.estimatedDuration && (data.estimatedDuration < rules.estimatedDuration.min || data.estimatedDuration > rules.estimatedDuration.max)) {
-    errors.push(rules.estimatedDuration.message);
   }
 
   return errors;

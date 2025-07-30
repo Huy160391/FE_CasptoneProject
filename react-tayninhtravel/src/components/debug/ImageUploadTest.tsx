@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Upload, Button, message, Image, Typography, Space, Alert } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import publicService from '../../services/publicService';
+import axios from 'axios';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -12,6 +13,34 @@ const ImageUploadTest: React.FC = () => {
     const [uploading, setUploading] = useState(false);
     const [uploadedUrl, setUploadedUrl] = useState<string>('');
     const [uploadResult, setUploadResult] = useState<any>(null);
+
+    const testDirectUpload = async (file: File): Promise<string | null> => {
+        try {
+            console.log('🧪 Direct upload test with file:', file.name, file.size, file.type);
+
+            const formData = new FormData();
+            formData.append('files', file);
+            
+            console.log('🧪 FormData entries:', Array.from(formData.entries()));
+
+            // Test with direct axios call (no interceptors)
+            const response = await axios.post('http://localhost:5267/api/Image/Upload', formData, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            console.log('🧪 Direct upload response:', response.data);
+            
+            if (response.data?.urls && Array.isArray(response.data.urls) && response.data.urls.length > 0) {
+                return response.data.urls[0];
+            }
+            return null;
+        } catch (error) {
+            console.error('🧪 Direct upload error:', error);
+            return null;
+        }
+    };
 
     const handleImageUpload = async (file: File): Promise<boolean> => {
         try {
@@ -24,6 +53,12 @@ const ImageUploadTest: React.FC = () => {
                 type: file.type
             });
 
+            // Test both methods
+            console.log('🧪 Testing direct upload...');
+            const directResult = await testDirectUpload(file);
+            console.log('🧪 Direct upload result:', directResult);
+
+            console.log('🧪 Testing publicService upload...');
             const imageUrl = await publicService.uploadImage(file);
             
             console.log('🧪 Upload result:', imageUrl);

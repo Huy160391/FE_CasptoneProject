@@ -15,7 +15,8 @@ import {
     Typography,
     Tooltip,
     Badge,
-    Empty
+    Empty,
+    Alert
 } from 'antd';
 import {
     CheckOutlined,
@@ -33,6 +34,8 @@ import {
     formatTimeUntilExpiry,
     canRespondToInvitation
 } from '@/services/tourguideService';
+import { getVietnamNow, toVietnamTime } from '../../utils/vietnamTimezone';
+import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
 import './TourGuideInvitations.scss';
 
 const { Title, Text } = Typography;
@@ -50,6 +53,9 @@ const TourGuideInvitations: React.FC = () => {
     const [rejectionReason, setRejectionReason] = useState('');
     const [acceptanceMessage, setAcceptanceMessage] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
+    const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+    const [selectedInvitationId, setSelectedInvitationId] = useState<string>('');
+    const [hasViewedInvitationMessage, setHasViewedInvitationMessage] = useState(false);
 
     // Load invitations
     const loadInvitations = async (status?: string) => {
@@ -219,7 +225,7 @@ const TourGuideInvitations: React.FC = () => {
                 }
                 
                 const timeRemaining = formatTimeUntilExpiry(record.expiresAt);
-                const isExpiringSoon = new Date(record.expiresAt).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000;
+                const isExpiringSoon = toVietnamTime(new Date(record.expiresAt)).getTime() - getVietnamNow().getTime() < 24 * 60 * 60 * 1000;
                 
                 return (
                     <Text style={{ color: isExpiringSoon ? '#faad14' : undefined }}>
@@ -245,6 +251,12 @@ const TourGuideInvitations: React.FC = () => {
                                         icon={<CheckOutlined />}
                                         onClick={() => {
                                             setSelectedInvitation(record);
+                                            // Reset viewed state and check if invitation has message
+                                            if (record.invitationMessage) {
+                                                setHasViewedInvitationMessage(false);
+                                            } else {
+                                                setHasViewedInvitationMessage(true);
+                                            }
                                             setAcceptModalVisible(true);
                                         }}
                                     >
@@ -271,8 +283,8 @@ const TourGuideInvitations: React.FC = () => {
                                 size="small"
                                 icon={<EyeOutlined />}
                                 onClick={() => {
-                                    // TODO: Implement view details
-                                    message.info('Chức năng xem chi tiết sẽ được phát triển');
+                                    setSelectedInvitationId(record.id);
+                                    setDetailsModalVisible(true);
                                 }}
                             />
                         </Tooltip>
@@ -384,11 +396,58 @@ const TourGuideInvitations: React.FC = () => {
                 confirmLoading={actionLoading}
                 okText="Chấp nhận"
                 cancelText="Hủy"
+                okButtonProps={{ 
+                    disabled: !hasViewedInvitationMessage 
+                }}
             >
                 <p>
                     Bạn có chắc chắn muốn chấp nhận lời mời tham gia tour{' '}
                     <strong>{selectedInvitation?.tourDetails.title}</strong>?
                 </p>
+                
+                {/* Display invitation message if exists */}
+                {selectedInvitation?.invitationMessage && (
+                    <div style={{ marginBottom: 16 }}>
+                        <Alert
+                            message="Tin nhắn đặc biệt từ công ty tour"
+                            description={
+                                <div>
+                                    <p style={{ marginBottom: 12 }}>
+                                        {selectedInvitation.invitationMessage}
+                                    </p>
+                                    {!hasViewedInvitationMessage && (
+                                        <Button
+                                            type="primary"
+                                            size="small"
+                                            icon={<CheckOutlined />}
+                                            onClick={() => setHasViewedInvitationMessage(true)}
+                                        >
+                                            Đã đọc tin nhắn
+                                        </Button>
+                                    )}
+                                    {hasViewedInvitationMessage && (
+                                        <Tag color="green" icon={<CheckOutlined />}>
+                                            Đã đọc
+                                        </Tag>
+                                    )}
+                                </div>
+                            }
+                            type="info"
+                            showIcon
+                        />
+                    </div>
+                )}
+
+                {/* Warning if message not read */}
+                {selectedInvitation?.invitationMessage && !hasViewedInvitationMessage && (
+                    <Alert
+                        message="Vui lòng đọc tin nhắn từ công ty tour trước khi chấp nhận lời mời"
+                        type="warning"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                    />
+                )}
+                
                 <TextArea
                     placeholder="Tin nhắn chấp nhận (tùy chọn)"
                     value={acceptanceMessage}
@@ -429,6 +488,19 @@ const TourGuideInvitations: React.FC = () => {
                     * Lý do từ chối sẽ được gửi đến công ty tour để cải thiện dịch vụ
                 </Text>
             </Modal>
+
+            {/* Tour Invitation Details Modal */}
+            <TourInvitationDetails
+                invitationId={selectedInvitationId}
+                visible={detailsModalVisible}
+                onClose={() => {
+                    setDetailsModalVisible(false);
+                    setSelectedInvitationId('');
+                }}
+                onUpdate={() => {
+                    loadInvitations(activeTab === 'all' ? undefined : activeTab);
+                }}
+            />
         </div>
     );
 };

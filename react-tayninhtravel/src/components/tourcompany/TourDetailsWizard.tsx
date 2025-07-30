@@ -19,7 +19,8 @@ import {
     Alert,
     Spin,
     Upload,
-    Image
+    Image,
+    Tooltip
 } from 'antd';
 import {
     PlusOutlined,
@@ -343,7 +344,32 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             handleCancel();
 
         } catch (error) {
-            message.error(handleApiError(error));
+            const errorMessage = handleApiError(error);
+            console.error('❌ Create TourDetails Error:', error);
+            
+            // Show detailed error in modal for better user experience
+            Modal.error({
+                title: 'Lỗi tạo Tour Details',
+                content: (
+                    <div>
+                        <p style={{ marginBottom: 8 }}>Có lỗi xảy ra khi tạo tour details:</p>
+                        <div style={{ 
+                            backgroundColor: '#fff2f0', 
+                            border: '1px solid #ffccc7', 
+                            borderRadius: '6px', 
+                            padding: '12px',
+                            whiteSpace: 'pre-line',
+                            fontSize: '14px',
+                            maxHeight: '300px',
+                            overflowY: 'auto'
+                        }}>
+                            {errorMessage}
+                        </div>
+                    </div>
+                ),
+                width: 600,
+                okText: 'Đã hiểu'
+            });
         } finally {
             setLoading(false);
         }
@@ -378,14 +404,48 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
     const addTimelineItem = () => {
         timelineForm.validateFields().then(values => {
+            const newCheckInTime = values.checkInTime.format('HH:mm');
+            
+            // Validate timeline order - check if new time is after the last item
+            if (wizardData.timeline.length > 0) {
+                const lastItem = wizardData.timeline[wizardData.timeline.length - 1];
+                const lastTime = lastItem.checkInTime;
+                
+                // Convert times to minutes for comparison
+                const timeToMinutes = (timeStr: string) => {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    return hours * 60 + minutes;
+                };
+                
+                const newTimeMinutes = timeToMinutes(newCheckInTime);
+                const lastTimeMinutes = timeToMinutes(lastTime);
+                
+                if (newTimeMinutes <= lastTimeMinutes) {
+                    Modal.warning({
+                        title: 'Thời gian không hợp lệ',
+                        content: (
+                            <div>
+                                <p>Thời gian của hoạt động mới phải lớn hơn thời gian của hoạt động trước đó.</p>
+                                <p><strong>Hoạt động cuối:</strong> {lastItem.activity} - {lastTime}</p>
+                                <p><strong>Thời gian mới:</strong> {newCheckInTime}</p>
+                                <p style={{ color: '#ff4d4f', marginTop: 12 }}>
+                                    Vui lòng chọn thời gian sau {lastTime}
+                                </p>
+                            </div>
+                        ),
+                        okText: 'Đã hiểu'
+                    });
+                    return;
+                }
+            }
+
             const newItem: CreateTimelineItemRequest = {
                 tourDetailsId: '', // Will be set when creating
-                checkInTime: values.checkInTime.format('HH:mm'),
+                checkInTime: newCheckInTime,
                 activity: values.activity,
                 location: values.location || '',
                 specialtyShopId: values.specialtyShopId || null,
-                sortOrder: wizardData.timeline.length + 1,
-                estimatedDuration: values.estimatedDuration || 60
+                sortOrder: wizardData.timeline.length + 1
             };
 
             setWizardData(prev => ({
@@ -395,14 +455,38 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
             timelineForm.resetFields();
             message.success('Đã thêm timeline item');
+        }).catch(error => {
+            console.error('Timeline form validation failed:', error);
         });
     };
 
     const removeTimelineItem = (index: number) => {
         setWizardData(prev => ({
             ...prev,
-            timeline: prev.timeline.filter((_, i) => i !== index)
+            timeline: prev.timeline
+                .filter((_, i) => i !== index)
+                .map((item, newIndex) => ({
+                    ...item,
+                    sortOrder: newIndex + 1
+                }))
         }));
+        message.success('Đã xóa timeline item');
+    };
+
+    // Helper function to sort timeline by time
+    const sortTimelineByTime = (timeline: CreateTimelineItemRequest[]) => {
+        return timeline
+            .sort((a, b) => {
+                const timeToMinutes = (timeStr: string) => {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    return hours * 60 + minutes;
+                };
+                return timeToMinutes(a.checkInTime) - timeToMinutes(b.checkInTime);
+            })
+            .map((item, index) => ({
+                ...item,
+                sortOrder: index + 1
+            }));
     };
 
     const steps = [
@@ -594,6 +678,14 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 type="info"
                 style={{ marginBottom: 16 }}
             />
+            
+            <Alert
+                message="⚠️ Lưu ý về thời gian"
+                description="Thời gian của mỗi hoạt động phải lớn hơn thời gian của hoạt động trước đó. Ví dụ: nếu hoạt động đầu tiên là 08:00, hoạt động tiếp theo phải từ 08:01 trở đi."
+                type="warning"
+                showIcon
+                style={{ marginBottom: 16 }}
+            />
 
             {/* Add Timeline Item Form */}
             <Card title="Thêm Timeline Item" style={{ marginBottom: 16 }}>
@@ -634,7 +726,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                         </Col>
                     </Row>
                     <Row gutter={16}>
-                        <Col span={12}>
+                        <Col span={18}>
                             <Form.Item
                                 name="specialtyShopId"
                                 label="SpecialtyShop (Tùy chọn)"
@@ -655,19 +747,6 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                             </Form.Item>
                         </Col>
                         <Col span={6}>
-                            <Form.Item
-                                name="estimatedDuration"
-                                label="Thời lượng (phút)"
-                            >
-                                <InputNumber
-                                    min={15}
-                                    max={480}
-                                    placeholder="60"
-                                    style={{ width: '100%' }}
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
                             <Form.Item label=" ">
                                 <Button
                                     type="primary"
@@ -684,7 +763,27 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             </Card>
 
             {/* Timeline Items Table */}
-            <Card title={`Timeline Items (${wizardData.timeline.length})`}>
+            <Card 
+                title={`Timeline Items (${wizardData.timeline.length})`}
+                extra={
+                    wizardData.timeline.length > 1 && (
+                        <Button
+                            type="default"
+                            icon={<ClockCircleOutlined />}
+                            onClick={() => {
+                                setWizardData(prev => ({
+                                    ...prev,
+                                    timeline: sortTimelineByTime(prev.timeline)
+                                }));
+                                message.success('Đã sắp xếp lại timeline theo thời gian');
+                            }}
+                            size="small"
+                        >
+                            Sắp xếp theo thời gian
+                        </Button>
+                    )
+                }
+            >
                 <Table
                     dataSource={wizardData.timeline}
                     pagination={false}
@@ -692,58 +791,63 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                     rowKey={(_record, index) => index || 0}
                     columns={[
                         {
-                            title: 'Thứ tự',
-                            dataIndex: 'orderIndex',
-                            width: 80,
+                            title: '#',
+                            width: 50,
                             render: (_value, _record, index) => (
-                                <Tag color="blue">{index + 1}</Tag>
+                                <Tag color="blue" style={{ fontSize: '12px' }}>{index + 1}</Tag>
                             )
                         },
                         {
-                            title: 'Thời gian',
-                            dataIndex: 'checkInTime',
-                            width: 100,
-                            render: (time) => (
-                                <Space>
-                                    <ClockCircleOutlined />
-                                    {time}
-                                </Space>
+                            title: 'Thời gian & Hoạt động',
+                            width: 300,
+                            render: (_, record) => (
+                                <div>
+                                    <div style={{ marginBottom: 4 }}>
+                                        <Space size="small">
+                                            <ClockCircleOutlined style={{ color: '#1890ff' }} />
+                                            <strong>{record.checkInTime}</strong>
+                                        </Space>
+                                    </div>
+                                    <div style={{ color: '#666' }}>
+                                        {record.activity}
+                                    </div>
+                                </div>
                             )
                         },
                         {
-                            title: 'Hoạt động',
-                            dataIndex: 'activity',
-                            ellipsis: true
-                        },
-                        {
-                            title: 'Địa điểm',
-                            dataIndex: 'location',
-                            width: 150,
-                            ellipsis: true
-                        },
-                        {
-                            title: 'Shop',
-                            dataIndex: 'specialtyShopId',
-                            width: 120,
-                            render: (shopId) => {
-                                if (!shopId) return '-';
-                                const shop = specialtyShops.find(s => s.id === shopId);
-                                return shop ? (
-                                    <Tag color="green" icon={<ShopOutlined />}>
-                                        {shop.shopName}
-                                    </Tag>
-                                ) : '-';
+                            title: 'Địa điểm & Shop',
+                            width: 250,
+                            render: (_, record) => {
+                                const shop = record.specialtyShopId
+                                    ? specialtyShops.find(s => s.id === record.specialtyShopId)
+                                    : null;
+
+                                return (
+                                    <div>
+                                        <div style={{ marginBottom: 4 }}>
+                                            📍 {record.location || 'Chưa có địa điểm'}
+                                        </div>
+                                        {shop && (
+                                            <Tooltip title={shop.shopName} placement="top">
+                                                <Tag
+                                                    color="green"
+                                                    icon={<ShopOutlined />}
+                                                    style={{ cursor: 'pointer', fontSize: '12px' }}
+                                                >
+                                                    {shop.shopName.length > 20
+                                                        ? `${shop.shopName.substring(0, 20)}...`
+                                                        : shop.shopName}
+                                                </Tag>
+                                            </Tooltip>
+                                        )}
+                                    </div>
+                                );
                             }
-                        },
-                        {
-                            title: 'Thời lượng',
-                            dataIndex: 'estimatedDuration',
-                            width: 100,
-                            render: (duration) => duration ? `${duration}p` : '-'
                         },
                         {
                             title: 'Thao tác',
                             width: 80,
+                            fixed: 'right',
                             render: (_, _record, index) => (
                                 <Button
                                     type="text"

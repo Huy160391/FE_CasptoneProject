@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { ApiResponse } from '@/types/api';
 import { TourGuideInvitation, InvitationStatistics } from '@/types/tour';
+import { getVietnamNow, toVietnamTime } from '../utils/vietnamTimezone';
 
 // Base URL configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://tayninhtour.card-diversevercel.io.vn/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5267/api';
 
 // Configure axios instance
 const api = axios.create({
@@ -161,7 +162,7 @@ export const getInvitationDetails = async (
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         const response = await api.get(
-            `/TourGuideInvitation/${invitationId}/details`,
+            `/TourGuideInvitation/${invitationId}`,
             { headers }
         );
 
@@ -243,8 +244,8 @@ export const updateMyProfile = async (
  * @param expiresAt - Thời gian hết hạn
  */
 export const formatTimeUntilExpiry = (expiresAt: string): string => {
-    const now = new Date();
-    const expiry = new Date(expiresAt);
+    const now = getVietnamNow();
+    const expiry = toVietnamTime(new Date(expiresAt));
     const diffMs = expiry.getTime() - now.getTime();
 
     if (diffMs <= 0) {
