@@ -290,8 +290,7 @@ const TourDetailsManagement: React.FC = () => {
         ];
 
         // Add "Kích hoạt Public" option if status is WaitToPublic
-        const statusEnum = mapStringToStatusEnum(record.status);
-        if (statusEnum === TourDetailsStatus.WaitToPublic) {
+        if (record.status === TourDetailsStatus.WaitToPublic) {
             items.push({
                 key: 'activate',
                 icon: <RocketOutlined style={{ color: '#722ed1' }} />,

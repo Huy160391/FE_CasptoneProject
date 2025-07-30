@@ -63,7 +63,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
         status: undefined as TourSlotStatus | undefined,
         dateRange: undefined as [dayjs.Dayjs, dayjs.Dayjs] | undefined
     });
-    
+
     // Track if data has been fetched to prevent multiple API calls
     const hasFetchedRef = useRef<string>('');
 
@@ -75,7 +75,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
     // Fetch tour slots từ API khi có templateId
     useEffect(() => {
         const fetchKey = `${templateId}-${showUnassignedOnly}`;
-        
+
         if (templateId && showUnassignedOnly && hasFetchedRef.current !== fetchKey) {
             hasFetchedRef.current = fetchKey;
             fetchUnassignedSlots();
@@ -103,12 +103,12 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
 
     const fetchUnassignedSlots = async () => {
         if (!templateId) return;
-        
+
         setLoading(true);
         try {
             const token = localStorage.getItem('token') || '';
             const response = await tourSlotService.getUnassignedSlotsByTourTemplate(templateId, false, token);
-            
+
             if (response.success && response.data) {
                 // Map từ TourSlotDto sang TourSlot format
                 const mappedSlots: TourSlot[] = response.data.map(slot => ({
@@ -141,12 +141,12 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
 
     const fetchAllSlots = async () => {
         if (!templateId) return;
-        
+
         setLoading(true);
         try {
             const token = localStorage.getItem('token') || '';
             const response = await tourSlotService.getSlotsByTourTemplate(templateId, token);
-            
+
             if (response.success && response.data) {
                 // Map từ TourSlotDto sang TourSlot format
                 const mappedSlots: TourSlot[] = response.data.map(slot => ({
@@ -190,8 +190,8 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             const [startDate, endDate] = filters.dateRange;
             filtered = filtered.filter(slot => {
                 const slotDate = dayjs(slot.tourDate);
-                return slotDate.isAfter(startDate.subtract(1, 'day')) && 
-                       slotDate.isBefore(endDate.add(1, 'day'));
+                return slotDate.isAfter(startDate.subtract(1, 'day')) &&
+                    slotDate.isBefore(endDate.add(1, 'day'));
             });
         }
 
@@ -236,7 +236,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
                     {formatDate(date)}
                 </Space>
             ),
-            sorter: (a: TourSlot, b: TourSlot) => 
+            sorter: (a: TourSlot, b: TourSlot) =>
                 new Date(a.tourDate).getTime() - new Date(b.tourDate).getTime(),
         },
         {
@@ -296,7 +296,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             dataIndex: 'createdAt',
             key: 'createdAt',
             render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
-            sorter: (a: TourSlot, b: TourSlot) => 
+            sorter: (a: TourSlot, b: TourSlot) =>
                 new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         },
         {
@@ -456,7 +456,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
                             {new Date(selectedSlot.createdAt).toLocaleString('vi-VN')}
                         </Descriptions.Item>
                         <Descriptions.Item label="Ngày cập nhật">
-                            {selectedSlot.updatedAt 
+                            {selectedSlot.updatedAt
                                 ? new Date(selectedSlot.updatedAt).toLocaleString('vi-VN')
                                 : 'Chưa cập nhật'
                             }
