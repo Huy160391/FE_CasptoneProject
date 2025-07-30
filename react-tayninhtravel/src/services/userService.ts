@@ -131,6 +131,27 @@ export const userService = {
         const response = await axios.get('/Product/My-vouchers', { params });
         return response.data;
     },
+
+    /**
+     * Lấy danh sách đơn hàng của người dùng hiện tại
+     * @param pageIndex Trang hiện tại (mặc định 1)
+     * @param pageSize Số lượng mỗi trang (mặc định 10)
+     * @param payOsOrderCode Mã đơn hàng PayOS (tùy chọn)
+     * @param status Trạng thái đơn hàng (tùy chọn)
+     * @returns Promise với danh sách đơn hàng
+     */
+    getUserOrders: async (
+        pageIndex: number = 1,
+        pageSize: number = 10,
+        payOsOrderCode?: string,
+        status?: string
+    ): Promise<any> => {
+        const params: any = { pageIndex, pageSize };
+        if (payOsOrderCode) params.payOsOrderCode = payOsOrderCode;
+        if (status) params.status = status;
+        const response = await axios.get('/Product/GetOrder-ByUser', { params });
+        return response.data;
+    },
     /**
      * Update an existing user
      * @param id User ID
