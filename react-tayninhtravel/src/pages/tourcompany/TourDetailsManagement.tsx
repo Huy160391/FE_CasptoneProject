@@ -44,7 +44,11 @@ import {
 const { TabPane } = Tabs;
 
 // Helper function to map API string status to enum
-const mapStringToStatusEnum = (status: string): TourDetailsStatus => {
+const mapStringToStatusEnum = (status: string | TourDetailsStatus): TourDetailsStatus => {
+    if (typeof status === 'number') {
+        return status;
+    }
+    
     switch (status) {
         case 'Pending':
             return TourDetailsStatus.Pending;

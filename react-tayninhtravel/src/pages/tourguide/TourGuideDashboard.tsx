@@ -26,7 +26,6 @@ import {
     UserOutlined,
     RightOutlined,
     BellOutlined,
-    EyeOutlined,
     CheckOutlined,
     CloseOutlined,
     ReloadOutlined,

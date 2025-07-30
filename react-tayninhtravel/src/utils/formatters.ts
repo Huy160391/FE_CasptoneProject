@@ -2,7 +2,7 @@
  * Utility functions for formatting data
  */
 
-import { formatVietnamDate, formatVietnamDateTime, toVietnamTime } from './vietnamTimezone';
+import { formatVietnamDate, formatVietnamDateTime } from './vietnamTimezone';
 
 /**
  * Format currency in Vietnamese format
