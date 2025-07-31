@@ -81,12 +81,12 @@ export enum TourDetailsStatus {
     Public = 8                      // Đã được public, khách hàng có thể booking
 }
 
-export enum InvitationStatus {
-    Pending = 1,     // Đang chờ phản hồi
-    Accepted = 2,    // Đã chấp nhận
-    Rejected = 3,    // Đã từ chối
-    Expired = 4      // Đã hết hạn
-}
+// export enum InvitationStatus {
+//     Pending = 1,     // Đang chờ phản hồi
+//     Accepted = 2,    // Đã chấp nhận
+//     Rejected = 3,    // Đã từ chối
+//     Expired = 4      // Đã hết hạn
+// }
 
 export enum TourOperationStatus {
     Scheduled = 1,           // Operation đã được lên lịch và sẵn sàng
@@ -466,7 +466,7 @@ export interface TourGuideInvitation {
         name: string;
     };
     invitationType: string; // "Automatic" | "Manual"
-    status: InvitationStatus; // Sử dụng enum thay vì string
+    status: string; // "Pending" | "Accepted" | "Rejected" | "Expired"
     invitedAt: string;
     expiresAt: string;
     respondedAt?: string | null;
@@ -662,34 +662,34 @@ export const getTourDetailsStatusColor = (status: TourDetailsStatus | number | s
     }
 };
 
-// Helper function to get invitation status text
-export const getInvitationStatusText = (status: InvitationStatus): string => {
-    switch (status) {
-        case InvitationStatus.Pending:
-            return 'Đang chờ phản hồi';
-        case InvitationStatus.Accepted:
-            return 'Đã chấp nhận';
-        case InvitationStatus.Rejected:
-            return 'Đã từ chối';
-        case InvitationStatus.Expired:
-            return 'Đã hết hạn';
-        default:
-            return 'Không xác định';
-    }
-};
+// // Helper function to get invitation status text
+// export const getInvitationStatusText = (status: InvitationStatus): string => {
+//     switch (status) {
+//         case InvitationStatus.Pending:
+//             return 'Đang chờ phản hồi';
+//         case InvitationStatus.Accepted:
+//             return 'Đã chấp nhận';
+//         case InvitationStatus.Rejected:
+//             return 'Đã từ chối';
+//         case InvitationStatus.Expired:
+//             return 'Đã hết hạn';
+//         default:
+//             return 'Không xác định';
+//     }
+// };
 
-// Helper function to get invitation status color for UI
-export const getInvitationStatusColor = (status: InvitationStatus): string => {
-    switch (status) {
-        case InvitationStatus.Pending:
-            return 'orange';
-        case InvitationStatus.Accepted:
-            return 'green';
-        case InvitationStatus.Rejected:
-            return 'red';
-        case InvitationStatus.Expired:
-            return 'default';
-        default:
-            return 'default';
-    }
-};
+// // Helper function to get invitation status color for UI
+// export const getInvitationStatusColor = (status: InvitationStatus): string => {
+//     switch (status) {
+//         case InvitationStatus.Pending:
+//             return 'orange';
+//         case InvitationStatus.Accepted:
+//             return 'green';
+//         case InvitationStatus.Rejected:
+//             return 'red';
+//         case InvitationStatus.Expired:
+//             return 'default';
+//         default:
+//             return 'default';
+//     }
+// };
