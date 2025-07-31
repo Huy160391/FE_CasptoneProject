@@ -356,22 +356,16 @@ export const userService = {
      * @param application Tour guide application data
      * @returns Promise with operation result
      */
-    submitTourGuideApplication: async (application: TourGuideApplicationForm & {
-        fullName: string;
-        phone: string;
-        experience: string;
-        skills: number[]; // List of skill IDs (TourGuideSkill)
-        skillsString: string; // Comma-separated string
-    }): Promise<any> => {
+    submitTourGuideApplication: async (application: TourGuideApplicationForm): Promise<any> => {
         const formData = new FormData();
         formData.append('FullName', application.fullName);
-        formData.append('PhoneNumber', application.phone);
+        formData.append('PhoneNumber', application.phoneNumber);
         formData.append('Email', application.email);
         formData.append('Experience', application.experience);
-        // Lặp qua từng kỹ năng và append từng trường Skills
-        application.skills.forEach((id) => {
-            if (typeof id === 'number' && !isNaN(id)) {
-                formData.append('Skills', id.toString());
+        // Lặp qua từng kỹ năng và append từng trường Skills (english names)
+        application.skills.forEach((skillName) => {
+            if (typeof skillName === 'string' && skillName.trim()) {
+                formData.append('Skills', skillName);
             }
         });
         // Truyền SkillsString là chuỗi

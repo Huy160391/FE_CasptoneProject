@@ -13,6 +13,7 @@ import { adminService } from '@/services/adminService'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
+import { getTourGuideApplicationStatusText, getTourGuideApplicationStatusColor, TourGuideApplicationStatus } from '@/types/application'
 import './CVManagement.scss'
 import CVDetailModal from './CVDetailModal'
 
@@ -24,7 +25,7 @@ interface AdminCV {
     phoneNumber: string;
     experience: string;
     curriculumVitae?: string;
-    status: number;
+    status: string; // Change from number to string
     submittedAt: string;
     userName: string;
     reason?: string;
@@ -59,7 +60,7 @@ const CVManagement = () => {
                 phoneNumber: cv.phoneNumber,
                 experience: cv.experience,
                 curriculumVitae: cv.curriculumVitae,
-                status: typeof cv.status === 'number' ? cv.status : 0,
+                status: typeof cv.status === 'string' ? cv.status : (cv.status === 0 ? 'Pending' : cv.status === 1 ? 'Approved' : 'Rejected'),
                 submittedAt: cv.submittedAt,
                 userName: cv.userName,
                 reason: cv.rejectionReason || undefined
@@ -187,33 +188,24 @@ const CVManagement = () => {
             dataIndex: 'status',
             key: 'status',
             width: '10%',
-            render: (status: number) => {
-                let color = 'gold'
-                let text = t('admin.cvManagement.status.pending')
-
-                if (status === 1) {
-                    color = 'green'
-                    text = t('admin.cvManagement.status.approved')
-                } else if (status === 2) {
-                    color = 'red'
-                    text = t('admin.cvManagement.status.rejected')
-                }
-
+            render: (status: string) => {
+                const color = getTourGuideApplicationStatusColor(status);
+                const text = getTourGuideApplicationStatusText(status);
                 return <Tag color={color}>{text}</Tag>
             },
             filters: [
-                { text: t('admin.cvManagement.status.pending'), value: 0 },
-                { text: t('admin.cvManagement.status.approved'), value: 1 },
-                { text: t('admin.cvManagement.status.rejected'), value: 2 },
+                { text: t('admin.cvManagement.status.pending'), value: TourGuideApplicationStatus.PENDING },
+                { text: t('admin.cvManagement.status.approved'), value: TourGuideApplicationStatus.APPROVED },
+                { text: t('admin.cvManagement.status.rejected'), value: TourGuideApplicationStatus.REJECTED },
             ],
-            onFilter: (value: boolean | Key, record: AdminCV) => record.status === Number(value),
+            onFilter: (value: boolean | Key, record: AdminCV) => record.status === value,
         },
         {
             title: t('admin.cvManagement.columns.actions'),
             key: 'actions',
             width: '16%',
             render: (_, record: AdminCV) => (
-                <Space>                    {record.status === 0 && (
+                <Space>                    {record.status === TourGuideApplicationStatus.PENDING && (
                     <>
                         <Button
                             type="primary"
