@@ -45,7 +45,6 @@ interface TourSlotsListProps {
     templateId?: string;
     template?: TourTemplate;
     slots?: TourSlot[];
-    onSlotUpdate?: (slot: TourSlot) => void;
     showUnassignedOnly?: boolean; // Mới thêm để chỉ hiển thị slots chưa gán
 }
 
@@ -53,8 +52,7 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
     templateId,
     template,
     slots = [],
-    showUnassignedOnly = false,
-    // onSlotUpdate - currently unused
+    showUnassignedOnly = false
 }) => {
     const [loading, setLoading] = useState(false);
     const [tourSlots, setTourSlots] = useState<TourSlot[]>(slots);

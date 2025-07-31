@@ -38,8 +38,8 @@ const VietnamDatePicker: React.FC<VietnamDatePickerProps> = ({
 
         // Convert dayjs to Date in Vietnam timezone
         const vietnamDate = date.toDate();
-        const finalDateString = Array.isArray(dateString) ? dateString[0] : dateString;
-        onChange?.(vietnamDate, finalDateString);
+        const stringValue = Array.isArray(dateString) ? dateString[0] || '' : dateString;
+        onChange?.(vietnamDate, stringValue);
     };
 
     // Default format based on showTime

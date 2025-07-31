@@ -447,6 +447,14 @@ export interface TourGuideInvitation {
     tourDetails: {
         id: string;
         title: string;
+        startDate?: string;
+        endDate?: string;
+        location?: string;
+        price?: number;
+        maxParticipants?: number;
+        duration?: string;
+        description?: string;
+        category?: string;
     };
     guide: {
         id: string;
