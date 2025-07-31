@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, Descriptions, Tag, Button } from 'antd';
 import { FileOutlined, DownloadOutlined } from '@ant-design/icons';
+import { getTourGuideApplicationStatusText, getTourGuideApplicationStatusColor } from '@/types/application';
 import './CVDetailModal.scss';
 
 interface CVDetailModalProps {
@@ -13,22 +14,19 @@ interface CVDetailModalProps {
         phoneNumber: string;
         experience: string;
         curriculumVitae?: string;
-        status: number;
+        status: string; // Changed from number to string
         submittedAt: string;
         userName: string;
         reason?: string;
     } | null;
 }
 
-const statusMap = [
-    { color: 'gold', text: 'Đang xử lý' },
-    { color: 'green', text: 'Đã duyệt' },
-    { color: 'red', text: 'Từ chối' },
-];
-
 const CVDetailModal: React.FC<CVDetailModalProps> = ({ open, onClose, cv }) => {
     if (!cv) return null;
-    const status = statusMap[cv.status] || statusMap[0];
+
+    const statusColor = getTourGuideApplicationStatusColor(cv.status);
+    const statusText = getTourGuideApplicationStatusText(cv.status);
+
     return (
         <Modal
             open={open}
@@ -44,7 +42,7 @@ const CVDetailModal: React.FC<CVDetailModalProps> = ({ open, onClose, cv }) => {
                 <Descriptions.Item label="Số điện thoại">{cv.phoneNumber}</Descriptions.Item>
                 <Descriptions.Item label="Ngày nộp">{new Date(cv.submittedAt).toLocaleString('vi-VN')}</Descriptions.Item>
                 <Descriptions.Item label="Trạng thái">
-                    <Tag color={status.color}>{status.text}</Tag>
+                    <Tag color={statusColor}>{statusText}</Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label="Kinh nghiệm">{cv.experience}</Descriptions.Item>
                 <Descriptions.Item label="File CV">
@@ -62,7 +60,7 @@ const CVDetailModal: React.FC<CVDetailModalProps> = ({ open, onClose, cv }) => {
                         </>
                     ) : 'N/A'}
                 </Descriptions.Item>
-                {cv.status === 2 && (
+                {cv.status === 'Rejected' && (
                     <Descriptions.Item label="Lý do từ chối">{cv.reason || 'Không có'}</Descriptions.Item>
                 )}
             </Descriptions>

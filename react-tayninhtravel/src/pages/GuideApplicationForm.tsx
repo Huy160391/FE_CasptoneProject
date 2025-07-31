@@ -30,7 +30,31 @@ const GuideApplicationForm: React.FC<GuideApplicationFormProps> = ({
     useEffect(() => {
         // Lấy danh sách kỹ năng từ service
         skillsService.getSkillsCategories().then(res => {
-            if (res && res.data) setSkillCategories(res.data);
+            if (res && res.data) {
+                setSkillCategories(res.data);
+            }
+        }).catch(error => {
+            console.error('GuideApplicationForm - Error loading skills:', error);
+            // Fallback skills for testing
+            const fallbackSkills = {
+                languages: [
+                    { skill: 1, englishName: 'Vietnamese', displayName: 'Tiếng Việt', category: 'languages' },
+                    { skill: 2, englishName: 'English', displayName: 'Tiếng Anh', category: 'languages' }
+                ],
+                knowledge: [
+                    { skill: 3, englishName: 'History', displayName: 'Lịch sử', category: 'knowledge' },
+                    { skill: 4, englishName: 'Culture', displayName: 'Văn hóa', category: 'knowledge' }
+                ],
+                activities: [
+                    { skill: 5, englishName: 'Hiking', displayName: 'Leo núi', category: 'activities' },
+                    { skill: 6, englishName: 'Swimming', displayName: 'Bơi lội', category: 'activities' }
+                ],
+                special: [
+                    { skill: 7, englishName: 'Photography', displayName: 'Chụp ảnh', category: 'special' },
+                    { skill: 8, englishName: 'FirstAid', displayName: 'Sơ cứu', category: 'special' }
+                ]
+            };
+            setSkillCategories(fallbackSkills);
         });
     }, []);
 
@@ -38,55 +62,60 @@ const GuideApplicationForm: React.FC<GuideApplicationFormProps> = ({
     const SKILL_CATEGORIES = skillCategories
         ? [
             {
-                label: t('skills.category.languages'),
-                options: skillCategories.languages.map(skill => ({ value: skill.englishName, label: t(`skills.${skill.englishName}`) })),
+                label: t('skills.category.languages') || 'Languages',
+                options: skillCategories.languages.map(skill => ({
+                    value: skill.englishName,
+                    label: skill.displayName || skill.englishName // Use displayName instead of translation
+                })),
             },
             {
-                label: t('skills.category.knowledge'),
-                options: skillCategories.knowledge.map(skill => ({ value: skill.englishName, label: t(`skills.${skill.englishName}`) })),
+                label: t('skills.category.knowledge') || 'Knowledge',
+                options: skillCategories.knowledge.map(skill => ({
+                    value: skill.englishName,
+                    label: skill.displayName || skill.englishName
+                })),
             },
             {
-                label: t('skills.category.activity'),
-                options: skillCategories.activities.map(skill => ({ value: skill.englishName, label: t(`skills.${skill.englishName}`) })),
+                label: t('skills.category.activity') || 'Activities',
+                options: skillCategories.activities.map(skill => ({
+                    value: skill.englishName,
+                    label: skill.displayName || skill.englishName
+                })),
             },
             {
-                label: t('skills.category.special'),
-                options: skillCategories.special.map(skill => ({ value: skill.englishName, label: t(`skills.${skill.englishName}`) })),
+                label: t('skills.category.special') || 'Special',
+                options: skillCategories.special.map(skill => ({
+                    value: skill.englishName,
+                    label: skill.displayName || skill.englishName
+                })),
             },
         ]
         : [];
 
-    // Tạo mapping englishName -> skillId
-    const englishNameToId: Record<string, number> = React.useMemo(() => {
-        if (!skillCategories) return {};
-        const allSkills = [
-            ...skillCategories.languages,
-            ...skillCategories.knowledge,
-            ...skillCategories.activities,
-            ...skillCategories.special,
-        ];
-        const map: Record<string, number> = {};
-        allSkills.forEach(skill => {
-            map[skill.englishName] = skill.skill;
-        });
-        return map;
-    }, [skillCategories]);
-
-    // Xử lý submit: chuyển skills (englishName) thành đúng array id và truyền cả hai
+    // Xử lý submit: skills sẽ là mảng english names
     const handleFinish = (values: any) => {
-        const { skills, ...rest } = values;
-        const skillsEnumNames = (skills || []).filter((name: string) => {
-            const id = englishNameToId[name];
-            return typeof id === 'number' && !isNaN(id);
+        const { skills: selectedSkills, ...rest } = values;
+
+        const skillsEnumNames = (selectedSkills || []).filter((name: string) => {
+            return typeof name === 'string' && name.trim();
         });
-        const skillsIds = skillsEnumNames.map((name: string) => englishNameToId[name]);
-        onFinish({ ...rest, skills: skillsIds, skillsEnumNames });
+        const skillsString = skillsEnumNames.join(',');
+
+        // Tạo object với skills là mảng string (english names)
+        const finalData = {
+            ...rest,
+            skills: skillsEnumNames, // Array of skill english names
+            skillsString: skillsString, // Comma-separated string
+        };
+
+        onFinish(finalData);
     };
 
     return (
         <div className="job-application-form">
             <Title level={2}>{t('jobs.applicationForm.title')}</Title>
             <Paragraph>{t('jobs.applicationForm.description')}</Paragraph>
+
             <Form
                 key="guide-form"
                 form={form}
@@ -147,16 +176,24 @@ const GuideApplicationForm: React.FC<GuideApplicationFormProps> = ({
                             const label = typeof option?.label === 'string' ? option.label : '';
                             return label.toLowerCase().includes(input.toLowerCase());
                         }}
+                        notFoundContent={skillCategories ? "Không tìm thấy kỹ năng" : "Đang tải..."}
                     >
-                        {SKILL_CATEGORIES.map(cat => (
-                            <OptGroup key={cat.label} label={cat.label}>
-                                {cat.options.map(opt => (
-                                    <Option key={opt.value} value={opt.value} label={opt.label}>
-                                        {opt.label}
-                                    </Option>
-                                ))}
-                            </OptGroup>
-                        ))}
+                        {SKILL_CATEGORIES.length > 0 ? (
+                            SKILL_CATEGORIES.map(cat => (
+                                <OptGroup key={cat.label} label={cat.label}>
+                                    {cat.options.map(opt => (
+                                        <Option key={opt.value} value={opt.value} label={opt.label}>
+                                            {opt.label}
+                                        </Option>
+                                    ))}
+                                </OptGroup>
+                            ))
+                        ) : (
+                            <>
+                                <Option value="test1">Test Skill 1</Option>
+                                <Option value="test2">Test Skill 2</Option>
+                            </>
+                        )}
                     </Select>
                 </Form.Item>
                 <Form.Item

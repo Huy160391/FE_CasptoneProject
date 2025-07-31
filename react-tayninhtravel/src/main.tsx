@@ -4,9 +4,13 @@ import './styles/global.scss'
 import App from './App.tsx'
 import './i18n'
 import setupConsoleSilencer from './utils/consoleSilencer'
+import appInitService from './services/appInitService'
 
 // Set up console silencer to filter out known third-party errors
 setupConsoleSilencer()
+
+// Initialize app services (including token expiration timer)
+appInitService.initialize()
 
 // Additional event listener for network errors
 window.addEventListener('error', (event) => {

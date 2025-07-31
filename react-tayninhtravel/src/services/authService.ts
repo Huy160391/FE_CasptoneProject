@@ -1,5 +1,6 @@
 import axiosInstance from '@/config/axios';
 import { jwtDecode } from 'jwt-decode';
+import tokenExpirationService from './tokenExpirationService';
 import {
     User,
     RegisterForm,
@@ -79,6 +80,9 @@ export const authService = {
                 localStorage.setItem('refreshToken', data.refreshToken);
                 localStorage.setItem('tokenExpirationTime', data.tokenExpirationTime);
 
+                // Bắt đầu timer để auto logout khi token hết hạn
+                tokenExpirationService.startExpirationTimer(data.tokenExpirationTime);
+
                 return {
                     user: userInfo,
                     token: data.token
@@ -139,6 +143,9 @@ export const authService = {
                 localStorage.setItem('refreshToken', data.refreshToken);
                 localStorage.setItem('tokenExpirationTime', data.tokenExpirationTime);
 
+                // Bắt đầu timer để auto logout khi token hết hạn
+                tokenExpirationService.startExpirationTimer(data.tokenExpirationTime);
+
                 return {
                     user: userInfo,
                     token: data.token
@@ -185,7 +192,15 @@ export const authService = {
     logout: async (): Promise<void> => {
         try {
             await axiosInstance.post('/Authentication/logout');
+
+            // Clear expiration timer
+            tokenExpirationService.clearExpirationTimer();
+
+            // Clear localStorage
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('tokenExpirationTime');
         } catch (error) {
             throw error;
         }
