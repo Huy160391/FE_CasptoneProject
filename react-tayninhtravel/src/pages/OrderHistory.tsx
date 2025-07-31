@@ -27,10 +27,48 @@ import {
     ShopOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { userService } from '../services/userService';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
+
+export interface OrderDetail {
+    productId: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    imageUrl?: string;
+    shopId: string;
+}
+
+export interface ApiOrder {
+    id: string;
+    userId: string;
+    totalAmount: number;
+    discountAmount: number;
+    totalAfterDiscount: number;
+    status: number;
+    voucherCode?: string;
+    payOsOrderCode: string;
+    isChecked: boolean;
+    checkedAt?: string;
+    checkedByShopId?: string;
+    createdAt: string;
+    orderDetails: OrderDetail[];
+}
+
+export interface ApiResponse {
+    statusCode: number;
+    message?: string;
+    success: boolean;
+    data: ApiOrder[];
+    totalPages: number;
+    totalRecord: number;
+    totalCount?: number;
+    pageIndex?: number;
+    pageSize?: number;
+}
 
 export interface OrderItem {
     id: string;
@@ -47,7 +85,7 @@ export interface Order {
     shopName: string;
     items: OrderItem[];
     totalAmount: number;
-    status: 'pending' | 'confirmed' | 'processing' | 'shipping' | 'delivered' | 'cancelled';
+    status: 'pending' | 'confirmed' | 'delivered' | 'cancelled';
     paymentStatus: 'unpaid' | 'paid' | 'refunded';
     paymentMethod: string;
     orderDate: string;
@@ -59,6 +97,43 @@ export interface Order {
 interface OrderHistoryProps {
     data?: Order[];
 }
+
+// Helper function to map API status to component status
+const mapApiStatusToComponentStatus = (apiStatus: number, isChecked: boolean): Order['status'] => {
+    switch (apiStatus) {
+        case 0: return 'pending';    // Pending
+        case 1: return isChecked ? 'delivered' : 'confirmed';  // Paid - nếu đã check thì delivered, chưa check thì confirmed
+        case 2: return 'cancelled';  // Cancelled
+        default: return 'pending';
+    }
+};
+
+// Helper function to transform API order to component order
+const transformApiOrderToOrder = (apiOrder: ApiOrder): Order => {
+    const items: OrderItem[] = apiOrder.orderDetails.map(detail => ({
+        id: detail.productId,
+        productName: detail.productName,
+        productImage: detail.imageUrl || undefined,
+        quantity: detail.quantity,
+        price: detail.unitPrice,
+        totalPrice: detail.unitPrice * detail.quantity
+    }));
+
+    return {
+        id: apiOrder.id,
+        orderNumber: apiOrder.payOsOrderCode,
+        shopName: 'Cửa hàng đặc sản', // Default shop name, you might want to fetch this from another API
+        items,
+        totalAmount: apiOrder.totalAfterDiscount,
+        status: mapApiStatusToComponentStatus(apiOrder.status, apiOrder.isChecked),
+        paymentStatus: apiOrder.status === 1 ? 'paid' : apiOrder.status === 2 ? 'refunded' : 'unpaid',
+        paymentMethod: 'PayOS',
+        orderDate: apiOrder.createdAt,
+        deliveryDate: apiOrder.checkedAt || undefined,
+        shippingAddress: '(Chưa có thông tin địa chỉ)', // Default address, you might want to fetch this from user profile
+        notes: apiOrder.voucherCode ? `Mã voucher: ${apiOrder.voucherCode}` : undefined
+    };
+};
 
 const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
     const { t } = useTranslation();
@@ -91,89 +166,54 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
             setLoading(true);
             setError(null);
 
-            // TODO: Replace with actual API call
-            // const response = await orderService.getUserOrders({
-            //     pageIndex: page - 1,
-            //     pageSize,
-            //     searchKeyword: keyword || undefined,
-            //     status,
-            //     includeInactive: includeInactiveOrders
-            // });
-
-            // Mock data for now
-            const mockOrders: Order[] = [
-                {
-                    id: '1',
-                    orderNumber: 'ORD-2024-001',
-                    shopName: 'Đặc sản Tây Ninh ABC',
-                    items: [
-                        {
-                            id: '1',
-                            productName: 'Bánh tráng nướng',
-                            quantity: 2,
-                            price: 50000,
-                            totalPrice: 100000
-                        },
-                        {
-                            id: '2',
-                            productName: 'Mắm ruốc Tây Ninh',
-                            quantity: 1,
-                            price: 120000,
-                            totalPrice: 120000
-                        }
-                    ],
-                    totalAmount: 220000,
-                    status: 'delivered',
-                    paymentStatus: 'paid',
-                    paymentMethod: 'VNPay',
-                    orderDate: '2024-03-15T10:30:00Z',
-                    deliveryDate: '2024-03-18T14:20:00Z',
-                    shippingAddress: '123 Nguyễn Văn Cừ, Quận 5, TP.HCM',
-                    notes: 'Giao hàng giờ hành chính'
-                },
-                {
-                    id: '2',
-                    orderNumber: 'ORD-2024-002',
-                    shopName: 'Cửa hàng đặc sản XYZ',
-                    items: [
-                        {
-                            id: '3',
-                            productName: 'Nem chua Tây Ninh',
-                            quantity: 3,
-                            price: 80000,
-                            totalPrice: 240000
-                        }
-                    ],
-                    totalAmount: 240000,
-                    status: 'shipping',
-                    paymentStatus: 'paid',
-                    paymentMethod: 'MoMo',
-                    orderDate: '2024-03-20T09:15:00Z',
-                    shippingAddress: '456 Lê Văn Sỹ, Quận 3, TP.HCM'
-                }
-            ];
-
-            // Filter mock data based on parameters
-            let filteredOrders = data || mockOrders;
-
-            if (keyword) {
-                filteredOrders = filteredOrders.filter(order =>
-                    order.orderNumber.toLowerCase().includes(keyword.toLowerCase()) ||
-                    order.shopName.toLowerCase().includes(keyword.toLowerCase())
-                );
-            }
-
+            // Convert component status to API status
+            let apiStatus: string | undefined;
             if (status) {
-                filteredOrders = filteredOrders.filter(order => order.status === status);
+                const statusMap: { [key: string]: string } = {
+                    'pending': '0',      // Pending
+                    'confirmed': '1',    // Paid (chưa giao)
+                    'delivered': '1',    // Paid (đã giao) - cần filter thêm isChecked = true
+                    'cancelled': '2'     // Cancelled
+                };
+                apiStatus = statusMap[status];
             }
 
-            if (!includeInactiveOrders) {
-                filteredOrders = filteredOrders.filter(order => order.status !== 'cancelled');
-            }
+            // Call the actual API
+            const response: ApiResponse = await userService.getUserOrders(
+                page,
+                pageSize,
+                keyword || undefined,
+                apiStatus
+            );
 
-            setOrders(filteredOrders);
-            setTotalCount(filteredOrders.length);
-            setCurrentPage(page);
+            if (response.success || response.statusCode === 200) {
+                // Transform API orders to component orders
+                let transformedOrders = response.data.map(transformApiOrderToOrder);
+
+                // Apply additional filtering for specific statuses
+                if (status === 'delivered') {
+                    // Chỉ lấy những đơn hàng đã được check (delivered)
+                    transformedOrders = transformedOrders.filter(order =>
+                        response.data.find(apiOrder => apiOrder.id === order.id)?.isChecked === true
+                    );
+                } else if (status === 'confirmed') {
+                    // Chỉ lấy những đơn hàng đã thanh toán nhưng chưa được check
+                    transformedOrders = transformedOrders.filter(order =>
+                        response.data.find(apiOrder => apiOrder.id === order.id)?.isChecked === false
+                    );
+                }
+
+                // Apply client-side filtering for inactive orders if needed
+                if (!includeInactiveOrders) {
+                    transformedOrders = transformedOrders.filter(order => order.status !== 'cancelled');
+                }
+
+                setOrders(transformedOrders);
+                setTotalCount(response.totalRecord || transformedOrders.length);
+                setCurrentPage(page);
+            } else {
+                throw new Error(response.message || 'Không thể tải danh sách đơn hàng');
+            }
         } catch (error: any) {
             console.error('Error loading orders:', error);
             setError(error.message || t('orderHistory.loadingError'));
@@ -215,8 +255,6 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
         const colors = {
             pending: 'orange',
             confirmed: 'blue',
-            processing: 'cyan',
-            shipping: 'purple',
             delivered: 'green',
             cancelled: 'red'
         };
@@ -227,8 +265,6 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
         const texts = {
             pending: t('orderHistory.statuses.pending'),
             confirmed: t('orderHistory.statuses.confirmed'),
-            processing: t('orderHistory.statuses.processing'),
-            shipping: t('orderHistory.statuses.shipping'),
             delivered: t('orderHistory.statuses.delivered'),
             cancelled: t('orderHistory.statuses.cancelled')
         };
@@ -333,8 +369,6 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                             >
                                 <Option value="pending">{t('orderHistory.statuses.pending')}</Option>
                                 <Option value="confirmed">{t('orderHistory.statuses.confirmed')}</Option>
-                                <Option value="processing">{t('orderHistory.statuses.processing')}</Option>
-                                <Option value="shipping">{t('orderHistory.statuses.shipping')}</Option>
                                 <Option value="delivered">{t('orderHistory.statuses.delivered')}</Option>
                                 <Option value="cancelled">{t('orderHistory.statuses.cancelled')}</Option>
                             </Select>

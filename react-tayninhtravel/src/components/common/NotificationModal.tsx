@@ -46,7 +46,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ visible, onClose 
     const fetchNotifications = async (reset = false) => {
         setLoading(true);
         try {
-            const currentPage = reset ? 1 : pageIndex;
+            const currentPage = reset ? 0 : pageIndex;
             const response = await notificationService.getAllNotifications(currentPage, 10);
 
             if (reset) {

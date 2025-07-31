@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Input, Space, Tag, Modal, message } from 'antd';
+import { Table, Button, Input, Space, Tag, Modal, message, Switch } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import type { Key } from 'react';
 import './Tours.scss';
 import { adminService } from '@/services/adminService';
 
 import TourDetailModal from '@/pages/admin/TourDetailModal';
 import type { PendingTour } from '@/types/tour';
+import { getTourDetailsStatusText, getTourDetailsStatusColor } from '@/types/tour';
 
 
 
@@ -17,24 +17,34 @@ const Tours = () => {
   const [loading, setLoading] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedTour, setSelectedTour] = useState<PendingTour | null>(null);
+  const [includeInactive, setIncludeInactive] = useState(false);
+
+  const fetchTours = async () => {
+    setLoading(true);
+    try {
+      const res = await adminService.getAllTours({
+        searchTerm: searchText,
+        includeInactive: includeInactive
+      });
+      console.log('API Response:', res); // Debug log
+      const data = Array.isArray(res.data)
+        ? res.data.map((item: PendingTour) => {
+          console.log('Tour item status:', item.status); // Debug log for each tour status
+          return { ...item };
+        })
+        : [];
+      setTours(data);
+    } catch (err) {
+      console.error('Error fetching tours:', err);
+      setTours([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPendingTours = async () => {
-      setLoading(true);
-      try {
-        const res = await adminService.getPendingTours();
-        const data = Array.isArray(res.data)
-          ? res.data.map((item: PendingTour) => ({ ...item }))
-          : [];
-        setTours(data);
-      } catch (err) {
-        setTours([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPendingTours();
-  }, []);
+    fetchTours();
+  }, [searchText, includeInactive]);
 
   const handleApprove = async (tour: PendingTour) => {
     let approveMessage = '';
@@ -128,14 +138,6 @@ const Tours = () => {
         </div>
       ),
       sorter: (a: PendingTour, b: PendingTour) => a.tourTemplateName.localeCompare(b.tourTemplateName),
-      filteredValue: searchText ? [searchText] : null,
-      onFilter: (value: boolean | Key, record: PendingTour) => {
-        const searchValue = value.toString().toLowerCase();
-        return (
-          record.tourTemplateName.toLowerCase().includes(searchValue) ||
-          record.startLocation.toLowerCase().includes(searchValue)
-        );
-      },
     },
     {
       title: 'Công ty tổ chức',
@@ -157,10 +159,23 @@ const Tours = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: PendingTour['status']) => {
-        const color = status === 1 ? 'success' : 'error';
-        const text = status === 1 ? 'Đang mở' : 'Tạm ngưng';
-        return <Tag className={`status-tag ${color}`}>{text}</Tag>;
+        const color = getTourDetailsStatusColor(status);
+        const text = getTourDetailsStatusText(status);
+        return <Tag color={color}>{text}</Tag>;
       },
+      filters: [
+        { text: 'Chờ duyệt', value: 'Pending' },
+        { text: 'Đã được duyệt', value: 'Approved' },
+        { text: 'Bị từ chối', value: 'Rejected' },
+        { text: 'Tạm ngưng', value: 'Suspended' },
+        { text: 'Chờ phân công HDV', value: 'AwaitingGuideAssignment' },
+        { text: 'Đã hủy', value: 'Cancelled' },
+        { text: 'Chờ admin duyệt', value: 'AwaitingAdminApproval' },
+        { text: 'Chờ mở bán vé', value: 'WaitToPublic' },
+        { text: 'Đã công khai', value: 'Public' },
+      ],
+      onFilter: (value: any, record: PendingTour) =>
+        record.status === value,
     },
     {
       title: 'Thao tác',
@@ -182,10 +197,19 @@ const Tours = () => {
           <Input
             placeholder="Tìm kiếm theo tên, địa điểm"
             prefix={<SearchOutlined />}
+            value={searchText}
             onChange={e => setSearchText(e.target.value)}
             className="search-input"
             allowClear
+            style={{ width: 250, marginRight: 16 }}
           />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{ marginRight: 8 }}>Bao gồm tour không hoạt động:</span>
+            <Switch
+              checked={includeInactive}
+              onChange={setIncludeInactive}
+            />
+          </div>
         </div>
       </div>
 
