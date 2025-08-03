@@ -34,6 +34,7 @@ import {
     TourTemplate,
     TourDetailsStatus
 } from '../../types/tour';
+import { mapStringToStatusEnum } from '../../utils/statusMapper';
 
 import {
     getTourDetailsStatusLabel,
@@ -42,37 +43,6 @@ import {
 
 
 const { TabPane } = Tabs;
-
-// Helper function to map API string status to enum
-const mapStringToStatusEnum = (status: string | TourDetailsStatus): TourDetailsStatus => {
-    if (typeof status === 'number') {
-        return status;
-    }
-    
-    switch (status) {
-        case 'Pending':
-            return TourDetailsStatus.Pending;
-        case 'Approved':
-            return TourDetailsStatus.Approved;
-        case 'Rejected':
-            return TourDetailsStatus.Rejected;
-        case 'Suspended':
-            return TourDetailsStatus.Suspended;
-        case 'AwaitingGuideAssignment':
-            return TourDetailsStatus.AwaitingGuideAssignment;
-        case 'Cancelled':
-            return TourDetailsStatus.Cancelled;
-        case 'AwaitingAdminApproval':
-            return TourDetailsStatus.AwaitingAdminApproval;
-        case 'WaitToPublic':
-            return TourDetailsStatus.WaitToPublic;
-        case 'Public':
-            return TourDetailsStatus.Public;
-        default:
-            console.warn('Unknown status:', status);
-            return TourDetailsStatus.Pending;
-    }
-};
 
 const TourDetailsManagement: React.FC = () => {
     const { token } = useAuthStore();
@@ -145,7 +115,6 @@ const TourDetailsManagement: React.FC = () => {
             // Backend trả về ResponseGetTourDetailsPaginatedDto
             if (response.success && response.data) {
                 console.log('✅ TourDetails loaded successfully:', response.data.length, 'items');
-                console.log('📊 Sample TourDetails item:', response.data[0]);
                 setTourDetailsList(response.data);
                 setTotalCount(response.totalCount || 0);
             } else {
@@ -290,7 +259,8 @@ const TourDetailsManagement: React.FC = () => {
         ];
 
         // Add "Kích hoạt Public" option if status is WaitToPublic
-        if (record.status === TourDetailsStatus.WaitToPublic) {
+        const statusEnum = mapStringToStatusEnum(record.status);
+        if (statusEnum === TourDetailsStatus.WaitToPublic) {
             items.push({
                 key: 'activate',
                 icon: <RocketOutlined style={{ color: '#722ed1' }} />,

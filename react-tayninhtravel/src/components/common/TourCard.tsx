@@ -9,6 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { TourDetailsStatus } from '../../types/tour';
 import { getTourImageWithFallback, getTourImageAltText } from '../../utils/imageUtils';
+import { mapStringToStatusEnum } from '../../utils/statusMapper';
 import TourPriceDisplay from './TourPriceDisplay';
 import './TourCard.scss';
 

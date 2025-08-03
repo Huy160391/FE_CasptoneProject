@@ -9,6 +9,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 
 import TourCard from '../common/TourCard'
 import LoginModal from '../auth/LoginModal'
+import { mapStringToStatusEnum } from '../../utils/statusMapper'
 import './FeaturedTours.scss'
 
 
@@ -32,7 +33,7 @@ interface TourDetail {
     activity: string;
     checkInTime: string;
   }>;
-  status: number;
+  status: string | number; // API trả về string, components convert thành number
 }
 
 const FeaturedTours = () => {
@@ -68,8 +69,16 @@ const FeaturedTours = () => {
 
       if (response.success && response.data) {
         // Filter only public tours (status 8) - tours available for customer booking
-        const publicTours = response.data.filter((tour: TourDetail) => tour.status === TourDetailsStatus.Public)
-        const selectedTours = publicTours.slice(0, 4) // Show up to 4 tours
+        const publicTours = response.data.filter((tour: TourDetail) => {
+          const mappedStatus = mapStringToStatusEnum(tour.status);
+          return mappedStatus === TourDetailsStatus.Public;
+        })
+        
+        // Convert string status to number enum for TourCard compatibility
+        const selectedTours = publicTours.slice(0, 4).map((tour: TourDetail) => ({
+          ...tour,
+          status: mapStringToStatusEnum(tour.status)
+        }))
         setTours(selectedTours)
 
         // Load real-time availability for each tour
