@@ -48,7 +48,7 @@ export const checkoutCart = async (
         '/Product/checkout',
         {
             cartItemIds,
-            myVoucherCodeId,
+            myVoucherCodeId: myVoucherCodeId || null,
         },
         {
             headers: {
