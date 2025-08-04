@@ -26,82 +26,11 @@
     margin-bottom: 40px;
   }
   
-  .activities-grid {
-    .activity-card {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      background-color: #fff;
-      border: 1px solid #f0f0f0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      
-      .ant-card-body {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-      
-      .ant-card-meta {
-        margin-bottom: 12px;
-      }
-      
-      .ant-card-meta-title {
-        color: rgba(0, 0, 0, 0.85);
-      }
-      
-      .activity-description {
-        color: rgba(0, 0, 0, 0.65);
-        margin-bottom: 16px;
-      }
-      
-      .activity-details {
-        flex: 1;
-        margin-bottom: 16px;
-        
-        .detail-item {
-          margin-bottom: 8px;
-          
-          .label {
-            font-weight: 500;
-            margin-right: 8px;
-            color: rgba(0, 0, 0, 0.85);
-          }
-          
-          .value {
-            color: rgba(0, 0, 0, 0.65);
-          }
-        }
-      }
-      
-      .activity-tags {
-        margin-bottom: 16px;
-        
-        .ant-tag {
-          background-color: #f5f5f5;
-          color: rgba(0, 0, 0, 0.65);
-          border: 1px solid #d9d9d9;
-        }
-      }
-      
-      .ant-btn-primary {
-        background-color: #1890ff;
-        border-color: #1890ff;
-        color: #fff;
-        
-        &:hover {
-          background-color: #40a9ff;
-          border-color: #40a9ff;
-        }
-      }
-      
-      .ant-rate {
-        color: #fadb14;
-        
-        .ant-rate-star:not(.ant-rate-star-full) .ant-rate-star-first, 
-        .ant-rate-star:not(.ant-rate-star-full) .ant-rate-star-second {
-          color: rgba(0, 0, 0, 0.25);
-        }
-      }
+  .tours-grid {
+    // TourCard styles are handled by the TourCard component itself
+    // Just add any grid-specific styles here if needed
+    .ant-empty {
+      padding: 50px 0;
     }
   }
   
@@ -163,55 +92,11 @@ body.dark-mode {
       }
     }
     
-    .activities-grid {
-      .activity-card {
-        background-color: #141414;
-        border-color: #303030;
-        
-        .ant-card-meta-title {
-          color: rgba(255, 255, 255, 0.85);
-        }
-        
-        .activity-description {
+    .tours-grid {
+      // TourCard dark mode styles are handled by the TourCard component itself
+      .ant-empty {
+        .ant-empty-description {
           color: rgba(255, 255, 255, 0.65);
-        }
-        
-        .activity-details {
-          .detail-item {
-            .label {
-              color: rgba(255, 255, 255, 0.85);
-            }
-            
-            .value {
-              color: rgba(255, 255, 255, 0.65);
-            }
-          }
-        }
-        
-        .activity-tags {
-          .ant-tag {
-            background-color: #1f1f1f;
-            color: rgba(255, 255, 255, 0.65);
-            border-color: #303030;
-          }
-        }
-        
-        .ant-btn-primary {
-          background-color: #79eac0;
-          border-color: #79eac0;
-          color: #000000;
-          
-          &:hover {
-            background-color: #5dc9a0;
-            border-color: #5dc9a0;
-          }
-        }
-        
-        .ant-rate {
-          .ant-rate-star:not(.ant-rate-star-full) .ant-rate-star-first, 
-          .ant-rate-star:not(.ant-rate-star-full) .ant-rate-star-second {
-            color: rgba(255, 255, 255, 0.25);
-          }
         }
       }
     }
