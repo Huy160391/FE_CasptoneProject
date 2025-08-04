@@ -683,6 +683,43 @@ export const userService = {
         });
         return response.data;
     },
+
+    /**
+     * Lấy thông tin chi tiết của một shop theo ID
+     * @param shopId ID của shop
+     * @returns Promise với thông tin chi tiết shop
+     */
+    getShopInfo: async (shopId: string): Promise<any> => {
+        try {
+            const response = await axios.get(`/SpecialtyShop/${shopId}`);
+
+            // API trả về object có structure: { data: shopInfo, isSuccess, statusCode, message, success, validationErrors }
+            if (response.data && response.data.isSuccess && response.data.data) {
+                return response.data.data;
+            }
+
+            // Nếu không có data hoặc không thành công, throw error
+            throw new Error(response.data?.message || 'Failed to fetch shop information');
+        } catch (error) {
+            console.error(`Error fetching shop info for ID ${shopId}:`, error);
+
+            // Trả về object mặc định để tránh crash
+            return {
+                id: shopId,
+                shopName: 'Unknown Shop',
+                description: '',
+                location: '',
+                representativeName: '',
+                email: '',
+                phoneNumber: '',
+                website: null,
+                businessLicense: '',
+                shopType: '',
+                rating: 0,
+                isShopActive: false
+            };
+        }
+    },
 };
 
 // Also export as default

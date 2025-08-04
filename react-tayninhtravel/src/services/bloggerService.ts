@@ -20,8 +20,8 @@ export const bloggerService = {
             status: apiBlog.status,
             likes: apiBlog.totalLikes || 0,
             comments: apiBlog.totalComments || 0,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: apiBlog.createdAt,
+            updatedAt: apiBlog.updatedAt,
             authorId: undefined,
             authorName: apiBlog.authorName,
         };
@@ -317,39 +317,68 @@ export const bloggerService = {
         }
     },
 
+
     /**
-     * Get blog statistics for dashboard
+     * Get dashboard statistics by month and year
      */
-    async getBlogStats(): Promise<{
+    async getDashboardStats(year: number, month: number): Promise<{
         totalPosts: number;
-        acceptedPosts: number;
-        pendingPosts: number;
+        approvedPosts: number;
         rejectedPosts: number;
-        totalViews: number;
+        pendingPosts: number;
         totalLikes: number;
+        totalComments: number;
     }> {
         try {
-            const response = await axiosInstance.get<{
-                statusCode: number;
-                message: string;
-                data: {
-                    totalPosts: number;
-                    acceptedPosts: number;
-                    pendingPosts: number;
-                    rejectedPosts: number;
-                    totalViews: number;
-                    totalLikes: number;
-                };
-            }>('/Blogger/Blog-Blogger/stats');
+            const params = {
+                year,
+                month
+            };
 
-            return response.data.data;
+            console.log('Calling /Blogger/Dashboard with params:', params);
+
+            const response = await axiosInstance.get('/Blogger/Dashboard', { params });
+
+            console.log('Full API response:', response);
+            console.log('Response.data:', response.data);
+
+            // Check if response.data is the actual data or wrapped in another structure
+            let actualData = response.data;
+
+            // If response is wrapped in { statusCode, message, data } structure
+            if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+                actualData = response.data.data;
+                console.log('Using response.data.data:', actualData);
+            } else {
+                console.log('Using response.data directly:', actualData);
+            }
+
+            // Return the data directly from response
+            return {
+                totalPosts: actualData?.totalPosts || 0,
+                approvedPosts: actualData?.approvedPosts || 0,
+                rejectedPosts: actualData?.rejectedPosts || 0,
+                pendingPosts: actualData?.pendingPosts || 0,
+                totalLikes: actualData?.totalLikes || 0,
+                totalComments: actualData?.totalComments || 0,
+            };
         } catch (error) {
-            console.error('Error fetching blog stats:', error);
+            console.error('Error fetching blogger dashboard stats:', error);
+
+            // Log the error details
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as any;
+                console.error('API Error details:', {
+                    status: axiosError.response?.status,
+                    data: axiosError.response?.data,
+                    url: axiosError.config?.url
+                });
+            }
+
+            // Re-throw error so component can handle fallback
             throw error;
         }
-    },
-
-    /**
+    },    /**
      * Handle API errors consistently
      */
     handleError(error: unknown, context: string): never {

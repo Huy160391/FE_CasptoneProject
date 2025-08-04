@@ -16,6 +16,7 @@
     "antd": "^5.25.1",
     "axios": "^1.9.0",
     "curtainsjs": "^8.1.6",
+    "dayjs": "^1.11.13",
     "gsap": "^3.13.0",
     "i18next": "^25.1.2",
     "jwt-decode": "^4.0.0",
@@ -24,6 +25,7 @@
     "react-i18next": "^15.5.1",
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.20.0",
+    "recharts": "^3.1.0",
     "three": "^0.177.0",
     "zustand": "^5.0.4"
   },
