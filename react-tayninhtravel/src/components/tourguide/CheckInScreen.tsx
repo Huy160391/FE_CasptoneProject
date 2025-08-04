@@ -65,7 +65,19 @@ const CheckInScreen: React.FC = () => {
     };
 
     useEffect(() => {
-        loadBookings();
+        let isMounted = true;
+
+        const loadData = async () => {
+            if (isMounted) {
+                await loadBookings();
+            }
+        };
+
+        loadData();
+
+        return () => {
+            isMounted = false;
+        };
     }, [tourId]);
 
     // Handle check-in
