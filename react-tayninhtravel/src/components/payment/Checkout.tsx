@@ -32,6 +32,7 @@ import type { ColumnsType } from 'antd/es/table'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import { checkoutCart } from '@/services/cartService'
+import { useEnhancedPayment } from '@/services/enhancedPaymentService'
 import './Checkout.scss'
 
 const { Title, Text } = Typography
@@ -68,6 +69,7 @@ const Checkout = () => {
     const navigate = useNavigate()
     const { items, getTotalItems, getTotalPrice, clearCart } = useCartStore()
     const { isAuthenticated, user } = useAuthStore()
+    const { createPaymentLink } = useEnhancedPayment()
 
     const [currentStep, setCurrentStep] = useState(0)
     const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
@@ -83,6 +85,7 @@ const Checkout = () => {
     const [selectedShippingMethod, setSelectedShippingMethod] = useState('pickup')
     const [agreeTerms, setAgreeTerms] = useState(false)
     const [loading, setLoading] = useState(false)
+    // Always use Enhanced Payment System
 
     // Authentication modal states
     const [loginModalVisible, setLoginModalVisible] = useState(false)
@@ -262,18 +265,27 @@ const Checkout = () => {
 
         setLoading(true)
         try {
-            const res = await checkoutCart('');
-            // Điều chỉnh lấy checkoutUrl từ response mới
-            if (res.checkoutUrl && res.checkoutUrl.checkoutUrl) {
-                window.location.href = res.checkoutUrl.checkoutUrl;
-                return;
-            }
-            clearCart()
-            notification.success({
-                message: t('checkout.orderSuccess'),
-                description: t('checkout.orderSuccessDescription')
+            // === ENHANCED PAYMENT SYSTEM (ONLY) ===
+            notification.info({
+                message: 'Sử dụng Enhanced Payment System',
+                description: 'Đang tạo thanh toán với transaction tracking...'
             })
-            // Xoá navigate('/order-success') vì không cần chuyển trang nữa
+
+            // First create order via legacy system to get orderId
+            const res = await checkoutCart('');
+
+            if (res.orderId) {
+                // Then create enhanced payment link
+                await createPaymentLink({
+                    orderId: res.orderId,
+                    amount: getTotalPrice(),
+                    description: `Product Order - ${res.orderId}`
+                });
+                // createPaymentLink automatically redirects to PayOS
+                clearCart()
+            } else {
+                throw new Error('Failed to create order');
+            }
         } catch (error) {
             notification.error({
                 message: t('checkout.orderError'),
@@ -592,6 +604,10 @@ const Checkout = () => {
                                     </div>
                                 </div>
                                 <Divider />
+
+                                {/* Payment System Selection - Hidden, always use Enhanced */}
+                                {/* Enhanced Payment System is now the only option */}
+
                                 <Checkbox
                                     checked={agreeTerms}
                                     onChange={(e) => setAgreeTerms(e.target.checked)}

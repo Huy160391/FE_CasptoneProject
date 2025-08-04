@@ -1,5 +1,5 @@
 // API URLs
-const DEVELOPMENT_API_URL = 'https://localhost:7000/api';
+const DEVELOPMENT_API_URL = 'http://localhost:5267/api';
 
 // Automatically use appropriate URL based on environment
 // Use local development API

@@ -28,6 +28,7 @@ import {
     formatCurrency,
     ProductOrderInfo
 } from '../../services/paymentService';
+import { EnhancedPaymentService } from '../../services/enhancedPaymentService';
 import { retryPaymentCallback, getPaymentErrorMessage } from '../../utils/retryUtils';
 
 const { Text } = Typography;
@@ -37,6 +38,7 @@ const ProductPaymentSuccess: React.FC = () => {
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [orderInfo, setOrderInfo] = useState<ProductOrderInfo | null>(null);
+    const [useEnhancedPayment, setUseEnhancedPayment] = useState(true); // Try Enhanced first
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -60,6 +62,40 @@ const ProductPaymentSuccess: React.FC = () => {
                 }
 
                 const orderCode = params.orderCode || params.orderId || '';
+
+                // Try Enhanced Payment System first
+                if (useEnhancedPayment) {
+                    try {
+                        console.log('Trying Enhanced Payment System...');
+                        const enhancedService = new EnhancedPaymentService();
+
+                        // Try to get transaction info from Enhanced system
+                        const transactionResponse = await enhancedService.getTransactionByOrderCode(orderCode);
+                        if (transactionResponse.success && transactionResponse.data) {
+                            console.log('Found transaction in Enhanced system:', transactionResponse.data);
+                            // Process with Enhanced system
+                            const enhancedResult = await enhancedService.processWebhookCallback({
+                                orderCode: orderCode,
+                                status: params.status || 'PAID'
+                            });
+
+                            if (enhancedResult.success) {
+                                console.log('Enhanced payment processing successful');
+                                setOrderInfo(transactionResponse.data.orderInfo);
+                                return; // Success, exit early
+                            }
+                        }
+
+                        console.log('Enhanced system not available, falling back to legacy...');
+                        setUseEnhancedPayment(false);
+                    } catch (enhancedError) {
+                        console.warn('Enhanced payment failed, falling back to legacy:', enhancedError);
+                        setUseEnhancedPayment(false);
+                    }
+                }
+
+                // Fallback to Legacy Payment System
+                console.log('Using Legacy Payment System...');
 
                 // Lookup order information first
                 try {
