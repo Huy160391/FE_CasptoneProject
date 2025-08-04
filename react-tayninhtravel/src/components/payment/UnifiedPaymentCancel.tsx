@@ -81,7 +81,7 @@ const UnifiedPaymentCancel: React.FC = () => {
         // Fallback: Try to find in PaymentTransaction and get the actual Order/TourBooking
         try {
             console.log('Trying PaymentTransaction fallback lookup...');
-            const enhancedResponse = await fetch(`${import.meta.env.VITE_API_URL}/enhanced-payment/transaction/order-code/${payOsOrderCode}`);
+            const enhancedResponse = await fetch(`${import.meta.env.VITE_API_URL}/enhanced-payments/transaction/order-code/${payOsOrderCode}`);
             if (enhancedResponse.ok) {
                 const enhancedData = await enhancedResponse.json();
                 if (enhancedData.success && enhancedData.data) {
