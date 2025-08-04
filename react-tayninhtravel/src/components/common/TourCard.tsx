@@ -32,7 +32,7 @@ interface TourDetail {
         activity: string;
         checkInTime: string;
     }>;
-    status: number;
+    status: string | number;
 }
 
 interface TourCardProps {
@@ -82,7 +82,7 @@ const TourCard: React.FC<TourCardProps> = ({
                         className="tour-image"
                     />
                     <div className="tour-status-overlay">
-                        {getStatusTag(tour.status)}
+                        {getStatusTag(typeof tour.status === 'string' ? mapStringToStatusEnum(tour.status) : tour.status)}
                     </div>
                     {/* Show image count if multiple images */}
                     {tour.imageUrls && tour.imageUrls.length > 1 && (

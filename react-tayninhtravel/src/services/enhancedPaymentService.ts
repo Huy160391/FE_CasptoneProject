@@ -79,14 +79,6 @@ export class EnhancedPaymentService {
     }
 
     /**
-     * Thử lại thanh toán cho transaction đã thất bại
-     */
-    async retryPayment(request: RetryPaymentRequest): Promise<ApiResponse<PaymentLinkResponse>> {
-        const response = await axios.post(`${this.baseUrl}/retry`, request);
-        return response.data;
-    }
-
-    /**
      * Lấy danh sách transactions theo orderId
      */
     async getTransactionsByOrderId(orderId: string): Promise<ApiResponse<PaymentTransactionResponse[]>> {
