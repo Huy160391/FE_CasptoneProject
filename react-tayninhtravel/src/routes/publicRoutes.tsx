@@ -19,6 +19,8 @@ import TourPaymentSuccess from '@/pages/TourPaymentSuccess';
 import TourPaymentCancel from '@/pages/TourPaymentCancel';
 import ProductPaymentSuccess from '@/pages/ProductPaymentSuccess';
 import ProductPaymentCancel from '@/pages/ProductPaymentCancel';
+import PaymentSuccess from '@/pages/PaymentSuccess';
+import PaymentCancel from '@/pages/PaymentCancel';
 import BookingHistory from '@/pages/BookingHistory';
 import TourDetailsPage from '@/pages/TourDetailsPage';
 import DebugAuth from '@/pages/DebugAuth';
@@ -85,7 +87,16 @@ export const publicRoutes: RouteObject[] = [
         path: '/booking/:tourId',
         element: <BookingPage />,
     },
-    // Product Payment Routes
+    // Unified Payment Routes (Enhanced Payment System)
+    {
+        path: '/payment-success',
+        element: <PaymentSuccess />,
+    },
+    {
+        path: '/payment-cancel',
+        element: <PaymentCancel />,
+    },
+    // Legacy Product Payment Routes (for backward compatibility)
     {
         path: '/product-payment-success',
         element: <ProductPaymentSuccess />,
@@ -94,7 +105,7 @@ export const publicRoutes: RouteObject[] = [
         path: '/product-payment-cancel',
         element: <ProductPaymentCancel />,
     },
-    // Tour Payment Routes
+    // Legacy Tour Payment Routes (for backward compatibility)
     {
         path: '/tour-payment-success',
         element: <TourPaymentSuccess />,
