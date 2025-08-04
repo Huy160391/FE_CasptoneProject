@@ -50,11 +50,31 @@ const UnifiedPaymentCancel: React.FC = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthStore();
 
+    // Normalize order code to TNDT format if needed
+    const normalizeOrderCode = (orderCode: string): string => {
+        // If already has TNDT prefix, return as is
+        if (orderCode.startsWith('TNDT')) {
+            return orderCode;
+        }
+
+        // If numeric only, add TNDT prefix
+        if (/^\d+$/.test(orderCode)) {
+            return `TNDT${orderCode}`;
+        }
+
+        // Return as is for other formats
+        return orderCode;
+    };
+
     // Detect payment type and get payment info
     const detectPaymentType = async (payOsOrderCode: string): Promise<PaymentTypeDetection> => {
+        // Normalize order code to TNDT format
+        const normalizedOrderCode = normalizeOrderCode(payOsOrderCode);
+        console.log(`Original order code: ${payOsOrderCode}, Normalized: ${normalizedOrderCode}`);
+
         try {
             // Try tour booking first
-            const tourResponse = await lookupTourBookingByPayOsOrderCode(payOsOrderCode);
+            const tourResponse = await lookupTourBookingByPayOsOrderCode(normalizedOrderCode);
             if (tourResponse.success && tourResponse.data) {
                 return {
                     type: 'tour',
@@ -67,7 +87,7 @@ const UnifiedPaymentCancel: React.FC = () => {
 
         try {
             // Try product order
-            const productResponse = await lookupProductOrderByPayOsOrderCode(payOsOrderCode);
+            const productResponse = await lookupProductOrderByPayOsOrderCode(normalizedOrderCode);
             if (productResponse.success && productResponse.data) {
                 return {
                     type: 'product',
@@ -81,7 +101,7 @@ const UnifiedPaymentCancel: React.FC = () => {
         // Fallback: Try to find in PaymentTransaction and get the actual Order/TourBooking
         try {
             console.log('Trying PaymentTransaction fallback lookup...');
-            const enhancedResponse = await fetch(`${import.meta.env.VITE_API_URL}/enhanced-payments/transaction/order-code/${payOsOrderCode}`);
+            const enhancedResponse = await fetch(`${import.meta.env.VITE_API_URL}/enhanced-payments/transaction/order-code/${normalizedOrderCode}`);
             if (enhancedResponse.ok) {
                 const enhancedData = await enhancedResponse.json();
                 if (enhancedData.success && enhancedData.data) {
