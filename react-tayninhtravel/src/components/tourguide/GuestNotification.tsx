@@ -24,6 +24,7 @@ import {
     CheckCircleOutlined
 } from '@ant-design/icons';
 import { getTourBookings, notifyGuests, TourBooking } from '@/services/tourguideService';
+import { getTourOperationByDetailsId } from '@/services/tourcompanyService';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -95,21 +96,28 @@ const GuestNotification: React.FC = () => {
     // Handle form submission
     const handleSubmit = async (values: NotificationFormData) => {
         if (!tourId) return;
-        
+
         try {
             setSending(true);
-            
-            const response = await notifyGuests(tourId, {
+
+            // First get operation ID from tour details ID
+            const operationResponse = await getTourOperationByDetailsId(tourId);
+            if (!operationResponse.success || !operationResponse.data) {
+                throw new Error('Không tìm thấy thông tin tour operation');
+            }
+
+            const operationId = operationResponse.data.id;
+            const response = await notifyGuests(operationId, {
                 message: values.message,
                 isUrgent: values.isUrgent
             });
-            
+
             if (response.success) {
                 notification.success({
                     message: 'Gửi thông báo thành công',
                     description: response.message || 'Thông báo đã được gửi đến tất cả khách hàng.',
                 });
-                
+
                 // Reset form
                 form.resetFields();
                 

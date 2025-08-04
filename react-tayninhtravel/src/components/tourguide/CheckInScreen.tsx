@@ -26,6 +26,7 @@ import {
     ScanOutlined
 } from '@ant-design/icons';
 import { getTourBookings, checkInGuest, TourBooking } from '@/services/tourguideService';
+import { getTourOperationByDetailsId } from '@/services/tourcompanyService';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -45,11 +46,19 @@ const CheckInScreen: React.FC = () => {
     // Load tour bookings
     const loadBookings = async () => {
         if (!tourId) return;
-        
+
         try {
             setLoading(true);
-            const response = await getTourBookings(tourId);
-            
+
+            // First get operation ID from tour details ID
+            const operationResponse = await getTourOperationByDetailsId(tourId);
+            if (!operationResponse.success || !operationResponse.data) {
+                throw new Error('Không tìm thấy thông tin tour operation');
+            }
+
+            const operationId = operationResponse.data.id;
+            const response = await getTourBookings(operationId);
+
             if (response.success && response.data) {
                 setBookings(response.data);
             }

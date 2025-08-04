@@ -361,17 +361,17 @@ export const getTourBookings = async (
 
 /**
  * Lấy timeline items cho tour cụ thể
- * @param operationId - ID của TourOperation
+ * @param tourDetailsId - ID của TourDetails
  * @param token - JWT token (optional)
  */
 export const getTourTimeline = async (
-    operationId: string,
+    tourDetailsId: string,
     token?: string
 ): Promise<ApiResponse<TimelineItem[]>> => {
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-        const response = await api.get(`/TourGuide/tour/${operationId}/timeline`, { headers });
+        const response = await api.get(`/TourDetails/${tourDetailsId}/timeline`, { headers });
 
         return response.data;
     } catch (error: any) {
