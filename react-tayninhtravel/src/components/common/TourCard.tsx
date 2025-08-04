@@ -97,6 +97,15 @@ const TourCard: React.FC<TourCardProps> = ({
                     className="custom-book-now-btn"
                     onClick={e => { e.stopPropagation(); onBookNow(tour); }}
                     disabled={!tour.tourOperation?.isActive}
+                    style={{
+                        borderRadius: '8px',
+                        border: 'none',
+                        height: '40px',
+                        background: '#1890ff',
+                        color: 'white',
+                        cursor: 'pointer',
+                        width: '100%'
+                    }}
                 >
                     <CalendarOutlined style={{ marginRight: 8 }} />
                     {t('tours.bookNow')}

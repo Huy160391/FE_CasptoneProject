@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Card, Tabs } from 'antd';
-import { UserOutlined, HistoryOutlined, ShoppingOutlined, CommentOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { UserOutlined, HistoryOutlined, ShoppingCartOutlined, CommentOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userService } from '@/services/userService';
 import type { UserSupportTicket } from '@/types/support';
 import ProfileInfo from './ProfileInfo';
 import BookingHistory from './BookingHistory';
-import TransactionHistory from './TransactionHistory';
+import OrderHistory from './OrderHistory';
 import CommentHistory from './CommentHistory';
 import SupportTicketHistory from './SupportTicketHistory';
 import RegisterHistory from './RegisterHistory';
@@ -20,23 +20,6 @@ const Profile = () => {
     const [supportTickets, setSupportTickets] = useState<UserSupportTicket[]>([]);
 
     // BookingHistory component now uses real API calls instead of mock data
-
-    const transactionHistory = [
-        {
-            id: 1,
-            type: 'Tour booking',
-            amount: '1,500,000 ₫',
-            date: '2024-03-15',
-            status: 'completed',
-        },
-        {
-            id: 2,
-            type: 'Product purchase',
-            amount: '850,000 ₫',
-            date: '2024-03-18',
-            status: 'completed',
-        },
-    ];
 
     const commentHistory = [
         {
@@ -130,12 +113,12 @@ const Profile = () => {
                                 key: "transactions",
                                 label: (
                                     <span>
-                                        <ShoppingOutlined />
-                                        {t('profile.transactionHistory')}
+                                        <ShoppingCartOutlined />
+                                        {t('profile.orderHistory')}
                                     </span>
                                 ),
                                 children: (
-                                    <TransactionHistory data={transactionHistory} />
+                                    <OrderHistory />
                                 )
                             },
                             {

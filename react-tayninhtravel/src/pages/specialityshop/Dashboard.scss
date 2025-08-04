@@ -26,8 +26,25 @@
     margin-top: 16px;
   }
   
-  .recent-orders-card, .top-products-card {
+  .recent-orders-card, .top-products-card, .quick-actions-card {
     height: 100%;
+  }
+
+  .quick-actions-card {
+    .ant-card-body {
+      padding: 20px;
+    }
+    
+    .ant-btn {
+      height: 40px;
+      border-radius: 6px;
+      font-weight: 500;
+      
+      &.ant-btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+      }
+    }
   }
   
   .status-tag {

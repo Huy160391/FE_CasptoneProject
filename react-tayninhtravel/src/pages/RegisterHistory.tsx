@@ -43,12 +43,13 @@ const mapRegisterHistoryData = (apiData: any, type: 'shop' | 'tourGuide') => {
             type,
             submittedAt: item.submittedAt || item.createdAt || new Date().toISOString(),
             status:
-                item.status === 1
+                // Handle both string and number status
+                (typeof item.status === 'string' && item.status === 'Approved') || item.status === 1
                     ? 'approved'
-                    : item.status === 0
+                    : (typeof item.status === 'string' && item.status === 'Pending') || item.status === 0
                         ? 'pending'
                         : 'rejected',
-            response: item.status === 0 ? '' : (item.response || item.rejectionReason || ''),
+            response: ((typeof item.status === 'string' && item.status === 'Pending') || item.status === 0) ? '' : (item.response || item.rejectionReason || ''),
             originalData: item, // Lưu data gốc
         };
         return mapped;

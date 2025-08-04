@@ -1,0 +1,233 @@
+.notification-modal {
+  .notification-modal-content {
+    max-height: 500px;
+    overflow-y: auto;
+    
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+
+    .notification-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 8px;
+    }
+
+    .notification-list {
+      .notification-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.3s;
+
+        &.clickable {
+          cursor: pointer;
+          
+          &:hover {
+            background-color: #f0f9ff;
+          }
+        }
+
+        &.unread {
+          background-color: #f6ffed;
+          border-left: 3px solid #52c41a;
+          padding-left: 9px;
+          
+          &.clickable:hover {
+            background-color: #e6f7e6;
+          }
+        }
+
+        &:hover {
+          background-color: #fafafa;
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .ant-list-item-meta-title {
+          margin-bottom: 4px;
+          
+          .ant-tag {
+            font-size: 10px;
+            padding: 1px 6px;
+            line-height: 16px;
+            margin-left: 8px;
+          }
+        }
+
+        .ant-list-item-meta-description {
+          color: #666;
+          
+          .ant-typography {
+            margin-bottom: 8px !important;
+          }
+        }
+
+        .ant-list-item-action {
+          margin-left: 8px;
+          
+          .ant-btn-link {
+            padding: 4px;
+            height: auto;
+          }
+        }
+      }
+    }
+
+    .load-more-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+  }
+
+  // Dark mode styles
+  &.dark-mode {
+    .ant-modal-content {
+      background-color: #1f1f1f;
+      border: 1px solid #424242;
+    }
+
+    .ant-modal-header {
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #424242;
+      
+      .ant-modal-title {
+        color: #fff;
+      }
+    }
+
+    .ant-modal-close-x {
+      color: #fff;
+      
+      &:hover {
+        color: #1890ff;
+      }
+    }
+
+    .notification-modal-content {
+      .notification-list {
+        .notification-item {
+          border-bottom: 1px solid #424242;
+
+          &.clickable {
+            &:hover {
+              background-color: #1a3a5c;
+            }
+          }
+
+          &.unread {
+            background-color: #162312;
+            border-left: 3px solid #52c41a;
+            
+            &.clickable:hover {
+              background-color: #1f2f1f;
+            }
+          }
+
+          &:hover {
+            background-color: #262626;
+          }
+
+          .ant-list-item-meta-title {
+            color: #fff;
+          }
+
+          .ant-list-item-meta-description {
+            color: #bfbfbf;
+            
+            .ant-typography {
+              color: #bfbfbf !important;
+            }
+          }
+
+          .ant-list-item-action {
+            .ant-btn-link {
+              color: #1890ff;
+              
+              &:hover {
+                color: #40a9ff;
+              }
+              
+              &.ant-btn-dangerous {
+                color: #ff4d4f;
+                
+                &:hover {
+                  color: #ff7875;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .load-more-container {
+        border-top: 1px solid #424242;
+        
+        .ant-btn-link {
+          color: #1890ff;
+          
+          &:hover {
+            color: #40a9ff;
+          }
+        }
+      }
+
+      .notification-actions {
+        .ant-btn {
+          border-color: #424242;
+          color: #1890ff;
+          
+          &:hover {
+            border-color: #1890ff;
+            color: #40a9ff;
+          }
+        }
+      }
+    }
+
+    .ant-divider {
+      border-color: #424242;
+    }
+
+    .ant-empty-description {
+      color: #bfbfbf;
+    }
+  }
+}
+
+// Notification Bell Button styles
+.notification-bell-btn {
+  position: relative;
+  
+  .ant-badge {
+    .ant-badge-count {
+      font-size: 10px;
+      min-width: 16px;
+      height: 16px;
+      line-height: 16px;
+      padding: 0 4px;
+      top: -4px;
+      right: -4px;
+    }
+  }
+  
+  &:hover {
+    color: #1890ff;
+  }
+
+  // Dark mode for bell button
+  .dark-mode & {
+    color: #bfbfbf;
+    
+    &:hover {
+      color: #1890ff;
+    }
+  }
+}

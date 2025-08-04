@@ -4,7 +4,7 @@ export interface TourGuideApplication {
     fullName: string;
     phoneNumber: string;
     experience: string;
-    status: number;
+    status: string; // "Pending" | "Approved" | "Rejected"
     submittedAt: string;
     userName: string;
     userEmail: string;
@@ -58,6 +58,13 @@ export enum ApplicationStatus {
     REJECTED = 2
 }
 
+// Tour Guide Application Status Enum (for string values)
+export enum TourGuideApplicationStatus {
+    PENDING = "Pending",
+    APPROVED = "Approved",
+    REJECTED = "Rejected"
+}
+
 // Shop Type Enum
 export enum ShopType {
     SOUVENIR = 'souvenir',
@@ -67,7 +74,12 @@ export enum ShopType {
 
 // Tour Guide Application Form Data (for submission)
 export interface TourGuideApplicationForm {
+    fullName: string;
+    phoneNumber: string;
     email: string;
+    experience: string;
+    skills: string[]; // List of skill enum names, e.g. ["Vietnamese", "English", ...]
+    skillsString: string; // Comma-separated string of enum names
     curriculumVitae: File;
 }
 
@@ -88,3 +100,36 @@ export interface ShopApplicationForm {
     businessLicense: File;
     businessCode: string;
 }
+
+// Helper functions for TourGuideApplication status
+export const getTourGuideApplicationStatusText = (status: string): string => {
+    switch (status) {
+        case TourGuideApplicationStatus.PENDING:
+        case "Pending":
+            return 'Chờ duyệt';
+        case TourGuideApplicationStatus.APPROVED:
+        case "Approved":
+            return 'Đã duyệt';
+        case TourGuideApplicationStatus.REJECTED:
+        case "Rejected":
+            return 'Đã từ chối';
+        default:
+            return status || 'Không xác định';
+    }
+};
+
+export const getTourGuideApplicationStatusColor = (status: string): string => {
+    switch (status) {
+        case TourGuideApplicationStatus.PENDING:
+        case "Pending":
+            return 'gold';
+        case TourGuideApplicationStatus.APPROVED:
+        case "Approved":
+            return 'green';
+        case TourGuideApplicationStatus.REJECTED:
+        case "Rejected":
+            return 'red';
+        default:
+            return 'default';
+    }
+};

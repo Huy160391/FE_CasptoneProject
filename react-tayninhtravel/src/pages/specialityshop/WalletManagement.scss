@@ -1,0 +1,434 @@
+.wallet-management-page {
+    padding: 24px;
+    background: #f5f5f5;
+    min-height: 100vh;
+
+    .page-header {
+        margin-bottom: 24px;
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+            .page-title {
+                font-size: 28px;
+                font-weight: 600;
+                color: #262626;
+                margin: 0;
+                transition: color 0.3s ease;
+                
+                .anticon {
+                    margin-right: 12px;
+                    color: #1677ff;
+                }
+            }
+            
+            .ant-space {
+                .date-range-picker {
+                    .ant-picker-suffix {
+                        color: #1677ff;
+                    }
+                }
+            }
+            
+            .ant-btn {
+                transition: all 0.3s ease;
+                border-radius: 6px;
+                height: 40px;
+                font-weight: 500;
+                
+                &.ant-btn-primary {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border: none;
+                    
+                    &:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+                    }
+                    
+                    &:disabled {
+                        background: #d9d9d9;
+                        transform: none;
+                        box-shadow: none;
+                    }
+                }
+            }
+
+            @media (max-width: 768px) {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+        }
+    }
+
+    // Statistics section
+    .statistics-section {
+        margin-bottom: 24px;
+
+        .stat-card {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            
+            .ant-statistic-title {
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 8px;
+            }
+            
+            &.total {
+                border-left: 4px solid #722ed1;
+                
+                .ant-statistic-content-value {
+                    color: #722ed1 !important;
+                }
+            }
+            
+            &.pending {
+                border-left: 4px solid #faad14;
+                
+                .ant-statistic-content-value {
+                    color: #faad14 !important;
+                }
+            }
+            
+            &.approved {
+                border-left: 4px solid #52c41a;
+                
+                .ant-statistic-content-value {
+                    color: #52c41a !important;
+                }
+            }
+            
+            &.rejected {
+                border-left: 4px solid #ff4d4f;
+                
+                .ant-statistic-content-value {
+                    color: #ff4d4f !important;
+                }
+            }
+        }
+    }
+
+    // Amount statistics
+    .amount-statistics {
+        margin-bottom: 24px;
+
+        .amount-card {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            
+            .ant-statistic-title {
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 8px;
+            }
+            
+            &.total-amount {
+                border-left: 4px solid #3f8600;
+            }
+            
+            &.approved-amount {
+                border-left: 4px solid #52c41a;
+            }
+            
+            &.pending-amount {
+                border-left: 4px solid #faad14;
+            }
+        }
+        
+        .accounts-card {
+            border-left: 4px solid #1677ff;
+            transition: all 0.3s ease;
+            
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+        }
+    }
+
+    .main-content {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        .wallet-tabs {
+            .ant-tabs-tab {
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+            .ant-tabs-content-holder {
+                padding: 24px;
+            }
+        }
+    }
+
+    // Modal styles
+    .ant-modal {
+        .ant-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            
+            .ant-modal-title {
+                color: white;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+// Dark mode support
+[data-theme='dark'] {
+    .wallet-management-page {
+        background: #141414;
+        
+        .page-header {
+            .header-content {
+                .page-title {
+                    color: #ffffff;
+                }
+                
+                .ant-btn {
+                    &.ant-btn-primary {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border-color: transparent;
+                        color: #ffffff;
+                        
+                        &:hover {
+                            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+                            border-color: transparent;
+                        }
+                    }
+                    
+                    &.ant-btn-default {
+                        background: #262626;
+                        border-color: #434343;
+                        color: #ffffff;
+                        
+                        &:hover {
+                            background: #303030;
+                            border-color: #595959;
+                            color: #ffffff;
+                        }
+                    }
+                }
+            }
+        }
+
+        .statistics-section,
+        .amount-statistics {
+            .stat-card,
+            .amount-card,
+            .accounts-card {
+                background: #1f1f1f;
+                border-color: #303030;
+                
+                .ant-card-body {
+                    background: #1f1f1f;
+                }
+                
+                .ant-statistic-title {
+                    color: #a6a6a6 !important;
+                }
+            }
+        }
+
+        .main-content {
+            background: #1f1f1f;
+            border-color: #303030;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            
+            .ant-card-body {
+                background: #1f1f1f;
+            }
+            
+            .wallet-tabs {
+                .ant-tabs-nav {
+                    &::before {
+                        border-bottom-color: #303030;
+                    }
+                }
+                
+                .ant-tabs-tab {
+                    color: #a6a6a6;
+                    
+                    &:hover {
+                        color: #ffffff;
+                    }
+                    
+                    &.ant-tabs-tab-active {
+                        .ant-tabs-tab-btn {
+                            color: #1677ff;
+                        }
+                    }
+                }
+                
+                .ant-tabs-ink-bar {
+                    background: #1677ff;
+                }
+            }
+        }
+        
+        // Modal dark mode
+        .ant-modal {
+            .ant-modal-content {
+                background: #1f1f1f;
+            }
+            
+            .ant-modal-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-bottom-color: #303030;
+                
+                .ant-modal-title {
+                    color: white;
+                    font-weight: 600;
+                }
+            }
+            
+            .ant-modal-body {
+                background: #1f1f1f;
+                color: #ffffff;
+            }
+            
+            .ant-modal-close {
+                color: #ffffff;
+                
+                &:hover {
+                    color: #ffffff;
+                    background: rgba(255, 255, 255, 0.1);
+                }
+            }
+        }
+    }
+}
+
+// Alternative class-based dark mode support
+.wallet-management-page.dark-theme {
+    background: #141414;
+    
+    .page-header {
+        .header-content {
+            .page-title {
+                color: #ffffff;
+            }
+            
+            .ant-btn {
+                &.ant-btn-primary {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-color: transparent;
+                    color: #ffffff;
+                    
+                    &:hover {
+                        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+                        border-color: transparent;
+                    }
+                    
+                    &:disabled {
+                        background: #434343;
+                        border-color: transparent;
+                        color: #8c8c8c;
+                    }
+                }
+            }
+        }
+    }
+
+    .statistics-section,
+    .amount-statistics {
+        .stat-card,
+        .amount-card,
+        .accounts-card {
+            background: #1f1f1f;
+            border-color: #303030;
+            
+            .ant-card-body {
+                background: #1f1f1f;
+            }
+            
+            .ant-statistic-title {
+                color: #a6a6a6 !important;
+            }
+        }
+    }
+
+    .main-content {
+        background: #1f1f1f;
+        border-color: #303030;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        
+        .ant-card-body {
+            background: #1f1f1f;
+        }
+        
+        .wallet-tabs {
+            .ant-tabs-nav {
+                &::before {
+                    border-bottom-color: #303030;
+                }
+            }
+            
+            .ant-tabs-tab {
+                color: #a6a6a6;
+                
+                &:hover {
+                    color: #ffffff;
+                }
+                
+                &.ant-tabs-tab-active {
+                    .ant-tabs-tab-btn {
+                        color: #1677ff;
+                    }
+                }
+            }
+            
+            .ant-tabs-ink-bar {
+                background: #1677ff;
+            }
+        }
+    }
+}
+
+// Responsive design
+@media (max-width: 1200px) {
+    .wallet-management-page {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .wallet-management-page {
+        padding: 12px;
+
+        .wallet-content {
+            .ant-tabs-content-holder {
+                padding: 16px;
+            }
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .wallet-management-page {
+        padding: 8px;
+        
+        .page-header {
+            .page-title {
+                font-size: 24px;
+            }
+        }
+    }
+}

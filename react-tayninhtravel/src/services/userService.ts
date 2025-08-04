@@ -113,6 +113,46 @@ export const userService = {
         return userService.mapApiUserToUser(response.data);
     },
     /**
+ * Lấy danh sách voucher của người dùng hiện tại
+ * @param pageIndex Trang hiện tại (mặc định 1)
+ * @param pageSize Số lượng mỗi trang (mặc định 10)
+ * @param status Trạng thái voucher (tùy chọn: active, used, expired, ...)
+ * @returns Promise với danh sách voucher và thông tin phân trang
+ */
+    getMyVouchers: async (
+        pageIndex: number = 1,
+        pageSize: number = 10,
+        status?: string,
+        textSearch?: string
+    ): Promise<any> => {
+        const params: any = { pageIndex, pageSize };
+        if (status) params.status = status;
+        if (textSearch) params.textSearch = textSearch;
+        const response = await axios.get('/Product/My-vouchers', { params });
+        return response.data;
+    },
+
+    /**
+     * Lấy danh sách đơn hàng của người dùng hiện tại
+     * @param pageIndex Trang hiện tại (mặc định 1)
+     * @param pageSize Số lượng mỗi trang (mặc định 10)
+     * @param payOsOrderCode Mã đơn hàng PayOS (tùy chọn)
+     * @param status Trạng thái đơn hàng (tùy chọn)
+     * @returns Promise với danh sách đơn hàng
+     */
+    getUserOrders: async (
+        pageIndex: number = 1,
+        pageSize: number = 10,
+        payOsOrderCode?: string,
+        status?: string
+    ): Promise<any> => {
+        const params: any = { pageIndex, pageSize };
+        if (payOsOrderCode) params.payOsOrderCode = payOsOrderCode;
+        if (status) params.status = status;
+        const response = await axios.get('/Product/GetOrder-ByUser', { params });
+        return response.data;
+    },
+    /**
      * Update an existing user
      * @param id User ID
      * @param userData New user data
@@ -316,22 +356,16 @@ export const userService = {
      * @param application Tour guide application data
      * @returns Promise with operation result
      */
-    submitTourGuideApplication: async (application: TourGuideApplicationForm & {
-        fullName: string;
-        phone: string;
-        experience: string;
-        skills: number[]; // List of skill IDs (TourGuideSkill)
-        skillsString: string; // Comma-separated string
-    }): Promise<any> => {
+    submitTourGuideApplication: async (application: TourGuideApplicationForm): Promise<any> => {
         const formData = new FormData();
         formData.append('FullName', application.fullName);
-        formData.append('PhoneNumber', application.phone);
+        formData.append('PhoneNumber', application.phoneNumber);
         formData.append('Email', application.email);
         formData.append('Experience', application.experience);
-        // Lặp qua từng kỹ năng và append từng trường Skills
-        application.skills.forEach((id) => {
-            if (typeof id === 'number' && !isNaN(id)) {
-                formData.append('Skills', id.toString());
+        // Lặp qua từng kỹ năng và append từng trường Skills (english names)
+        application.skills.forEach((skillName) => {
+            if (typeof skillName === 'string' && skillName.trim()) {
+                formData.append('Skills', skillName);
             }
         });
         // Truyền SkillsString là chuỗi

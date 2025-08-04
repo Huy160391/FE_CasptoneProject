@@ -10,7 +10,6 @@ import {
     Tag,
     Row,
     Col,
-    Input,
     Breadcrumb,
     notification
 } from 'antd'
@@ -292,16 +291,6 @@ const CartDetail = () => {
                                         {t('cart.continueShopping')}
                                     </Button>
                                 </div>
-                            </Space>
-                        </Card>
-
-                        <Card title={t('cart.coupon')} className="coupon-card" style={{ marginTop: 16 }}>
-                            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                                <Input
-                                    placeholder={t('cart.enterCouponCode')}
-                                    style={{ width: '100%' }}
-                                />
-                                <Button block>{t('cart.applyCoupon')}</Button>
                             </Space>
                         </Card>
                     </Col>

@@ -4,17 +4,17 @@ import { getMyInvitations, acceptInvitation, rejectInvitation } from '../service
 // Test function để kiểm tra API
 const testTourGuideInvitationAPIs = async () => {
     console.log('🧪 Testing TourGuide Invitation APIs...');
-    
+
     try {
         // Test 1: Get my invitations
         console.log('\n📋 Test 1: Getting my invitations...');
         const invitationsResponse = await getMyInvitations();
         console.log('✅ Get invitations response:', invitationsResponse);
-        
+
         if (invitationsResponse.success) {
             console.log('📊 Statistics:', invitationsResponse.data.statistics);
             console.log('📝 Invitations count:', invitationsResponse.data.invitations.length);
-            
+
             // Log first invitation if exists
             if (invitationsResponse.data.invitations.length > 0) {
                 const firstInvitation = invitationsResponse.data.invitations[0];
@@ -25,7 +25,7 @@ const testTourGuideInvitationAPIs = async () => {
                     invitationType: firstInvitation.invitationType,
                     expiresAt: firstInvitation.expiresAt
                 });
-                
+
                 // Test 2: Test accept invitation (only if pending)
                 if (firstInvitation.status === 'Pending') {
                     console.log('\n✅ Test 2: Testing accept invitation...');
@@ -34,7 +34,7 @@ const testTourGuideInvitationAPIs = async () => {
                     // const acceptResponse = await acceptInvitation(firstInvitation.id, 'Test acceptance message');
                     // console.log('Accept response:', acceptResponse);
                 }
-                
+
                 // Test 3: Test reject invitation (only if pending)
                 if (firstInvitation.status === 'Pending') {
                     console.log('\n❌ Test 3: Testing reject invitation...');
@@ -49,15 +49,15 @@ const testTourGuideInvitationAPIs = async () => {
         } else {
             console.error('❌ Failed to get invitations:', invitationsResponse.message);
         }
-        
+
         // Test 4: Get invitations with status filter
         console.log('\n🔍 Test 4: Getting pending invitations only...');
         const pendingInvitationsResponse = await getMyInvitations('Pending');
         console.log('✅ Pending invitations response:', pendingInvitationsResponse);
-        
+
     } catch (error) {
         console.error('❌ Test failed with error:', error);
-        
+
         // Check if it's an authentication error
         if (error.response?.status === 401) {
             console.error('🔐 Authentication error - make sure you are logged in as a Tour Guide');
@@ -75,17 +75,17 @@ const testTourGuideInvitationAPIs = async () => {
 const checkAuthStatus = () => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
-    
+
     console.log('🔐 Authentication Status:');
     console.log('Token exists:', !!token);
-    
+
     if (user) {
         try {
             const userData = JSON.parse(user);
             console.log('User role:', userData.role);
             console.log('User name:', userData.name);
             console.log('User email:', userData.email);
-            
+
             if (userData.role !== 'Tour Guide') {
                 console.warn('⚠️  Warning: Current user role is not "Tour Guide"');
             }
@@ -100,10 +100,10 @@ const checkAuthStatus = () => {
 // Function to test API connectivity
 const testAPIConnectivity = async () => {
     console.log('🌐 Testing API connectivity...');
-    
+
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5267/api';
     console.log('API Base URL:', API_BASE_URL);
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/TourGuideInvitation/my-invitations`, {
             method: 'GET',
@@ -112,10 +112,10 @@ const testAPIConnectivity = async () => {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         console.log('Response status:', response.status);
         console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-        
+
         if (response.ok) {
             const data = await response.json();
             console.log('✅ API is accessible');

@@ -26,11 +26,13 @@ import {
 } from '@ant-design/icons'
 import { useCartStore } from '@/store/useCartStore'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useThemeStore } from '@/store/useThemeStore'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
+import VoucherModal from './VoucherModal'
 import { checkoutCart } from '@/services/cartService'
 import { useEnhancedPayment } from '@/services/enhancedPaymentService'
 import './Checkout.scss'
@@ -64,12 +66,29 @@ interface ShippingMethod {
     icon: React.ReactNode
 }
 
+interface Voucher {
+    voucherCodeId: string;
+    code: string;
+    voucherName: string;
+    discountAmount: number;
+    discountPercent: number | null;
+    startDate: string;
+    endDate: string;
+    isUsed: boolean;
+    claimedAt: string;
+    usedAt: string | null;
+    isExpired: boolean;
+    isActive: boolean;
+    status: string;
+}
+
 const Checkout = () => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { items, getTotalItems, getTotalPrice, clearCart } = useCartStore()
     const { isAuthenticated, user } = useAuthStore()
     const { createPaymentLink } = useEnhancedPayment()
+    const { isDarkMode } = useThemeStore()
 
     const [currentStep, setCurrentStep] = useState(0)
     const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
@@ -83,6 +102,10 @@ const Checkout = () => {
     })
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank_transfer')
     const [selectedShippingMethod, setSelectedShippingMethod] = useState('pickup')
+    const [selectedVoucherCodeId, setSelectedVoucherCodeId] = useState<string | null>(null)
+    const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null)
+    const [voucherDiscount, setVoucherDiscount] = useState(0)
+    const [voucherModalVisible, setVoucherModalVisible] = useState(false)
     const [agreeTerms, setAgreeTerms] = useState(false)
     const [loading, setLoading] = useState(false)
     // Always use Enhanced Payment System
@@ -150,6 +173,27 @@ const Checkout = () => {
 
     const getTotalWithShipping = () => {
         return getTotalPrice() + getShippingPrice()
+    }
+
+    const getTotalAfterVoucher = () => {
+        const totalWithShipping = getTotalWithShipping()
+        return Math.max(0, totalWithShipping - voucherDiscount)
+    }
+
+    const handleApplyVoucher = (voucher: Voucher) => {
+        setSelectedVoucherCodeId(voucher.voucherCodeId)
+        setSelectedVoucher(voucher)
+        // Tính toán discount amount
+        const discountAmount = voucher.discountPercent && voucher.discountPercent > 0
+            ? Math.min((getTotalWithShipping() * voucher.discountPercent / 100), voucher.discountAmount || 0)
+            : voucher.discountAmount
+        setVoucherDiscount(discountAmount || 0)
+    }
+
+    const handleRemoveVoucher = () => {
+        setSelectedVoucherCodeId(null)
+        setSelectedVoucher(null)
+        setVoucherDiscount(0)
     }
 
     // Table columns for order summary
@@ -286,13 +330,14 @@ const Checkout = () => {
             } else {
                 throw new Error('Failed to create order');
             }
+
         } catch (error) {
             notification.error({
                 message: t('checkout.orderError'),
                 description: t('checkout.orderErrorDescription')
-            })
+            });
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     }
 
@@ -343,9 +388,11 @@ const Checkout = () => {
                             <ShoppingCartOutlined className="empty-icon" />
                             <Title level={3}>{t('checkout.emptyCart')}</Title>
                             <Text>{t('checkout.emptyCartDescription')}</Text>
-                            <Button type="primary" size="large" onClick={() => navigate('/shop')}>
-                                {t('cart.continueShopping')}
-                            </Button>
+                            <div style={{ marginTop: 16 }}>
+                                <Button type="primary" size="large" onClick={() => navigate('/shop')}>
+                                    {t('cart.continueShopping')}
+                                </Button>
+                            </div>
                         </div>
                     </Card>
                 </div>
@@ -662,6 +709,62 @@ const Checkout = () => {
 
                             <Divider />
 
+                            {/* Voucher Section */}
+                            <div className="voucher-section" style={{ marginBottom: 16 }}>
+                                <Title level={5} style={{ color: isDarkMode ? '#fff' : undefined }}>
+                                    Mã giảm giá
+                                </Title>
+                                {selectedVoucher ? (
+                                    <div className="applied-voucher" style={{
+                                        padding: 12,
+                                        border: '1px solid #52c41a',
+                                        borderRadius: 6,
+                                        backgroundColor: isDarkMode ? '#162312' : '#f6ffed',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <div>
+                                            <Text strong style={{ color: '#52c41a' }}>
+                                                {selectedVoucher.code}
+                                            </Text>
+                                            <br />
+                                            <Text type="secondary" style={{
+                                                fontSize: 12,
+                                                color: isDarkMode ? '#bfbfbf' : undefined
+                                            }}>
+                                                {selectedVoucher.voucherName} - Giảm {formatPrice(voucherDiscount)}
+                                            </Text>
+                                        </div>
+                                        <Button
+                                            type="text"
+                                            size="small"
+                                            onClick={handleRemoveVoucher}
+                                            style={{
+                                                color: '#ff4d4f',
+                                                backgroundColor: isDarkMode ? 'rgba(255, 77, 79, 0.1)' : 'transparent'
+                                            }}
+                                        >
+                                            Bỏ chọn
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <Button
+                                        type="dashed"
+                                        block
+                                        style={{
+                                            marginBottom: 8,
+                                            borderColor: isDarkMode ? '#434343' : undefined,
+                                            color: isDarkMode ? '#fff' : undefined,
+                                            backgroundColor: isDarkMode ? '#141414' : undefined
+                                        }}
+                                        onClick={() => setVoucherModalVisible(true)}
+                                    >
+                                        Chọn voucher
+                                    </Button>
+                                )}
+                            </div>
+
                             <div className="summary-calculations">
                                 <div className="summary-row">
                                     <Text>{t('checkout.subtotal')} ({getTotalItems()} {t('cart.items')}):</Text>
@@ -673,10 +776,18 @@ const Checkout = () => {
                                         {getShippingPrice() === 0 ? t('checkout.free') : formatPrice(getShippingPrice())}
                                     </Text>
                                 </div>
+                                {voucherDiscount > 0 && (
+                                    <div className="summary-row">
+                                        <Text>Giảm giá voucher:</Text>
+                                        <Text strong style={{ color: '#52c41a' }}>
+                                            -{formatPrice(voucherDiscount)}
+                                        </Text>
+                                    </div>
+                                )}
                                 <Divider />
                                 <div className="summary-row total-row">
                                     <Title level={4}>{t('checkout.total')}:</Title>
-                                    <Title level={4} className="total-price">{formatPrice(getTotalWithShipping())}</Title>
+                                    <Title level={4} className="total-price">{formatPrice(getTotalAfterVoucher())}</Title>
                                 </div>
                             </div>
                         </Card>
@@ -701,6 +812,14 @@ const Checkout = () => {
                         setRegisterModalVisible(false)
                         setLoginModalVisible(true)
                     }}
+                />
+
+                {/* Voucher Modal */}
+                <VoucherModal
+                    visible={voucherModalVisible}
+                    onClose={() => setVoucherModalVisible(false)}
+                    onSelectVoucher={handleApplyVoucher}
+                    selectedVoucherId={selectedVoucherCodeId}
                 />
             </div>
         </div>

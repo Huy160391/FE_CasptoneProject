@@ -1,6 +1,7 @@
 import { Layout, Space } from 'antd'
 import ThemeToggle from '../common/ThemeToggle'
 import LanguageSwitcher from '../common/LanguageSwitcher'
+import NotificationBell from '../common/NotificationBell'
 import './AdminHeader.scss'
 
 const { Header } = Layout
@@ -13,6 +14,9 @@ const AdminHeader = () => {
         <Space className="header-actions" size="middle">
           <ThemeToggle />
           <LanguageSwitcher />
+          <div className="notification-bell">
+            <NotificationBell />
+          </div>
         </Space>
       </div>
     </Header>

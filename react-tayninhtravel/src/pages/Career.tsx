@@ -132,21 +132,20 @@ const Career = () => {
             // Get the CV file from the upload component
             const file = cvFile[0].originFileObj as File;
 
-            // Nhận skills (ID) và skillsString từ form, không mapping lại
-            const { skills, skillsString } = values;
-
-            // Submit đầy đủ thông tin
+            // Submit tour guide application with skills
             const response = await userService.submitTourGuideApplication({
                 fullName: values.fullName,
-                phone: values.phone,
+                phoneNumber: values.phone,
                 email: values.email,
                 experience: values.experience,
-                skills,
-                skillsString,
+                skills: values.skills, // Array of skill IDs
+                skillsString: values.skillsString, // Comma-separated string
                 curriculumVitae: file
-            } as any);
+            });
 
             console.log('API response:', response);
+            console.log('Submitted skills (english names):', values.skills);
+            console.log('Submitted skillsString:', values.skillsString);
 
             // Show success message
             message.success(t('jobs.applicationForm.successMessage'));

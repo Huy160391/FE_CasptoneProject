@@ -10,7 +10,8 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     HomeOutlined,
-    LogoutOutlined
+    LogoutOutlined,
+    WalletOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -55,6 +56,11 @@ const SpecialityShopSidebar = () => {
             key: '/speciality-shop/reviews',
             icon: <StarOutlined />,
             label: <Link to="/speciality-shop/reviews">Đánh giá sản phẩm</Link>,
+        },
+        {
+            key: '/speciality-shop/wallet',
+            icon: <WalletOutlined />,
+            label: <Link to="/speciality-shop/wallet">Quản lý ví</Link>,
         },
     ];
 

@@ -190,16 +190,17 @@ body.dark-mode {
         }
       }
     }
-  }
-  .view-more {
-    .custom-view-more-btn {
-      background: #fff;
-      color: #181828;
 
-      &:hover,
-      &:focus {
-        background: #f0f0f0;
+    .view-more {
+      .custom-view-more-btn {
+        background: #fff;
         color: #181828;
+
+        &:hover,
+        &:focus {
+          background: #f0f0f0;
+          color: #181828;
+        }
       }
     }
   }
@@ -260,6 +261,7 @@ body.dark-mode {
         .book-now-btn {
           height: 40px;
           font-size: 14px;
+          border-radius: 8px !important;
         }
       }
     }
