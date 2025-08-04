@@ -78,6 +78,33 @@ const UnifiedPaymentCancel: React.FC = () => {
             console.log('Not a product order either');
         }
 
+        // Fallback: Try to find in PaymentTransaction and get the actual Order/TourBooking
+        try {
+            console.log('Trying PaymentTransaction fallback lookup...');
+            const enhancedResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/enhanced-payment/transaction/order-code/${payOsOrderCode}`);
+            if (enhancedResponse.ok) {
+                const enhancedData = await enhancedResponse.json();
+                if (enhancedData.success && enhancedData.data) {
+                    console.log('Found in PaymentTransaction:', enhancedData.data);
+
+                    // Determine type based on transaction data
+                    if (enhancedData.data.tourBookingInfo) {
+                        return {
+                            type: 'tour',
+                            info: enhancedData.data.tourBookingInfo
+                        };
+                    } else if (enhancedData.data.orderInfo) {
+                        return {
+                            type: 'product',
+                            info: enhancedData.data.orderInfo
+                        };
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('PaymentTransaction fallback also failed:', error);
+        }
+
         throw new Error('Unable to determine payment type from order code');
     };
 
