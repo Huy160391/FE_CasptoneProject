@@ -246,7 +246,232 @@ export const canRespondToInvitation = (invitation: TourGuideInvitation): boolean
     return invitation.status === 'Pending' && new Date(invitation.expiresAt) > new Date();
 };
 
+// ===== HDV TOUR MANAGEMENT APIs =====
+
+export interface ActiveTour {
+    id: string;
+    title: string;
+    description?: string;
+    startDate: string;
+    endDate: string;
+    price: number;
+    maxGuests: number;
+    currentBookings: number;
+    status: string;
+    tourTemplate: {
+        title: string;
+        startLocation: string;
+        endLocation: string;
+    };
+    bookingsCount: number;
+    checkedInCount: number;
+}
+
+export interface TourBooking {
+    id: string;
+    bookingCode: string;
+    contactName?: string;
+    contactPhone?: string;
+    contactEmail?: string;
+    numberOfGuests: number;
+    adultCount: number;
+    childCount: number;
+    totalPrice: number;
+    isCheckedIn: boolean;
+    checkInTime?: string;
+    checkInNotes?: string;
+    qrCodeData?: string;
+    customerName?: string;
+}
+
+export interface TimelineItem {
+    id: string;
+    checkInTime: string;
+    activity: string;
+    sortOrder: number;
+    isCompleted: boolean;
+    completedAt?: string;
+    completionNotes?: string;
+    specialtyShop?: {
+        id: string;
+        shopName: string;
+        address: string;
+    };
+}
+
+export interface CheckInRequest {
+    qrCodeData?: string;
+    notes?: string;
+}
+
+export interface CompleteTimelineRequest {
+    notes?: string;
+}
+
+export interface ReportIncidentRequest {
+    tourOperationId: string;
+    title: string;
+    description: string;
+    severity: 'Low' | 'Medium' | 'High' | 'Critical';
+    imageUrls?: string[];
+}
+
+export interface NotifyGuestsRequest {
+    message: string;
+    isUrgent?: boolean;
+}
+
+/**
+ * Lấy danh sách tours đang active của HDV hiện tại
+ * @param token - JWT token (optional)
+ */
+export const getMyActiveTours = async (token?: string): Promise<ApiResponse<ActiveTour[]>> => {
+    try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const response = await api.get('/TourGuide/my-active-tours', { headers });
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Error fetching active tours:', error);
+        throw error;
+    }
+};
+
+/**
+ * Lấy danh sách bookings cho tour cụ thể
+ * @param operationId - ID của TourOperation
+ * @param token - JWT token (optional)
+ */
+export const getTourBookings = async (
+    operationId: string,
+    token?: string
+): Promise<ApiResponse<TourBooking[]>> => {
+    try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const response = await api.get(`/TourGuide/tour/${operationId}/bookings`, { headers });
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Error fetching tour bookings:', error);
+        throw error;
+    }
+};
+
+/**
+ * Lấy timeline items cho tour cụ thể
+ * @param operationId - ID của TourOperation
+ * @param token - JWT token (optional)
+ */
+export const getTourTimeline = async (
+    operationId: string,
+    token?: string
+): Promise<ApiResponse<TimelineItem[]>> => {
+    try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const response = await api.get(`/TourGuide/tour/${operationId}/timeline`, { headers });
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Error fetching tour timeline:', error);
+        throw error;
+    }
+};
+
+/**
+ * Check-in khách hàng
+ * @param bookingId - ID của TourBooking
+ * @param request - Thông tin check-in
+ * @param token - JWT token (optional)
+ */
+export const checkInGuest = async (
+    bookingId: string,
+    request: CheckInRequest,
+    token?: string
+): Promise<ApiResponse<any>> => {
+    try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const response = await api.post(`/TourGuide/checkin/${bookingId}`, request, { headers });
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Error checking in guest:', error);
+        throw error;
+    }
+};
+
+/**
+ * Hoàn thành timeline item
+ * @param timelineId - ID của TimelineItem
+ * @param request - Thông tin hoàn thành
+ * @param token - JWT token (optional)
+ */
+export const completeTimelineItem = async (
+    timelineId: string,
+    request: CompleteTimelineRequest,
+    token?: string
+): Promise<ApiResponse<any>> => {
+    try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const response = await api.post(`/TourGuide/timeline/${timelineId}/complete`, request, { headers });
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Error completing timeline item:', error);
+        throw error;
+    }
+};
+
+/**
+ * Báo cáo sự cố
+ * @param request - Thông tin sự cố
+ * @param token - JWT token (optional)
+ */
+export const reportIncident = async (
+    request: ReportIncidentRequest,
+    token?: string
+): Promise<ApiResponse<any>> => {
+    try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const response = await api.post('/TourGuide/incident/report', request, { headers });
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Error reporting incident:', error);
+        throw error;
+    }
+};
+
+/**
+ * Gửi thông báo cho guests
+ * @param operationId - ID của TourOperation
+ * @param request - Nội dung thông báo
+ * @param token - JWT token (optional)
+ */
+export const notifyGuests = async (
+    operationId: string,
+    request: NotifyGuestsRequest,
+    token?: string
+): Promise<ApiResponse<any>> => {
+    try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const response = await api.post(`/TourGuide/tour/${operationId}/notify-guests`, request, { headers });
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Error notifying guests:', error);
+        throw error;
+    }
+};
+
 export default {
+    // Existing invitation APIs
     getMyInvitations,
     acceptInvitation,
     rejectInvitation,
@@ -256,4 +481,13 @@ export default {
     updateMyProfile,
     formatTimeUntilExpiry,
     canRespondToInvitation,
+
+    // New HDV tour management APIs
+    getMyActiveTours,
+    getTourBookings,
+    getTourTimeline,
+    checkInGuest,
+    completeTimelineItem,
+    reportIncident,
+    notifyGuests,
 };
