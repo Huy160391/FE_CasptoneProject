@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Modal, Form, Input, Button, Checkbox, Divider, message } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '@/store/useAuthStore'
 import { authService } from '@/services/authService'
+import { syncCartOnLogin } from '@/services/cartService'
 import OTPVerificationModal from './OTPVerificationModal'
 import './AuthModal.scss'
 
@@ -18,6 +21,9 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
   const [loading, setLoading] = useState(false)
   const [showOTPModal, setShowOTPModal] = useState(false)
   const [registeredEmail, setRegisteredEmail] = useState('')
+  const login = useAuthStore(state => state.login)
+  const navigate = useNavigate()
+  const googleBtnRef = useRef<HTMLDivElement>(null)
 
   const handleSubmit = async (values: any) => {
     try {
@@ -53,28 +59,87 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
     onLoginClick()
   }
 
-
-  // Đăng ký bằng Google: hiện popup chọn tài khoản Google
-  const handleGoogleRegister = () => {
-    if (!(window as any).google || !(window as any).google.accounts) {
-      message.error('Google SDK chưa được tải.');
-      return;
+  // Render Google button khi modal mở
+  React.useEffect(() => {
+    let retryTimeout: NodeJS.Timeout | null = null;
+    function renderGoogleButton(attempt = 0) {
+      if (!isVisible) return;
+      const google = (window as any).google;
+      if (google && googleBtnRef.current) {
+        googleBtnRef.current.innerHTML = '';
+        google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: async (response: any) => {
+            if (response.credential) {
+              try {
+                setLoading(true);
+                const loginRes = await authService.loginWithGoogle(response.credential);
+                if (loginRes.user && loginRes.token) {
+                  login(loginRes.user, loginRes.token);
+                  message.success(t('common.loginSuccess'));
+                  form.resetFields();
+                  onClose();
+                  // Đồng bộ cart sau khi login thành công
+                  const syncedCart = await syncCartOnLogin(loginRes.token);
+                  if (syncedCart && Array.isArray(syncedCart.items)) {
+                    const { useCartStore } = await import('@/store/useCartStore');
+                    if (useCartStore?.setState) {
+                      useCartStore.setState({ items: syncedCart.items });
+                    }
+                  }
+                  localStorage.setItem('lastLoginTime', new Date().toISOString());
+                  // Redirect based on role
+                  if (loginRes.user.role === 'Admin') {
+                    navigate('/admin/dashboard');
+                  } else if (loginRes.user.role === 'Tour Company') {
+                    navigate('/tour-company/dashboard');
+                  } else if (loginRes.user.role === 'Specialty Shop') {
+                    navigate('/speciality-shop');
+                  } else if (loginRes.user.role === 'Blogger') {
+                    navigate('/blogger/dashboard');
+                  } else {
+                    if (window.location.pathname === '/') {
+                      navigate('/');
+                    } else {
+                      navigate(-1);
+                    }
+                  }
+                } else {
+                  throw new Error('Login response invalid');
+                }
+              } catch (error: any) {
+                message.error(error.response?.data?.message || t('common.loginFailed'));
+              } finally {
+                setLoading(false);
+              }
+            } else {
+              message.error('Google login failed: No credential received.');
+              setLoading(false);
+            }
+          },
+        });
+        google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: 320,
+        });
+      } else if (attempt < 10) {
+        // Retry every 200ms up to 2s
+        retryTimeout = setTimeout(() => renderGoogleButton(attempt + 1), 200);
+      } else if (googleBtnRef.current) {
+        googleBtnRef.current.innerHTML = '<div style="color:red;text-align:center">Google SDK chưa được tải.</div>';
+      }
     }
-    (window as any).google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: async (response: any) => {
-        if (response.credential) {
-          // Ở đây bạn có thể xử lý đăng ký bằng Google, ví dụ gửi credential lên backend
-          message.success('Đăng ký bằng Google thành công!');
-          // ...
-        } else {
-          message.error('Google register failed: No credential received.');
-        }
-      },
-      ux_mode: 'popup',
-    });
-    (window as any).google.accounts.id.prompt();
-  }
+    if (isVisible) {
+      renderGoogleButton();
+    }
+    return () => {
+      if (retryTimeout) clearTimeout(retryTimeout);
+      if (googleBtnRef.current) {
+        googleBtnRef.current.innerHTML = '';
+      }
+    };
+  }, [isVisible]);
 
   const handleLoginClick = () => {
     onClose()
@@ -217,9 +282,7 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
           <Divider plain>{t('auth.orRegisterWith')}</Divider>
 
           <div className="social-login" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <Button type="default" block size="large" onClick={handleGoogleRegister} style={{ maxWidth: 320 }}>
-              Đăng ký với Google
-            </Button>
+            <div ref={googleBtnRef}></div>
           </div>
 
           <div className="login-link">

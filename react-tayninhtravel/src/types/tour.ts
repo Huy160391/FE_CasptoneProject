@@ -9,7 +9,7 @@ export interface PendingTour {
     scheduleDays: string;
     title: string;
     description: string;
-    status: number;
+    status: TourDetailsStatus | string; // API có thể trả về string hoặc enum
     commentApproved: string | null;
     skillsRequired: string;
     imageUrls: string[];
@@ -25,6 +25,23 @@ export interface PendingTour {
         createdAt: string;
         updatedAt: string;
     }[];
+    tourOperation?: {
+        id: string;
+        tourDetailsId: string;
+        guideId: string;
+        guideName: string | null;
+        guideEmail: string | null;
+        guidePhoneNumber: string | null;
+        price: number;
+        maxGuests: number;
+        currentBookings: number;
+        availableSpots: number;
+        status: string;
+        statusName: string;
+        isActive: boolean;
+        createdAt: string;
+        updatedAt: string;
+    };
     timelineItemsCount: number;
     assignedSlotsCount: number;
     invitedSpecialtyShops: any[];
@@ -60,9 +77,16 @@ export enum TourDetailsStatus {
     AwaitingGuideAssignment = 4,    // Chờ phân công hướng dẫn viên
     Cancelled = 5,                  // Đã hủy
     AwaitingAdminApproval = 6,      // Chờ admin duyệt
-    WaitToPublic = 7,               // Chờ công khai
-    Public = 8                      // Đã công khai (có thể booking)
+    WaitToPublic = 7,               // Chờ mở bán vé
+    Public = 8                      // Đã được public, khách hàng có thể booking
 }
+
+// export enum InvitationStatus {
+//     Pending = 1,     // Đang chờ phản hồi
+//     Accepted = 2,    // Đã chấp nhận
+//     Rejected = 3,    // Đã từ chối
+//     Expired = 4      // Đã hết hạn
+// }
 
 export enum TourOperationStatus {
     Scheduled = 1,           // Operation đã được lên lịch và sẵn sàng
@@ -489,3 +513,183 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
     pageSize: number;
     totalPages: number;
 }
+
+// API Response interface for getAllTours
+export interface GetAllToursResponse {
+    statusCode: number;
+    message: string;
+    data: PendingTour[];
+    totalCount: number;
+    statistics: {
+        statusBreakdown: Record<string, number>;
+        recentActivity: {
+            todayCreated: number;
+            thisWeekCreated: number;
+            thisMonthCreated: number;
+        };
+        filterApplied: {
+            includeInactive: boolean;
+            status: string | null;
+            keyword: string | null;
+        };
+    };
+    availableStatuses: string[];
+    queryInfo: {
+        executedAt: string;
+        totalRecordsBeforeFilter: number;
+        totalRecordsAfterFilter: number;
+        filtersApplied: string[];
+    };
+}
+
+// Helper functions for enum mappings
+
+// Helper function to get tour details status text
+export const getTourDetailsStatusText = (status: TourDetailsStatus | number | string): string => {
+    // Handle string status from API
+    if (typeof status === 'string') {
+        switch (status) {
+            case 'Pending':
+                return 'Chờ duyệt';
+            case 'Approved':
+                return 'Đã được duyệt';
+            case 'Rejected':
+                return 'Bị từ chối';
+            case 'Suspended':
+                return 'Tạm ngưng';
+            case 'AwaitingGuideAssignment':
+                return 'Chờ phân công hướng dẫn viên';
+            case 'Cancelled':
+                return 'Đã hủy';
+            case 'AwaitingAdminApproval':
+                return 'Chờ admin duyệt';
+            case 'WaitToPublic':
+                return 'Chờ mở bán vé';
+            case 'Public':
+                return 'Đã được public, khách hàng có thể booking';
+            default:
+                return status || 'Không xác định';
+        }
+    }
+
+    // Handle enum/number status
+    const statusValue = typeof status === 'number' ? status : status;
+    switch (statusValue) {
+        case TourDetailsStatus.Pending:
+        case 0:
+            return 'Chờ duyệt';
+        case TourDetailsStatus.Approved:
+        case 1:
+            return 'Đã được duyệt';
+        case TourDetailsStatus.Rejected:
+        case 2:
+            return 'Bị từ chối';
+        case TourDetailsStatus.Suspended:
+        case 3:
+            return 'Tạm ngưng';
+        case TourDetailsStatus.AwaitingGuideAssignment:
+        case 4:
+            return 'Chờ phân công hướng dẫn viên';
+        case TourDetailsStatus.Cancelled:
+        case 5:
+            return 'Đã hủy';
+        case TourDetailsStatus.AwaitingAdminApproval:
+        case 6:
+            return 'Chờ admin duyệt';
+        case TourDetailsStatus.WaitToPublic:
+        case 7:
+            return 'Chờ mở bán vé';
+        case TourDetailsStatus.Public:
+        case 8:
+            return 'Đã được public, khách hàng có thể booking';
+        default:
+            return 'Không xác định';
+    }
+};
+
+// Helper function to get tour details status color for UI
+export const getTourDetailsStatusColor = (status: TourDetailsStatus | number | string): string => {
+    // Handle string status from API
+    if (typeof status === 'string') {
+        switch (status) {
+            case 'Pending':
+            case 'AwaitingAdminApproval':
+            case 'WaitToPublic':
+                return 'orange';
+            case 'Approved':
+            case 'Public':
+                return 'green';
+            case 'Rejected':
+            case 'Cancelled':
+                return 'red';
+            case 'Suspended':
+                return 'volcano';
+            case 'AwaitingGuideAssignment':
+                return 'blue';
+            default:
+                return 'default';
+        }
+    }
+
+    // Handle enum/number status
+    const statusValue = typeof status === 'number' ? status : status;
+    switch (statusValue) {
+        case TourDetailsStatus.Pending:
+        case TourDetailsStatus.AwaitingAdminApproval:
+        case TourDetailsStatus.WaitToPublic:
+        case 0:
+        case 6:
+        case 7:
+            return 'orange';
+        case TourDetailsStatus.Approved:
+        case TourDetailsStatus.Public:
+        case 1:
+        case 8:
+            return 'green';
+        case TourDetailsStatus.Rejected:
+        case TourDetailsStatus.Cancelled:
+        case 2:
+        case 5:
+            return 'red';
+        case TourDetailsStatus.Suspended:
+        case 3:
+            return 'volcano';
+        case TourDetailsStatus.AwaitingGuideAssignment:
+        case 4:
+            return 'blue';
+        default:
+            return 'default';
+    }
+};
+
+// // Helper function to get invitation status text
+// export const getInvitationStatusText = (status: InvitationStatus): string => {
+//     switch (status) {
+//         case InvitationStatus.Pending:
+//             return 'Đang chờ phản hồi';
+//         case InvitationStatus.Accepted:
+//             return 'Đã chấp nhận';
+//         case InvitationStatus.Rejected:
+//             return 'Đã từ chối';
+//         case InvitationStatus.Expired:
+//             return 'Đã hết hạn';
+//         default:
+//             return 'Không xác định';
+//     }
+// };
+
+// // Helper function to get invitation status color for UI
+// export const getInvitationStatusColor = (status: InvitationStatus): string => {
+//     switch (status) {
+//         case InvitationStatus.Pending:
+//             return 'orange';
+//         case InvitationStatus.Accepted:
+//             return 'green';
+//         case InvitationStatus.Rejected:
+//             return 'red';
+//         case InvitationStatus.Expired:
+//             return 'default';
+//         default:
+//             return 'default';
+//     }
+// };

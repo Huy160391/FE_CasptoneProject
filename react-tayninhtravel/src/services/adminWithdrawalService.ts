@@ -13,15 +13,55 @@ import { WithdrawalRequestListParams, ProcessWithdrawalRequest } from '@/types';
 /**
  * Get all withdrawal requests for admin review
  * @param params - Filter and pagination parameters
+ * @param params.status - Withdrawal status (0: Chờ duyệt, 1: Đã duyệt, 2: Từ chối, 3: Đã hủy)
+ * @param params.pageNumber - Page number for pagination
+ * @param params.pageSize - Number of items per page
+ * @param params.searchTerm - Search term for filtering
  * @param token - Authentication token
  * @returns Promise with withdrawal requests data
  */
 export const getAdminWithdrawalRequests = async (
-    params: WithdrawalRequestListParams = {},
+    params: {
+        status?: 0 | 1 | 2 | 3;
+        pageNumber?: number;
+        pageSize?: number;
+        searchTerm?: string;
+    } = {},
     token?: string
 ): Promise<any> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.get('/Admin/WithdrawalRequests', { params, headers });
+
+    // Tạo query parameters, chỉ thêm các tham số có giá trị
+    const queryParams: Record<string, any> = {};
+
+    if (params.status !== undefined) {
+        queryParams.status = params.status;
+    }
+
+    if (params.pageNumber !== undefined) {
+        queryParams.pageNumber = params.pageNumber;
+    }
+
+    if (params.pageSize !== undefined) {
+        queryParams.pageSize = params.pageSize;
+    }
+
+    if (params.searchTerm && params.searchTerm.trim()) {
+        queryParams.searchTerm = params.searchTerm.trim();
+    }
+
+    // Debug: Log the actual URL being called
+    console.log('Calling API with URL: /Admin/Withdrawal');
+    console.log('Query params:', queryParams);
+
+    const response = await axios.get('/Admin/Withdrawal', {
+        params: queryParams,
+        headers
+    });
+
+    // Debug: Log response data để kiểm tra cấu trúc
+    console.log('Raw API response:', response.data);
+
     return response.data;
 };
 
@@ -36,7 +76,7 @@ export const getAdminWithdrawalRequestById = async (
     token?: string
 ): Promise<any> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.get(`/Admin/WithdrawalRequests/${id}`, { headers });
+    const response = await axios.get(`/Admin/Withdrawal/${id}`, { headers });
     return response.data;
 };
 
@@ -44,16 +84,27 @@ export const getAdminWithdrawalRequestById = async (
  * Approve withdrawal request
  * @param id - Withdrawal request ID
  * @param data - Admin notes and approval data
+ * @param data.adminNotes - Admin notes for the approval
+ * @param data.transactionReference - Transaction reference number
  * @param token - Authentication token
  * @returns Promise with approval result
  */
 export const approveWithdrawalRequest = async (
     id: string,
-    data: ProcessWithdrawalRequest = {},
+    data: {
+        adminNotes?: string;
+        transactionReference: string;
+    },
     token?: string
 ): Promise<any> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.put(`/Admin/WithdrawalRequests/${id}/approve`, data, { headers });
+
+    const requestBody = {
+        adminNotes: data.adminNotes || '',
+        transactionReference: data.transactionReference
+    };
+
+    const response = await axios.put(`/Admin/Withdrawal/${id}/approve`, requestBody, { headers });
     return response.data;
 };
 
@@ -66,11 +117,16 @@ export const approveWithdrawalRequest = async (
  */
 export const rejectWithdrawalRequest = async (
     id: string,
-    data: ProcessWithdrawalRequest = {},
+    data: { reason: string },
     token?: string
 ): Promise<any> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.put(`/Admin/WithdrawalRequests/${id}/reject`, data, { headers });
+
+    const requestBody = {
+        reason: data.reason
+    };
+
+    const response = await axios.put(`/Admin/Withdrawal/${id}/reject`, requestBody, { headers });
     return response.data;
 };
 
@@ -89,12 +145,12 @@ export const getWithdrawalStatistics = async (
     token?: string
 ): Promise<any> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.get('/Admin/WithdrawalRequests/statistics', { params, headers });
+    const response = await axios.get('/Admin/Withdrawal/stats', { params, headers });
     return response.data;
 };
 
 /**
- * Export withdrawal requests to Excel/CSV
+ * Export withdrawal requests to Excel/CSVWithdrawalRequests
  * @param params - Filter parameters for export
  * @param token - Authentication token
  * @returns Promise with file blob
@@ -104,7 +160,7 @@ export const exportWithdrawalRequests = async (
     token?: string
 ): Promise<Blob> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.get('/Admin/WithdrawalRequests/export', {
+    const response = await axios.get('/Admin/Withdrawal/export', {
         params,
         headers,
         responseType: 'blob'
@@ -125,7 +181,7 @@ export const bulkApproveWithdrawalRequests = async (
     token?: string
 ): Promise<any> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.put('/Admin/WithdrawalRequests/bulk-approve', {
+    const response = await axios.put('/Admin/Withdrawal/bulk-approve', {
         ids,
         ...data
     }, { headers });
@@ -135,19 +191,19 @@ export const bulkApproveWithdrawalRequests = async (
 /**
  * Bulk reject multiple withdrawal requests
  * @param ids - Array of withdrawal request IDs
- * @param data - Admin notes for bulk rejection
+ * @param data - Rejection reason for bulk rejection
  * @param token - Authentication token
  * @returns Promise with bulk rejection result
  */
 export const bulkRejectWithdrawalRequests = async (
     ids: string[],
-    data: ProcessWithdrawalRequest = {},
+    data: { reason: string },
     token?: string
 ): Promise<any> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await axios.put('/Admin/WithdrawalRequests/bulk-reject', {
+    const response = await axios.put('/Admin/Withdrawal/bulk-reject', {
         ids,
-        ...data
+        reason: data.reason
     }, { headers });
     return response.data;
 };
@@ -164,8 +220,8 @@ export const formatWithdrawalRequest = (request: any) => {
         ...request,
         formattedAmount: `${request.amount?.toLocaleString('vi-VN')} ₫`,
         formattedRequestedAt: new Date(request.requestedAt).toLocaleString('vi-VN'),
-        formattedProcessedAt: request.processedAt 
-            ? new Date(request.processedAt).toLocaleString('vi-VN') 
+        formattedProcessedAt: request.processedAt
+            ? new Date(request.processedAt).toLocaleString('vi-VN')
             : null,
         statusText: getStatusText(request.status),
         statusColor: getStatusColor(request.status)

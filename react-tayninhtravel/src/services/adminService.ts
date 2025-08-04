@@ -9,10 +9,19 @@ export type { AdminBlogPost, SupportTicket, AdminSupportTicket } from '../types'
 
 class AdminService {
     // Lấy danh sách tour chờ duyệt
-    async getPendingTours({ page = 0, pageSize = 10, searchTerm = '' } = {}): Promise<any> {
-        const params: any = { page, pageSize, status: 'pending' };
+    async getAllTours({
+        page = 0,
+        pageSize = 10,
+        searchTerm = '',
+        status = '',
+        includeInactive = false
+    } = {}): Promise<any> {
+        const params: any = { page, pageSize };
         if (searchTerm) params.searchTerm = searchTerm;
-        const response = await axios.get('/Admin/tourdetails/pending-approval', { params });
+        if (status) params.status = status;
+        params.includeInactive = includeInactive;
+
+        const response = await axios.get('/Admin/tourdetails/all', { params });
         return response.data;
     }
 

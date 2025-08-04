@@ -19,6 +19,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from '../common/ThemeToggle'
 import LanguageSwitcher from '../common/LanguageSwitcher'
+import NotificationBell from '../common/NotificationBell'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import CartDrawer from '../cart/CartDrawer'
@@ -175,29 +176,6 @@ const Navbar = () => {
       icon: <UserOutlined />,
       onClick: () => navigate('/profile'),
     },
-    ...(user?.role === 'Admin' ? [{
-      key: 'admin',
-      label: 'Admin Dashboard',
-      icon: <DashboardOutlined />,
-      onClick: () => navigate('/admin/dashboard'),
-    }] : []), ...(user?.role === 'Blogger' ? [{
-      key: 'blogger',
-      label: 'Blogger Dashboard',
-      icon: <DashboardOutlined />,
-      onClick: () => navigate('/blogger/dashboard'),
-    }] : []),
-    ...(user?.role === 'Tour Company' ? [{
-      key: 'tour-company',
-      label: 'Tour Company Dashboard',
-      icon: <DashboardOutlined />,
-      onClick: () => navigate('/tour-company/dashboard'),
-    }] : []),
-    ...(user?.role === 'Specialty Shop' ? [{
-      key: 'speciality-shop',
-      label: 'Speciality Shop Dashboard',
-      icon: <DashboardOutlined />,
-      onClick: () => navigate('/speciality-shop'),
-    }] : []),
     {
       key: 'settings',
       label: t('common.settings'),
@@ -252,6 +230,12 @@ const Navbar = () => {
             <Space size={12}>
               <ThemeToggle />
               <LanguageSwitcher />
+
+              {isAuthenticated && (
+                <div className="notification-bell">
+                  <NotificationBell />
+                </div>
+              )}
 
               <Badge count={getTotalItems()} showZero={false} size="small">
                 <Button
@@ -316,6 +300,9 @@ const Navbar = () => {
         />        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {isAuthenticated ? (
             <>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                <NotificationBell />
+              </div>
               {user?.role === 'Admin' && (
                 <Button type="primary" onClick={() => navigate('/admin/dashboard')}>
                   Admin Dashboard

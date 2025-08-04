@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Tabs, 
-    Card, 
-    Row, 
-    Col, 
-    Statistic, 
+import {
+    Tabs,
+    Card,
+    Row,
+    Col,
+    Statistic,
     Badge,
     Typography,
     Space,
@@ -38,7 +38,7 @@ interface StatisticsData {
     approvedRequests: number;
     rejectedRequests: number;
     cancelledRequests: number;
-    totalAmount: number;
+    totalAmount: number;  // This will map from totalAmountRequested
     approvedAmount: number;
     pendingAmount: number;
 }
@@ -91,15 +91,18 @@ const AdminWithdrawalManagement: React.FC = () => {
             };
 
             const response = await getWithdrawalStatistics(params, token || undefined);
-            setStatistics(response.data || {
-                totalRequests: 0,
-                pendingRequests: 0,
-                approvedRequests: 0,
-                rejectedRequests: 0,
-                cancelledRequests: 0,
-                totalAmount: 0,
-                approvedAmount: 0,
-                pendingAmount: 0
+
+            // Map API response fields to component state
+            const apiData = response.data || response;
+            setStatistics({
+                totalRequests: apiData.totalRequests || 0,
+                pendingRequests: apiData.pendingRequests || 0,
+                approvedRequests: apiData.approvedRequests || 0,
+                rejectedRequests: apiData.rejectedRequests || 0,
+                cancelledRequests: apiData.cancelledRequests || 0,
+                totalAmount: apiData.totalAmountRequested || 0,
+                approvedAmount: apiData.approvedAmount || 0,
+                pendingAmount: apiData.pendingAmount || 0
             });
         } catch (error: any) {
             message.error('Không thể tải thống kê');
@@ -138,7 +141,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                 </Badge>
             ),
             children: (
-                <WithdrawalRequestList 
+                <WithdrawalRequestList
                     initialStatus={WithdrawalStatus.Pending}
                     refreshTrigger={refreshTrigger}
                 />
@@ -155,7 +158,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                 </Badge>
             ),
             children: (
-                <WithdrawalRequestList 
+                <WithdrawalRequestList
                     initialStatus={WithdrawalStatus.Approved}
                     refreshTrigger={refreshTrigger}
                 />
@@ -172,7 +175,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                 </Badge>
             ),
             children: (
-                <WithdrawalRequestList 
+                <WithdrawalRequestList
                     initialStatus={WithdrawalStatus.Rejected}
                     refreshTrigger={refreshTrigger}
                 />
@@ -189,7 +192,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                 </Badge>
             ),
             children: (
-                <WithdrawalRequestList 
+                <WithdrawalRequestList
                     initialStatus={WithdrawalStatus.Cancelled}
                     refreshTrigger={refreshTrigger}
                 />
@@ -204,7 +207,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                 </Space>
             ),
             children: (
-                <WithdrawalRequestList 
+                <WithdrawalRequestList
                     refreshTrigger={refreshTrigger}
                 />
             )

@@ -122,6 +122,22 @@
     }
   }
 
+  .notification-bell {
+    .ant-btn {
+      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+
   .cart-button {
     font-size: 20px;
     width: 40px;
@@ -197,6 +213,16 @@ body.dark-mode {
         &:hover, &:focus {
           color: #8aedcb;
           border-color: #8aedcb;
+        }
+      }
+    }
+    
+    .notification-bell {
+      .ant-btn {
+        color: rgba(255, 255, 255, 0.85);
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
         }
       }
     }

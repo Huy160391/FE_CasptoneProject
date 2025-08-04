@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Card, 
-    Table, 
-    Tag, 
-    Button, 
-    Modal, 
-    Typography, 
-    Space, 
+import {
+    Card,
+    Table,
+    Tag,
+    Button,
+    Modal,
+    Typography,
+    Space,
     Tooltip,
     Popconfirm,
     message,
@@ -15,8 +15,8 @@ import {
     Row,
     Col
 } from 'antd';
-import { 
-    EyeOutlined, 
+import {
+    EyeOutlined,
     StopOutlined,
     FilterOutlined,
     ReloadOutlined,
@@ -24,8 +24,6 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { WithdrawalRequest, WithdrawalStatus } from '@/types';
-import { getMyWithdrawalRequests, cancelWithdrawalRequest } from '@/services/specialtyShopService';
-import { useAuthStore } from '@/store/useAuthStore';
 import dayjs from 'dayjs';
 import './WithdrawalRequestHistory.scss';
 
@@ -36,6 +34,8 @@ const { RangePicker } = DatePicker;
 interface WithdrawalRequestHistoryProps {
     /** Refresh trigger */
     refreshTrigger?: number;
+    /** Service for API calls */
+    service?: any;
 }
 
 /**
@@ -51,9 +51,9 @@ interface WithdrawalRequestHistoryProps {
  * - Real-time status updates
  */
 const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
-    refreshTrigger
+    refreshTrigger,
+    service
 }) => {
-    const { token } = useAuthStore();
     const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState<WithdrawalRequest | null>(null);
@@ -79,14 +79,14 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
         setLoading(true);
         try {
             const params = {
-                pageIndex: pagination.current - 1,
+                pageIndex: pagination.current,
                 pageSize: pagination.pageSize,
                 status: filters.status,
                 fromDate: filters.dateRange?.[0]?.format('YYYY-MM-DD'),
                 toDate: filters.dateRange?.[1]?.format('YYYY-MM-DD')
             };
 
-            const response = await getMyWithdrawalRequests(params, token || undefined);
+            const response = await (service?.getMyWithdrawalRequests(params) || Promise.resolve({ data: [], totalCount: 0, pageIndex: 1, pageSize: 10 }));
             setRequests(response.data || []);
             setPagination(prev => ({
                 ...prev,
@@ -105,7 +105,7 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
      */
     const handleCancelRequest = async (id: string) => {
         try {
-            await cancelWithdrawalRequest(id, token || undefined);
+            await (service?.cancelWithdrawalRequest(id, { reason: 'Người dùng hủy' }) || Promise.resolve());
             message.success('Đã hủy yêu cầu rút tiền');
             loadWithdrawalRequests();
         } catch (error: any) {
@@ -171,7 +171,7 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
                     <Text strong>{bankAccount?.bankName}</Text>
                     <br />
                     <Text type="secondary" className="account-number">
-                        {bankAccount?.accountNumber}
+                        {bankAccount?.maskedAccountNumber}
                     </Text>
                 </div>
             )
@@ -181,7 +181,19 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
             dataIndex: 'status',
             key: 'status',
             width: 100,
-            render: (status: WithdrawalStatus) => getStatusTag(status),
+            render: (status: WithdrawalStatus, record: WithdrawalRequest) => {
+                // Use statusName from API if available, otherwise use getStatusTag
+                if (record.statusName) {
+                    const statusConfig = {
+                        [WithdrawalStatus.Pending]: 'processing',
+                        [WithdrawalStatus.Approved]: 'success',
+                        [WithdrawalStatus.Rejected]: 'error',
+                        [WithdrawalStatus.Cancelled]: 'default'
+                    };
+                    return <Tag color={statusConfig[status]}>{record.statusName}</Tag>;
+                }
+                return getStatusTag(status);
+            },
             filters: [
                 { text: 'Chờ duyệt', value: WithdrawalStatus.Pending },
                 { text: 'Đã duyệt', value: WithdrawalStatus.Approved },
@@ -221,7 +233,7 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
                             }}
                         />
                     </Tooltip>
-                    {record.status === WithdrawalStatus.Pending && (
+                    {record.canCancel && (
                         <Popconfirm
                             title="Hủy yêu cầu rút tiền"
                             description="Bạn có chắc chắn muốn hủy yêu cầu này?"
@@ -300,7 +312,7 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
                         total: pagination.total,
                         showSizeChanger: true,
                         showQuickJumper: true,
-                        showTotal: (total, range) => 
+                        showTotal: (total, range) =>
                             `${range[0]}-${range[1]} của ${total} yêu cầu`,
                         onChange: (page, pageSize) => {
                             setPagination(prev => ({
@@ -337,10 +349,24 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
                                 {getStatusTag(selectedRequest.status)}
                             </Col>
                             <Col span={12}>
-                                <Text type="secondary">Số tiền:</Text>
+                                <Text type="secondary">Số tiền yêu cầu:</Text>
                                 <br />
                                 <Title level={4} className="amount">
                                     {formatCurrency(selectedRequest.amount)}
+                                </Title>
+                            </Col>
+                            <Col span={12}>
+                                <Text type="secondary">Phí rút tiền:</Text>
+                                <br />
+                                <Text type="secondary">
+                                    {formatCurrency(selectedRequest.withdrawalFee)}
+                                </Text>
+                            </Col>
+                            <Col span={12}>
+                                <Text type="secondary">Số tiền thực nhận:</Text>
+                                <br />
+                                <Title level={5} style={{ color: '#52c41a', margin: 0 }}>
+                                    {formatCurrency(selectedRequest.netAmount)}
                                 </Title>
                             </Col>
                             <Col span={12}>
@@ -348,12 +374,17 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
                                 <br />
                                 <Text>{dayjs(selectedRequest.requestedAt).format('DD/MM/YYYY HH:mm')}</Text>
                             </Col>
+                            <Col span={12}>
+                                <Text type="secondary">Số dư ví lúc tạo:</Text>
+                                <br />
+                                <Text>{formatCurrency(selectedRequest.walletBalanceAtRequest)}</Text>
+                            </Col>
                             <Col span={24}>
                                 <Text type="secondary">Tài khoản ngân hàng:</Text>
                                 <br />
                                 <Text strong>{selectedRequest.bankAccount?.bankName}</Text>
                                 <br />
-                                <Text>Số TK: {selectedRequest.bankAccount?.accountNumber}</Text>
+                                <Text>Số TK: {selectedRequest.bankAccount?.maskedAccountNumber}</Text>
                                 <br />
                                 <Text>Chủ TK: {selectedRequest.bankAccount?.accountHolderName}</Text>
                             </Col>
@@ -362,6 +393,13 @@ const WithdrawalRequestHistory: React.FC<WithdrawalRequestHistoryProps> = ({
                                     <Text type="secondary">Ngày xử lý:</Text>
                                     <br />
                                     <Text>{dayjs(selectedRequest.processedAt).format('DD/MM/YYYY HH:mm')}</Text>
+                                </Col>
+                            )}
+                            {selectedRequest.processedByName && (
+                                <Col span={12}>
+                                    <Text type="secondary">Người xử lý:</Text>
+                                    <br />
+                                    <Text>{selectedRequest.processedByName}</Text>
                                 </Col>
                             )}
                             {selectedRequest.adminNotes && (

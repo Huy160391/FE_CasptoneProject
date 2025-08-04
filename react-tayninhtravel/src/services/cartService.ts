@@ -24,7 +24,7 @@ export const updateCart = async (data: any, token: string) => {
 
 // Checkout giỏ hàng, trả về orderId và URL thanh toán PayOS
 export const checkoutCart = async (
-    voucherCode: string
+    myVoucherCodeId: string | null = null
 ) => {
     const token = useAuthStore.getState().token || '';
     // Lấy danh sách sản phẩm hiện tại từ store và map lại đúng format
@@ -48,7 +48,7 @@ export const checkoutCart = async (
         '/Product/checkout',
         {
             cartItemIds,
-            voucherCode,
+            myVoucherCodeId: myVoucherCodeId || null,
         },
         {
             headers: {

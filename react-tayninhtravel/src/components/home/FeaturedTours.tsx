@@ -11,6 +11,7 @@ import TourCard from '../common/TourCard'
 import LoginModal from '../auth/LoginModal'
 import { mapStringToStatusEnum } from '../../utils/statusMapper'
 import './FeaturedTours.scss'
+import '@/styles/custom-buttons.scss'
 
 
 

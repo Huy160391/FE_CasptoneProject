@@ -19,6 +19,7 @@ import { useThemeStore } from '@/store/useThemeStore';
 import { useTranslation } from 'react-i18next';
 import ThemeToggle from '../common/ThemeToggle';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import NotificationBell from '../common/NotificationBell';
 import './TourCompanyLayout.scss';
 
 const { Header, Sider, Content } = Layout;
@@ -157,15 +158,19 @@ const TourCompanyLayout: React.FC = () => {
                     </Button>
                 </div>
             </Sider>
-            <Layout>                <Header className="tour-company-header" style={{ background: colorBgContainer }}>
-                <div className="header-left">
-                    <div className="page-title">{t('tourCompany.dashboard.title')}</div>
-                </div>
-                <div className="header-right">
-                    <ThemeToggle />
-                    <LanguageSwitcher />
-                </div>
-            </Header>
+            <Layout>
+                <Header className="tour-company-header" style={{ background: colorBgContainer }}>
+                    <div className="header-left">
+                        <div className="page-title">{t('tourCompany.dashboard.title')}</div>
+                    </div>
+                    <div className="header-right">
+                        <div className="notification-bell">
+                            <NotificationBell />
+                        </div>
+                        <ThemeToggle />
+                        <LanguageSwitcher />
+                    </div>
+                </Header>
                 <Content className="tour-company-content">
                     <Outlet />
                 </Content>
