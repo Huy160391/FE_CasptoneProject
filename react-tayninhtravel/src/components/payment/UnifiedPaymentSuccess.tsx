@@ -56,11 +56,31 @@ const UnifiedPaymentSuccess: React.FC = () => {
     // Retry configuration
     const maxRetries = 3;
 
+    // Normalize order code to TNDT format if needed
+    const normalizeOrderCode = (orderCode: string): string => {
+        // If already has TNDT prefix, return as is
+        if (orderCode.startsWith('TNDT')) {
+            return orderCode;
+        }
+
+        // If numeric only, add TNDT prefix
+        if (/^\d+$/.test(orderCode)) {
+            return `TNDT${orderCode}`;
+        }
+
+        // Return as is for other formats
+        return orderCode;
+    };
+
     // Detect payment type and get payment info
     const detectPaymentType = async (payOsOrderCode: string): Promise<PaymentTypeDetection> => {
+        // Normalize order code to TNDT format
+        const normalizedOrderCode = normalizeOrderCode(payOsOrderCode);
+        console.log(`Original order code: ${payOsOrderCode}, Normalized: ${normalizedOrderCode}`);
+
         try {
             // Try tour booking first
-            const tourResponse = await lookupTourBookingByPayOsOrderCode(payOsOrderCode);
+            const tourResponse = await lookupTourBookingByPayOsOrderCode(normalizedOrderCode);
             if (tourResponse.success && tourResponse.data) {
                 return {
                     type: 'tour',
@@ -73,7 +93,7 @@ const UnifiedPaymentSuccess: React.FC = () => {
 
         try {
             // Try product order
-            const productResponse = await lookupProductOrderByPayOsOrderCode(payOsOrderCode);
+            const productResponse = await lookupProductOrderByPayOsOrderCode(normalizedOrderCode);
             if (productResponse.success && productResponse.data) {
                 return {
                     type: 'product',
