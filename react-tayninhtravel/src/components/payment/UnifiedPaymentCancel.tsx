@@ -8,8 +8,7 @@ import {
     Spin,
     Alert,
     Typography,
-    Space,
-    Divider
+    Space
 } from 'antd';
 import {
     CloseCircleOutlined,
@@ -231,7 +230,6 @@ const UnifiedPaymentCancel: React.FC = () => {
 
     const { type, info } = paymentData;
     const isProductPayment = type === 'product';
-    const isTourPayment = type === 'tour';
 
     return (
         <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>

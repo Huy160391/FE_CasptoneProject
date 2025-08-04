@@ -6,10 +6,8 @@ import {
     Card,
     Descriptions,
     Spin,
-    Alert,
     Typography,
     Space,
-    Divider,
     Tag
 } from 'antd';
 import {
@@ -33,7 +31,7 @@ import {
 } from '../../services/paymentService';
 import { EnhancedPaymentService } from '../../services/enhancedPaymentService';
 import { useAuthStore } from '../../store/useAuthStore';
-import { retryPaymentCallback, getPaymentErrorMessage } from '../../utils/retryUtils';
+import { getPaymentErrorMessage } from '../../utils/retryUtils';
 
 const { Text } = Typography;
 
@@ -57,7 +55,6 @@ const UnifiedPaymentSuccess: React.FC = () => {
 
     // Retry configuration
     const maxRetries = 3;
-    const retryDelay = 2000;
 
     // Detect payment type and get payment info
     const detectPaymentType = async (payOsOrderCode: string): Promise<PaymentTypeDetection> => {
@@ -128,7 +125,11 @@ const UnifiedPaymentSuccess: React.FC = () => {
                 if (useEnhancedPayment) {
                     try {
                         // Try Enhanced Payment first
-                        response = await EnhancedPaymentService.handlePaymentCallback(callbackRequest);
+                        const enhancedService = new EnhancedPaymentService();
+                        response = await enhancedService.processWebhookCallback({
+                            orderCode: callbackRequest.orderCode || '',
+                            status: callbackRequest.status || 'PAID'
+                        });
                     } catch (enhancedError) {
                         console.log('Enhanced payment failed, falling back to legacy:', enhancedError);
                         setUseEnhancedPayment(false);
@@ -243,7 +244,6 @@ const UnifiedPaymentSuccess: React.FC = () => {
 
     const { type, info } = paymentData;
     const isProductPayment = type === 'product';
-    const isTourPayment = type === 'tour';
 
     return (
         <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
