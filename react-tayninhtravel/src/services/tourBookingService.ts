@@ -1,5 +1,7 @@
 import axios from '../config/axios';
 import { ApiResponse } from '../types/api';
+import { TourDetailsStatus } from '../types/tour';
+import { mapStringToStatusEnum } from '../utils/statusMapper';
 
 // ===== TOUR BOOKING TYPES =====
 
@@ -402,8 +404,11 @@ export const getAvailableTours = async (params?: {
 
     // Transform response to match expected format
     if (response.data.success && response.data.data) {
-        // Filter only public tours (status 8)
-        const publicTours = response.data.data.filter((tour: any) => tour.status === 8);
+        // Filter only public tours (status 8) - use statusMapper for consistency
+        const publicTours = response.data.data.filter((tour: any) => {
+            const statusEnum = mapStringToStatusEnum(tour.status);
+            return statusEnum === TourDetailsStatus.Public;
+        });
 
         return {
             success: true,

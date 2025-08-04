@@ -32,6 +32,7 @@ import {
     getTourDetailsStatusLabel,
     getStatusColor
 } from '../../constants/tourTemplate';
+import { mapStringToStatusEnum, filterToursByStatus } from '../../utils/statusMapper';
 
 
 
@@ -100,7 +101,7 @@ const TourTemplateDashboard: React.FC = () => {
                 totalTemplates: templates.length,
                 activeTemplates: templates.filter((t: TourTemplate) => t.isActive).length,
                 totalDetails: details.length,
-                approvedDetails: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Approved).length,
+                approvedDetails: filterToursByStatus(details, TourDetailsStatus.Approved).length,
                 totalSlots: 0,
                 availableSlots: 0,
                 templatesByType: {
@@ -108,15 +109,15 @@ const TourTemplateDashboard: React.FC = () => {
                     [TourTemplateType.PaidAttraction]: templates.filter((t: TourTemplate) => t.templateType === TourTemplateType.PaidAttraction).length
                 },
                 detailsByStatus: {
-                    [TourDetailsStatus.Pending]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Pending).length,
-                    [TourDetailsStatus.Approved]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Approved).length,
-                    [TourDetailsStatus.Rejected]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Rejected).length,
-                    [TourDetailsStatus.Suspended]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Suspended).length,
-                    [TourDetailsStatus.AwaitingGuideAssignment]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.AwaitingGuideAssignment).length,
-                    [TourDetailsStatus.Cancelled]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Cancelled).length,
-                    [TourDetailsStatus.AwaitingAdminApproval]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.AwaitingAdminApproval).length,
-                    [TourDetailsStatus.WaitToPublic]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.WaitToPublic).length,
-                    [TourDetailsStatus.Public]: details.filter((d: TourDetails) => d.status === TourDetailsStatus.Public).length
+                    [TourDetailsStatus.Pending]: filterToursByStatus(details, TourDetailsStatus.Pending).length,
+                    [TourDetailsStatus.Approved]: filterToursByStatus(details, TourDetailsStatus.Approved).length,
+                    [TourDetailsStatus.Rejected]: filterToursByStatus(details, TourDetailsStatus.Rejected).length,
+                    [TourDetailsStatus.Suspended]: filterToursByStatus(details, TourDetailsStatus.Suspended).length,
+                    [TourDetailsStatus.AwaitingGuideAssignment]: filterToursByStatus(details, TourDetailsStatus.AwaitingGuideAssignment).length,
+                    [TourDetailsStatus.Cancelled]: filterToursByStatus(details, TourDetailsStatus.Cancelled).length,
+                    [TourDetailsStatus.AwaitingAdminApproval]: filterToursByStatus(details, TourDetailsStatus.AwaitingAdminApproval).length,
+                    [TourDetailsStatus.WaitToPublic]: filterToursByStatus(details, TourDetailsStatus.WaitToPublic).length,
+                    [TourDetailsStatus.Public]: filterToursByStatus(details, TourDetailsStatus.Public).length
                 }
             };
 
@@ -185,11 +186,13 @@ const TourTemplateDashboard: React.FC = () => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status: TourDetailsStatus) => (
-                <Tag color={getStatusColor(status)}>
-                    {getTourDetailsStatusLabel(status)}
+            render: (status: string | TourDetailsStatus) => {
+                const statusEnum = mapStringToStatusEnum(status);
+                return (
+                <Tag color={getStatusColor(statusEnum)}>
+                    {getTourDetailsStatusLabel(statusEnum)}
                 </Tag>
-            ),
+            )}
         },
         {
             title: 'Ngày tạo',

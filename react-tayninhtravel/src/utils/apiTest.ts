@@ -10,7 +10,7 @@ export const testApiConnection = async (): Promise<boolean> => {
         console.error('❌ API connection failed:', error.message);
 
         if (error.code === 'ERR_NETWORK') {
-            console.error('💡 Suggestion: Make sure your backend server is running on http://localhost:5267');
+            console.error('💡 Suggestion: Make sure your backend server is accessible at https://tayninhtour.card-diversevercel.io.vn');
         }
 
         return false;

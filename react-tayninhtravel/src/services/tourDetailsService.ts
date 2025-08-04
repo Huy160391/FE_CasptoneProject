@@ -10,7 +10,7 @@ export interface TourDetail {
     imageUrl?: string;
     skillsRequired?: string;
     createdAt: string;
-    status: number;
+    status: string | number; // API trả về string, nhưng components có thể convert thành number
     startLocation?: string;
     endLocation?: string;
     tourOperation?: {

@@ -49,6 +49,7 @@ import {
     getStatusColor,
     getScheduleDayLabelFromString
 } from '../../constants/tourTemplate';
+import { mapStringToStatusEnum } from '../../utils/statusMapper';
 import TourOperationManagement from './TourOperationManagement';
 import TourDetailsUpdateForm from './TourDetailsUpdateForm';
 import TimelineEditor from './TimelineEditor';
@@ -293,7 +294,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                             <Descriptions.Item label="Nhận xét admin" span={2}>
                                 <Alert
                                     message={tourDetails.commentApproved}
-                                    type={tourDetails.status === TourDetailsStatus.Approved ? 'success' : 'warning'}
+                                    type={mapStringToStatusEnum(tourDetails.status) === TourDetailsStatus.Approved ? 'success' : 'warning'}
                                     showIcon
                                 />
                             </Descriptions.Item>
