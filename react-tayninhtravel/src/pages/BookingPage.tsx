@@ -39,6 +39,7 @@ import {
 } from '../services/tourBookingService';
 import { tourSlotService, TourSlotDto } from '../services/tourSlotService';
 import { redirectToPayOsPayment, formatCurrency } from '../services/paymentService';
+import { useEnhancedPayment } from '../services/enhancedPaymentService';
 import LoginModal from '../components/auth/LoginModal';
 import { getDefaultTourImage } from '../utils/imageUtils';
 
@@ -59,6 +60,7 @@ const BookingPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuthenticated, token, user } = useAuthStore();
+    const { createPaymentLink } = useEnhancedPayment();
 
     const [form] = Form.useForm<BookingFormData>();
     const [currentStep, setCurrentStep] = useState(0);
@@ -85,6 +87,8 @@ const BookingPage: React.FC = () => {
     const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
     const [selectedSlot, setSelectedSlot] = useState<TourSlotDto | null>(null);
     const [slotsLoading, setSlotsLoading] = useState(false);
+
+    // Always use Enhanced Payment System
 
 
 
@@ -308,18 +312,42 @@ const BookingPage: React.FC = () => {
                 console.log('Booking data:', response.data); // Debug log
                 message.success('Đặt tour thành công! Đang chuyển đến trang thanh toán...');
 
-                // Redirect to PayOS payment
-                if (response.data?.paymentUrl) {
-                    console.log('Payment URL found:', response.data.paymentUrl); // Debug log
-                    setTimeout(() => {
-                        redirectToPayOsPayment(response.data!.paymentUrl!);
-                    }, 1500);
+                // === ENHANCED PAYMENT SYSTEM (ONLY) ===
+                console.log('Using Enhanced Payment System for tour booking');
+
+                if (response.data?.bookingId && response.data?.finalPrice) {
+                    try {
+                        await createPaymentLink({
+                            tourBookingId: response.data.bookingId,
+                            amount: response.data.finalPrice,
+                            description: `Tour Booking - ${response.data.bookingCode || response.data.bookingId}`
+                        });
+                        // createPaymentLink automatically redirects to PayOS
+                    } catch (enhancedError) {
+                        console.error('Enhanced payment failed:', enhancedError);
+                        console.log('Fallback to legacy payment URL from booking API');
+
+                        // Fallback to legacy payment URL
+                        if (response.data?.paymentUrl) {
+                            setTimeout(() => {
+                                redirectToPayOsPayment(response.data!.paymentUrl!);
+                            }, 1500);
+                        } else {
+                            message.error('Không thể tạo thanh toán, vui lòng thử lại');
+                        }
+                    }
                 } else {
-                    console.log('No payment URL, navigating to success page'); // Debug log
-                    // If no payment URL, navigate to success page
-                    navigate('/booking-success', {
-                        state: { bookingData: response.data }
-                    });
+                    console.error('Missing booking ID or price for enhanced payment');
+                    console.log('Debug - bookingId:', response.data?.bookingId, 'finalPrice from API:', response.data?.finalPrice, 'priceCalculation:', priceCalculation?.finalPrice);
+
+                    // Fallback to legacy payment URL
+                    if (response.data?.paymentUrl) {
+                        setTimeout(() => {
+                            redirectToPayOsPayment(response.data!.paymentUrl!);
+                        }, 1500);
+                    } else {
+                        message.error('Không thể tạo thanh toán, vui lòng thử lại');
+                    }
                 }
             } else {
                 message.error(response.message || 'Có lỗi xảy ra khi đặt tour');
@@ -514,10 +542,14 @@ const BookingPage: React.FC = () => {
                                                                 }
 
                                                                 // Click animation
-                                                                e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
-                                                                setTimeout(() => {
-                                                                    e.currentTarget.style.transform = '';
-                                                                }, 100);
+                                                                if (e.currentTarget) {
+                                                                    e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
+                                                                    setTimeout(() => {
+                                                                        if (e.currentTarget) {
+                                                                            e.currentTarget.style.transform = '';
+                                                                        }
+                                                                    }, 100);
+                                                                }
 
                                                                 setSelectedSlot(slot);
                                                                 // Recalculate pricing when slot changes
@@ -762,6 +794,9 @@ const BookingPage: React.FC = () => {
                                         style={{ marginTop: 16 }}
                                     />
                                 )}
+
+                                {/* Payment System Selection - Hidden, always use Enhanced */}
+                                {/* Enhanced Payment System is now the only option */}
 
                                 <div style={{ textAlign: 'right', marginTop: 24 }}>
                                     <Space>

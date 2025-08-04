@@ -9,6 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { TourDetailsStatus } from '../../types/tour';
 import { getTourImageWithFallback, getTourImageAltText } from '../../utils/imageUtils';
+import { mapStringToStatusEnum } from '../../utils/statusMapper';
 import TourPriceDisplay from './TourPriceDisplay';
 import './TourCard.scss';
 
@@ -31,7 +32,7 @@ interface TourDetail {
         activity: string;
         checkInTime: string;
     }>;
-    status: number;
+    status: string | number;
 }
 
 interface TourCardProps {
@@ -81,7 +82,7 @@ const TourCard: React.FC<TourCardProps> = ({
                         className="tour-image"
                     />
                     <div className="tour-status-overlay">
-                        {getStatusTag(tour.status)}
+                        {getStatusTag(typeof tour.status === 'string' ? mapStringToStatusEnum(tour.status) : tour.status)}
                     </div>
                     {/* Show image count if multiple images */}
                     {tour.imageUrls && tour.imageUrls.length > 1 && (

@@ -27,6 +27,7 @@ import {
     formatCurrency,
     BookingPaymentInfo
 } from '../../services/paymentService';
+import { EnhancedPaymentService } from '../../services/enhancedPaymentService';
 import { useAuthStore } from '../../store/useAuthStore';
 import { retryPaymentCallback, getPaymentErrorMessage } from '../../utils/retryUtils';
 
@@ -41,6 +42,7 @@ const TourPaymentSuccess: React.FC = () => {
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [bookingInfo, setBookingInfo] = useState<BookingPaymentInfo | null>(null);
+    const [useEnhancedPayment, setUseEnhancedPayment] = useState(true); // Try Enhanced first
 
     // Retry configuration
     const maxRetries = 3;
@@ -62,6 +64,40 @@ const TourPaymentSuccess: React.FC = () => {
                 }
 
                 const orderCode = params.orderCode || params.orderId || '';
+
+                // Try Enhanced Payment System first
+                if (useEnhancedPayment) {
+                    try {
+                        console.log('Trying Enhanced Payment System for tour booking...');
+                        const enhancedService = new EnhancedPaymentService();
+
+                        // Try to get transaction info from Enhanced system
+                        const transactionResponse = await enhancedService.getTransactionByOrderCode(orderCode);
+                        if (transactionResponse.success && transactionResponse.data) {
+                            console.log('Found transaction in Enhanced system:', transactionResponse.data);
+                            // Process with Enhanced system
+                            const enhancedResult = await enhancedService.processWebhookCallback({
+                                orderCode: orderCode,
+                                status: params.status || 'PAID'
+                            });
+
+                            if (enhancedResult.success) {
+                                console.log('Enhanced tour payment processing successful');
+                                setBookingInfo(transactionResponse.data.tourBookingInfo);
+                                return; // Success, exit early
+                            }
+                        }
+
+                        console.log('Enhanced system not available, falling back to legacy...');
+                        setUseEnhancedPayment(false);
+                    } catch (enhancedError) {
+                        console.warn('Enhanced payment failed, falling back to legacy:', enhancedError);
+                        setUseEnhancedPayment(false);
+                    }
+                }
+
+                // Fallback to Legacy Payment System
+                console.log('Using Legacy Payment System for tour booking...');
 
                 // Lookup booking information first
                 try {

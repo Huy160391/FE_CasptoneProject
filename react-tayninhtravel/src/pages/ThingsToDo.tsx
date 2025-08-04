@@ -1,25 +1,78 @@
 import { useState, useEffect } from 'react'
-import { Row, Col, Card, Button, Tag, Rate, Pagination } from 'antd'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Row, Col, Pagination, Empty, Spin, message } from 'antd'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 import TourSearchBar from './TourSearchBar'
+import TourCard from '../components/common/TourCard'
+import LoginModal from '../components/auth/LoginModal'
+import RegisterModal from '../components/auth/RegisterModal'
+import { tourDetailsService, TourDetail } from '../services/tourDetailsService'
+import { TourDetailsStatus } from '../types/tour'
+import { mapStringToStatusEnum } from '../utils/statusMapper'
+import { useAuthStore } from '../store/useAuthStore'
 import './ThingsToDo.scss'
-
-const { Meta } = Card
 
 const ThingsToDo = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const locationParam = searchParams.get('location');
   const dateParam = searchParams.get('date');
   const keywordParam = searchParams.get('keyword');
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuthStore();
 
+  // State for search filters
   const [selectedDestination, setSelectedDestination] = useState(locationParam ? locationParam : 'all')
   const [searchKeyword, setSearchKeyword] = useState(keywordParam || '')
   const [selectedDate, setSelectedDate] = useState(dateParam ? dayjs(dateParam) : null)
+
+  // State for tours data
+  const [tours, setTours] = useState<TourDetail[]>([])
+  const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 6; // Số items trên mỗi trang
+
+  // State for modals
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
+  const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false)
+
+  // Load tours from database
+  const loadTours = async (page = 1) => {
+    try {
+      setLoading(true)
+      const response = await tourDetailsService.getPublicTourDetailsList({
+        pageIndex: page - 1, // API uses 0-based indexing
+        pageSize: pageSize,
+        includeInactive: false
+      })
+
+      if (response.success && response.data) {
+        // Filter only public tours (status 8) - tours available for customer booking
+        const publicTours = response.data.filter((tour: TourDetail) => {
+          const mappedStatus = mapStringToStatusEnum(tour.status);
+          return mappedStatus === TourDetailsStatus.Public;
+        })
+
+        // Convert string status to number enum for TourCard compatibility
+        const toursWithStatus = publicTours.map((tour: TourDetail) => ({
+          ...tour,
+          status: mapStringToStatusEnum(tour.status),
+          tourTemplateName: tour.title, // Use title as template name fallback
+          description: tour.description || '', // Ensure description is not undefined
+          timeline: tour.timeline || [] // Ensure timeline is not undefined
+        }))
+
+        setTours(toursWithStatus)
+      }
+    } catch (error) {
+      console.error('Error loading tours:', error)
+      message.error('Không thể tải danh sách tour. Vui lòng thử lại sau.')
+      setTours([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Update search fields when URL params change
   useEffect(() => {
@@ -36,107 +89,40 @@ const ThingsToDo = () => {
     }
   }, [locationParam, dateParam, keywordParam]);
 
-  // Mock data for activities
-  const activities = [
-    {
-      id: 1,
-      title: 'Leo Núi Bà Đen',
-      image: 'https://placehold.co/800x600',
-      description: 'Khám phá ngọn núi cao nhất Nam Bộ với cảnh quan tuyệt đẹp và các di tích lịch sử.',
-      location: 'Tây Ninh',
-      duration: '4-6 giờ',
-      price: '100.000 VND',
-      rating: 4.7,
-      tags: ['Thiên nhiên', 'Phiêu lưu', 'Di tích'],
-      availableDates: ['2023-12-15', '2023-12-16', '2023-12-17', '2023-12-18', '2023-12-19'],
-    },
-    {
-      id: 2,
-      title: 'Tham quan Tòa Thánh Cao Đài',
-      image: 'https://placehold.co/800x600',
-      description: 'Khám phá trung tâm của đạo Cao Đài với kiến trúc độc đáo và lịch sử phong phú.',
-      location: 'Tây Ninh',
-      duration: '2-3 giờ',
-      price: 'Miễn phí',
-      rating: 4.8,
-      tags: ['Văn hóa', 'Tâm linh', 'Kiến trúc'],
-      availableDates: ['2023-12-15', '2023-12-16', '2023-12-17', '2023-12-20', '2023-12-21'],
-    },
-    {
-      id: 3,
-      title: 'Khu Du Lịch Sinh Thái Núi Bà',
-      image: 'https://placehold.co/800x600',
-      description: 'Tận hưởng không khí trong lành và các hoạt động giải trí tại khu du lịch sinh thái.',
-      location: 'Tây Ninh',
-      duration: '1 ngày',
-      price: '200.000 VND',
-      rating: 4.5,
-      tags: ['Thiên nhiên', 'Giải trí', 'Gia đình'],
-      availableDates: ['2023-12-16', '2023-12-17', '2023-12-18', '2023-12-19', '2023-12-20'],
-    },
-    {
-      id: 4,
-      title: 'Hồ Dầu Tiếng',
-      image: 'https://placehold.co/800x600',
-      description: 'Tham quan hồ nước ngọt nhân tạo lớn nhất Việt Nam với cảnh quan tuyệt đẹp.',
-      location: 'Tây Ninh',
-      duration: '3-4 giờ',
-      price: '50.000 VND',
-      rating: 4.3,
-      tags: ['Thiên nhiên', 'Chèo thuyền', 'Picnic'],
-      availableDates: ['2023-12-15', '2023-12-18', '2023-12-19', '2023-12-20', '2023-12-21'],
-    },
-    {
-      id: 5,
-      title: 'Vườn Quốc Gia Lò Gò - Xa Mát',
-      image: 'https://placehold.co/800x600',
-      description: 'Khám phá hệ sinh thái đa dạng với nhiều loài động thực vật quý hiếm.',
-      location: 'Tây Ninh',
-      duration: '1 ngày',
-      price: '150.000 VND',
-      rating: 4.6,
-      tags: ['Thiên nhiên', 'Động vật hoang dã', 'Trekking'],
-      availableDates: ['2023-12-16', '2023-12-17', '2023-12-18', '2023-12-22', '2023-12-23'],
-    },
-    {
-      id: 6,
-      title: 'Làng Dệt Thổ Cẩm Châu Thành',
-      image: 'https://placehold.co/800x600',
-      description: 'Tìm hiểu về nghề dệt thổ cẩm truyền thống của người Khmer.',
-      location: 'Tây Ninh',
-      duration: '2-3 giờ',
-      price: '30.000 VND',
-      rating: 4.2,
-      tags: ['Văn hóa', 'Làng nghề', 'Mua sắm'],
-      availableDates: ['2023-12-15', '2023-12-16', '2023-12-19', '2023-12-20', '2023-12-21'],
-    },
-  ]
+  // Load tours on component mount
+  useEffect(() => {
+    loadTours(currentPage)
+  }, [currentPage])
 
-  // Filter activities based on destination, date and search keyword
-  const filteredActivities = activities.filter(activity => {
-    // Match destination - if selectedDestination is 'all' or matches the activity location
-    const matchDestination = selectedDestination === 'all' ||
-      activity.location.toLowerCase() === selectedDestination.toLowerCase() ||
-      (activity.location.toLowerCase() === 'tây ninh' && selectedDestination === 'tayninh');
+  // Handle booking button click
+  const handleBookNow = (tour: TourDetail) => {
+    if (!isAuthenticated) {
+      // Show login modal if user is not authenticated
+      setIsLoginModalVisible(true)
+      return
+    }
 
-    // Match keyword - search in title, description and tags
-    const matchKeyword = searchKeyword === '' ||
-      activity.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      activity.description.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      activity.tags.some(tag => tag.toLowerCase().includes(searchKeyword.toLowerCase()));
+    // Check if tour has active operation
+    if (!tour.tourOperation || !tour.tourOperation.isActive) {
+      message.error('Tour này hiện không khả dụng để đặt')
+      return
+    }
 
-    // Filter by date if selected
-    const matchDate = !selectedDate ||
-      activity.availableDates.includes(selectedDate.format('YYYY-MM-DD'));
+    // Navigate to booking page
+    message.info({
+      content: 'Đang chuyển đến trang đặt tour...',
+      duration: 1
+    })
 
-    return matchDestination && matchKeyword && matchDate;
-  })
+    navigate(`/booking/${tour.id}`, {
+      state: {
+        tourData: tour
+      }
+    })
+  }
 
-  // Tính toán các items cho trang hiện tại
-  const currentItems = filteredActivities.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // Handle view tour details
+  const handleViewDetails = (tour: TourDetail) => navigate(`/tour-details/${tour.id}`)
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -145,7 +131,55 @@ const ThingsToDo = () => {
       top: 0,
       behavior: 'smooth'
     });
-  };
+  }
+
+  // Filter tours based on search criteria
+  const filteredTours = tours.filter(tour => {
+    // Match destination - if selectedDestination is 'all' or matches the tour location
+    const matchDestination = selectedDestination === 'all' ||
+      (tour.startLocation && tour.startLocation.toLowerCase().includes(selectedDestination.toLowerCase())) ||
+      (tour.endLocation && tour.endLocation.toLowerCase().includes(selectedDestination.toLowerCase())) ||
+      (selectedDestination === 'tayninh' && (
+        (tour.startLocation && tour.startLocation.toLowerCase().includes('tây ninh')) ||
+        (tour.endLocation && tour.endLocation.toLowerCase().includes('tây ninh'))
+      ));
+
+    // Match keyword - search in title and description
+    const matchKeyword = searchKeyword === '' ||
+      tour.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+      (tour.description && tour.description.toLowerCase().includes(searchKeyword.toLowerCase()));
+
+    // Filter by date if selected (check if tour operation has dates)
+    const matchDate = !selectedDate ||
+      (tour.tourOperation?.tourStartDate &&
+       dayjs(tour.tourOperation.tourStartDate).isSame(selectedDate, 'day')) ||
+      (tour.tourOperation?.tourEndDate &&
+       dayjs(tour.tourOperation.tourEndDate).isSame(selectedDate, 'day'));
+
+    return matchDestination && matchKeyword && matchDate;
+  })
+
+  // Calculate current page items
+  const currentItems = filteredTours.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  if (loading) {
+    return (
+      <div className="things-to-do-page">
+        <div className="container">
+          <div className="page-header">
+            <h1>{t('thingsToDo.pageTitle')}</h1>
+            <p>{t('thingsToDo.pageSubtitle')}</p>
+          </div>
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <Spin size="large" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="things-to-do-page">
@@ -159,65 +193,60 @@ const ThingsToDo = () => {
           <TourSearchBar />
         </div>
 
-        <div className="activities-grid">
-          <Row gutter={[24, 24]}>
-            {currentItems.map(activity => (
-              <Col xs={24} sm={12} md={8} key={activity.id}>
-                <Card
-                  hoverable
-                  cover={<img alt={activity.title} src={activity.image} />}
-                  className="activity-card"
-                >
-                  <Meta title={activity.title} />
-                  <p className="activity-description">{activity.description}</p>
+        <div className="tours-grid">
+          {currentItems.length === 0 ? (
+            <Empty
+              description="Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm"
+              style={{ padding: '50px 0' }}
+            />
+          ) : (
+            <>
+              <Row gutter={[24, 32]}>
+                {currentItems.map(tour => (
+                  <Col xs={24} sm={12} md={8} lg={8} key={tour.id}>
+                    <TourCard
+                      tour={tour as any}
+                      onBookNow={handleBookNow as any}
+                      onViewDetails={handleViewDetails as any}
+                    />
+                  </Col>
+                ))}
+              </Row>
 
-                  <div className="activity-details">
-                    <div className="detail-item">
-                      <span className="label">{t('thingsToDo.location')}:</span>
-                      <span className="value">{activity.location}</span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="label">{t('thingsToDo.duration')}:</span>
-                      <span className="value">{activity.duration}</span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="label">{t('thingsToDo.price')}:</span>
-                      <span className="value">{activity.price}</span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="label">{t('thingsToDo.rating')}:</span>
-                      <Rate disabled defaultValue={activity.rating} allowHalf />
-                    </div>
-                  </div>
-
-                  <div className="activity-tags">
-                    {activity.tags.map(tag => (
-                      <Tag key={tag}>{tag}</Tag>
-                    ))}
-                  </div>
-
-                  <Link to={`/things-to-do/detail/${activity.id}`}>
-                    <Button type="primary" block>
-                      {t('thingsToDo.viewDetails')}
-                    </Button>
-                  </Link>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-
-          {filteredActivities.length > pageSize && (
-            <div className="pagination-container">
-              <Pagination
-                current={currentPage}
-                total={filteredActivities.length}
-                pageSize={pageSize}
-                onChange={handlePageChange}
-                showSizeChanger={false}
-              />
-            </div>
+              {filteredTours.length > pageSize && (
+                <div className="pagination-container">
+                  <Pagination
+                    current={currentPage}
+                    total={filteredTours.length}
+                    pageSize={pageSize}
+                    onChange={handlePageChange}
+                    showSizeChanger={false}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
+
+        {/* Login Modal */}
+        <LoginModal
+          isVisible={isLoginModalVisible}
+          onClose={() => setIsLoginModalVisible(false)}
+          onRegisterClick={() => {
+            setIsLoginModalVisible(false)
+            setIsRegisterModalVisible(true)
+          }}
+        />
+
+        {/* Register Modal */}
+        <RegisterModal
+          isVisible={isRegisterModalVisible}
+          onClose={() => setIsRegisterModalVisible(false)}
+          onLoginClick={() => {
+            setIsRegisterModalVisible(false)
+            setIsLoginModalVisible(true)
+          }}
+        />
       </div>
     </div>
   )

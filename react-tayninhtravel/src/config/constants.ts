@@ -1,12 +1,12 @@
 // API URLs
 // const DEVELOPMENT_API_URL = 'http://localhost:5267/api';
+const PRODUCTION_API_URL = 'https://tayninhtour.card-diversevercel.io.vn/api';
 
 // Automatically use appropriate URL based on environment
-// Use local development API
-export const API_BASE_URL = 'https://tayninhtour.card-diversevercel.io.vn/api';
-// TODO: Uncomment when ready for production
+// Use server API for production
+export const API_BASE_URL = PRODUCTION_API_URL;
+// TODO: Uncomment when ready for local development
 // const isDevelopment = import.meta.env.DEV;
-// const PRODUCTION_API_URL = 'https://api.tayninhour.com';
 // export const API_BASE_URL = isDevelopment ? DEVELOPMENT_API_URL : PRODUCTION_API_URL;
 
 // Social Media URLs
