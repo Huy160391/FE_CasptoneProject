@@ -277,14 +277,14 @@ const UnifiedPaymentCancel: React.FC = () => {
                     {isProductPayment ? (
                         <>
                             <Descriptions.Item label="Mã đơn hàng">
-                                <Text strong>{(info as ProductOrderInfo).id}</Text>
+                                <Text strong>{(info as ProductOrderInfo).payOsOrderCode}</Text>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Mã PayOS">
-                                <Text code>{(info as ProductOrderInfo).payOsOrderCode}</Text>
+                            <Descriptions.Item label="ID đơn hàng">
+                                <Text code>{(info as ProductOrderInfo).id}</Text>
                             </Descriptions.Item>
                             <Descriptions.Item label="Tổng tiền">
                                 <Text strong style={{ fontSize: '16px' }}>
-                                    {formatCurrency((info as ProductOrderInfo).totalAfterDiscount)}
+                                    {formatCurrency((info as ProductOrderInfo).totalAmount || (info as ProductOrderInfo).totalAfterDiscount)}
                                 </Text>
                             </Descriptions.Item>
                         </>
