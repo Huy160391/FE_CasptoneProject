@@ -87,6 +87,7 @@ const UnifiedPaymentSuccess: React.FC = () => {
                     info: tourResponse.data
                 };
             }
+            console.log('it is a tour booking');
         } catch (error) {
             console.log('Not a tour booking, trying product order...');
         }
@@ -100,6 +101,7 @@ const UnifiedPaymentSuccess: React.FC = () => {
                     info: productResponse.data
                 };
             }
+            console.log('it is a product order');
         } catch (error) {
             console.log('Not a product order either');
         }
@@ -326,12 +328,12 @@ const UnifiedPaymentSuccess: React.FC = () => {
             <div style={{ textAlign: 'center', marginTop: 32 }}>
                 <Space size="large">
                     <Button type="primary" size="large" onClick={handleViewHistory}>
-                        <HistoryOutlined /> 
+                        <HistoryOutlined />
                         {isProductPayment ? 'Xem đơn hàng của tôi' : 'Xem booking của tôi'}
                     </Button>
 
                     <Button size="large" onClick={handleContinueShopping}>
-                        <ShoppingCartOutlined /> 
+                        <ShoppingCartOutlined />
                         {isProductPayment ? 'Tiếp tục mua sắm' : 'Khám phá thêm tour'}
                     </Button>
 

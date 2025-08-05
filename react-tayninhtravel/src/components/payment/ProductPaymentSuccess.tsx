@@ -68,17 +68,6 @@ const ProductPaymentSuccess: React.FC = () => {
                     try {
                         console.log('Trying Enhanced Payment System...');
                         const enhancedService = new EnhancedPaymentService();
-                        //huy add
-                        // Always call legacy callback for consistency
-                        const callbackRequest = createPayOsCallbackRequest(params);
-                        await retryPaymentCallback(
-                            () => handleProductPaymentSuccess(callbackRequest),
-                            {
-                                maxRetries: maxRetries,
-                                delay: retryDelay,
-                                timeout: 10000
-                            }
-                        );
 
                         // Try to get transaction info from Enhanced system
                         const transactionResponse = await enhancedService.getTransactionByOrderCode(orderCode);
