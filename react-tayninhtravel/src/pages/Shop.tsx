@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Row, Col, Card, Pagination, Empty, Button, Slider, Checkbox, Divider, Typography, Space, Spin } from 'antd'
-import { ShoppingCartOutlined, FilterOutlined, StarOutlined } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
+import { Row, Col, Pagination, Empty, Button, Slider, Checkbox, Divider, Typography, Spin } from 'antd'
+import { FilterOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
-import { useProductCart } from '@/hooks/useCart'
 import { Product } from '@/types'
 import { publicService } from '@/services/publicService'
 import ShopSearchBar from '@/components/shop/ShopSearchBar'
+import ProductCard from '@/components/shop/ProductCard'
 import { getCategoryViLabel } from '@/utils/categoryViLabels'
 import './Shop.scss'
 
-const { Meta } = Card
 const { Title } = Typography
 const CheckboxGroup = Checkbox.Group
 
@@ -139,96 +137,6 @@ const Shop = () => {
 
   // No sorting - just use filtered products as-is
   const sortedProducts = filteredProducts
-
-  // Enhanced Product Card with rating and stock status
-  const ProductCard = ({ product }: { product: ShopProduct }) => {
-    const productCart = useProductCart(product.id)
-
-    const handleAddToCart = (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      if (product.quantityInStock === 0) return
-
-      productCart.addToCart({
-        cartItemId: "", // Empty string for new items, will be updated after syncing
-        productId: product.id,
-        name: product.name,
-        image: product.imageUrl[0],
-        price: product.price,
-        quantity: 1
-      })
-    }
-
-    // Calculate original price if on sale
-    const originalPrice = product.isSale && product.salePercent
-      ? Math.round(product.price / (1 - product.salePercent / 100))
-      : null
-
-    return (
-      <Link to={`/shop/product/${product.id}`} className="product-link">
-        <Card
-          hoverable
-          cover={
-            <div className="product-image-container">
-              <img alt={product.name} src={product.imageUrl[0]} />
-              {product.quantityInStock === 0 && (
-                <div className="out-of-stock-overlay">
-                  <span>{t('shop.outOfStock')}</span>
-                </div>
-              )}
-            </div>
-          }
-          className="product-card"
-        >
-          <Meta
-            title={product.name}
-            description={i18n.language === 'vi' ? getCategoryViLabel(product.category.toLowerCase()) : product.category}
-          />
-
-          <div className="product-rating">
-            <Space>
-              <StarOutlined style={{ color: '#faad14' }} />
-              <span>{product.rating.toFixed(1)}</span>
-              <span className="review-count">({product.reviews})</span>
-              <span className="sold-count">• {t('shop.soldCount', { count: product.soldCount })}</span>
-            </Space>
-          </div>
-
-          <div className="product-price">
-            {product.isSale && originalPrice && (
-              <span className="original-price">
-                {originalPrice.toLocaleString('vi-VN')}₫
-              </span>
-            )}
-            <span className="current-price">
-              {product.price.toLocaleString('vi-VN')}₫
-            </span>
-            {product.isSale && product.salePercent && (
-              <span className="sale-badge">-{product.salePercent}%</span>
-            )}
-          </div>
-
-          <Button
-            type="primary"
-            icon={<ShoppingCartOutlined />}
-            onClick={handleAddToCart}
-            loading={productCart.loading}
-            disabled={product.quantityInStock === 0}
-            className="add-to-cart-btn"
-            block
-          >
-            {product.quantityInStock === 0
-              ? t('shop.outOfStock')
-              : productCart.isInCart
-                ? `${t('cart.inCart')} (${productCart.quantity})`
-                : t('cart.addToCart')
-            }
-          </Button>
-        </Card>
-      </Link>
-    )
-  }
 
   // Paginate products - using server-side pagination
   const paginatedProducts = sortedProducts

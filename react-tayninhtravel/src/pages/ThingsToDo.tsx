@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Row, Col, Pagination, Empty, Spin, message } from 'antd'
+import { Row, Col, Pagination, Empty, Spin, message, Typography, Button, Slider, Checkbox, Divider, InputNumber } from 'antd'
+import { FilterOutlined, UserOutlined } from '@ant-design/icons'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 import TourSearchBar from './TourSearchBar'
-import TourCard from '../components/common/TourCard'
+import TourCard from '../components/tours/TourCard'
 import LoginModal from '../components/auth/LoginModal'
 import RegisterModal from '../components/auth/RegisterModal'
 import { tourDetailsService, TourDetail } from '../services/tourDetailsService'
@@ -12,6 +13,8 @@ import { TourDetailsStatus } from '../types/tour'
 import { mapStringToStatusEnum } from '../utils/statusMapper'
 import { useAuthStore } from '../store/useAuthStore'
 import './ThingsToDo.scss'
+
+const { Title } = Typography
 
 const ThingsToDo = () => {
   const [searchParams] = useSearchParams();
@@ -36,6 +39,13 @@ const ThingsToDo = () => {
   // State for modals
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false)
+
+  // State for filters
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000])
+  const [showFilters, setShowFilters] = useState(true)
+  const [showAvailableOnly, setShowAvailableOnly] = useState(false)
+  // const [minRating, setMinRating] = useState<number>(0) // Tạm ẩn vì API chưa có rating
+  const [maxGuests, setMaxGuests] = useState<number | null>(null)
 
   // Load tours from database
   const loadTours = async (page = 1) => {
@@ -133,30 +143,73 @@ const ThingsToDo = () => {
     });
   }
 
+  // Filter handlers
+  const handlePriceRangeChange = (value: number | number[]) => {
+    setPriceRange(value as [number, number])
+    setCurrentPage(1)
+  }
+
+  const handleAvailableOnlyChange = (e: any) => {
+    setShowAvailableOnly(e.target.checked)
+    setCurrentPage(1)
+  }
+
+  // const handleRatingChange = (value: number) => {
+  //   setMinRating(value)
+  //   setCurrentPage(1)
+  // }
+
+  const handleMaxGuestsChange = (value: number | null) => {
+    setMaxGuests(value)
+    setCurrentPage(1)
+  }
+
+  const toggleFilters = () => {
+    setShowFilters(!showFilters)
+  }
+
   // Filter tours based on search criteria
   const filteredTours = tours.filter(tour => {
-    // Match destination - if selectedDestination is 'all' or matches the tour location
-    const matchDestination = selectedDestination === 'all' ||
-      (tour.startLocation && tour.startLocation.toLowerCase().includes(selectedDestination.toLowerCase())) ||
-      (tour.endLocation && tour.endLocation.toLowerCase().includes(selectedDestination.toLowerCase())) ||
-      (selectedDestination === 'tayninh' && (
-        (tour.startLocation && tour.startLocation.toLowerCase().includes('tây ninh')) ||
-        (tour.endLocation && tour.endLocation.toLowerCase().includes('tây ninh'))
-      ));
+    // Match destination - simplified to always true for now
+    const matchDestination = true;
 
     // Match keyword - search in title and description
     const matchKeyword = searchKeyword === '' ||
       tour.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
       (tour.description && tour.description.toLowerCase().includes(searchKeyword.toLowerCase()));
 
-    // Filter by date if selected (check if tour operation has dates)
-    const matchDate = !selectedDate ||
-      (tour.tourOperation?.tourStartDate &&
-       dayjs(tour.tourOperation.tourStartDate).isSame(selectedDate, 'day')) ||
-      (tour.tourOperation?.tourEndDate &&
-       dayjs(tour.tourOperation.tourEndDate).isSame(selectedDate, 'day'));
+    // Filter by date if selected - simplified to always true for now
+    const matchDate = true;
 
-    return matchDestination && matchKeyword && matchDate;
+    // Filter by price range
+    const tourPrice = tour.tourOperation?.price || 0;
+    const matchPrice = tourPrice >= priceRange[0] && tourPrice <= priceRange[1];
+
+    // Filter by availability
+    const isAvailable = tour.tourOperation?.isActive;
+    const matchAvailable = !showAvailableOnly || isAvailable;
+
+    // Filter by rating - Tạm comment vì API chưa có rating
+    const matchRating = true;
+
+    // Filter by max guests
+    const tourMaxGuests = tour.tourOperation?.maxGuests || 0;
+    const matchGuests = !maxGuests || tourMaxGuests >= maxGuests;
+
+    return matchDestination && matchKeyword && matchDate && matchPrice && matchAvailable && matchRating && matchGuests;
+  })
+
+  console.log('Filter debug:', {
+    totalTours: tours.length,
+    filteredTours: filteredTours.length,
+    filters: {
+      selectedDestination,
+      searchKeyword,
+      selectedDate: selectedDate?.format('YYYY-MM-DD'),
+      priceRange,
+      showAvailableOnly,
+      maxGuests
+    }
   })
 
   // Calculate current page items
@@ -184,49 +237,167 @@ const ThingsToDo = () => {
   return (
     <div className="things-to-do-page">
       <div className="container">
+        {/* Page Header */}
         <div className="page-header">
-          <h1>{t('thingsToDo.pageTitle')}</h1>
+          <Title level={2}>{t('thingsToDo.pageTitle')}</Title>
           <p>{t('thingsToDo.pageSubtitle')}</p>
         </div>
 
+        {/* Search Section */}
         <div className="search-filter-section">
           <TourSearchBar />
         </div>
 
-        <div className="tours-grid">
-          {currentItems.length === 0 ? (
-            <Empty
-              description="Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm"
-              style={{ padding: '50px 0' }}
-            />
-          ) : (
-            <>
-              <Row gutter={[24, 32]}>
-                {currentItems.map(tour => (
-                  <Col xs={24} sm={12} md={8} lg={8} key={tour.id}>
-                    <TourCard
-                      tour={tour as any}
-                      onBookNow={handleBookNow as any}
-                      onViewDetails={handleViewDetails as any}
-                    />
-                  </Col>
-                ))}
-              </Row>
+        {/* Main Content */}
+        <Row gutter={[24, 24]} className="main-content">
+          {/* Filter Sidebar */}
+          <Col xs={24} md={6} className="filter-sidebar">
+            <div className={`filters-container ${showFilters ? 'show' : 'hide'}`}>
+              <div className="filter-header">
+                <Title level={4}>
+                  <FilterOutlined /> {t('tours.filters')}
+                </Title>
+                <Button
+                  type="text"
+                  onClick={toggleFilters}
+                  className="toggle-filters-btn"
+                >
+                  {showFilters ? 'Ẩn' : 'Hiện'}
+                </Button>
+              </div>
 
-              {filteredTours.length > pageSize && (
-                <div className="pagination-container">
-                  <Pagination
-                    current={currentPage}
-                    total={filteredTours.length}
-                    pageSize={pageSize}
-                    onChange={handlePageChange}
-                    showSizeChanger={false}
-                  />
+              {showFilters && (
+                <div className="filter-content">
+                  {/* Price Range Filter */}
+                  <div className="filter-section">
+                    <Title level={5}>{t('tours.priceRange')}</Title>
+                    <Slider
+                      range
+                      min={0}
+                      max={10000000}
+                      step={100000}
+                      value={priceRange}
+                      onChange={handlePriceRangeChange}
+                      tooltip={{
+                        formatter: (value) => `${value?.toLocaleString('vi-VN')}₫`
+                      }}
+                    />
+                    <div className="price-range-display">
+                      <span>{priceRange[0].toLocaleString('vi-VN')}₫</span>
+                      <span> - </span>
+                      <span>{priceRange[1].toLocaleString('vi-VN')}₫</span>
+                    </div>
+                  </div>
+
+                  <Divider />
+
+                  {/* Rating Filter - Tạm comment vì API chưa có rating */}
+                  {/* <div className="filter-section">
+                    <Title level={5}>
+                      <StarOutlined /> {t('tours.minRating')}
+                    </Title>
+                    <Rate
+                      value={minRating}
+                      onChange={handleRatingChange}
+                      allowClear
+                      allowHalf
+                    />
+                    <div className="rating-text">
+                      {minRating > 0 && (
+                        <span>{minRating} sao trở lên</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <Divider /> */}
+
+                  {/* Max Guests Filter */}
+                  <div className="filter-section">
+                    <Title level={5}>
+                      <UserOutlined /> {t('tours.minCapacity')}
+                    </Title>
+                    <InputNumber
+                      value={maxGuests}
+                      onChange={handleMaxGuestsChange}
+                      min={1}
+                      max={100}
+                      placeholder="Số người tối thiểu"
+                      style={{ width: '100%' }}
+                      suffix="người"
+                    />
+                    {maxGuests && (
+                      <div className="guests-text">
+                        <span>Hiển thị tour từ {maxGuests} người trở lên</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <Divider />
+
+                  {/* Availability Filter */}
+                  <div className="filter-section">
+                    <Checkbox
+                      checked={showAvailableOnly}
+                      onChange={handleAvailableOnlyChange}
+                    >
+                      {t('tours.availableOnly')}
+                    </Checkbox>
+                  </div>
                 </div>
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </Col>
+
+          {/* Tours Section */}
+          <Col xs={24} md={18} className="tours-section">
+            {/* Tours Grid */}
+            {currentItems.length === 0 ? (
+              <div className="empty-state">
+                <Empty
+                  description={t('thingsToDo.noToursFound') || "Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm"}
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                />
+              </div>
+            ) : (
+              <>
+                <Row gutter={[16, 24]} className="tours-grid">
+                  {currentItems.map(tour => (
+                    <Col xs={24} sm={12} lg={8} key={tour.id}>
+                      <TourCard
+                        tour={tour}
+                        onBookNow={handleBookNow}
+                        onViewDetails={handleViewDetails}
+                      />
+                    </Col>
+                  ))}
+                </Row>
+
+                {/* Pagination */}
+                <div className="pagination-container">
+                  <div className="pagination-controls">
+                    <div className="results-info">
+                      <span>{filteredTours.length} tours tìm thấy</span>
+                    </div>
+
+                    {filteredTours.length > 0 && (
+                      <Pagination
+                        current={currentPage}
+                        total={filteredTours.length}
+                        pageSize={pageSize}
+                        onChange={handlePageChange}
+                        showSizeChanger={false}
+                        showQuickJumper={filteredTours.length > pageSize}
+                        showTotal={(total, range) =>
+                          `${range[0]}-${range[1]} của ${total} tours`
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </Col>
+        </Row>
 
         {/* Login Modal */}
         <LoginModal

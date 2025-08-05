@@ -284,7 +284,19 @@
         },
         "contactForPrice": "Liên hệ",
         "seatsLeft": "Còn {{count}} chỗ",
-        "imageCount": "ảnh"
+        "imageCount": "ảnh",
+        "filters": "Bộ lọc",
+        "destinations": "Điểm đến",
+        "priceRange": "Khoảng giá",
+        "availableOnly": "Chỉ hiển thị tour có sẵn",
+        "minRating": "Đánh giá tối thiểu",
+        "minCapacity": "Sức chứa tối thiểu",
+        "days": "ngày",
+        "flexible": "Linh hoạt",
+        "maxParticipants": "Số người tối đa",
+        "startDate": "Ngày khởi hành",
+        "person": "người",
+        "unavailable": "Không khả dụng"
     },
     "thingsToDo": {
         "pageTitle": "Khám phá Tây Ninh",
@@ -293,7 +305,8 @@
         "duration": "Thời gian",
         "price": "Giá",
         "rating": "Đánh giá",
-        "viewDetails": "Xem chi tiết"
+        "viewDetails": "Xem chi tiết",
+        "noToursFound": "Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm"
     },
     "thingsToDoDetail": {
         "tourNotFound": "Không tìm thấy tour",
