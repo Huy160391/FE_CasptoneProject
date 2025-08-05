@@ -8,6 +8,52 @@ import type { TourGuideApplication } from '@/types';
 export type { AdminBlogPost, SupportTicket, AdminSupportTicket } from '../types';
 
 class AdminService {
+    /**
+     * Lấy danh sách order sản phẩm
+     * @param params { pageIndex, pageSize, payOsOrderCode, status }
+     * @returns Danh sách order và thông tin phân trang
+     */
+    async getAllProductOrders(params: {
+        pageIndex?: number;
+        pageSize?: number;
+        payOsOrderCode?: string;
+        status?: string;
+    } = {}): Promise<{
+        orders: any[];
+        totalPages: number;
+        totalRecord: number;
+        pageIndex: number | null;
+        pageSize: number | null;
+        statusCode: number;
+        message: string | null;
+        success: boolean;
+    }> {
+        try {
+            const response = await axios.get('/Product/AllOrder', { params });
+            return {
+                orders: response.data.data || [],
+                totalPages: response.data.totalPages || 0,
+                totalRecord: response.data.totalRecord || 0,
+                pageIndex: response.data.pageIndex ?? null,
+                pageSize: response.data.pageSize ?? null,
+                statusCode: response.data.statusCode,
+                message: response.data.message ?? null,
+                success: response.data.success ?? false
+            };
+        } catch (error) {
+            console.error('Error fetching product orders:', error);
+            return {
+                orders: [],
+                totalPages: 0,
+                totalRecord: 0,
+                pageIndex: null,
+                pageSize: null,
+                statusCode: 500,
+                message: 'Error fetching product orders',
+                success: false
+            };
+        }
+    }
     // Lấy danh sách tour chờ duyệt
     async getAllTours({
         page = 0,
@@ -498,6 +544,17 @@ class AdminService {
     }
 
     // Specialty Shop Management
+    async getSpecialtyShopById(shopId: string): Promise<any> {
+        try {
+            const response = await axios.get(`/SpecialtyShop/${shopId}`);
+            return response.data.data || response.data;
+        } catch (error) {
+            console.error(`Error fetching shop ${shopId}:`, error);
+            this.handleError(error, 'Error fetching shop details');
+            return null;
+        }
+    }
+
     async getSpecialtyShops({
         pageIndex = 0,
         pageSize = 10,
