@@ -11,7 +11,6 @@ import {
   ReadOutlined,
   HomeOutlined,
   LogoutOutlined,
-  ShoppingCartOutlined,
   CustomerServiceOutlined,
   TeamOutlined,
   ShopOutlined
@@ -84,12 +83,11 @@ const AdminSidebar = () => {
           key: '/admin/withdrawal-requests',
           label: <Link to="/admin/withdrawal-requests">Quản lý rút tiền</Link>,
         },
+        {
+          key: '/admin/orders',
+          label: <Link to="/admin/orders">Quản lý đơn hàng</Link>,
+        },
       ],
-    },
-    {
-      key: '/admin/orders',
-      icon: <ShoppingCartOutlined />,
-      label: <Link to="/admin/orders">{t('admin.sidebar.orders')}</Link>,
     },
     {
       key: '/admin/tours',

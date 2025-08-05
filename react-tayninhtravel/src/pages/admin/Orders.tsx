@@ -1,29 +1,36 @@
-import { useState } from 'react'
-import { Table, Button, Input, Space, Tag, Modal, Select, DatePicker } from 'antd'
+import { useState, useEffect } from 'react'
+import { Table, Button, Input, Space, Tag, Modal, Select, Tooltip, Spin } from 'antd'
 import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { Key } from 'react'
 import './Orders.scss'
+import adminService from '@/services/adminService'
 
 const { Option } = Select
 
 interface OrderItem {
-  id: number
-  name: string
-  price: number
+  productId: string
+  productName: string
   quantity: number
+  unitPrice: number
+  imageUrl?: string | null
+  shopId: string
 }
 
 interface Order {
-  key: string
   id: string
-  customer: string
-  email: string
-  phone: string
-  date: string
-  total: number
-  status: 'completed' | 'processing' | 'cancelled'
-  items: OrderItem[]
+  userId: string
+  totalAmount: number
+  discountAmount: number
+  totalAfterDiscount: number
+  status: string
+  voucherCode?: string | null
+  payOsOrderCode: string
+  isChecked: boolean
+  checkedAt?: string | null
+  checkedByShopId?: string | null
+  createdAt: string
+  orderDetails: OrderItem[]
 }
 
 const Orders = () => {
@@ -31,136 +38,111 @@ const Orders = () => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(false)
+  const [shopInfoMap, setShopInfoMap] = useState<Record<string, any>>({})
 
-  // Mock data for orders
-  const orders: Order[] = [
-    {
-      key: '1',
-      id: 'ORD-001',
-      customer: 'Nguyễn Văn A',
-      email: 'nguyenvana@example.com',
-      phone: '0901234567',
-      date: '2023-05-15',
-      total: 1200000,
-      status: 'completed',
-      items: [
-        { id: 1, name: 'Nón lá Tây Ninh', price: 150000, quantity: 2 },
-        { id: 2, name: 'Áo thun Núi Bà Đen', price: 200000, quantity: 3 },
-        { id: 3, name: 'Tranh Tòa Thánh Cao Đài', price: 350000, quantity: 1 },
-      ],
-    },
-    {
-      key: '2',
-      id: 'ORD-002',
-      customer: 'Trần Thị B',
-      email: 'tranthib@example.com',
-      phone: '0912345678',
-      date: '2023-05-14',
-      total: 850000,
-      status: 'processing',
-      items: [
-        { id: 1, name: 'Nón lá Tây Ninh', price: 150000, quantity: 1 },
-        { id: 5, name: 'Trà Tây Ninh', price: 120000, quantity: 2 },
-        { id: 4, name: 'Túi xách thổ cẩm', price: 250000, quantity: 2 },
-      ],
-    },
-    {
-      key: '3',
-      id: 'ORD-003',
-      customer: 'Lê Văn C',
-      email: 'levanc@example.com',
-      phone: '0923456789',
-      date: '2023-05-14',
-      total: 2350000,
-      status: 'completed',
-      items: [
-        { id: 3, name: 'Tranh Tòa Thánh Cao Đài', price: 350000, quantity: 2 },
-        { id: 6, name: 'Mật ong rừng Tây Ninh', price: 180000, quantity: 3 },
-        { id: 2, name: 'Áo thun Núi Bà Đen', price: 200000, quantity: 5 },
-      ],
-    },
-    {
-      key: '4',
-      id: 'ORD-004',
-      customer: 'Phạm Thị D',
-      email: 'phamthid@example.com',
-      phone: '0934567890',
-      date: '2023-05-13',
-      total: 750000,
-      status: 'cancelled',
-      items: [
-        { id: 4, name: 'Túi xách thổ cẩm', price: 250000, quantity: 3 },
-      ],
-    },
-    {
-      key: '5',
-      id: 'ORD-005',
-      customer: 'Hoàng Văn E',
-      email: 'hoangvane@example.com',
-      phone: '0945678901',
-      date: '2023-05-12',
-      total: 1500000,
-      status: 'completed',
-      items: [
-        { id: 2, name: 'Áo thun Núi Bà Đen', price: 200000, quantity: 2 },
-        { id: 5, name: 'Trà Tây Ninh', price: 120000, quantity: 5 },
-        { id: 6, name: 'Mật ong rừng Tây Ninh', price: 180000, quantity: 3 },
-      ],
-    },
-  ]
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true)
+      try {
+        const res = await adminService.getAllProductOrders({})
+        const orderList: Order[] = res.orders || []
+        setOrders(orderList)
+
+        // Lấy danh sách shopId duy nhất từ tất cả orderDetails
+        const shopIds = Array.from(new Set(orderList.flatMap(order => order.orderDetails.map(item => item.shopId))))
+        // Lấy thông tin shop cho từng shopId
+        const shopInfoPromises = shopIds.map(async shopId => {
+          try {
+            const shopRes = await adminService.getSpecialtyShopById(shopId)
+            return { shopId, shop: shopRes }
+          } catch {
+            return { shopId, shop: null }
+          }
+        })
+        const shopInfos = await Promise.all(shopInfoPromises)
+        const shopMap: Record<string, any> = {}
+        shopInfos.forEach(({ shopId, shop }) => {
+          shopMap[shopId] = shop
+        })
+        setShopInfoMap(shopMap)
+      } catch (err) {
+        setOrders([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchOrders()
+  }, [])
 
   const columns: ColumnsType<Order> = [
     {
       title: 'Mã đơn hàng',
-      dataIndex: 'id',
-      key: 'id',
-    },
-    {
-      title: 'Khách hàng',
-      dataIndex: 'customer',
-      key: 'customer',
+      dataIndex: 'payOsOrderCode',
+      key: 'payOsOrderCode',
       filteredValue: searchText ? [searchText] : null,
       onFilter: (value: boolean | Key, record: Order) => {
         const searchValue = value.toString().toLowerCase()
         return (
-          record.customer.toLowerCase().includes(searchValue) ||
-          record.id.toLowerCase().includes(searchValue) ||
-          record.email.toLowerCase().includes(searchValue) ||
-          record.phone.includes(searchValue)
+          record.payOsOrderCode.toLowerCase().includes(searchValue) ||
+          record.id.toLowerCase().includes(searchValue)
         )
       },
     },
     {
+      title: 'Tên shop',
+      key: 'shopName',
+      render: (_: any, record: Order) => {
+        // Lấy shopId đầu tiên của order (giả sử mỗi đơn chỉ có 1 shop)
+        const shopId = record.orderDetails[0]?.shopId
+        const shop = shopInfoMap[shopId]
+        const shopName = shop?.name || 'N/A'
+        return shop ? (
+          <Tooltip title={
+            <div>
+              <div><strong>{shop.name}</strong></div>
+              <div>Địa chỉ: {shop.address || 'N/A'}</div>
+              <div>SĐT: {shop.phone || 'N/A'}</div>
+              <div>Email: {shop.email || 'N/A'}</div>
+            </div>
+          }>
+            <span style={{ cursor: 'pointer', color: '#1677ff', textDecoration: 'underline' }}>{shopName}</span>
+          </Tooltip>
+        ) : shopName
+      }
+    },
+    {
       title: 'Ngày đặt',
-      dataIndex: 'date',
-      key: 'date',
-      sorter: (a: Order, b: Order) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date: string) => new Date(date).toLocaleString('vi-VN'),
+      sorter: (a: Order, b: Order) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     },
     {
       title: 'Tổng tiền',
-      dataIndex: 'total',
-      key: 'total',
+      dataIndex: 'totalAfterDiscount',
+      key: 'totalAfterDiscount',
       render: (total: number) => `${total.toLocaleString()} ₫`,
-      sorter: (a: Order, b: Order) => a.total - b.total,
+      sorter: (a: Order, b: Order) => a.totalAfterDiscount - b.totalAfterDiscount,
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: Order['status']) => {
+      render: (status: string) => {
         let color = ''
         let text = ''
-
         switch (status) {
-          case 'completed':
+          case 'Paid':
             color = 'success'
             text = 'Hoàn thành'
             break
-          case 'processing':
+          case 'Pending':
             color = 'processing'
             text = 'Đang xử lý'
             break
-          case 'cancelled':
+          case 'Cancelled':
             color = 'error'
             text = 'Đã hủy'
             break
@@ -168,13 +150,12 @@ const Orders = () => {
             color = 'default'
             text = status
         }
-
         return <Tag className={`status-tag ${color}`}>{text}</Tag>
       },
       filters: [
-        { text: 'Hoàn thành', value: 'completed' },
-        { text: 'Đang xử lý', value: 'processing' },
-        { text: 'Đã hủy', value: 'cancelled' },
+        { text: 'Hoàn thành', value: 'Paid' },
+        { text: 'Đang xử lý', value: 'Pending' },
+        { text: 'Đã hủy', value: 'Cancelled' },
       ],
       onFilter: (value: boolean | Key, record: Order) => record.status === value,
     },
@@ -229,7 +210,7 @@ const Orders = () => {
   const handleDelete = (order: Order) => {
     Modal.confirm({
       title: 'Xác nhận xóa',
-      content: `Bạn có chắc chắn muốn xóa đơn hàng "${order.id}" không?`,
+      content: `Bạn có chắc chắn muốn xóa đơn hàng "${order.payOsOrderCode}" không?`,
       okText: 'Xóa',
       okType: 'danger',
       cancelText: 'Hủy',
@@ -258,7 +239,7 @@ const Orders = () => {
         <h1>Quản lý đơn hàng</h1>
         <div className="header-actions">
           <Input
-            placeholder="Tìm kiếm theo mã, tên khách hàng, email, số điện thoại"
+            placeholder="Tìm kiếm theo mã đơn hàng"
             prefix={<SearchOutlined />}
             onChange={e => handleSearch(e.target.value)}
             className="search-input"
@@ -267,17 +248,19 @@ const Orders = () => {
         </div>
       </div>
 
-      <Table
-        dataSource={orders}
-        columns={columns}
-        rowKey="id"
-        pagination={{ pageSize: 10 }}
-        className="orders-table"
-      />
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        <Table
+          dataSource={orders}
+          columns={columns}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+          className="orders-table"
+        />
+      </Spin>
 
       {/* View Order Modal */}
       <Modal
-        title={`Chi tiết đơn hàng ${selectedOrder?.id}`}
+        title={`Chi tiết đơn hàng ${selectedOrder?.payOsOrderCode}`}
         open={isViewModalVisible}
         onCancel={handleViewModalClose}
         footer={[
@@ -291,21 +274,20 @@ const Orders = () => {
           <div className="order-details">
             <div className="order-info">
               <div className="info-section">
-                <h3>Thông tin khách hàng</h3>
-                <p><strong>Tên:</strong> {selectedOrder.customer}</p>
-                <p><strong>Email:</strong> {selectedOrder.email}</p>
-                <p><strong>Số điện thoại:</strong> {selectedOrder.phone}</p>
-              </div>
-
-              <div className="info-section">
                 <h3>Thông tin đơn hàng</h3>
-                <p><strong>Mã đơn hàng:</strong> {selectedOrder.id}</p>
-                <p><strong>Ngày đặt:</strong> {selectedOrder.date}</p>
+                <p><strong>Mã đơn hàng:</strong> {selectedOrder.payOsOrderCode}</p>
+                <p><strong>Ngày đặt:</strong> {new Date(selectedOrder.createdAt).toLocaleString('vi-VN')}</p>
                 <p><strong>Trạng thái:</strong> {
-                  selectedOrder.status === 'completed' ? 'Hoàn thành' :
-                    selectedOrder.status === 'processing' ? 'Đang xử lý' :
-                      selectedOrder.status === 'cancelled' ? 'Đã hủy' : selectedOrder.status
+                  selectedOrder.status === 'Paid' ? 'Hoàn thành' :
+                    selectedOrder.status === 'Pending' ? 'Đang xử lý' :
+                      selectedOrder.status === 'Cancelled' ? 'Đã hủy' : selectedOrder.status
                 }</p>
+                <p><strong>Tổng tiền gốc:</strong> {selectedOrder.totalAmount.toLocaleString()} ₫</p>
+                <p><strong>Giảm giá:</strong> {selectedOrder.discountAmount.toLocaleString()} ₫</p>
+                <p><strong>Tổng tiền cuối:</strong> {selectedOrder.totalAfterDiscount.toLocaleString()} ₫</p>
+                {selectedOrder.voucherCode && (
+                  <p><strong>Mã voucher:</strong> {selectedOrder.voucherCode}</p>
+                )}
               </div>
             </div>
 
@@ -321,21 +303,15 @@ const Orders = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedOrder.items.map((item: any) => (
-                    <tr key={item.id}>
-                      <td>{item.name}</td>
-                      <td>{item.price.toLocaleString()} ₫</td>
+                  {selectedOrder.orderDetails.map((item: OrderItem) => (
+                    <tr key={item.productId}>
+                      <td>{item.productName}</td>
+                      <td>{item.unitPrice.toLocaleString()} ₫</td>
                       <td>{item.quantity}</td>
-                      <td>{(item.price * item.quantity).toLocaleString()} ₫</td>
+                      <td>{(item.unitPrice * item.quantity).toLocaleString()} ₫</td>
                     </tr>
                   ))}
                 </tbody>
-                <tfoot>
-                  <tr>
-                    <td colSpan={3}><strong>Tổng cộng</strong></td>
-                    <td><strong>{selectedOrder.total.toLocaleString()} ₫</strong></td>
-                  </tr>
-                </tfoot>
               </table>
             </div>
           </div>
@@ -344,7 +320,7 @@ const Orders = () => {
 
       {/* Edit Order Modal */}
       <Modal
-        title={`Cập nhật đơn hàng ${selectedOrder?.id}`}
+        title={`Cập nhật đơn hàng ${selectedOrder?.payOsOrderCode}`}
         open={isEditModalVisible}
         onCancel={handleEditModalClose}
         onOk={handleEditModalClose}
@@ -360,18 +336,10 @@ const Orders = () => {
                 style={{ width: '100%' }}
                 onChange={handleStatusChange}
               >
-                <Option value="completed">Hoàn thành</Option>
-                <Option value="processing">Đang xử lý</Option>
-                <Option value="cancelled">Đã hủy</Option>
+                <Option value="Paid">Hoàn thành</Option>
+                <Option value="Pending">Đang xử lý</Option>
+                <Option value="Cancelled">Đã hủy</Option>
               </Select>
-            </div>
-
-            <div className="form-item">
-              <label>Ngày đặt:</label>
-              <DatePicker
-                defaultValue={null}
-                style={{ width: '100%' }}
-              />
             </div>
 
             <div className="form-item">

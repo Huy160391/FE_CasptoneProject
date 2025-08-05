@@ -84,6 +84,15 @@ const TourPaymentSuccess: React.FC = () => {
                             if (enhancedResult.success) {
                                 console.log('Enhanced tour payment processing successful');
                                 setBookingInfo(transactionResponse.data.tourBookingInfo);
+
+                                // ALWAYS call legacy handleTourBookingPaymentSuccess for business logic
+                                console.log('Calling legacy handleTourBookingPaymentSuccess for business logic...');
+                                const callbackRequest = createPayOsCallbackRequest({
+                                    ...params,
+                                    status: 'PAID'
+                                });
+                                await handleTourBookingPaymentSuccess(callbackRequest);
+
                                 return; // Success, exit early
                             }
                         }
@@ -149,9 +158,9 @@ const TourPaymentSuccess: React.FC = () => {
 
     const handleViewBookings = () => {
         if (isAuthenticated) {
-            navigate('/my-bookings');
+            navigate('/booking-history');
         } else {
-            navigate('/login', { state: { from: '/my-bookings' } });
+            navigate('/login', { state: { from: '/booking-history' } });
         }
     };
 

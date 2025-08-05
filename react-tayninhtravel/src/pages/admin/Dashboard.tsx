@@ -10,7 +10,7 @@ import {
   BookOutlined,
   ArrowUpOutlined
 } from '@ant-design/icons'
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { adminService } from '@/services/adminService'
 import { userService } from '@/services/userService'
 import dayjs, { Dayjs } from 'dayjs'
@@ -305,60 +305,63 @@ const Dashboard = () => {
                 <p style={{ marginTop: '16px', color: '#666' }}>Đang tải thông tin cửa hàng...</p>
               </div>
             ) : revenueByShopData.length > 0 ? (
-              <div style={{ height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={revenueByShopData.slice(0, 5)} // Top 5 shops
-                    layout="horizontal"
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis
-                      dataKey="shopName"
-                      type="category"
-                      width={100}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      formatter={(value) => [
-                        `${Number(value).toLocaleString()} ₫`,
-                        'Doanh thu'
-                      ]}
-                      labelFormatter={(label) => `${label}`}
-                      contentStyle={{
-                        backgroundColor: '#fff',
-                        border: '1px solid #d9d9d9',
-                        borderRadius: '6px'
-                      }}
-                    />
-                    <Bar dataKey="revenue" fill="#1677ff" />
-                  </BarChart>
-                </ResponsiveContainer>
-
-                {/* Show shop details below chart */}
-                <div style={{ marginTop: '16px', maxHeight: '120px', overflowY: 'auto' }}>
-                  {revenueByShopData.slice(0, 3).map((shop, index) => (
-                    <div key={shop.shopId} style={{
-                      padding: '8px 0',
-                      borderBottom: index < 2 ? '1px solid #f0f0f0' : 'none',
-                      fontSize: '12px'
-                    }}>
-                      <div style={{ fontWeight: 'bold', color: '#1677ff' }}>
-                        #{index + 1} {shop.shopName}
+              <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                {revenueByShopData.slice(0, 8).map((shop, index) => (
+                  <div key={shop.shopId} style={{
+                    padding: '12px 0',
+                    borderBottom: index < revenueByShopData.slice(0, 8).length - 1 ? '1px solid #f0f0f0' : 'none',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        fontWeight: 'bold',
+                        color: '#1677ff',
+                        fontSize: '14px',
+                        marginBottom: '4px'
+                      }}>
+                        #{index + 1} {shop.shopName.length > 25 ? shop.shopName.substring(0, 25) + '...' : shop.shopName}
                       </div>
-                      <div style={{ color: '#666', marginTop: '2px' }}>
-                        {shop.shopType && <span>{shop.shopType} • </span>}
-                        {Number(shop.revenue).toLocaleString()} ₫
-                      </div>
+                      {shop.shopType && (
+                        <div style={{
+                          color: '#666',
+                          fontSize: '12px',
+                          marginBottom: '2px'
+                        }}>
+                          {shop.shopType}
+                        </div>
+                      )}
                       {shop.location && (
-                        <div style={{ color: '#999', fontSize: '11px', marginTop: '1px' }}>
+                        <div style={{
+                          color: '#999',
+                          fontSize: '11px'
+                        }}>
                           📍 {shop.location.length > 30 ? shop.location.substring(0, 30) + '...' : shop.location}
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
+                    <div style={{
+                      textAlign: 'right',
+                      fontWeight: 'bold',
+                      color: '#52c41a',
+                      fontSize: '14px'
+                    }}>
+                      {Number(shop.revenue).toLocaleString()} ₫
+                    </div>
+                  </div>
+                ))}
+                {revenueByShopData.length > 8 && (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '8px 0',
+                    color: '#666',
+                    fontSize: '12px',
+                    fontStyle: 'italic'
+                  }}>
+                    +{revenueByShopData.length - 8} cửa hàng khác
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px 0', color: '#666' }}>

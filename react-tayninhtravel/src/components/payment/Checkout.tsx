@@ -85,7 +85,7 @@ interface Voucher {
 const Checkout = () => {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const { items, getTotalItems, getTotalPrice, clearCart } = useCartStore()
+    const { items, getTotalItems, getTotalPrice } = useCartStore()
     const { isAuthenticated, user } = useAuthStore()
     const { createPaymentLink } = useEnhancedPayment()
     const { isDarkMode } = useThemeStore()
@@ -326,7 +326,7 @@ const Checkout = () => {
                     description: `Product Order - ${res.orderId}`
                 });
                 // createPaymentLink automatically redirects to PayOS
-                clearCart()
+                // clearCart()
             } else {
                 throw new Error('Failed to create order');
             }
