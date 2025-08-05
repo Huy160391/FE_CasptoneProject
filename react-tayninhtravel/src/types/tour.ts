@@ -576,31 +576,22 @@ export const getTourDetailsStatusText = (status: TourDetailsStatus | number | st
     const statusValue = typeof status === 'number' ? status : status;
     switch (statusValue) {
         case TourDetailsStatus.Pending:
-        case 0:
             return 'Chờ duyệt';
         case TourDetailsStatus.Approved:
-        case 1:
             return 'Đã được duyệt';
         case TourDetailsStatus.Rejected:
-        case 2:
             return 'Bị từ chối';
         case TourDetailsStatus.Suspended:
-        case 3:
             return 'Tạm ngưng';
         case TourDetailsStatus.AwaitingGuideAssignment:
-        case 4:
             return 'Chờ phân công hướng dẫn viên';
         case TourDetailsStatus.Cancelled:
-        case 5:
             return 'Đã hủy';
         case TourDetailsStatus.AwaitingAdminApproval:
-        case 6:
             return 'Chờ admin duyệt';
         case TourDetailsStatus.WaitToPublic:
-        case 7:
             return 'Chờ mở bán vé';
         case TourDetailsStatus.Public:
-        case 8:
             return 'Đã được public, khách hàng có thể booking';
         default:
             return 'Không xác định';
@@ -637,25 +628,16 @@ export const getTourDetailsStatusColor = (status: TourDetailsStatus | number | s
         case TourDetailsStatus.Pending:
         case TourDetailsStatus.AwaitingAdminApproval:
         case TourDetailsStatus.WaitToPublic:
-        case 0:
-        case 6:
-        case 7:
             return 'orange';
         case TourDetailsStatus.Approved:
         case TourDetailsStatus.Public:
-        case 1:
-        case 8:
             return 'green';
         case TourDetailsStatus.Rejected:
         case TourDetailsStatus.Cancelled:
-        case 2:
-        case 5:
             return 'red';
         case TourDetailsStatus.Suspended:
-        case 3:
             return 'volcano';
         case TourDetailsStatus.AwaitingGuideAssignment:
-        case 4:
             return 'blue';
         default:
             return 'default';
