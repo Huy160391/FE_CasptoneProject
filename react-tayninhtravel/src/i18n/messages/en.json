@@ -226,7 +226,19 @@
         },
         "contactForPrice": "Contact",
         "seatsLeft": "{{count}} seats left",
-        "imageCount": "images"
+        "imageCount": "images",
+        "filters": "Filters",
+        "destinations": "Destinations",
+        "priceRange": "Price Range",
+        "availableOnly": "Available only",
+        "minRating": "Minimum Rating",
+        "minCapacity": "Minimum Capacity",
+        "days": "days",
+        "flexible": "Flexible",
+        "maxParticipants": "Max participants",
+        "startDate": "Start date",
+        "person": "person",
+        "unavailable": "Unavailable"
     },
     "thingsToDo": {
         "pageTitle": "Explore Tay Ninh",
@@ -235,7 +247,8 @@
         "duration": "Duration",
         "price": "Price",
         "rating": "Rating",
-        "viewDetails": "View Details"
+        "viewDetails": "View Details",
+        "noToursFound": "No tours found matching your search criteria"
     },
     "thingsToDoDetail": {
         "tourNotFound": "Tour not found",
