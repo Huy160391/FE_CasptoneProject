@@ -145,11 +145,32 @@ export const parsePayOsCallbackParams = (url: string): { orderId?: string; order
 };
 
 /**
+ * Normalize order code to TNDT format if needed
+ */
+const normalizeOrderCodeForCallback = (orderCode: string): string => {
+    // If already has TNDT prefix, return as is
+    if (orderCode.startsWith('TNDT')) {
+        return orderCode;
+    }
+
+    // If numeric only, add TNDT prefix
+    if (/^\d+$/.test(orderCode)) {
+        return `TNDT${orderCode}`;
+    }
+
+    // Return as is for other formats
+    return orderCode;
+};
+
+/**
  * Tạo PayOS callback request từ URL parameters
  */
 export const createPayOsCallbackRequest = (params: { orderId?: string; orderCode?: string; status?: string }): PaymentCallbackRequest => {
+    const rawOrderCode = params.orderCode || params.orderId || '';
+    const normalizedOrderCode = normalizeOrderCodeForCallback(rawOrderCode);
+
     return {
-        orderCode: params.orderCode || params.orderId || '',
+        orderCode: normalizedOrderCode,
         status: params.status || 'PAID',
         transactionDateTime: new Date().toISOString()
     };
