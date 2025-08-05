@@ -439,6 +439,175 @@ class AdminService {
         const response = await axios.post(`SpecialtyShopApplication/${applicationId}/reject`, { rejectionReason: reason });
         return response.data;
     }
+
+    // Dashboard Statistics
+    async getDashboardStats(year: number, month: number): Promise<{
+        totalAccounts: number;
+        newAccountsThisMonth: number;
+        bookingsThisMonth: number;
+        ordersThisMonth: number;
+        totalRevenue: number;
+        withdrawRequestsTotal: number;
+        withdrawRequestsApprove: number;
+        newTourGuidesThisMonth: number;
+        newShopsThisMonth: number;
+        newPostsThisMonth: number;
+        revenueByShop: any[];
+    }> {
+        try {
+            const params = {
+                year,
+                month
+            };
+
+            const response = await axios.get('/Admin/Dashboard', { params });
+
+            // Validate and return with default values if needed
+            return {
+                totalAccounts: response.data.totalAccounts || 0,
+                newAccountsThisMonth: response.data.newAccountsThisMonth || 0,
+                bookingsThisMonth: response.data.bookingsThisMonth || 0,
+                ordersThisMonth: response.data.ordersThisMonth || 0,
+                totalRevenue: response.data.totalRevenue || 0,
+                withdrawRequestsTotal: response.data.withdrawRequestsTotal || 0,
+                withdrawRequestsApprove: response.data.withdrawRequestsApprove || 0,
+                newTourGuidesThisMonth: response.data.newTourGuidesThisMonth || 0,
+                newShopsThisMonth: response.data.newShopsThisMonth || 0,
+                newPostsThisMonth: response.data.newPostsThisMonth || 0,
+                revenueByShop: response.data.revenueByShop || []
+            };
+        } catch (error) {
+            console.error('Error fetching dashboard stats:', error);
+            this.handleError(error, 'Error fetching dashboard statistics');
+
+            // Return default values on error
+            return {
+                totalAccounts: 0,
+                newAccountsThisMonth: 0,
+                bookingsThisMonth: 0,
+                ordersThisMonth: 0,
+                totalRevenue: 0,
+                withdrawRequestsTotal: 0,
+                withdrawRequestsApprove: 0,
+                newTourGuidesThisMonth: 0,
+                newShopsThisMonth: 0,
+                newPostsThisMonth: 0,
+                revenueByShop: []
+            };
+        }
+    }
+
+    // Specialty Shop Management
+    async getSpecialtyShops({
+        pageIndex = 0,
+        pageSize = 10,
+        includeInactive = false,
+        searchTerm = ''
+    }: {
+        pageIndex?: number;
+        pageSize?: number;
+        includeInactive?: boolean;
+        searchTerm?: string;
+    } = {}): Promise<{
+        shops: any[];
+        totalCount: number;
+        pageIndex: number;
+        pageSize: number;
+        isSuccess: boolean;
+        message: string;
+    }> {
+        try {
+            const params: any = {
+                pageIndex,
+                pageSize,
+                includeInactive
+            };
+
+            if (searchTerm) {
+                params.searchTerm = searchTerm;
+            }
+
+            const response = await axios.get<{
+                data: any[];
+                isSuccess: boolean;
+                statusCode: number;
+                message: string;
+                success: boolean;
+                validationErrors: any[];
+            }>('/SpecialtyShop', { params });
+
+            // Validate response structure
+            if (!response.data || typeof response.data !== 'object') {
+                throw new Error('Invalid response format from server');
+            }
+
+            const shops = Array.isArray(response.data.data) ? response.data.data : [];
+
+            return {
+                shops: shops,
+                totalCount: shops.length, // API might not provide total count, using array length
+                pageIndex: pageIndex,
+                pageSize: pageSize,
+                isSuccess: response.data.isSuccess || false,
+                message: response.data.message || 'Retrieved shops successfully'
+            };
+
+        } catch (error) {
+            console.error('Error fetching specialty shops:', error);
+            this.handleError(error, 'Error fetching specialty shops');
+
+            // Return default values on error
+            return {
+                shops: [],
+                totalCount: 0,
+                pageIndex: pageIndex || 0,
+                pageSize: pageSize || 10,
+                isSuccess: false,
+                message: 'Failed to fetch shops'
+            };
+        }
+    }
+
+    // Tour Guide Management
+    async getTourGuides(params: {
+        pageIndex?: number;
+        pageSize?: number;
+        includeInactive?: boolean;
+        searchTerm?: string;
+    } = {}) {
+        try {
+            const {
+                pageIndex = 0,
+                pageSize = 10,
+                includeInactive = false,
+                searchTerm = ''
+            } = params;
+
+            const queryParams = new URLSearchParams({
+                pageIndex: pageIndex.toString(),
+                pageSize: pageSize.toString(),
+                includeInactive: includeInactive.toString(),
+                ...(searchTerm && { searchTerm })
+            });
+
+            const response = await axios.get(`/Account/guides?${queryParams}`);
+
+            return {
+                isSuccess: true,
+                tourGuides: response.data.data || response.data || [],
+                totalCount: response.data.totalCount || response.data.length || 0,
+                message: 'Lấy danh sách hướng dẫn viên thành công'
+            };
+        } catch (error: any) {
+            console.error('Error fetching tour guides:', error);
+            return {
+                isSuccess: false,
+                tourGuides: [],
+                totalCount: 0,
+                message: error?.response?.data?.message || 'Không thể lấy danh sách hướng dẫn viên'
+            };
+        }
+    }
 }
 
 export const adminService = new AdminService();

@@ -173,8 +173,46 @@ const MyBlogs = () => {
         dataIndex: 'updatedAt',
         key: 'updatedAt',
         width: 130,
-        render: (date: string) => new Date(date).toLocaleDateString(),
-        sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
+        render: (date: any) => {
+            // Handle different date types safely
+            let dateString = '';
+
+            if (date instanceof Date) {
+                dateString = date.toISOString();
+            } else if (typeof date === 'string') {
+                dateString = date;
+            } else if (date && typeof date === 'object') {
+                dateString = date.toString();
+            } else {
+                return 'N/A';
+            }
+
+            // Extract date part and format as dd/MM/yyyy
+            if (!dateString || !dateString.includes('T')) {
+                return 'N/A';
+            }
+
+            const dateOnly = dateString.split('T')[0]; // Get "2025-07-30"
+            const dateParts = dateOnly.split('-'); // ["2025", "07", "30"]
+
+            if (dateParts.length !== 3) {
+                return dateString;
+            }
+
+            return `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // "30/07/2025"
+        },
+        sorter: (a, b) => {
+            const getDateString = (date: any) => {
+                if (date instanceof Date) return date.toISOString();
+                if (typeof date === 'string') return date;
+                if (date && typeof date === 'object') return date.toString();
+                return '';
+            };
+
+            const dateA = getDateString(a.updatedAt).split('T')[0];
+            const dateB = getDateString(b.updatedAt).split('T')[0];
+            return dateA.localeCompare(dateB);
+        },
     }, {
         title: t('blogger.myBlogs.table.actions'),
         key: 'actions',

@@ -8,6 +8,8 @@ import Blogs from '@/pages/admin/Blogs';
 import CVManagement from '@/pages/admin/CVManagement';
 import SupportTickets from '@/pages/admin/SupportTickets';
 import ShopRegistrationManagement from '@/pages/admin/ShopRegistrationManagement';
+import ShopManagement from '@/pages/admin/ShopManagement';
+import TourGuideManagement from '@/pages/admin/TourGuideManagement';
 import { AdminWithdrawalManagement } from '@/components/admin';
 
 export const adminRoutes: RouteObject[] = [
@@ -20,6 +22,26 @@ export const adminRoutes: RouteObject[] = [
             }, {
                 path: 'users',
                 element: <UserManagement />,
+            },
+            {
+                path: 'tour-guides',
+                element: <TourGuideManagement />,
+            },
+            {
+                path: 'CVManagement',
+                element: <CVManagement />,
+            },
+            {
+                path: 'shops',
+                element: <ShopManagement />,
+            },
+            {
+                path: 'shop-registrations',
+                element: <ShopRegistrationManagement />,
+            },
+            {
+                path: 'withdrawal-requests',
+                element: <AdminWithdrawalManagement />,
             },
             {
                 path: 'orders',
@@ -35,21 +57,10 @@ export const adminRoutes: RouteObject[] = [
             }, {
                 path: 'blogs',
                 element: <Blogs />,
-            }, {
-                path: 'CVManagement',
-                element: <CVManagement />,
             },
             {
                 path: 'support-tickets',
                 element: <SupportTickets />,
-            },
-            {
-                path: 'shop-registrations',
-                element: <ShopRegistrationManagement />,
-            },
-            {
-                path: 'withdrawal-requests',
-                element: <AdminWithdrawalManagement />,
             },
         ],
     },
