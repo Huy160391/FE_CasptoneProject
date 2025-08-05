@@ -2,6 +2,10 @@ import { RouteObject } from 'react-router-dom';
 import TourGuideDashboard from '@/pages/tourguide/TourGuideDashboard';
 import TourGuideInvitationList from '@/pages/tourguide/TourGuideInvitationList';
 import TourGuideSchedule from '@/pages/tourguide/TourGuideSchedule';
+import CheckInScreen from '@/components/tourguide/CheckInScreen';
+import TimelineProgress from '@/components/tourguide/TimelineProgress';
+import IncidentReport from '@/components/tourguide/IncidentReport';
+import GuestNotification from '@/components/tourguide/GuestNotification';
 
 
 export const tourguideRoutes: RouteObject[] = [
@@ -19,6 +23,22 @@ export const tourguideRoutes: RouteObject[] = [
             {
                 path: 'schedule',
                 element: <TourGuideSchedule />,
+            },
+            {
+                path: 'checkin/:tourId',
+                element: <CheckInScreen />,
+            },
+            {
+                path: 'timeline/:tourId',
+                element: <TimelineProgress />,
+            },
+            {
+                path: 'incident-report',
+                element: <IncidentReport />,
+            },
+            {
+                path: 'guest-notification/:tourId',
+                element: <GuestNotification />,
             },
 
             {

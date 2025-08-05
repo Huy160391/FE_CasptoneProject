@@ -316,26 +316,13 @@ const BookingPage: React.FC = () => {
                 console.log('Using Enhanced Payment System for tour booking');
 
                 if (response.data?.bookingId && response.data?.finalPrice) {
-                    try {
-                        await createPaymentLink({
-                            tourBookingId: response.data.bookingId,
-                            amount: response.data.finalPrice,
-                            description: `Tour Booking - ${response.data.bookingCode || response.data.bookingId}`
-                        });
-                        // createPaymentLink automatically redirects to PayOS
-                    } catch (enhancedError) {
-                        console.error('Enhanced payment failed:', enhancedError);
-                        console.log('Fallback to legacy payment URL from booking API');
-
-                        // Fallback to legacy payment URL
-                        if (response.data?.paymentUrl) {
-                            setTimeout(() => {
-                                redirectToPayOsPayment(response.data!.paymentUrl!);
-                            }, 1500);
-                        } else {
-                            message.error('Không thể tạo thanh toán, vui lòng thử lại');
-                        }
-                    }
+                    // Use Enhanced Payment System only
+                    await createPaymentLink({
+                        tourBookingId: response.data.bookingId,
+                        amount: response.data.finalPrice,
+                        description: `Tour Booking - ${response.data.bookingCode || response.data.bookingId}`
+                    });
+                    // createPaymentLink automatically redirects to PayOS
                 } else {
                     console.error('Missing booking ID or price for enhanced payment');
                     console.log('Debug - bookingId:', response.data?.bookingId, 'finalPrice from API:', response.data?.finalPrice, 'priceCalculation:', priceCalculation?.finalPrice);

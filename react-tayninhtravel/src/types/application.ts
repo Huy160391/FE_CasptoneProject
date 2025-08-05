@@ -105,13 +105,10 @@ export interface ShopApplicationForm {
 export const getTourGuideApplicationStatusText = (status: string): string => {
     switch (status) {
         case TourGuideApplicationStatus.PENDING:
-        case "Pending":
             return 'Chờ duyệt';
         case TourGuideApplicationStatus.APPROVED:
-        case "Approved":
             return 'Đã duyệt';
         case TourGuideApplicationStatus.REJECTED:
-        case "Rejected":
             return 'Đã từ chối';
         default:
             return status || 'Không xác định';
@@ -121,13 +118,10 @@ export const getTourGuideApplicationStatusText = (status: string): string => {
 export const getTourGuideApplicationStatusColor = (status: string): string => {
     switch (status) {
         case TourGuideApplicationStatus.PENDING:
-        case "Pending":
             return 'gold';
         case TourGuideApplicationStatus.APPROVED:
-        case "Approved":
             return 'green';
         case TourGuideApplicationStatus.REJECTED:
-        case "Rejected":
             return 'red';
         default:
             return 'default';
