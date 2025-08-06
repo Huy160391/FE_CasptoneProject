@@ -780,19 +780,22 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                         {renderSlotsTab()}
                     </TabPane>
 
-                    <TabPane
-                        tab={
-                            <span>
-                                <UserOutlined />
-                                Hướng dẫn viên ({invitations?.statistics.totalInvitations || 0})
-                                {(invitations?.statistics?.acceptedCount || 0) > 0 &&
-                                    <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
-                            </span>
-                        }
-                        key="invitations"
-                    >
-                        {renderInvitationsTab()}
-                    </TabPane>
+                    {/* Chỉ hiển thị tab Hướng dẫn viên khi tour không ở trạng thái Pending */}
+                    {tourDetails && mapStringToStatusEnum(tourDetails.status) !== TourDetailsStatus.Pending && (
+                        <TabPane
+                            tab={
+                                <span>
+                                    <UserOutlined />
+                                    Hướng dẫn viên ({invitations?.statistics.totalInvitations || 0})
+                                    {(invitations?.statistics?.acceptedCount || 0) > 0 &&
+                                        <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
+                                </span>
+                            }
+                            key="invitations"
+                        >
+                            {renderInvitationsTab()}
+                        </TabPane>
+                    )}
                 </Tabs>
             </Spin>
 

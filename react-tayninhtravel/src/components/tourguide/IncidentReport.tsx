@@ -109,16 +109,33 @@ const IncidentReport: React.FC = () => {
         }
     };
 
-    // Handle image upload (mock implementation)
-    const handleImageUpload = (info: any) => {
-        // In real implementation, this would upload to a file service
-        // For now, we'll just simulate successful upload
-        if (info.file.status === 'done') {
-            const mockUrl = `https://example.com/uploads/${info.file.name}`;
-            setImageUrls(prev => [...prev, mockUrl]);
-            notification.success({
-                message: 'Upload thành công',
-                description: `Đã upload ${info.file.name}`,
+    // Handle image upload (real implementation)
+    const handleImageUpload = async (info: any) => {
+        const { file } = info;
+
+        if (file.status === 'uploading') {
+            return;
+        }
+
+        try {
+            // Use the existing image upload service
+            const { publicService } = await import('@/services/publicService');
+            const uploadedUrl = await publicService.uploadImage(file.originFileObj || file);
+
+            if (uploadedUrl) {
+                setImageUrls(prev => [...prev, uploadedUrl]);
+                notification.success({
+                    message: 'Upload thành công',
+                    description: `Đã upload ${file.name}`,
+                });
+            } else {
+                throw new Error('Upload failed');
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            notification.error({
+                message: 'Lỗi upload',
+                description: `Không thể upload ${file.name}. Vui lòng thử lại.`,
             });
         }
     };
@@ -254,8 +271,12 @@ const IncidentReport: React.FC = () => {
                             name="images"
                             listType="picture-card"
                             multiple
-                            beforeUpload={() => false} // Prevent auto upload
-                            onChange={handleImageUpload}
+                            accept="image/*"
+                            customRequest={({ file, onSuccess }) => {
+                                // Handle upload manually
+                                handleImageUpload({ file });
+                                onSuccess?.('ok');
+                            }}
                             showUploadList={false}
                         >
                             <div>

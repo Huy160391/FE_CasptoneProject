@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Card,
@@ -13,7 +13,8 @@ import {
     Progress,
     Alert,
     Divider,
-    Tag
+    Tag,
+    Tabs
 } from 'antd';
 import {
     QrcodeOutlined,
@@ -23,7 +24,9 @@ import {
     PhoneOutlined,
     TeamOutlined,
     ArrowLeftOutlined,
-    ScanOutlined
+    ScanOutlined,
+    CameraOutlined,
+    StopOutlined
 } from '@ant-design/icons';
 import { getTourBookings, checkInGuest, TourBooking } from '@/services/tourguideService';
 import { getTourOperationByDetailsId } from '@/services/tourcompanyService';
@@ -34,7 +37,8 @@ const { TextArea } = Input;
 const CheckInScreen: React.FC = () => {
     const { tourId } = useParams<{ tourId: string }>();
     const navigate = useNavigate();
-    
+    const videoRef = useRef<HTMLVideoElement>(null);
+
     const [bookings, setBookings] = useState<TourBooking[]>([]);
     const [loading, setLoading] = useState(false);
     const [checkingIn, setCheckingIn] = useState<string | null>(null);
@@ -42,6 +46,8 @@ const CheckInScreen: React.FC = () => {
     const [selectedBooking, setSelectedBooking] = useState<TourBooking | null>(null);
     const [qrCodeInput, setQrCodeInput] = useState('');
     const [notes, setNotes] = useState('');
+    const [cameraActive, setCameraActive] = useState(false);
+    const [scannerMode, setScannerMode] = useState<'manual' | 'camera'>('manual');
 
     // Load tour bookings
     const loadBookings = async () => {
@@ -125,12 +131,44 @@ const CheckInScreen: React.FC = () => {
         }
     };
 
+    // Start camera for QR scanning
+    const startCamera = async () => {
+        try {
+            setCameraActive(true);
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' } // Use back camera on mobile
+            });
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                videoRef.current.play();
+            }
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            notification.error({
+                message: 'Lỗi camera',
+                description: 'Không thể truy cập camera. Vui lòng sử dụng chế độ nhập thủ công.',
+            });
+            setScannerMode('manual');
+        }
+    };
+
+    // Stop camera
+    const stopCamera = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const stream = videoRef.current.srcObject as MediaStream;
+            stream.getTracks().forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+        }
+        setCameraActive(false);
+    };
+
     // Open QR scanner modal
     const openQrModal = (booking: TourBooking) => {
         setSelectedBooking(booking);
         setQrModalVisible(true);
         setQrCodeInput('');
         setNotes('');
+        setScannerMode('manual');
     };
 
     // Manual check-in without QR
@@ -283,14 +321,19 @@ const CheckInScreen: React.FC = () => {
             <Modal
                 title="Quét QR Code"
                 open={qrModalVisible}
+                width={600}
                 onCancel={() => {
+                    stopCamera();
                     setQrModalVisible(false);
                     setSelectedBooking(null);
                     setQrCodeInput('');
                     setNotes('');
                 }}
                 footer={[
-                    <Button key="cancel" onClick={() => setQrModalVisible(false)}>
+                    <Button key="cancel" onClick={() => {
+                        stopCamera();
+                        setQrModalVisible(false);
+                    }}>
                         Hủy
                     </Button>,
                     <Button
@@ -310,19 +353,93 @@ const CheckInScreen: React.FC = () => {
                             <Text strong>Khách hàng: </Text>
                             <Text>{selectedBooking.contactName || selectedBooking.customerName}</Text>
                         </div>
-                        
-                        <div style={{ marginBottom: '16px' }}>
-                            <Text strong>Mã QR Code:</Text>
-                            <Input
-                                placeholder="Nhập mã QR hoặc quét QR code"
-                                value={qrCodeInput}
-                                onChange={(e) => setQrCodeInput(e.target.value)}
-                                prefix={<ScanOutlined />}
-                                style={{ marginTop: '8px' }}
-                            />
-                        </div>
-                        
-                        <div>
+
+                        {/* Scanner Mode Tabs */}
+                        <Tabs
+                            activeKey={scannerMode}
+                            onChange={(key) => {
+                                setScannerMode(key as 'manual' | 'camera');
+                                if (key === 'camera') {
+                                    startCamera();
+                                } else {
+                                    stopCamera();
+                                }
+                            }}
+                            items={[
+                                {
+                                    key: 'manual',
+                                    label: (
+                                        <span>
+                                            <ScanOutlined /> Nhập thủ công
+                                        </span>
+                                    ),
+                                    children: (
+                                        <div>
+                                            <Text strong>Mã QR Code:</Text>
+                                            <Input
+                                                placeholder="Nhập mã QR code"
+                                                value={qrCodeInput}
+                                                onChange={(e) => setQrCodeInput(e.target.value)}
+                                                prefix={<ScanOutlined />}
+                                                style={{ marginTop: '8px' }}
+                                            />
+                                        </div>
+                                    )
+                                },
+                                {
+                                    key: 'camera',
+                                    label: (
+                                        <span>
+                                            <CameraOutlined /> Quét camera
+                                        </span>
+                                    ),
+                                    children: (
+                                        <div style={{ textAlign: 'center' }}>
+                                            <video
+                                                ref={videoRef}
+                                                style={{
+                                                    width: '100%',
+                                                    maxWidth: '400px',
+                                                    height: '300px',
+                                                    border: '2px solid #d9d9d9',
+                                                    borderRadius: '8px',
+                                                    backgroundColor: '#f5f5f5'
+                                                }}
+                                                playsInline
+                                            />
+                                            <div style={{ marginTop: '16px' }}>
+                                                <Space>
+                                                    <Button
+                                                        icon={cameraActive ? <StopOutlined /> : <CameraOutlined />}
+                                                        onClick={cameraActive ? stopCamera : startCamera}
+                                                    >
+                                                        {cameraActive ? 'Dừng camera' : 'Bật camera'}
+                                                    </Button>
+                                                </Space>
+                                            </div>
+                                            <Alert
+                                                message="Hướng dẫn"
+                                                description="Đưa QR code vào khung camera. Khi quét thành công, mã sẽ tự động điền vào ô bên dưới."
+                                                type="info"
+                                                showIcon
+                                                style={{ marginTop: '16px', textAlign: 'left' }}
+                                            />
+                                            <div style={{ marginTop: '16px' }}>
+                                                <Text strong>Mã đã quét:</Text>
+                                                <Input
+                                                    placeholder="Mã QR sẽ hiển thị ở đây"
+                                                    value={qrCodeInput}
+                                                    onChange={(e) => setQrCodeInput(e.target.value)}
+                                                    style={{ marginTop: '8px' }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                            ]}
+                        />
+
+                        <div style={{ marginTop: '16px' }}>
                             <Text strong>Ghi chú (tùy chọn):</Text>
                             <TextArea
                                 placeholder="Ghi chú về check-in..."

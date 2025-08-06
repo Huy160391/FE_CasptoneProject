@@ -15,7 +15,8 @@ import {
     Tooltip,
     Space,
     notification,
-    Modal
+    Modal,
+    FloatButton
 } from 'antd';
 import {
     MailOutlined,
@@ -29,7 +30,8 @@ import {
     CheckOutlined,
     CloseOutlined,
     ReloadOutlined,
-    FireOutlined
+    FireOutlined,
+    ExclamationCircleOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -45,6 +47,7 @@ import {
 import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
 import TourDetailsViewModal from '@/components/tourguide/TourDetailsViewModal';
 import ProfileSection from '@/components/tourguide/ProfileSection';
+import TourActiveList from '@/components/tourguide/TourActiveList';
 import './TourGuideDashboard.scss';
 
 const { Title, Text } = Typography;
@@ -67,6 +70,7 @@ const TourGuideDashboard: React.FC = () => {
     // New states for HDV tour management
     const [activeTours, setActiveTours] = useState<ActiveTour[]>([]);
     const [activeToursLoading, setActiveToursLoading] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     // Helper function to show schedule conflict error
     const showScheduleConflictError = (errorMessage: string) => {
@@ -526,89 +530,7 @@ const TourGuideDashboard: React.FC = () => {
                 <Row gutter={[16, 16]}>
                     {/* Tours hôm nay */}
                     <Col xs={24}>
-                        <Card
-                            title={
-                                <Space>
-                                    <CalendarOutlined />
-                                    Tours hôm nay
-                                    <Badge count={activeTours.length} showZero />
-                                </Space>
-                            }
-                            extra={
-                                <Space>
-                                    <Button
-                                        type="link"
-                                        onClick={() => navigate('/tour-guide/schedule')}
-                                    >
-                                        Xem lịch trình <RightOutlined />
-                                    </Button>
-                                </Space>
-                            }
-                            loading={activeToursLoading}
-                        >
-                            {activeTours.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '20px' }}>
-                                    <Text type="secondary">Không có tour nào hôm nay</Text>
-                                </div>
-                            ) : (
-                                <Row gutter={[16, 16]}>
-                                    {activeTours.map((tour) => (
-                                        <Col xs={24} sm={12} lg={8} key={tour.id}>
-                                            <Card
-                                                size="small"
-                                                hoverable
-                                                style={{ height: '100%' }}
-                                                actions={[
-                                                    <Button
-                                                        key="checkin"
-                                                        type="primary"
-                                                        size="small"
-                                                        onClick={() => navigate(`/tour-guide/checkin/${tour.id}`)}
-                                                        disabled={tour.checkedInCount === tour.bookingsCount}
-                                                    >
-                                                        Check-in ({tour.checkedInCount}/{tour.bookingsCount})
-                                                    </Button>,
-                                                    <Button
-                                                        key="timeline"
-                                                        size="small"
-                                                        onClick={() => navigate(`/tour-guide/timeline/${tour.id}`)}
-                                                    >
-                                                        Timeline
-                                                    </Button>
-                                                ]}
-                                            >
-                                                <Card.Meta
-                                                    title={
-                                                        <div>
-                                                            <Text strong>{tour.title}</Text>
-                                                            <br />
-                                                            <Text type="secondary" style={{ fontSize: '12px' }}>
-                                                                {tour.tourTemplate.startLocation} → {tour.tourTemplate.endLocation}
-                                                            </Text>
-                                                        </div>
-                                                    }
-                                                    description={
-                                                        <div>
-                                                            <div style={{ marginBottom: '8px' }}>
-                                                                <Text type="secondary">
-                                                                    {new Date(tour.startDate).toLocaleDateString('vi-VN')} - {new Date(tour.endDate).toLocaleDateString('vi-VN')}
-                                                                </Text>
-                                                            </div>
-                                                            <Progress
-                                                                percent={Math.round((tour.checkedInCount / tour.bookingsCount) * 100)}
-                                                                size="small"
-                                                                status={tour.checkedInCount === tour.bookingsCount ? 'success' : 'active'}
-                                                                format={() => `${tour.checkedInCount}/${tour.bookingsCount} khách`}
-                                                            />
-                                                        </div>
-                                                    }
-                                                />
-                                            </Card>
-                                        </Col>
-                                    ))}
-                                </Row>
-                            )}
-                        </Card>
+                        <TourActiveList refreshTrigger={refreshTrigger} />
                     </Col>
                 </Row>
 
