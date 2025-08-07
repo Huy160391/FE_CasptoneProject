@@ -12,7 +12,6 @@ import {
     Switch,
     Modal,
     Rate,
-    Descriptions,
     Badge
 } from 'antd';
 import {
@@ -35,25 +34,19 @@ import './TourGuideManagement.scss';
 
 interface TourGuide {
     id: string;
-    userId: string;
-    applicationId: string;
     fullName: string;
     phoneNumber: string;
     email: string;
     experience: string;
     skills: string;
-    isAvailable: boolean;
     rating: number;
     totalToursGuided: number;
+    isAvailable: boolean;
+    notes?: string;
+    profileImageUrl?: string;
     approvedAt: string;
-    approvedById?: string;
-    createdAt: string;
-    createdById?: string;
-    updatedAt?: string;
-    updatedById?: string;
-    userAvatar?: string;
-    specialization?: string;
-    experienceYears?: number;
+    userName: string;
+    approvedByName?: string;
 }
 
 const TourGuideManagement = () => {
@@ -75,8 +68,8 @@ const TourGuideManagement = () => {
             const response = await adminService.getTourGuides({
                 pageIndex,
                 pageSize,
-                includeInactive,
-                searchTerm: searchText
+                Active: !includeInactive, // Convert includeInactive to Active
+                textSearch: searchText
             });
 
             if (response.isSuccess) {
@@ -107,19 +100,8 @@ const TourGuideManagement = () => {
         return () => clearTimeout(timeoutId);
     }, [searchText]);
 
-    const getExperienceLevel = (years: number | string) => {
-        const yearsNum = typeof years === 'string' ? parseInt(years) || 0 : years || 0;
-        if (yearsNum < 1) return { level: 'Mới', color: 'blue' };
-        if (yearsNum < 3) return { level: 'Có kinh nghiệm', color: 'green' };
-        if (yearsNum < 5) return { level: 'Giàu kinh nghiệm', color: 'orange' };
-        return { level: 'Chuyên gia', color: 'red' };
-    };
-
-    const getRatingColor = (rating: number) => {
-        if (rating >= 4.5) return '#52c41a';
-        if (rating >= 4.0) return '#faad14';
-        if (rating >= 3.5) return '#fa8c16';
-        return '#ff4d4f';
+    const getRatingColor = (_rating: number) => {
+        return '#faad14'; // Màu vàng giống quản lý shop
     };
 
     const formatDate = (dateString: string) => {
@@ -133,48 +115,59 @@ const TourGuideManagement = () => {
         setDetailModalVisible(true);
     };
 
-    const handleToggleStatus = async (_guideId: string, _currentStatus: boolean) => {
-        try {
-            // TODO: Implement toggle guide status API
-            message.info('Tính năng đang phát triển');
-        } catch (error) {
-            message.error('Không thể cập nhật trạng thái hướng dẫn viên');
-        }
-    };
-
     const columns: ColumnsType<TourGuide> = [
         {
             title: 'Hướng dẫn viên',
             key: 'guide',
-            width: 300,
+            width: 250,
             render: (_, record) => (
                 <div className="guide-info">
                     <div className="guide-header">
                         <Avatar
                             size={40}
-                            src={record.userAvatar}
+                            src={record.profileImageUrl}
                             icon={<UserOutlined />}
                             className="guide-avatar"
                         />
                         <div className="guide-details">
                             <div className="guide-name">{record.fullName}</div>
-                            <div className="guide-specialization">
-                                {record.specialization && (
-                                    <Tag color="purple" icon={<SafetyCertificateOutlined />}>
-                                        {record.specialization}
-                                    </Tag>
-                                )}
+                            <div className="guide-username" style={{ fontSize: '12px', color: '#666' }}>
+                                @{record.userName}
                             </div>
                         </div>
                     </div>
-                    <div className="guide-experience">
-                        {(() => {
-                            const exp = getExperienceLevel(record.experienceYears || 0);
-                            return <Tag color={exp.color}>{exp.level}</Tag>;
-                        })()}
+                </div>
+            ),
+        },
+        {
+            title: 'Kỹ năng',
+            dataIndex: 'skills',
+            key: 'skills',
+            width: 150,
+            render: (skills: string) => (
+                <Tag color="purple" icon={<SafetyCertificateOutlined />}>
+                    {skills}
+                </Tag>
+            ),
+        },
+        {
+            title: 'Đánh giá',
+            dataIndex: 'rating',
+            key: 'rating',
+            width: 120,
+            align: 'center',
+            render: (rating: number) => (
+                <div className="rating-display">
+                    <Rate disabled defaultValue={rating} allowHalf style={{ fontSize: '12px' }} />
+                    <div
+                        className="rating-score"
+                        style={{ color: getRatingColor(rating) }}
+                    >
+                        <StarOutlined /> {rating?.toFixed(1) || 'N/A'}
                     </div>
                 </div>
             ),
+            sorter: (a, b) => (a.rating || 0) - (b.rating || 0),
         },
         {
             title: 'Liên hệ',
@@ -190,25 +183,6 @@ const TourGuideManagement = () => {
                     </div>
                 </div>
             ),
-        },
-        {
-            title: 'Đánh giá',
-            dataIndex: 'rating',
-            key: 'rating',
-            width: 120,
-            align: 'center',
-            render: (rating: number) => (
-                <div className="rating-display">
-                    <div
-                        className="rating-score"
-                        style={{ color: getRatingColor(rating) }}
-                    >
-                        <StarOutlined /> {rating?.toFixed(1) || 'N/A'}
-                    </div>
-                    <Rate disabled defaultValue={rating} allowHalf style={{ fontSize: '12px' }} />
-                </div>
-            ),
-            sorter: (a, b) => (a.rating || 0) - (b.rating || 0),
         },
         {
             title: 'Số tour đã dẫn',
@@ -238,14 +212,10 @@ const TourGuideManagement = () => {
             align: 'center',
             render: (_, record) => (
                 <div className="status-display">
-                    <Switch
-                        checked={record.isAvailable}
-                        onChange={(_checked) => handleToggleStatus(record.id, record.isAvailable)}
-                        checkedChildren="Sẵn sàng"
-                        unCheckedChildren="Bận"
-                        size="small"
-                    />
-                    <div className="availability-text">
+                    <Tag color={record.isAvailable ? 'green' : 'red'}>
+                        {record.isAvailable ? 'Sẵn sàng' : 'Bận'}
+                    </Tag>
+                    <div className="availability-text" style={{ fontSize: '12px', color: '#666' }}>
                         {record.isAvailable ? 'Có thể nhận tour' : 'Không có sẵn'}
                     </div>
                 </div>
@@ -365,86 +335,162 @@ const TourGuideManagement = () => {
 
             {/* Detail Modal */}
             <Modal
-                title={
-                    <div className="modal-title">
-                        <UserOutlined /> Chi tiết hướng dẫn viên
-                    </div>
-                }
+                title={null}
                 open={detailModalVisible}
                 onCancel={() => setDetailModalVisible(false)}
-                footer={[
-                    <Button key="close" onClick={() => setDetailModalVisible(false)}>
-                        Đóng
-                    </Button>
-                ]}
-                width={800}
+                footer={null}
+                width={900}
+                centered
+                className={`tour-guide-detail-modal ${isDarkMode ? 'dark-mode' : 'light-mode'}`}
             >
                 {selectedGuide && (
-                    <div className="guide-detail">
-                        <div className="guide-avatar-section">
-                            <Avatar
-                                size={80}
-                                src={selectedGuide.userAvatar}
-                                icon={<UserOutlined />}
-                            />
-                            <div className="guide-basic-info">
-                                <h3>{selectedGuide.fullName}</h3>
-                                <div className="rating-section">
-                                    <Rate disabled defaultValue={selectedGuide.rating} allowHalf />
-                                    <span className="rating-text">
+                    <div className="guide-detail-content">
+                        {/* Header Section */}
+                        <div className="guide-detail-header">
+                            <div className="guide-avatar-large">
+                                <Avatar
+                                    size={120}
+                                    src={selectedGuide.profileImageUrl}
+                                    icon={<UserOutlined />}
+                                    className="guide-avatar-border"
+                                />
+                                <div className="guide-status-badge">
+                                    <Tag
+                                        color={selectedGuide.isAvailable ? 'green' : 'red'}
+                                        style={{ fontSize: '12px', fontWeight: '500' }}
+                                    >
+                                        {selectedGuide.isAvailable ? 'Sẵn sàng' : 'Bận'}
+                                    </Tag>
+                                </div>
+                            </div>
+                            <div className="guide-header-info">
+                                <h2 className="guide-name-title">
+                                    {selectedGuide.fullName}
+                                </h2>
+                                <p className="guide-username-text">
+                                    @{selectedGuide.userName}
+                                </p>
+                                <div className="guide-rating-header">
+                                    <Rate
+                                        disabled
+                                        defaultValue={selectedGuide.rating}
+                                        allowHalf
+                                        style={{ fontSize: '16px' }}
+                                    />
+                                    <span className="rating-score">
                                         {selectedGuide.rating?.toFixed(1)}/5.0
                                     </span>
+                                </div>
+                                <div className="guide-skills-header">
+                                    <Tag
+                                        color="purple"
+                                        icon={<SafetyCertificateOutlined />}
+                                        style={{ fontSize: '13px', padding: '4px 12px' }}
+                                    >
+                                        {selectedGuide.skills}
+                                    </Tag>
+                                </div>
+                            </div>
+                            <div className="guide-stats">
+                                <div className="stat-item">
+                                    <div className="stat-number">
+                                        {selectedGuide.totalToursGuided}
+                                    </div>
+                                    <div className="stat-label">Tour đã dẫn</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-number stat-rating">
+                                        {selectedGuide.rating?.toFixed(1) || 'N/A'}
+                                    </div>
+                                    <div className="stat-label">Đánh giá</div>
                                 </div>
                             </div>
                         </div>
 
-                        <Descriptions bordered column={2}>
-                            <Descriptions.Item label="ID hướng dẫn viên">
-                                {selectedGuide.id}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Trạng thái">
-                                <Tag color={selectedGuide.isAvailable ? 'green' : 'red'}>
-                                    {selectedGuide.isAvailable ? 'Sẵn sàng' : 'Bận'}
-                                </Tag>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Số điện thoại">
-                                <PhoneOutlined /> {selectedGuide.phoneNumber}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Email">
-                                <MailOutlined /> {selectedGuide.email}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Số tour đã dẫn">
-                                <Badge
-                                    count={selectedGuide.totalToursGuided}
-                                    showZero
-                                    color="#1890ff"
-                                />
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Đánh giá trung bình">
-                                <div style={{ color: getRatingColor(selectedGuide.rating) }}>
-                                    <StarOutlined /> {selectedGuide.rating?.toFixed(1)}
+                        {/* Content Section */}
+                        <div className="guide-detail-body">
+                            <div className="detail-section">
+                                <h3 className="section-title">
+                                    <UserOutlined className="section-icon" />
+                                    Thông tin cá nhân
+                                </h3>
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <div className="info-label">
+                                            <PhoneOutlined className="info-icon" />
+                                            Số điện thoại
+                                        </div>
+                                        <div className="info-value">
+                                            {selectedGuide.phoneNumber}
+                                        </div>
+                                    </div>
+                                    <div className="info-item">
+                                        <div className="info-label">
+                                            <MailOutlined className="info-icon" />
+                                            Email
+                                        </div>
+                                        <div className="info-value">
+                                            {selectedGuide.email}
+                                        </div>
+                                    </div>
+                                    <div className="info-item">
+                                        <div className="info-label">
+                                            <CalendarOutlined className="info-icon" />
+                                            Ngày được duyệt
+                                        </div>
+                                        <div className="info-value">
+                                            {formatDate(selectedGuide.approvedAt)}
+                                        </div>
+                                    </div>
+                                    <div className="info-item">
+                                        <div className="info-label">
+                                            <UserOutlined className="info-icon" />
+                                            ID hướng dẫn viên
+                                        </div>
+                                        <div className="info-value info-id">
+                                            {selectedGuide.id}
+                                        </div>
+                                    </div>
                                 </div>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Ngày được duyệt">
-                                <CalendarOutlined /> {formatDate(selectedGuide.approvedAt)}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Ngày tham gia">
-                                <CalendarOutlined /> {formatDate(selectedGuide.createdAt)}
-                            </Descriptions.Item>
-                            {selectedGuide.specialization && (
-                                <Descriptions.Item label="Chuyên môn" span={2}>
-                                    <Tag color="purple" icon={<SafetyCertificateOutlined />}>
-                                        {selectedGuide.specialization}
-                                    </Tag>
-                                </Descriptions.Item>
+                            </div>
+
+                            <div className="detail-section">
+                                <h3 className="section-title">
+                                    <SafetyCertificateOutlined className="section-icon" />
+                                    Kinh nghiệm & Kỹ năng
+                                </h3>
+                                <div className="experience-content">
+                                    <p className="experience-text">
+                                        {selectedGuide.experience}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {selectedGuide.notes && (
+                                <div className="detail-section">
+                                    <h3 className="section-title">
+                                        <EditOutlined className="section-icon" />
+                                        Ghi chú
+                                    </h3>
+                                    <div className="notes-content">
+                                        <p className="notes-text">
+                                            {selectedGuide.notes}
+                                        </p>
+                                    </div>
+                                </div>
                             )}
-                            <Descriptions.Item label="Kinh nghiệm" span={2}>
-                                {selectedGuide.experience}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Kỹ năng" span={2}>
-                                {selectedGuide.skills}
-                            </Descriptions.Item>
-                        </Descriptions>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="guide-detail-footer">
+                            <Button
+                                size="large"
+                                onClick={() => setDetailModalVisible(false)}
+                                style={{ minWidth: '100px' }}
+                            >
+                                Đóng
+                            </Button>
+                        </div>
                     </div>
                 )}
             </Modal>

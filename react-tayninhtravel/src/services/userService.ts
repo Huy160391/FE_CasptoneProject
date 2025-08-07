@@ -113,22 +113,24 @@ export const userService = {
         return userService.mapApiUserToUser(response.data);
     },
     /**
- * Lấy danh sách voucher của người dùng hiện tại
- * @param pageIndex Trang hiện tại (mặc định 1)
- * @param pageSize Số lượng mỗi trang (mặc định 10)
- * @param status Trạng thái voucher (tùy chọn: active, used, expired, ...)
- * @returns Promise với danh sách voucher và thông tin phân trang
- */
-    getMyVouchers: async (
+     * Lấy danh sách voucher khả dụng (theo guide API)
+     * @param pageIndex Trang hiện tại (mặc định 1)
+     * @param pageSize Số lượng mỗi trang (mặc định 10)
+     * @returns Promise với danh sách voucher khả dụng
+     */
+    getAvailableVouchers: async (
         pageIndex: number = 1,
-        pageSize: number = 10,
-        status?: string,
-        textSearch?: string
-    ): Promise<any> => {
-        const params: any = { pageIndex, pageSize };
-        if (status) params.status = status;
-        if (textSearch) params.textSearch = textSearch;
-        const response = await axios.get('/Product/My-vouchers', { params });
+        pageSize: number = 10
+    ): Promise<{
+        statusCode: number;
+        message: string;
+        success: boolean;
+        data: any[];
+        totalRecord: number;
+        totalPages: number;
+    }> => {
+        const params = { pageIndex, pageSize };
+        const response = await axios.get('/Product/GetAvailable-Vouchers', { params });
         return response.data;
     },
 
@@ -137,18 +139,21 @@ export const userService = {
      * @param pageIndex Trang hiện tại (mặc định 1)
      * @param pageSize Số lượng mỗi trang (mặc định 10)
      * @param payOsOrderCode Mã đơn hàng PayOS (tùy chọn)
-     * @param status Trạng thái đơn hàng (tùy chọn)
+     * @param orderStatus Trạng thái đơn hàng (tùy chọn: Pending, Paid, Cancel)
+     * @param isChecked Đã nhận hàng hay chưa (tùy chọn: true/false)
      * @returns Promise với danh sách đơn hàng
      */
     getUserOrders: async (
         pageIndex: number = 1,
         pageSize: number = 10,
         payOsOrderCode?: string,
-        status?: string
+        orderStatus?: string,
+        isChecked?: boolean
     ): Promise<any> => {
         const params: any = { pageIndex, pageSize };
         if (payOsOrderCode) params.payOsOrderCode = payOsOrderCode;
-        if (status) params.status = status;
+        if (orderStatus) params.orderStatus = orderStatus;
+        if (isChecked !== undefined) params.isChecked = isChecked;
         const response = await axios.get('/Product/GetOrder-ByUser', { params });
         return response.data;
     },

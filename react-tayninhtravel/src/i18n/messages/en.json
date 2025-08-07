@@ -37,7 +37,6 @@
             "users": "Users Management",
             "orders": "Orders Management",
             "tours": "Tours Management",
-            "reviews": "Reviews Management",
             "blogs": "Blogs Management",
             "cvManagement": "CV Management",
             "supportTickets": "Support Tickets",
@@ -199,11 +198,19 @@
             "response": "Response",
             "updateStatus": "Update Status",
             "markInProgress": "In Progress",
-            "markResolved": "Resolved",
-            "markRejected": "Rejected",
+            "markClosed": "Close Ticket",
+            "markOpen": "Reopen Ticket",
             "yourResponse": "Your Response",
             "responseHint": "Enter your response to the ticket...",
-            "downloadAttachment": "Download Attachment"
+            "downloadAttachment": "Download Attachment",
+            "viewAttachment": "View Attachment",
+            "responseSuccess": "Response sent successfully",
+            "statusUpdateSuccess": "Ticket status updated to {{status}}",
+            "errors": {
+                "fetchFailed": "Failed to load tickets",
+                "statusUpdateFailed": "Failed to update ticket status",
+                "responseFailed": "Failed to send response"
+            }
         }
     },
     "tours": {
@@ -1522,11 +1529,12 @@
         "noOrders": "You have no orders yet",
         "close": "Close",
         "orderInformation": "Order Information",
+        "deliveryStatus": "Delivery Status",
+        "delivered": "Delivered",
+        "notDelivered": "Not Delivered",
         "statuses": {
-            "pending": "Pending",
-            "confirmed": "Confirmed",
-            "processing": "Processing",
-            "shipping": "Shipping",
+            "paid": "Paid",
+            "notDelivered": "Not Delivered",
             "delivered": "Delivered",
             "cancelled": "Cancelled"
         },

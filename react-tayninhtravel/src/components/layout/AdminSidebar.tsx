@@ -7,7 +7,6 @@ import {
   DashboardOutlined,
   UserOutlined,
   AppstoreOutlined,
-  CommentOutlined,
   ReadOutlined,
   HomeOutlined,
   LogoutOutlined,
@@ -87,6 +86,10 @@ const AdminSidebar = () => {
           key: '/admin/orders',
           label: <Link to="/admin/orders">Quản lý đơn hàng</Link>,
         },
+        {
+          key: '/admin/vouchers',
+          label: <Link to="/admin/vouchers">Quản lý voucher</Link>,
+        },
       ],
     },
     {
@@ -95,10 +98,6 @@ const AdminSidebar = () => {
       label: <Link to="/admin/tours">{t('admin.sidebar.tours')}</Link>,
     },
     {
-      key: '/admin/reviews',
-      icon: <CommentOutlined />,
-      label: <Link to="/admin/reviews">{t('admin.sidebar.reviews')}</Link>,
-    }, {
       key: '/admin/blogs',
       icon: <ReadOutlined />,
       label: <Link to="/admin/blogs">{t('admin.sidebar.blogs')}</Link>,

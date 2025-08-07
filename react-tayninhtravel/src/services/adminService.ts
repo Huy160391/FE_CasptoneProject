@@ -29,7 +29,7 @@ class AdminService {
         success: boolean;
     }> {
         try {
-            const response = await axios.get('/Product/AllOrder', { params });
+            const response = await axios.get('/Product/GetAllOrder', { params });
             return {
                 orders: response.data.data || [],
                 totalPages: response.data.totalPages || 0,
@@ -261,7 +261,23 @@ class AdminService {
         try {
             let endpoint = 'Cms/SupportTicket';
             if (status) {
-                endpoint += `?status=${encodeURIComponent(status)}`;
+                // Convert status string to number for API compatibility
+                let statusNumber: number;
+                switch (status) {
+                    case 'Open':
+                        statusNumber = 0;
+                        break;
+                    case 'Closed':
+                        statusNumber = 3;
+                        break;
+                    default:
+                        // If status is unexpected, don't add filter
+                        statusNumber = -1;
+                }
+
+                if (statusNumber >= 0) {
+                    endpoint += `?status=${statusNumber}`;
+                }
             }
 
             const response = await axios.get<AdminSupportTicket[]>(endpoint);
@@ -286,11 +302,8 @@ class AdminService {
                 case 'Open':
                     statusNumber = 0;
                     break;
-                case 'Resolved':
-                    statusNumber = 1;
-                    break;
-                case 'Rejected':
-                    statusNumber = 2;
+                case 'Closed':
+                    statusNumber = 3;
                     break;
                 default:
                     throw new Error('Invalid status');
@@ -311,7 +324,7 @@ class AdminService {
                 throw new Error('Response cannot be empty');
             }
 
-            await axios.put(`SupportTickets/Admin/${ticketId}/respond`, { response: response.trim() });
+            await axios.post(`Cms/${ticketId}/Reply-SupportTicket`, { commentText: response.trim() });
         } catch (error) {
             this.handleError(error, 'Error sending ticket response');
         }
@@ -325,22 +338,64 @@ class AdminService {
             throw new Error('Missing required ticket fields');
         }
 
-        // Status validation
-        const status = Number(ticket.status);
+        // Status validation - keep original status from API
         let ticketStatus: TicketStatus;
 
-        switch (status) {
-            case 0:
+        if (typeof ticket.status === 'string') {
+            // Validate that the status is one of the allowed values
+            const validStatuses: TicketStatus[] = ['Open', 'Closed'];
+            const statusCapitalized = ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1).toLowerCase();
+
+            if (validStatuses.includes(statusCapitalized as TicketStatus)) {
+                ticketStatus = statusCapitalized as TicketStatus;
+            } else {
+                // Log warning but default to 'Open' for unknown status
+                console.warn('Unknown ticket status:', ticket.status, 'defaulting to Open');
                 ticketStatus = 'Open';
-                break;
-            case 1:
-                ticketStatus = 'Resolved';
-                break;
-            case 2:
-                ticketStatus = 'Rejected';
-                break;
-            default:
-                throw new Error('Invalid ticket status');
+            }
+        } else {
+            // If status is a number, convert to string equivalent
+            const status = Number(ticket.status);
+            switch (status) {
+                case 0:
+                    ticketStatus = 'Open';
+                    break;
+                case 3:
+                    ticketStatus = 'Closed';
+                    break;
+                default:
+                    console.warn('Unknown ticket status number:', status, 'defaulting to Open');
+                    ticketStatus = 'Open';
+            }
+        }
+
+        // Process images - handle different formats from API
+        let processedImages: { id: string; url: string }[] = [];
+
+        if (Array.isArray(ticket.images)) {
+            processedImages = ticket.images.map((img: any, index: number) => {
+                if (typeof img === 'string') {
+                    // If images are just URLs
+                    return { id: `img_${index}`, url: img };
+                } else if (img && typeof img === 'object') {
+                    // If images are objects, try to extract url
+                    return {
+                        id: img.id || img.imageId || `img_${index}`,
+                        url: img.url || img.imageUrl || img.src || ''
+                    };
+                }
+                return { id: `img_${index}`, url: '' };
+            }).filter((img: { id: string; url: string }) => img.url); // Filter out empty URLs
+        }
+
+        // Process response/comments - API uses "comments" array instead of "response" string
+        let responseText = '';
+        if (ticket.response) {
+            responseText = ticket.response;
+        } else if (Array.isArray(ticket.comments) && ticket.comments.length > 0) {
+            // Get the latest comment as response
+            const latestComment = ticket.comments[ticket.comments.length - 1];
+            responseText = latestComment.commentText || '';
         }
 
         return {
@@ -350,10 +405,10 @@ class AdminService {
             status: ticketStatus,
             createdAt: ticket.createdAt || new Date().toISOString(),
             userId: ticket.userId || '',
-            userName: ticket.userName || '',
+            userName: ticket.userName || ticket.userEmail || 'Unknown User', // Fallback to userEmail if userName not available
             userEmail: ticket.userEmail || '',
-            images: Array.isArray(ticket.images) ? ticket.images : [],
-            response: ticket.response
+            images: processedImages,
+            response: responseText
         };
     } private handleError(error: unknown, context: string): Error {
         if (error && typeof error === 'object' && 'response' in error) {
@@ -629,30 +684,43 @@ class AdminService {
     async getTourGuides(params: {
         pageIndex?: number;
         pageSize?: number;
-        includeInactive?: boolean;
-        searchTerm?: string;
+        textSearch?: string;
+        Active?: boolean;
+        isAvailable?: boolean;
     } = {}) {
         try {
             const {
                 pageIndex = 0,
                 pageSize = 10,
-                includeInactive = false,
-                searchTerm = ''
+                textSearch = '',
+                Active,
+                isAvailable
             } = params;
 
-            const queryParams = new URLSearchParams({
-                pageIndex: pageIndex.toString(),
-                pageSize: pageSize.toString(),
-                includeInactive: includeInactive.toString(),
-                ...(searchTerm && { searchTerm })
-            });
+            const queryParams: any = {
+                pageIndex,
+                pageSize
+            };
 
-            const response = await axios.get(`/Account/guides?${queryParams}`);
+            if (textSearch) {
+                queryParams.textSearch = textSearch;
+            }
+            if (Active !== undefined) {
+                queryParams.Active = Active;
+            }
+            if (isAvailable !== undefined) {
+                queryParams.isAvailable = isAvailable;
+            }
+
+            const response = await axios.get('/Cms/TourGuide', { params: queryParams });
 
             return {
                 isSuccess: true,
-                tourGuides: response.data.data || response.data || [],
-                totalCount: response.data.totalCount || response.data.length || 0,
+                tourGuides: response.data.data || [],
+                totalCount: response.data.totalRecord || 0,
+                totalPages: response.data.totalPages || 0,
+                pageIndex: response.data.pageIndex || params.pageIndex || 0,
+                pageSize: response.data.pageSize || params.pageSize || 10,
                 message: 'Lấy danh sách hướng dẫn viên thành công'
             };
         } catch (error: any) {
@@ -661,6 +729,9 @@ class AdminService {
                 isSuccess: false,
                 tourGuides: [],
                 totalCount: 0,
+                totalPages: 0,
+                pageIndex: params.pageIndex || 0,
+                pageSize: params.pageSize || 10,
                 message: error?.response?.data?.message || 'Không thể lấy danh sách hướng dẫn viên'
             };
         }
