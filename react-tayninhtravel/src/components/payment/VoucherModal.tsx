@@ -39,6 +39,7 @@ interface Voucher {
     isExpired: boolean;
     isActive: boolean;
     status: string;
+    isExpiringSoon?: boolean;
 }
 
 interface VoucherModalProps {
@@ -62,14 +63,29 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
     const [pageIndex, setPageIndex] = useState(1);
     const pageSize = 10;
 
+    const isVoucherExpired = (voucher: Voucher) => {
+        const now = new Date();
+        const endDate = new Date(voucher.endDate);
+        // Voucher expired if past end date, used, or not active
+        return endDate < now || voucher.isUsed || !voucher.isActive;
+    };
+
     const fetchVouchers = async (search?: string, page: number = 1) => {
         setLoading(true);
         try {
-            const response = await userService.getMyVouchers(page, pageSize, undefined, search);
+            const response = await userService.getAvailableVouchers(page, pageSize);
 
             if (response.success && Array.isArray(response.data)) {
-                setVouchers(response.data);
-                setTotalRecord(response.totalRecord || 0);
+                // Filter by search text locally since API doesn't support search
+                let filteredVouchers = response.data;
+                if (search) {
+                    filteredVouchers = response.data.filter(voucher =>
+                        voucher.name?.toLowerCase().includes(search.toLowerCase()) ||
+                        voucher.description?.toLowerCase().includes(search.toLowerCase())
+                    );
+                }
+                setVouchers(filteredVouchers);
+                setTotalRecord(filteredVouchers.length);
             } else {
                 setVouchers([]);
                 setTotalRecord(0);
@@ -105,11 +121,20 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
     };
 
     const getVoucherStatus = (voucher: Voucher) => {
+        const now = new Date();
+        const endDate = new Date(voucher.endDate);
+
+        if (endDate < now || voucher.isExpired) {
+            return <Tag color="default">Đã hết hạn</Tag>;
+        }
         if (voucher.isUsed) {
             return <Tag color="default">Đã sử dụng</Tag>;
         }
-        if (voucher.isExpired) {
-            return <Tag color="default">Đã hết hạn</Tag>;
+        if (!voucher.isActive) {
+            return <Tag color="default">Không khả dụng</Tag>;
+        }
+        if (voucher.isExpiringSoon) {
+            return <Tag color="warning">Sắp hết hạn</Tag>;
         }
         return <Tag color="success">Có thể sử dụng</Tag>;
     };
@@ -118,11 +143,11 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
         if (voucher.discountPercent && voucher.discountPercent > 0) {
             return `Giảm ${voucher.discountPercent}%`;
         }
-        return `Giảm ${formatCurrency(voucher.discountAmount)}`;
+        return `Giảm ${formatCurrency(voucher.discountAmount || 0)}`;
     };
 
     const isVoucherDisabled = (voucher: Voucher) => {
-        return voucher.isUsed || voucher.isExpired || !voucher.isActive;
+        return isVoucherExpired(voucher);
     };
 
     const handleSelectVoucher = (voucher: Voucher) => {
@@ -223,7 +248,7 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
                                                     fontSize: 16,
                                                     color: isDarkMode ? '#ffffff' : undefined
                                                 }}>
-                                                    {voucher.code}
+                                                    {voucher.voucherName}
                                                 </Text>
                                                 <div style={{ marginLeft: 8 }}>
                                                     {getVoucherStatus(voucher)}
@@ -231,7 +256,7 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
                                             </div>
                                             <div style={{ marginBottom: 8 }}>
                                                 <Text style={{ color: isDarkMode ? '#d9d9d9' : undefined }}>
-                                                    {voucher.voucherName}
+                                                    Mã: {voucher.code}
                                                 </Text>
                                             </div>
                                             <div style={{ marginBottom: 8 }}>
@@ -251,19 +276,14 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
                                                         HSD: {formatDate(voucher.endDate)}
                                                     </Text>
                                                 </Space>
-                                                {voucher.isUsed && voucher.usedAt && (
-                                                    <Space size="small">
-                                                        <CheckCircleOutlined style={{
-                                                            color: isDarkMode ? '#8c8c8c' : '#8c8c8c'
-                                                        }} />
-                                                        <Text type="secondary" style={{
-                                                            fontSize: 12,
-                                                            color: isDarkMode ? '#bfbfbf' : undefined
-                                                        }}>
-                                                            Đã dùng: {formatDate(voucher.usedAt)}
-                                                        </Text>
-                                                    </Space>
-                                                )}
+                                                <Space size="small">
+                                                    <Text type="secondary" style={{
+                                                        fontSize: 12,
+                                                        color: isDarkMode ? '#bfbfbf' : undefined
+                                                    }}>
+                                                        Trạng thái: {voucher.status}
+                                                    </Text>
+                                                </Space>
                                             </div>
                                         </div>
                                         {selectedVoucherId === voucher.voucherCodeId && (

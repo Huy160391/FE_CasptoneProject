@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Input, Space, Tag, Modal, Select, Tooltip, Spin } from 'antd'
-import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { Table, Button, Input, Space, Tag, Modal, Spin, theme } from 'antd'
+import { SearchOutlined, EyeOutlined, DeleteOutlined, ShopOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { Key } from 'react'
 import './Orders.scss'
 import adminService from '@/services/adminService'
-
-const { Option } = Select
 
 interface OrderItem {
   productId: string
@@ -33,14 +31,43 @@ interface Order {
   orderDetails: OrderItem[]
 }
 
+interface ShopInfo {
+  id: string
+  userId: string
+  shopName: string
+  description: string
+  location: string
+  representativeName: string
+  email: string
+  phoneNumber: string
+  website?: string | null
+  businessLicense: string
+  businessLicenseUrl?: string | null
+  logoUrl?: string | null
+  shopType: string
+  openingHours: string
+  closingHours: string
+  rating: number
+  isShopActive: boolean
+  createdAt: string
+  updatedAt: string
+  userName?: string | null
+  userEmail?: string | null
+  userAvatar?: string | null
+  userRole?: string | null
+}
+
 const Orders = () => {
+  const { token } = theme.useToken()
   const [searchText, setSearchText] = useState('')
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false)
+  const [isShopModalVisible, setIsShopModalVisible] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [selectedShop, setSelectedShop] = useState<ShopInfo | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
-  const [shopInfoMap, setShopInfoMap] = useState<Record<string, any>>({})
+  const [shopInfoMap, setShopInfoMap] = useState<Record<string, ShopInfo>>({})
+  const [shopFilterOptions, setShopFilterOptions] = useState<Array<{ text: string, value: string }>>([])
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -62,11 +89,18 @@ const Orders = () => {
           }
         })
         const shopInfos = await Promise.all(shopInfoPromises)
-        const shopMap: Record<string, any> = {}
+        const shopMap: Record<string, ShopInfo> = {}
+        const filterOptions: Array<{ text: string, value: string }> = []
+
         shopInfos.forEach(({ shopId, shop }) => {
-          shopMap[shopId] = shop
+          if (shop) {
+            shopMap[shopId] = shop
+            filterOptions.push({ text: shop.shopName, value: shopId })
+          }
         })
+
         setShopInfoMap(shopMap)
+        setShopFilterOptions(filterOptions)
       } catch (err) {
         setOrders([])
       } finally {
@@ -75,6 +109,14 @@ const Orders = () => {
     }
     fetchOrders()
   }, [])
+
+  const handleShopClick = (shopId: string) => {
+    const shop = shopInfoMap[shopId]
+    if (shop) {
+      setSelectedShop(shop)
+      setIsShopModalVisible(true)
+    }
+  }
 
   const columns: ColumnsType<Order> = [
     {
@@ -97,20 +139,25 @@ const Orders = () => {
         // Lấy shopId đầu tiên của order (giả sử mỗi đơn chỉ có 1 shop)
         const shopId = record.orderDetails[0]?.shopId
         const shop = shopInfoMap[shopId]
-        const shopName = shop?.name || 'N/A'
+        const shopName = shop?.shopName || 'N/A'
+
         return shop ? (
-          <Tooltip title={
-            <div>
-              <div><strong>{shop.name}</strong></div>
-              <div>Địa chỉ: {shop.address || 'N/A'}</div>
-              <div>SĐT: {shop.phone || 'N/A'}</div>
-              <div>Email: {shop.email || 'N/A'}</div>
-            </div>
-          }>
-            <span style={{ cursor: 'pointer', color: '#1677ff', textDecoration: 'underline' }}>{shopName}</span>
-          </Tooltip>
+          <Button
+            type="link"
+            icon={<ShopOutlined />}
+            onClick={() => handleShopClick(shopId)}
+            style={{ padding: 0, height: 'auto' }}
+          >
+            {shopName}
+          </Button>
         ) : shopName
-      }
+      },
+      filters: shopFilterOptions,
+      filterSearch: true,
+      onFilter: (value: boolean | Key, record: Order) => {
+        const shopId = record.orderDetails[0]?.shopId
+        return shopId === value
+      },
     },
     {
       title: 'Ngày đặt',
@@ -173,14 +220,6 @@ const Orders = () => {
             Xem
           </Button>
           <Button
-            type="primary"
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => handleEdit(record)}
-          >
-            Sửa
-          </Button>
-          <Button
             danger
             icon={<DeleteOutlined />}
             size="small"
@@ -202,11 +241,6 @@ const Orders = () => {
     setIsViewModalVisible(true)
   }
 
-  const handleEdit = (order: Order) => {
-    setSelectedOrder(order)
-    setIsEditModalVisible(true)
-  }
-
   const handleDelete = (order: Order) => {
     Modal.confirm({
       title: 'Xác nhận xóa',
@@ -225,12 +259,9 @@ const Orders = () => {
     setIsViewModalVisible(false)
   }
 
-  const handleEditModalClose = () => {
-    setIsEditModalVisible(false)
-  }
-
-  const handleStatusChange = (value: string) => {
-    console.log('Status changed to:', value)
+  const handleShopModalClose = () => {
+    setIsShopModalVisible(false)
+    setSelectedShop(null)
   }
 
   return (
@@ -258,93 +289,293 @@ const Orders = () => {
         />
       </Spin>
 
-      {/* View Order Modal */}
+      {/* Shop Info Modal */}
       <Modal
-        title={`Chi tiết đơn hàng ${selectedOrder?.payOsOrderCode}`}
-        open={isViewModalVisible}
-        onCancel={handleViewModalClose}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShopOutlined />
+            <span>Thông tin cửa hàng</span>
+          </div>
+        }
+        open={isShopModalVisible}
+        onCancel={handleShopModalClose}
         footer={[
-          <Button key="close" onClick={handleViewModalClose}>
+          <Button key="close" onClick={handleShopModalClose}>
             Đóng
           </Button>,
         ]}
-        width={700}
+        width={800}
       >
-        {selectedOrder && (
-          <div className="order-details">
-            <div className="order-info">
-              <div className="info-section">
-                <h3>Thông tin đơn hàng</h3>
-                <p><strong>Mã đơn hàng:</strong> {selectedOrder.payOsOrderCode}</p>
-                <p><strong>Ngày đặt:</strong> {new Date(selectedOrder.createdAt).toLocaleString('vi-VN')}</p>
-                <p><strong>Trạng thái:</strong> {
-                  selectedOrder.status === 'Paid' ? 'Hoàn thành' :
-                    selectedOrder.status === 'Pending' ? 'Đang xử lý' :
-                      selectedOrder.status === 'Cancelled' ? 'Đã hủy' : selectedOrder.status
-                }</p>
-                <p><strong>Tổng tiền gốc:</strong> {selectedOrder.totalAmount.toLocaleString()} ₫</p>
-                <p><strong>Giảm giá:</strong> {selectedOrder.discountAmount.toLocaleString()} ₫</p>
-                <p><strong>Tổng tiền cuối:</strong> {selectedOrder.totalAfterDiscount.toLocaleString()} ₫</p>
-                {selectedOrder.voucherCode && (
-                  <p><strong>Mã voucher:</strong> {selectedOrder.voucherCode}</p>
-                )}
+        {selectedShop && (
+          <div className="shop-details">
+            <div className="shop-header" style={{ marginBottom: '20px' }}>
+              {selectedShop.logoUrl && (
+                <img
+                  src={selectedShop.logoUrl}
+                  alt="Shop logo"
+                  style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', marginBottom: '10px' }}
+                />
+              )}
+              <h2 style={{ margin: 0, color: '#1677ff' }}>{selectedShop.shopName}</h2>
+              <p style={{ color: '#666', margin: '5px 0' }}>{selectedShop.shopType}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Tag color={selectedShop.isShopActive ? 'green' : 'red'}>
+                  {selectedShop.isShopActive ? 'Hoạt động' : 'Ngừng hoạt động'}
+                </Tag>
+                <span style={{ color: '#faad14' }}>⭐ {selectedShop.rating}/5</span>
               </div>
             </div>
 
-            <div className="order-items">
-              <h3>Sản phẩm</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Sản phẩm</th>
-                    <th>Giá</th>
-                    <th>Số lượng</th>
-                    <th>Thành tiền</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedOrder.orderDetails.map((item: OrderItem) => (
-                    <tr key={item.productId}>
-                      <td>{item.productName}</td>
-                      <td>{item.unitPrice.toLocaleString()} ₫</td>
-                      <td>{item.quantity}</td>
-                      <td>{(item.unitPrice * item.quantity).toLocaleString()} ₫</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="shop-info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="info-section">
+                <h3>Thông tin liên hệ</h3>
+                <p><strong>Người đại diện:</strong> {selectedShop.representativeName}</p>
+                <p><strong>Email:</strong> {selectedShop.email}</p>
+                <p><strong>Số điện thoại:</strong> {selectedShop.phoneNumber}</p>
+                <p><strong>Địa chỉ:</strong> {selectedShop.location}</p>
+                {selectedShop.website && (
+                  <p><strong>Website:</strong> <a href={selectedShop.website} target="_blank" rel="noopener noreferrer">{selectedShop.website}</a></p>
+                )}
+              </div>
+
+              <div className="info-section">
+                <h3>Thông tin kinh doanh</h3>
+                <p><strong>Giấy phép kinh doanh:</strong> {selectedShop.businessLicense}</p>
+                <p><strong>Giờ mở cửa:</strong> {selectedShop.openingHours} - {selectedShop.closingHours}</p>
+                <p><strong>Ngày tạo:</strong> {new Date(selectedShop.createdAt).toLocaleString('vi-VN')}</p>
+                <p><strong>Cập nhật lần cuối:</strong> {new Date(selectedShop.updatedAt).toLocaleString('vi-VN')}</p>
+              </div>
             </div>
+
+            {selectedShop.description && (
+              <div className="info-section" style={{ marginTop: '20px' }}>
+                <h3>Mô tả</h3>
+                <p>{selectedShop.description}</p>
+              </div>
+            )}
           </div>
         )}
       </Modal>
 
-      {/* Edit Order Modal */}
+      {/* View Order Modal */}
       <Modal
-        title={`Cập nhật đơn hàng ${selectedOrder?.payOsOrderCode}`}
-        open={isEditModalVisible}
-        onCancel={handleEditModalClose}
-        onOk={handleEditModalClose}
-        okText="Cập nhật"
-        cancelText="Hủy"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <EyeOutlined />
+            <span>Chi tiết đơn hàng #{selectedOrder?.payOsOrderCode}</span>
+          </div>
+        }
+        open={isViewModalVisible}
+        onCancel={handleViewModalClose}
+        footer={[
+          <Button key="close" type="primary" onClick={handleViewModalClose}>
+            Đóng
+          </Button>,
+        ]}
+        width={900}
       >
         {selectedOrder && (
-          <div className="edit-order-form">
-            <div className="form-item">
-              <label>Trạng thái:</label>
-              <Select
-                defaultValue={selectedOrder.status}
-                style={{ width: '100%' }}
-                onChange={handleStatusChange}
-              >
-                <Option value="Paid">Hoàn thành</Option>
-                <Option value="Pending">Đang xử lý</Option>
-                <Option value="Cancelled">Đã hủy</Option>
-              </Select>
+          <div className="order-details" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            {/* Order Header */}
+            <div style={{
+              background: token.colorPrimary ?
+                `linear-gradient(135deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%)` :
+                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              padding: '20px',
+              borderRadius: '8px',
+              marginBottom: '20px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h2 style={{ margin: 0, color: 'white', fontSize: '20px' }}>
+                    Đơn hàng #{selectedOrder.payOsOrderCode}
+                  </h2>
+                  <p style={{ margin: '5px 0 0 0', opacity: 0.9 }}>
+                    Đặt lúc {new Date(selectedOrder.createdAt).toLocaleString('vi-VN')}
+                  </p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <Tag
+                    color={
+                      selectedOrder.status === 'Paid' ? 'success' :
+                        selectedOrder.status === 'Pending' ? 'processing' :
+                          selectedOrder.status === 'Cancelled' ? 'error' : 'default'
+                    }
+                    style={{ fontSize: '14px', padding: '4px 12px' }}
+                  >
+                    {selectedOrder.status === 'Paid' ? 'Hoàn thành' :
+                      selectedOrder.status === 'Pending' ? 'Đang xử lý' :
+                        selectedOrder.status === 'Cancelled' ? 'Đã hủy' : selectedOrder.status}
+                  </Tag>
+                </div>
+              </div>
             </div>
 
-            <div className="form-item">
-              <label>Ghi chú:</label>
-              <Input.TextArea rows={4} />
+            {/* Order Info Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+              <div style={{
+                background: token.colorBgContainer,
+                padding: '16px',
+                borderRadius: '8px',
+                border: `1px solid ${token.colorBorder}`,
+                boxShadow: token.boxShadowTertiary
+              }}>
+                <h4 style={{ margin: '0 0 12px 0', color: token.colorText, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '16px' }}>📋</span>
+                  Thông tin cơ bản
+                </h4>
+                <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                  <div style={{ marginBottom: '8px' }}>
+                    <span style={{ color: token.colorTextSecondary, minWidth: '100px', display: 'inline-block' }}>Mã đơn:</span>
+                    <span style={{ fontWeight: '500', color: token.colorText }}>{selectedOrder.payOsOrderCode}</span>
+                  </div>
+                  <div style={{ marginBottom: '8px' }}>
+                    <span style={{ color: token.colorTextSecondary, minWidth: '100px', display: 'inline-block' }}>User ID:</span>
+                    <span style={{ fontWeight: '500', color: token.colorText }}>{selectedOrder.userId}</span>
+                  </div>
+                  {selectedOrder.voucherCode && (
+                    <div style={{ marginBottom: '8px' }}>
+                      <span style={{ color: token.colorTextSecondary, minWidth: '100px', display: 'inline-block' }}>Voucher:</span>
+                      <Tag color="orange">{selectedOrder.voucherCode}</Tag>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{
+                background: token.colorBgContainer,
+                padding: '16px',
+                borderRadius: '8px',
+                border: `1px solid ${token.colorBorder}`,
+                boxShadow: token.boxShadowTertiary
+              }}>
+                <h4 style={{ margin: '0 0 12px 0', color: token.colorText, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '16px' }}>💰</span>
+                  Thông tin thanh toán
+                </h4>
+                <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                  <div style={{ marginBottom: '8px' }}>
+                    <span style={{ color: token.colorTextSecondary, minWidth: '120px', display: 'inline-block' }}>Tổng tiền gốc:</span>
+                    <span style={{ fontWeight: '500', color: token.colorText }}>{selectedOrder.totalAmount.toLocaleString()} ₫</span>
+                  </div>
+                  <div style={{ marginBottom: '8px' }}>
+                    <span style={{ color: token.colorTextSecondary, minWidth: '120px', display: 'inline-block' }}>Giảm giá:</span>
+                    <span style={{ fontWeight: '500', color: token.colorError }}>
+                      -{selectedOrder.discountAmount.toLocaleString()} ₫
+                    </span>
+                  </div>
+                  <div style={{
+                    marginTop: '12px',
+                    paddingTop: '12px',
+                    borderTop: `2px solid ${token.colorBorder}`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span style={{ fontWeight: '600', fontSize: '16px', color: token.colorText }}>Thành tiền:</span>
+                    <span style={{
+                      fontWeight: '700',
+                      fontSize: '18px',
+                      color: token.colorSuccess
+                    }}>
+                      {selectedOrder.totalAfterDiscount.toLocaleString()} ₫
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Products Section */}
+            <div style={{
+              background: token.colorBgContainer,
+              border: `1px solid ${token.colorBorder}`,
+              borderRadius: '8px',
+              overflow: 'hidden',
+              boxShadow: token.boxShadowTertiary
+            }}>
+              <div style={{
+                background: token.colorFillSecondary,
+                padding: '16px',
+                borderBottom: `1px solid ${token.colorBorder}`
+              }}>
+                <h4 style={{ margin: 0, color: token.colorText, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '16px' }}>🛍️</span>
+                  Sản phẩm ({selectedOrder.orderDetails.length} món)
+                </h4>
+              </div>
+
+              <div style={{ padding: '0' }}>
+                {selectedOrder.orderDetails.map((item: OrderItem, index: number) => (
+                  <div
+                    key={item.productId}
+                    style={{
+                      padding: '16px',
+                      borderBottom: index < selectedOrder.orderDetails.length - 1 ? `1px solid ${token.colorBorderSecondary}` : 'none',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      background: token.colorBgContainer
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '500', marginBottom: '4px', color: token.colorText }}>
+                        {item.productName}
+                      </div>
+                      <div style={{ fontSize: '13px', color: token.colorTextSecondary }}>
+                        ID: {item.productId}
+                      </div>
+                      {item.imageUrl && (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.productName}
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            objectFit: 'cover',
+                            borderRadius: '4px',
+                            marginTop: '8px',
+                            border: `1px solid ${token.colorBorder}`
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    <div style={{ textAlign: 'center', minWidth: '80px' }}>
+                      <div style={{ fontSize: '14px', color: token.colorTextSecondary }}>Đơn giá</div>
+                      <div style={{ fontWeight: '500', color: token.colorText }}>
+                        {item.unitPrice.toLocaleString()} ₫
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'center', minWidth: '60px' }}>
+                      <div style={{ fontSize: '14px', color: token.colorTextSecondary }}>SL</div>
+                      <div style={{
+                        fontWeight: '600',
+                        background: token.colorFillSecondary,
+                        borderRadius: '50%',
+                        width: '30px',
+                        height: '30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto',
+                        color: token.colorText,
+                        border: `1px solid ${token.colorBorder}`
+                      }}>
+                        {item.quantity}
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right', minWidth: '100px' }}>
+                      <div style={{ fontSize: '14px', color: token.colorTextSecondary }}>Thành tiền</div>
+                      <div style={{ fontWeight: '600', color: token.colorSuccess, fontSize: '15px' }}>
+                        {(item.unitPrice * item.quantity).toLocaleString()} ₫
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

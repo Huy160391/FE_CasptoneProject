@@ -1,5 +1,5 @@
-// User Management Page Styles
-.user-management-page {
+// Voucher Management Page Styles
+.voucher-management-page {
   .header-bar {
     display: flex;
     align-items: center;
@@ -10,7 +10,8 @@
       margin: 0;
       font-size: 24px;
       font-weight: 700;
-      color: #222;
+      color: var(--text-primary, #222);
+      transition: color 0.3s ease;
     }
 
     .header-actions {
@@ -20,7 +21,7 @@
     }
   }
 
-  .users-table {
+  .vouchers-table {
     .ant-table-tbody > tr {
       cursor: pointer;
       transition: background-color 0.2s;
@@ -77,18 +78,38 @@
 }
 
 // Dark mode styles
-.dark-theme {
-  .user-management-page {
-    .header-bar {
-      h1 {
-        color: #fff;
-      }
-    }
+body[data-theme="dark"] .voucher-management-page .header-bar h1,
+html[data-theme="dark"] .voucher-management-page .header-bar h1,
+.dark-theme .voucher-management-page .header-bar h1,
+.ant-app.dark .voucher-management-page .header-bar h1,
+[data-bs-theme="dark"] .voucher-management-page .header-bar h1 {
+  color: #fff !important;
+}
 
-    .users-table {
-      .ant-table-tbody > tr:hover {
-        background-color: #3a3a3a;
-      }
+// CSS Variables cho dark mode
+body[data-theme="dark"] {
+  --text-primary: #fff;
+}
+
+html[data-theme="dark"] {
+  --text-primary: #fff;
+}
+
+.dark-theme {
+  --text-primary: #fff;
+}
+
+.ant-app.dark {
+  --text-primary: #fff;
+}
+
+// Dark mode styles cho các element khác
+[data-theme="dark"] .voucher-management-page,
+.dark-theme .voucher-management-page,
+.ant-app.dark .voucher-management-page {
+  .vouchers-table {
+    .ant-table-tbody > tr:hover {
+      background-color: #3a3a3a;
     }
   }
 }

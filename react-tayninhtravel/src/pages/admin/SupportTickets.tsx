@@ -9,7 +9,6 @@ import {
     Typography,
     message,
     Spin,
-    Select,
     Badge,
     Tooltip
 } from 'antd'
@@ -28,10 +27,9 @@ import './SupportTickets.scss'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
-const { Option } = Select
 
 // Use the TicketStatus type for better type safety
-const TICKET_STATUSES: TicketStatus[] = ['Open', 'Resolved', 'Rejected']
+const TICKET_STATUSES: TicketStatus[] = ['Open', 'Closed']
 
 interface TicketStatusConfig {
     color: string
@@ -44,13 +42,9 @@ const STATUS_CONFIG: Record<TicketStatus, TicketStatusConfig> = {
         color: 'processing',
         icon: <ExclamationCircleOutlined />
     },
-    Resolved: {
-        color: 'success',
+    Closed: {
+        color: 'default',
         icon: <CheckCircleOutlined />
-    },
-    Rejected: {
-        color: 'error',
-        icon: null
     }
 }
 
@@ -63,14 +57,18 @@ const SupportTickets = () => {
     const [isRespondModalVisible, setIsRespondModalVisible] = useState(false)
     const [searchText, setSearchText] = useState('')
     const [response, setResponse] = useState('')
-    const [statusFilter, setStatusFilter] = useState<TicketStatus | undefined>(undefined)
     const [responseLoading, setResponseLoading] = useState(false)
+    const [filteredInfo, setFilteredInfo] = useState<any>({})
 
     const fetchTickets = async () => {
         try {
             setLoading(true)
-            const tickets = await adminService.getSupportTickets(statusFilter)
+            console.log('Fetching all tickets')
+            const tickets = await adminService.getSupportTickets()
+            console.log('Raw tickets response:', tickets)
+            console.log('Tickets status values:', tickets.map(t => ({ id: t.id, status: t.status, statusType: typeof t.status })))
             setTickets(tickets)
+            console.log('Tickets set to state:', tickets)
         } catch (error: any) {
             console.error('Error fetching tickets:', error)
             message.error(error.message || t('admin.supportTickets.errors.fetchFailed'))
@@ -81,14 +79,15 @@ const SupportTickets = () => {
 
     useEffect(() => {
         fetchTickets()
-    }, [statusFilter])
+    }, [])
+
+    const handleTableChange = (_pagination: any, filters: any, _sorter: any) => {
+        console.log('Table change - filters:', filters);
+        setFilteredInfo(filters);
+    };
 
     const handleSearch = (value: string) => {
         setSearchText(value)
-    }
-
-    const handleStatusFilterChange = (value: TicketStatus | undefined) => {
-        setStatusFilter(value)
     }
 
     const handleView = (ticket: AdminSupportTicket) => {
@@ -165,6 +164,7 @@ const SupportTickets = () => {
                     (record.userName?.toLowerCase() || '').includes(searchValue)
                 )
             },
+            filterSearch: true,
         },
         {
             title: t('admin.supportTickets.columns.user'),
@@ -192,7 +192,13 @@ const SupportTickets = () => {
                 text: status,
                 value: status,
             })),
-            onFilter: (value, record) => record.status === value,
+            filteredValue: filteredInfo.status || null,
+            onFilter: (value, record) => {
+                console.log('Filter value:', value, 'Record status:', record.status);
+                return record.status === value;
+            },
+            filterMultiple: true,
+            width: '120px',
         },
         {
             title: t('admin.supportTickets.columns.hasAttachment'),
@@ -245,27 +251,14 @@ const SupportTickets = () => {
             </div>
 
             <div className="table-actions">
-                <Space>
-                    <Input
-                        placeholder={t('admin.supportTickets.searchPlaceholder')}
-                        prefix={<SearchOutlined />}
-                        value={searchText}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        style={{ width: 250 }}
-                        allowClear
-                    />
-                    <Select
-                        placeholder={t('admin.supportTickets.filterByStatus')}
-                        onChange={handleStatusFilterChange}
-                        allowClear
-                        style={{ width: 150 }}
-                        value={statusFilter}
-                    >
-                        {TICKET_STATUSES.map(status => (
-                            <Option key={status} value={status}>{status}</Option>
-                        ))}
-                    </Select>
-                </Space>
+                <Input
+                    placeholder={t('admin.supportTickets.searchPlaceholder')}
+                    prefix={<SearchOutlined />}
+                    value={searchText}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    style={{ width: 250 }}
+                    allowClear
+                />
             </div>
 
             <Spin spinning={loading}>
@@ -275,6 +268,8 @@ const SupportTickets = () => {
                     rowKey="id"
                     pagination={{ pageSize: 10 }}
                     className="tickets-table"
+                    scroll={{ x: true }}
+                    onChange={handleTableChange}
                 />
             </Spin>
 
@@ -340,17 +335,16 @@ const SupportTickets = () => {
                                 <Button
                                     type="primary"
                                     style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-                                    onClick={() => handleStatusUpdate(selectedTicket.id, 'Resolved')}
-                                    disabled={selectedTicket.status === 'Resolved'}
+                                    onClick={() => handleStatusUpdate(selectedTicket.id, 'Closed')}
+                                    disabled={selectedTicket.status === 'Closed'}
                                 >
-                                    {t('admin.supportTickets.markResolved')}
+                                    {t('admin.supportTickets.markClosed')}
                                 </Button>
                                 <Button
-                                    danger
-                                    onClick={() => handleStatusUpdate(selectedTicket.id, 'Rejected')}
-                                    disabled={selectedTicket.status === 'Rejected'}
+                                    onClick={() => handleStatusUpdate(selectedTicket.id, 'Open')}
+                                    disabled={selectedTicket.status === 'Open'}
                                 >
-                                    {t('admin.supportTickets.markRejected')}
+                                    {t('admin.supportTickets.markOpen')}
                                 </Button>
                             </Space>
                         </div>

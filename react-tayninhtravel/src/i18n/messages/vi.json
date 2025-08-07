@@ -37,7 +37,6 @@
             "users": "Quản lý người dùng",
             "orders": "Quản lý đơn hàng",
             "tours": "Quản lý tour",
-            "reviews": "Quản lý đánh giá",
             "blogs": "Quản lý bài viết",
             "cvManagement": "Quản lý CV",
             "supportTickets": "Hỗ trợ khách hàng",
@@ -200,11 +199,19 @@
             "response": "Phản hồi",
             "updateStatus": "Cập nhật trạng thái",
             "markInProgress": "Đang xử lý",
-            "markResolved": "Đã giải quyết",
-            "markRejected": "Từ chối",
+            "markClosed": "Đóng ticket",
+            "markOpen": "Mở lại ticket",
             "yourResponse": "Phản hồi của bạn",
             "responseHint": "Nhập phản hồi của bạn cho yêu cầu này...",
-            "downloadAttachment": "Tải tệp đính kèm"
+            "downloadAttachment": "Tải tệp đính kèm",
+            "viewAttachment": "Xem tệp đính kèm",
+            "responseSuccess": "Phản hồi đã được gửi thành công",
+            "statusUpdateSuccess": "Trạng thái ticket đã được cập nhật thành {{status}}",
+            "errors": {
+                "fetchFailed": "Không thể tải danh sách ticket",
+                "statusUpdateFailed": "Không thể cập nhật trạng thái ticket",
+                "responseFailed": "Không thể gửi phản hồi"
+            }
         },
         "shopManagement": {
             "title": "Quản lý đăng ký shop",
@@ -1567,13 +1574,14 @@
         "noOrders": "Bạn chưa có đơn hàng nào",
         "close": "Đóng",
         "orderInformation": "Thông tin đơn hàng",
+        "deliveryStatus": "Trạng thái giao hàng",
+        "delivered": "Đã nhận hàng",
+        "notDelivered": "Chưa nhận hàng",
         "statuses": {
-            "pending": "Chờ xác nhận",
-            "confirmed": "Đã xác nhận",
-            "processing": "Đang xử lý",
-            "shipping": "Đang giao hàng",
-            "delivered": "Đã giao hàng",
-            "cancelled": "Đã hủy"
+            "paid": "Đã thanh toán",
+            "notDelivered": "Chưa nhận hàng",
+            "delivered": "Đã nhận hàng",
+            "cancelled": "Bị hủy"
         },
         "paymentStatuses": {
             "unpaid": "Chưa thanh toán",

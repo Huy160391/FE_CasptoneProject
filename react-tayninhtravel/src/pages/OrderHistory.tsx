@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Card,
-    List,
+    Table,
     Tag,
     Button,
     Space,
@@ -9,7 +9,6 @@ import {
     Spin,
     Alert,
     Empty,
-    Pagination,
     Input,
     Select,
     Row,
@@ -18,6 +17,7 @@ import {
     Modal,
     Switch
 } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import {
     CalendarOutlined,
     DollarOutlined,
@@ -40,6 +40,10 @@ export interface OrderDetail {
     unitPrice: number;
     imageUrl?: string;
     shopId: string;
+    shopName?: string;
+    shopEmail?: string;
+    shopType?: string;
+    rating?: number;
 }
 
 export interface ApiOrder {
@@ -48,7 +52,7 @@ export interface ApiOrder {
     totalAmount: number;
     discountAmount: number;
     totalAfterDiscount: number;
-    status: number;
+    status: string; // "Paid", "Pending", "Cancel"
     voucherCode?: string;
     payOsOrderCode: string;
     isChecked: boolean;
@@ -85,7 +89,7 @@ export interface Order {
     shopName: string;
     items: OrderItem[];
     totalAmount: number;
-    status: 'pending' | 'confirmed' | 'delivered' | 'cancelled';
+    status: 'paid' | 'cancelled' | 'delivered' | 'not-delivered';
     paymentStatus: 'unpaid' | 'paid' | 'refunded';
     paymentMethod: string;
     orderDate: string;
@@ -99,12 +103,12 @@ interface OrderHistoryProps {
 }
 
 // Helper function to map API status to component status
-const mapApiStatusToComponentStatus = (apiStatus: number, isChecked: boolean): Order['status'] => {
-    switch (apiStatus) {
-        case 0: return 'pending';    // Pending
-        case 1: return isChecked ? 'delivered' : 'confirmed';  // Paid - nếu đã check thì delivered, chưa check thì confirmed
-        case 2: return 'cancelled';  // Cancelled
-        default: return 'pending';
+const mapApiStatusToComponentStatus = (apiStatus: string, isChecked: boolean): Order['status'] => {
+    switch (apiStatus.toLowerCase()) {
+        case 'pending': return 'not-delivered';    // Pending -> Chưa nhận hàng (chưa thanh toán)
+        case 'paid': return isChecked ? 'delivered' : 'paid';  // Paid - nếu đã check thì delivered, chưa check thì paid
+        case 'cancel': return 'cancelled';  // Cancel -> Bị hủy
+        default: return 'not-delivered';
     }
 };
 
@@ -119,14 +123,19 @@ const transformApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         totalPrice: detail.unitPrice * detail.quantity
     }));
 
+    const shopName = apiOrder.orderDetails.length > 0 && apiOrder.orderDetails[0].shopName
+        ? apiOrder.orderDetails[0].shopName
+        : 'Cửa hàng đặc sản';
+
     return {
         id: apiOrder.id,
         orderNumber: apiOrder.payOsOrderCode,
-        shopName: 'Cửa hàng đặc sản', // Default shop name, you might want to fetch this from another API
+        shopName: shopName,
         items,
         totalAmount: apiOrder.totalAfterDiscount,
         status: mapApiStatusToComponentStatus(apiOrder.status, apiOrder.isChecked),
-        paymentStatus: apiOrder.status === 1 ? 'paid' : apiOrder.status === 2 ? 'refunded' : 'unpaid',
+        paymentStatus: apiOrder.status.toLowerCase() === 'paid' ? 'paid' :
+            apiOrder.status.toLowerCase() === 'cancel' ? 'refunded' : 'unpaid',
         paymentMethod: 'PayOS',
         orderDate: apiOrder.createdAt,
         deliveryDate: apiOrder.checkedAt || undefined,
@@ -166,42 +175,36 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
             setLoading(true);
             setError(null);
 
-            // Convert component status to API status
-            let apiStatus: string | undefined;
+            // Convert component status to API parameters
+            let orderStatus: string | undefined;
+            let isChecked: boolean | undefined;
+
             if (status) {
-                const statusMap: { [key: string]: string } = {
-                    'pending': '0',      // Pending
-                    'confirmed': '1',    // Paid (chưa giao)
-                    'delivered': '1',    // Paid (đã giao) - cần filter thêm isChecked = true
-                    'cancelled': '2'     // Cancelled
-                };
-                apiStatus = statusMap[status];
+                if (status === 'not-delivered') {
+                    orderStatus = 'Pending';  // Chưa nhận hàng = chưa thanh toán
+                } else if (status === 'paid') {
+                    orderStatus = 'Paid';
+                    isChecked = false; // Đã thanh toán nhưng chưa nhận hàng
+                } else if (status === 'delivered') {
+                    orderStatus = 'Paid';
+                    isChecked = true; // Đã thanh toán và đã nhận hàng
+                } else if (status === 'cancelled') {
+                    orderStatus = 'Cancel';
+                }
             }
 
-            // Call the actual API
+            // Call the actual API - cần update userService để nhận orderStatus và isChecked
             const response: ApiResponse = await userService.getUserOrders(
                 page,
                 pageSize,
                 keyword || undefined,
-                apiStatus
+                orderStatus,
+                isChecked
             );
 
             if (response.success || response.statusCode === 200) {
                 // Transform API orders to component orders
                 let transformedOrders = response.data.map(transformApiOrderToOrder);
-
-                // Apply additional filtering for specific statuses
-                if (status === 'delivered') {
-                    // Chỉ lấy những đơn hàng đã được check (delivered)
-                    transformedOrders = transformedOrders.filter(order =>
-                        response.data.find(apiOrder => apiOrder.id === order.id)?.isChecked === true
-                    );
-                } else if (status === 'confirmed') {
-                    // Chỉ lấy những đơn hàng đã thanh toán nhưng chưa được check
-                    transformedOrders = transformedOrders.filter(order =>
-                        response.data.find(apiOrder => apiOrder.id === order.id)?.isChecked === false
-                    );
-                }
 
                 // Apply client-side filtering for inactive orders if needed
                 if (!includeInactiveOrders) {
@@ -253,8 +256,8 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
 
     const getStatusColor = (status: Order['status']) => {
         const colors = {
-            pending: 'orange',
-            confirmed: 'blue',
+            paid: 'blue',
+            'not-delivered': 'orange',
             delivered: 'green',
             cancelled: 'red'
         };
@@ -263,28 +266,10 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
 
     const getStatusText = (status: Order['status']) => {
         const texts = {
-            pending: t('orderHistory.statuses.pending'),
-            confirmed: t('orderHistory.statuses.confirmed'),
+            paid: t('orderHistory.statuses.paid'),
+            'not-delivered': t('orderHistory.statuses.notDelivered'),
             delivered: t('orderHistory.statuses.delivered'),
             cancelled: t('orderHistory.statuses.cancelled')
-        };
-        return texts[status] || status;
-    };
-
-    const getPaymentStatusColor = (status: Order['paymentStatus']) => {
-        const colors = {
-            unpaid: 'red',
-            paid: 'green',
-            refunded: 'orange'
-        };
-        return colors[status] || 'default';
-    };
-
-    const getPaymentStatusText = (status: Order['paymentStatus']) => {
-        const texts = {
-            unpaid: t('orderHistory.paymentStatuses.unpaid'),
-            paid: t('orderHistory.paymentStatuses.paid'),
-            refunded: t('orderHistory.paymentStatuses.refunded')
         };
         return texts[status] || status;
     };
@@ -311,28 +296,114 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
         setDetailModalVisible(true);
     };
 
+    // Define table columns
+    const columns: ColumnsType<Order> = [
+        {
+            title: t('orderHistory.orderNumber'),
+            dataIndex: 'orderNumber',
+            key: 'orderNumber',
+            width: 150,
+            render: (text: string) => <Text strong>{text}</Text>,
+        },
+        {
+            title: t('orderHistory.shopName'),
+            dataIndex: 'shopName',
+            key: 'shopName',
+            width: 200,
+            render: (text: string) => (
+                <Text>
+                    <ShopOutlined /> {text}
+                </Text>
+            ),
+        },
+        {
+            title: t('orderHistory.status'),
+            dataIndex: 'status',
+            key: 'status',
+            width: 120,
+            render: (status: Order['status']) => (
+                <Tag color={getStatusColor(status)}>
+                    {getStatusText(status)}
+                </Tag>
+            ),
+        },
+        {
+            title: t('orderHistory.deliveryStatus'),
+            key: 'deliveryStatus',
+            width: 120,
+            render: (_, order: Order) => {
+                const isDelivered = order.status === 'delivered';
+                return (
+                    <Tag color={isDelivered ? 'green' : 'orange'}>
+                        {isDelivered ? t('orderHistory.delivered') : t('orderHistory.notDelivered')}
+                    </Tag>
+                );
+            },
+        },
+        {
+            title: t('orderHistory.itemCount'),
+            dataIndex: 'items',
+            key: 'itemCount',
+            width: 100,
+            render: (items: OrderItem[]) => (
+                <Text>
+                    <ShoppingCartOutlined /> {items.length} {t('orderHistory.itemCountText')}
+                </Text>
+            ),
+        },
+        {
+            title: t('orderHistory.totalAmount'),
+            dataIndex: 'totalAmount',
+            key: 'totalAmount',
+            width: 150,
+            render: (amount: number) => (
+                <Text strong style={{ color: '#f5222d' }}>
+                    <DollarOutlined /> {formatCurrency(amount)}
+                </Text>
+            ),
+        },
+        {
+            title: t('orderHistory.orderDate'),
+            dataIndex: 'orderDate',
+            key: 'orderDate',
+            width: 160,
+            render: (date: string) => (
+                <Text>
+                    <CalendarOutlined /> {formatDate(date)}
+                </Text>
+            ),
+        },
+        {
+            title: t('orderHistory.paymentMethod'),
+            dataIndex: 'paymentMethod',
+            key: 'paymentMethod',
+            width: 120,
+        },
+        {
+            title: t('orderHistory.actions'),
+            key: 'actions',
+            width: 100,
+            render: (_, order: Order) => (
+                <Button
+                    type="link"
+                    icon={<EyeOutlined />}
+                    onClick={() => showOrderDetail(order)}
+                >
+                    {t('orderHistory.viewDetail')}
+                </Button>
+            ),
+        },
+    ];
+
     // If using legacy data prop
     if (data) {
         return (
-            <List
-                itemLayout="horizontal"
+            <Table
                 dataSource={data}
-                renderItem={(item) => (
-                    <List.Item>
-                        <List.Item.Meta
-                            title={item.orderNumber}
-                            description={
-                                <>
-                                    <div>{t('orderHistory.shopName')}: {item.shopName}</div>
-                                    <div>{t('orderHistory.totalAmount')}: {formatCurrency(item.totalAmount)}</div>
-                                    <Tag color={getStatusColor(item.status)}>
-                                        {getStatusText(item.status)}
-                                    </Tag>
-                                </>
-                            }
-                        />
-                    </List.Item>
-                )}
+                columns={columns}
+                rowKey="id"
+                pagination={false}
+                size="small"
             />
         );
     }
@@ -367,8 +438,8 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                                 onChange={handleStatusFilter}
                                 value={statusFilter}
                             >
-                                <Option value="pending">{t('orderHistory.statuses.pending')}</Option>
-                                <Option value="confirmed">{t('orderHistory.statuses.confirmed')}</Option>
+                                <Option value="paid">{t('orderHistory.statuses.paid')}</Option>
+                                <Option value="not-delivered">{t('orderHistory.statuses.notDelivered')}</Option>
                                 <Option value="delivered">{t('orderHistory.statuses.delivered')}</Option>
                                 <Option value="cancelled">{t('orderHistory.statuses.cancelled')}</Option>
                             </Select>
@@ -416,82 +487,24 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
                     />
                 ) : (
-                    <>
-                        <List
-                            itemLayout="vertical"
-                            dataSource={orders}
-                            renderItem={(order) => (
-                                <List.Item
-                                    key={order.id}
-                                    actions={[
-                                        <Button
-                                            key="view"
-                                            type="link"
-                                            icon={<EyeOutlined />}
-                                            onClick={() => showOrderDetail(order)}
-                                        >
-                                            {t('orderHistory.viewDetail')}
-                                        </Button>
-                                    ]}
-                                >
-                                    <List.Item.Meta
-                                        title={
-                                            <Space>
-                                                <Text strong>{order.orderNumber}</Text>
-                                                <Tag color={getStatusColor(order.status)}>
-                                                    {getStatusText(order.status)}
-                                                </Tag>
-                                                <Tag color={getPaymentStatusColor(order.paymentStatus)}>
-                                                    {getPaymentStatusText(order.paymentStatus)}
-                                                </Tag>
-                                            </Space>
-                                        }
-                                        description={
-                                            <Space direction="vertical" size="small">
-                                                <Text>
-                                                    <ShopOutlined /> {t('orderHistory.shopName')}: {order.shopName}
-                                                </Text>
-                                                <Text>
-                                                    <CalendarOutlined /> {t('orderHistory.orderDate')}: {formatDate(order.orderDate)}
-                                                </Text>
-                                                <Text>
-                                                    <ShoppingCartOutlined /> {t('orderHistory.itemCount')}: {order.items.length} {t('orderHistory.itemCountText')}
-                                                </Text>
-                                                <Text>
-                                                    <DollarOutlined /> {t('orderHistory.totalAmount')}: <Text strong style={{ color: '#f5222d' }}>
-                                                        {formatCurrency(order.totalAmount)}
-                                                    </Text>
-                                                </Text>
-                                                {order.deliveryDate && (
-                                                    <Text type="secondary">
-                                                        {t('orderHistory.deliveryDate')}: {formatDate(order.deliveryDate)}
-                                                    </Text>
-                                                )}
-                                                <Text type="secondary">
-                                                    {t('orderHistory.paymentMethod')}: {order.paymentMethod}
-                                                </Text>
-                                            </Space>
-                                        }
-                                    />
-                                </List.Item>
-                            )}
-                        />
-
-                        <div style={{ textAlign: 'center', marginTop: 16 }}>
-                            <Pagination
-                                current={currentPage}
-                                total={totalCount}
-                                pageSize={pageSize}
-                                showSizeChanger
-                                showQuickJumper
-                                showTotal={(total, range) =>
-                                    `${range[0]}-${range[1]} ${t('orderHistory.paginationText')} ${total} ${t('orderHistory.paginationTotal')}`
-                                }
-                                onChange={handlePageChange}
-                                onShowSizeChange={handlePageChange}
-                            />
-                        </div>
-                    </>
+                    <Table
+                        dataSource={orders}
+                        columns={columns}
+                        rowKey="id"
+                        pagination={{
+                            current: currentPage,
+                            total: totalCount,
+                            pageSize: pageSize,
+                            showSizeChanger: true,
+                            showQuickJumper: true,
+                            showTotal: (total: number, range: [number, number]) =>
+                                `${range[0]}-${range[1]} ${t('orderHistory.paginationText')} ${total} ${t('orderHistory.paginationTotal')}`,
+                            onChange: handlePageChange,
+                            onShowSizeChange: handlePageChange,
+                        }}
+                        scroll={{ x: 1400 }}
+                        size="middle"
+                    />
                 )}
             </Card>
 
@@ -521,12 +534,6 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                             <Descriptions.Item label={t('orderHistory.status')}>
                                 <Tag color={getStatusColor(selectedOrder.status)}>
                                     {getStatusText(selectedOrder.status)}
-                                </Tag>
-                            </Descriptions.Item>
-
-                            <Descriptions.Item label={t('orderHistory.payment')}>
-                                <Tag color={getPaymentStatusColor(selectedOrder.paymentStatus)}>
-                                    {getPaymentStatusText(selectedOrder.paymentStatus)}
                                 </Tag>
                             </Descriptions.Item>
 

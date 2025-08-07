@@ -160,6 +160,7 @@ export interface GetProductsParams {
     pageSize?: number;
     textSearch?: string;
     status?: boolean;
+    sortBySoldCount?: 'asc' | 'desc';
 }
 
 // Extend global Blog interface for specific API response
