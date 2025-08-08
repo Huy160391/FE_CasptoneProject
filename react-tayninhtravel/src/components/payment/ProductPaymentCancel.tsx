@@ -98,7 +98,7 @@ const ProductPaymentCancel: React.FC = () => {
     };
 
     const handleViewOrders = () => {
-        navigate('/orders');
+        navigate('/profile', { state: { activeTab: 'order-history' } });
     };
 
     const handleContinueShopping = () => {
