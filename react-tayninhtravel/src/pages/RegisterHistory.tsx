@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Spin, Table, Tag, Modal, Descriptions, Image } from 'antd';
+import { Spin, Table, Tag, Modal, Descriptions, Image, Typography, Card } from 'antd';
 import { useTranslation } from 'react-i18next';
 import userService from '../services/userService';
+
+const { Title, Text } = Typography;
 
 interface RegisterHistoryItem {
     id: string;
@@ -253,17 +255,30 @@ const RegisterHistory = () => {
     ];
 
     return (
-        <Spin spinning={!!loading}>
-            <Table
-                columns={columns}
-                dataSource={data.map((item, idx) => ({ ...item, key: item.id || idx }))}
-                pagination={false}
-                rowKey="key"
-                onRow={(record) => ({
-                    onClick: () => handleRowClick(record),
-                    style: { cursor: 'pointer' }
-                })}
-            />
+        <div>
+            <Card>
+                <div style={{ marginBottom: 16 }}>
+                    <Title level={4}>
+                        📝 {t('registerHistory.title', 'Lịch sử đăng ký')}
+                    </Title>
+                    <Text type="secondary">
+                        {t('registerHistory.description', 'Theo dõi trạng thái đăng ký shop và hướng dẫn viên của bạn')}
+                    </Text>
+                </div>
+
+                <Spin spinning={!!loading}>
+                    <Table
+                        columns={columns}
+                        dataSource={data.map((item, idx) => ({ ...item, key: item.id || idx }))}
+                        pagination={false}
+                        rowKey="key"
+                        onRow={(record) => ({
+                            onClick: () => handleRowClick(record),
+                            style: { cursor: 'pointer' }
+                        })}
+                    />
+                </Spin>
+            </Card>
 
             <Modal
                 title={
@@ -301,7 +316,7 @@ const RegisterHistory = () => {
                     </div>
                 )}
             </Modal>
-        </Spin>
+        </div>
     );
 };
 

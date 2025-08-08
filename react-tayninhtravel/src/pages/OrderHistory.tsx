@@ -107,7 +107,8 @@ const mapApiStatusToComponentStatus = (apiStatus: string, isChecked: boolean): O
     switch (apiStatus.toLowerCase()) {
         case 'pending': return 'not-delivered';    // Pending -> Chưa nhận hàng (chưa thanh toán)
         case 'paid': return isChecked ? 'delivered' : 'paid';  // Paid - nếu đã check thì delivered, chưa check thì paid
-        case 'cancel': return 'cancelled';  // Cancel -> Bị hủy
+        case 'cancel':
+        case 'cancelled': return 'cancelled';  // Cancel/Cancelled -> Bị hủy
         default: return 'not-delivered';
     }
 };
@@ -135,7 +136,7 @@ const transformApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         totalAmount: apiOrder.totalAfterDiscount,
         status: mapApiStatusToComponentStatus(apiOrder.status, apiOrder.isChecked),
         paymentStatus: apiOrder.status.toLowerCase() === 'paid' ? 'paid' :
-            apiOrder.status.toLowerCase() === 'cancel' ? 'refunded' : 'unpaid',
+            (apiOrder.status.toLowerCase() === 'cancel' || apiOrder.status.toLowerCase() === 'cancelled') ? 'refunded' : 'unpaid',
         paymentMethod: 'PayOS',
         orderDate: apiOrder.createdAt,
         deliveryDate: apiOrder.checkedAt || undefined,
@@ -189,7 +190,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                     orderStatus = 'Paid';
                     isChecked = true; // Đã thanh toán và đã nhận hàng
                 } else if (status === 'cancelled') {
-                    orderStatus = 'Cancel';
+                    orderStatus = 'Cancelled'; // Sửa từ 'Cancelled' thay vì 'Cancel'
                 }
             }
 
@@ -383,6 +384,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
             title: t('orderHistory.actions'),
             key: 'actions',
             width: 100,
+            fixed: 'right',
             render: (_, order: Order) => (
                 <Button
                     type="link"
@@ -481,11 +483,6 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                             </Button>
                         }
                     />
-                ) : orders.length === 0 ? (
-                    <Empty
-                        description={t('orderHistory.noOrders')}
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    />
                 ) : (
                     <Table
                         dataSource={orders}
@@ -504,6 +501,14 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                         }}
                         scroll={{ x: 1400 }}
                         size="middle"
+                        locale={{
+                            emptyText: orders.length === 0 ? (
+                                <Empty
+                                    description={t('orderHistory.noOrders')}
+                                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                />
+                            ) : undefined
+                        }}
                     />
                 )}
             </Card>
