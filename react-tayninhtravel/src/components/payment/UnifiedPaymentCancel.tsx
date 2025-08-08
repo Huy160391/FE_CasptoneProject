@@ -187,12 +187,12 @@ const UnifiedPaymentCancel: React.FC = () => {
     const handleViewHistory = () => {
         if (paymentData?.type === 'tour') {
             if (isAuthenticated) {
-                navigate('/booking-history');
+                navigate('/profile', { state: { activeTab: 'booking-history' } });
             } else {
-                navigate('/login', { state: { from: '/booking-history' } });
+                navigate('/login', { state: { from: '/profile' } });
             }
         } else {
-            navigate('/orders');
+            navigate('/profile', { state: { activeTab: 'order-history' } });
         }
     };
 
