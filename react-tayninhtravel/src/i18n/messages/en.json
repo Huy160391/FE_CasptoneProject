@@ -1494,8 +1494,80 @@
         "TraditionalMassage": "Traditional massage"
     },
     "chatbot": {
+        "title": "TNDT AI Assistant",
         "greeting": "Hello! How can I help you today?",
-        "inputPlaceholder": "Type a message..."
+        "inputPlaceholder": "Type a message...",
+        "errors": {
+            "loginRequired": "You need to login to use chat.",
+            "cannotLoadSessions": "Cannot load chat sessions.",
+            "cannotCreateSession": "Cannot create new chat session.",
+            "createSessionError": "An error occurred while creating chat session.",
+            "cannotSendMessage": "Cannot send message. Please try again.",
+            "sendMessageError": "An error occurred while sending message."
+        },
+        "sessions": {
+            "history": "Chat History",
+            "noSessions": "No chat sessions yet",
+            "delete": "Delete Chat Session",
+            "deleteConfirm": "Are you sure you want to delete the chat session \"{title}\"?",
+            "deleteWarning": "This action cannot be undone.",
+            "edit": "Rename Chat Session",
+            "editPrompt": "Enter new name for the chat session:",
+            "editPlaceholder": "Enter new name..."
+        },
+        "chatTypes": {
+            "tour": "Tour Consultation",
+            "product": "Product Consultation",
+            "tayninh": "Tay Ninh Information",
+            "default": "TNDT AI Chat",
+            "selectType": "Select consultation type:",
+            "descriptions": {
+                "tour": "Tour advice, pricing, bookings",
+                "product": "Local specialty shopping advice",
+                "tayninh": "Local history and culture"
+            }
+        },
+        "actions": {
+            "creating": "Creating...",
+            "startChat": "Start chat",
+            "sendMessage": "Send message",
+            "closeChat": "Close chat",
+            "newChat": "New chat",
+            "rename": "Rename",
+            "delete": "Delete",
+            "cancel": "Cancel",
+            "save": "Save"
+        },
+        "tooltips": {
+            "sessionHistory": "Chat history",
+            "newChat": "New chat",
+            "closeChat": "Close chat",
+            "rename": "Rename",
+            "delete": "Delete",
+            "sendMessage": "Send message",
+            "startChat": "Start chat"
+        },
+        "placeholders": {
+            "typeMessage": "Type a message...",
+            "startChatMessage": "Type a message to start ...",
+            "newName": "Enter new name..."
+        },
+        "welcome": {
+            "title": "Welcome to TNDT AI Assistant!",
+            "instructions": "To start chatting, please:",
+            "steps": {
+                "selectType": "Select the appropriate consultation type above",
+                "startChat": "Click \"Start chat\" button or use the + icon in the header",
+                "languageNote": "Currently we only support Vietnamese language"
+            }
+        },
+        "conversation": {
+            "startTitle": "Start conversation",
+            "startMessage": "Type a message to start chatting with AI assistant."
+        },
+        "topicRedirect": {
+            "confirmMessage": "{suggestion}\n\nDo you want to create a new chat session?"
+        }
     },
     "bookingHistory": {
         "title": "Booking History",
