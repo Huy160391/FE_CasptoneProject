@@ -1539,8 +1539,80 @@
         "TraditionalMassage": "Massage truyền thống"
     },
     "chatbot": {
+        "title": "TNDT AI Assistant",
         "greeting": "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?",
-        "inputPlaceholder": "Nhập tin nhắn..."
+        "inputPlaceholder": "Nhập tin nhắn...",
+        "errors": {
+            "loginRequired": "Bạn cần đăng nhập để sử dụng chat.",
+            "cannotLoadSessions": "Không thể tải danh sách phiên chat.",
+            "cannotCreateSession": "Không thể tạo phiên chat mới.",
+            "createSessionError": "Có lỗi xảy ra khi tạo phiên chat.",
+            "cannotSendMessage": "Không thể gửi tin nhắn. Vui lòng thử lại.",
+            "sendMessageError": "Có lỗi xảy ra khi gửi tin nhắn."
+        },
+        "sessions": {
+            "history": "Lịch sử chat",
+            "noSessions": "Chưa có phiên chat nào",
+            "delete": "Xóa phiên chat",
+            "deleteConfirm": "Bạn có chắc chắn muốn xóa phiên chat \"{title}\"?",
+            "deleteWarning": "Hành động này không thể hoàn tác.",
+            "edit": "Đổi tên phiên chat",
+            "editPrompt": "Nhập tên mới cho phiên chat:",
+            "editPlaceholder": "Nhập tên mới..."
+        },
+        "chatTypes": {
+            "tour": "Tư vấn Tour",
+            "product": "Tư vấn Sản phẩm",
+            "tayninh": "Thông tin Tây Ninh",
+            "default": "TNDT AI Chat",
+            "selectType": "Chọn loại tư vấn:",
+            "descriptions": {
+                "tour": "Tư vấn tour, giá cả, đặt chỗ",
+                "product": "Tư vấn mua sắm đặc sản",
+                "tayninh": "Lịch sử, văn hóa địa phương"
+            }
+        },
+        "actions": {
+            "creating": "Đang tạo...",
+            "startChat": "Bắt đầu chat",
+            "sendMessage": "Gửi tin nhắn",
+            "closeChat": "Đóng chat",
+            "newChat": "Tạo chat mới",
+            "rename": "Đổi tên",
+            "delete": "Xóa",
+            "cancel": "Hủy",
+            "save": "Lưu"
+        },
+        "tooltips": {
+            "sessionHistory": "Lịch sử chat",
+            "newChat": "Tạo chat mới",
+            "closeChat": "Đóng chat",
+            "rename": "Đổi tên",
+            "delete": "Xóa",
+            "sendMessage": "Gửi tin nhắn",
+            "startChat": "Bắt đầu chat"
+        },
+        "placeholders": {
+            "typeMessage": "Nhập tin nhắn...",
+            "startChatMessage": "Nhập tin nhắn để bắt đầu ...",
+            "newName": "Nhập tên mới..."
+        },
+        "welcome": {
+            "title": "Chào mừng đến với TNDT AI Assistant!",
+            "instructions": "Để bắt đầu trò chuyện, vui lòng:",
+            "steps": {
+                "selectType": "Chọn loại tư vấn phù hợp ở phía trên",
+                "startChat": "Click nút \"Bắt đầu chat\" hoặc dùng icon + trên header",
+                "languageNote": "Hiện chúng tôi không hỗ trợ ngôn ngữ nào khác ngoài tiếng Việt"
+            }
+        },
+        "conversation": {
+            "startTitle": "Bắt đầu cuộc trò chuyện",
+            "startMessage": "Nhập tin nhắn để bắt đầu chat với AI assistant."
+        },
+        "topicRedirect": {
+            "confirmMessage": "{suggestion}\n\nBạn có muốn tạo phiên chat mới không?"
+        }
     },
     "bookingHistory": {
         "title": "Lịch sử đặt tour",
