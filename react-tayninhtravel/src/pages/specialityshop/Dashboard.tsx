@@ -132,14 +132,14 @@ const Dashboard = () => {
     // Table columns for orders
     const orderColumns = [
         {
-            title: 'Mã đơn hàng',
-            dataIndex: 'id',
-            key: 'id',
+            title: 'Mã PayOS',
+            dataIndex: 'payOsOrderCode',
+            key: 'payOsOrderCode',
         },
         {
             title: 'Khách hàng',
-            dataIndex: 'customerName',
-            key: 'customerName',
+            dataIndex: 'userName',
+            key: 'userName',
         },
         {
             title: 'Ngày đặt',
@@ -149,8 +149,8 @@ const Dashboard = () => {
         },
         {
             title: 'Số tiền',
-            dataIndex: 'totalAmount',
-            key: 'totalAmount',
+            dataIndex: 'totalAfterDiscount',
+            key: 'totalAfterDiscount',
             render: (amount: number) => `${amount.toLocaleString()} ₫`,
         },
         {
@@ -159,11 +159,21 @@ const Dashboard = () => {
             key: 'status',
             render: (status: string) => {
                 let color = '';
-                if (status === 'Completed' || status === 'Delivered') color = 'success';
-                else if (status === 'Processing' || status === 'Pending') color = 'processing';
-                else if (status === 'Cancelled') color = 'error';
+                let text = '';
+                if (status === 'Paid') {
+                    color = 'success';
+                    text = 'Đã thanh toán';
+                } else if (status === 'Pending') {
+                    color = 'processing';
+                    text = 'Chờ xử lý';
+                } else if (status === 'Cancelled') {
+                    color = 'error';
+                    text = 'Đã hủy';
+                } else {
+                    text = status;
+                }
 
-                return <span className={`status-tag ${color}`}>{status}</span>;
+                return <span className={`status-tag ${color}`}>{text}</span>;
             },
         },
     ];
@@ -222,7 +232,7 @@ const Dashboard = () => {
                 <Col xs={24} lg={16}>
                     <Card title="Đơn hàng gần đây" className="recent-orders-card">
                         <Table
-                            dataSource={recentOrders.map((order, index) => ({ ...order, key: order.id || index }))}
+                            dataSource={recentOrders.map((order, index) => ({ ...order, key: order.payOsOrderCode || order.id || index }))}
                             columns={orderColumns}
                             pagination={false}
                             size="small"

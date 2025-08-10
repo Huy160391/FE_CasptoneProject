@@ -51,10 +51,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
     const quantityInStock = product.quantityInStock ?? 999
     const isOutOfStock = quantityInStock === 0
 
-    // Calculate original price if on sale
-    const originalPrice = product.isSale && product.salePercent
-        ? Math.round(product.price / (1 - product.salePercent / 100))
-        : null
+    // Calculate discounted price if on sale
+    const currentPrice = product.isSale && product.salePercent
+        ? Math.round(product.price * (1 - product.salePercent / 100))
+        : product.price
+
+    const originalPrice = product.isSale && product.salePercent ? product.price : null
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault()
@@ -71,7 +73,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 productId: product.id,
                 name: product.name,
                 image: imageUrl,
-                price: product.price,
+                price: currentPrice,
                 quantity: 1
             })
         }
@@ -117,7 +119,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                         </span>
                     )}
                     <span className="current-price">
-                        {product.price.toLocaleString('vi-VN')}₫
+                        {currentPrice.toLocaleString('vi-VN')}₫
                     </span>
                 </div>
 
