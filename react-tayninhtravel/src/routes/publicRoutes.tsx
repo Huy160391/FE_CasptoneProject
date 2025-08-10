@@ -4,6 +4,7 @@ import About from '@/pages/About';
 import Support from '@/pages/Support';
 import Shop from '@/pages/Shop';
 import ProductDetail from '@/pages/ProductDetail';
+import ShopDetail from '@/pages/ShopDetail';
 import ThingsToDo from '@/pages/ThingsToDo';
 import ThingsToDoDetail from '@/pages/ThingsToDoDetail';
 import Blog from '@/pages/Blog';
@@ -51,6 +52,10 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/shop/product/:id',
         element: <ProductDetail />,
+    },
+    {
+        path: '/shop/:shopId',
+        element: <ShopDetail />,
     },
     {
         path: '/cart',

@@ -33,7 +33,8 @@ export interface CustomerInfo {
 
 export interface Product {
     id: string;
-    shopId: string;
+    shopId?: string; // Keep for backward compatibility
+    specialtyShopId: string; // New field from API
     name: string;
     description: string | null;
     price: number;
@@ -45,6 +46,7 @@ export interface Product {
     salePercent?: number;
     createdAt: string;
     updatedAt: string;
+    averageRating?: number | null;
 }
 
 export interface CartItem {

@@ -112,6 +112,30 @@
           color: #40a9ff;
         }
       }
+
+      // Dark mode with higher specificity
+      .dark-mode & .view-shop-btn {
+        background-color: #79eac0 !important;
+        border-color: #79eac0 !important;
+        color: #000000 !important;
+
+        &:hover {
+          background-color: #66d9a8 !important;
+          border-color: #66d9a8 !important;
+          color: #000000 !important;
+        }
+
+        &:focus {
+          background-color: #79eac0 !important;
+          border-color: #79eac0 !important;
+          color: #000000 !important;
+        }
+      }
+
+      // Dark mode styling for shop name
+      .shop-name {
+        color: #79eac0 !important;
+      }
     }
   }
 

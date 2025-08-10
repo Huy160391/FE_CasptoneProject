@@ -474,6 +474,9 @@ export const getWalletBalance = async (shopId: string, token?: string): Promise<
 export interface ShopOrder {
     id: string;
     userId: string;
+    userName: string;
+    userEmail: string;
+    userPhoneNumber: string;
     totalAmount: number;
     discountAmount: number;
     totalAfterDiscount: number;
@@ -491,6 +494,10 @@ export interface ShopOrder {
         unitPrice: number;
         imageUrl: string | null;
         shopId: string;
+        shopName?: string | null;
+        shopEmail?: string | null;
+        shopType?: string | null;
+        rating?: number | null;
     }>;
 }
 
@@ -498,11 +505,11 @@ export interface ShopOrder {
 export const getShopOrders = async (params: {
     pageIndex?: number;
     pageSize?: number;
-    payOsCode?: string;
+    payOsOrderCode?: string;
     status?: boolean; // Luôn để true theo yêu cầu
     isChecked?: boolean; // Đã nhận hàng hay chưa
     orderStatus?: 'Pending' | 'Paid' | 'Cancelled'; // Status của đơn hàng (theo response thực tế)
-} = {}, token?: string): Promise<{ data: ShopOrder[]; totalCount: number; totalPages?: number; pageIndex?: number; pageSize?: number }> => {
+} = {}, token?: string): Promise<{ data: ShopOrder[]; totalCount: number; totalRecord?: number; totalPages?: number; pageIndex?: number; pageSize?: number }> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     // Tạo query params với các tham số mới
@@ -513,14 +520,14 @@ export const getShopOrders = async (params: {
     };
 
     // Thêm các tham số tùy chọn nếu có
-    if (params.payOsCode) queryParams.payOsCode = params.payOsCode;
+    if (params.payOsOrderCode) queryParams.payOsOrderCode = params.payOsOrderCode;
     if (params.isChecked !== undefined) queryParams.isChecked = params.isChecked;
     if (params.orderStatus) queryParams.orderStatus = params.orderStatus;
 
     console.log('Calling Product/GetOrder-ByShop with params:', queryParams);
 
     try {
-        const response = await axios.get('/Product/GetOrder-ByShop', { params: queryParams, headers });
+        const response = await axios.get('/Product/GetOrder-ByCurrentShop', { params: queryParams, headers });
 
         console.log('Shop orders response:', response.data);
 
@@ -595,9 +602,18 @@ export const cancelOrder = async (orderId: string, reason: string, token?: strin
     return response.data;
 };
 
-// Đánh dấu đơn hàng đã giao
+// Đánh dấu đơn hàng đã giao (deprecated - sử dụng markOrderAsReceived thay thế)
 export const markOrderAsDelivered = async (orderId: string, token?: string): Promise<any> => {
     return updateOrderStatus(orderId, 'Delivered', token);
+};
+
+// Xác nhận khách hàng đã nhận hàng (API mới)
+export const markOrderAsReceived = async (payOsOrderCode: string, token?: string): Promise<any> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.post('/Order/check', {
+        payOsOrderCode: payOsOrderCode
+    }, { headers });
+    return response.data;
 };
 
 // Lấy lịch sử giao dịch ví
