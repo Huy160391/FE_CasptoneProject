@@ -35,6 +35,8 @@ import {
     getBookingStatusColor
 } from '../services/tourBookingService';
 import { formatCurrency } from '../services/paymentService';
+import { hasIndividualQRs, TourBookingDto } from '../types/individualQR';
+import IndividualQRDisplay from '../components/common/IndividualQRDisplay';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -453,11 +455,30 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                             </Descriptions>
                         )}
 
-                        {selectedBooking.qrCodeData && (
+                        {/* ✅ NEW: Individual QR System Display */}
+                        {hasIndividualQRs(selectedBooking as TourBookingDto) ? (
+                            <div style={{ marginTop: 24 }}>
+                                <IndividualQRDisplay
+                                    guests={(selectedBooking as TourBookingDto).guests || []}
+                                    bookingCode={selectedBooking.bookingCode}
+                                    tourTitle={selectedBooking.tourOperation?.tourTitle}
+                                    totalPrice={selectedBooking.totalPrice}
+                                    tourDate={selectedBooking.tourOperation?.tourDate}
+                                />
+                            </div>
+                        ) : selectedBooking.qrCodeData ? (
+                            /* 🔄 LEGACY: Old QR System (backward compatibility) */
                             <div style={{ marginTop: 16, textAlign: 'center' }}>
-                                <Title level={5}>QR Code check-in</Title>
+                                <Title level={5}>QR Code check-in (Legacy)</Title>
                                 <div style={{ padding: 16, border: '1px dashed #d9d9d9', borderRadius: 8 }}>
                                     <Text type="secondary">QR Code sẽ được hiển thị khi tour được xác nhận</Text>
+                                </div>
+                            </div>
+                        ) : (
+                            /* No QR codes available */
+                            <div style={{ marginTop: 16, textAlign: 'center' }}>
+                                <div style={{ padding: 16, border: '1px dashed #d9d9d9', borderRadius: 8 }}>
+                                    <Text type="secondary">QR Code sẽ được tạo sau khi thanh toán thành công</Text>
                                 </div>
                             </div>
                         )}

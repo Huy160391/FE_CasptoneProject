@@ -37,6 +37,7 @@ import {
     PriceCalculation,
     CreateTourBookingRequest
 } from '../services/tourBookingService';
+import { GuestInfoRequest } from '../types/individualQR';
 import { tourSlotService, TourSlotDto } from '../services/tourSlotService';
 import { redirectToPayOsPayment, formatCurrency } from '../services/paymentService';
 import { useEnhancedPayment } from '../services/enhancedPaymentService';
@@ -53,6 +54,7 @@ interface BookingFormData {
     contactPhone: string;
     contactEmail: string;
     specialRequests?: string;
+    guests: GuestInfoRequest[]; // ✅ NEW: Individual guest info
 }
 
 const BookingPage: React.FC = () => {
@@ -67,6 +69,7 @@ const BookingPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [calculating, setCalculating] = useState(false);
+    const [paymentProcessing, setPaymentProcessing] = useState(false); // ✅ NEW: Prevent duplicate payment calls
 
     const [tourDetails, setTourDetails] = useState<TourDetailsForBooking | null>(null);
     const [priceCalculation, setPriceCalculation] = useState<PriceCalculation | null>(null);
@@ -80,7 +83,8 @@ const BookingPage: React.FC = () => {
         contactName: '',
         contactPhone: '',
         contactEmail: '',
-        specialRequests: ''
+        specialRequests: '',
+        guests: [{ guestName: '', guestEmail: '', guestPhone: '' }] // ✅ NEW
     });
 
     // Tour slots state
@@ -237,12 +241,72 @@ const BookingPage: React.FC = () => {
         }
     };
 
+    // ✅ NEW: Helper functions for individual guests
+    const updateGuestInfo = (index: number, field: keyof GuestInfoRequest, value: string) => {
+        const updatedGuests = [...formValues.guests];
+        updatedGuests[index] = { ...updatedGuests[index], [field]: value };
+
+        setFormValues(prev => ({
+            ...prev,
+            guests: updatedGuests
+        }));
+    };
+
+    const validateUniqueEmail = (email: string, currentIndex: number, guests: GuestInfoRequest[]) => {
+        if (!email) return Promise.resolve();
+
+        const duplicateIndex = guests.findIndex((guest, index) =>
+            index !== currentIndex && guest.guestEmail.toLowerCase() === email.toLowerCase()
+        );
+
+        if (duplicateIndex !== -1) {
+            return Promise.reject(new Error(`Email đã được sử dụng cho khách hàng ${duplicateIndex + 1}`));
+        }
+
+        return Promise.resolve();
+    };
+
+    const handleGuestArrayUpdate = (allValues: BookingFormData) => {
+        const newGuestCount = allValues.numberOfGuests;
+        const currentGuests = formValues.guests || []; // Safe fallback
+
+        // Auto-adjust guests array
+        const newGuests = Array.from({ length: newGuestCount }, (_, index) => {
+            if (index < currentGuests.length) {
+                return currentGuests[index]; // Keep existing data
+            } else {
+                // Auto-populate first guest with contact info
+                if (index === 0 && allValues.contactName && allValues.contactEmail) {
+                    return {
+                        guestName: allValues.contactName,
+                        guestEmail: allValues.contactEmail,
+                        guestPhone: allValues.contactPhone || ''
+                    };
+                }
+                return { guestName: '', guestEmail: '', guestPhone: '' };
+            }
+        });
+
+        setFormValues(prev => ({
+            ...prev,
+            guests: newGuests
+        }));
+
+        // Continue with existing price calculation logic...
+        if (tourDetails && selectedSlot) {
+            handleGuestCountChange({ numberOfGuests: allValues.numberOfGuests });
+        }
+    };
+
     const handleFormValuesChange = (changedValues: Partial<BookingFormData>, allValues: BookingFormData) => {
         // Save form values to state
         setFormValues(allValues);
 
         if (changedValues.numberOfGuests) {
-            handleGuestCountChange(allValues);
+            // Update price calculation (original function)
+            handleGuestCountChange(changedValues);
+            // Update guests array (new function)
+            handleGuestArrayUpdate(allValues);
         }
     };
 
@@ -267,6 +331,13 @@ const BookingPage: React.FC = () => {
     };
 
     const handleSubmit = async () => {
+        // Prevent double submission
+        if (submitting) {
+            return;
+        }
+
+        setSubmitting(true);
+
         if (!isAuthenticated) {
             setIsLoginModalVisible(true);
             return;
@@ -279,72 +350,90 @@ const BookingPage: React.FC = () => {
 
         try {
             // Use form values from state (since form might not be rendered in current step)
-            console.log('Form values from state:', formValues); // Debug log
 
-            // Validate booking request
+            // ✅ NEW: Individual QR Booking Request
             const bookingRequest: CreateTourBookingRequest = {
-                tourOperationId: tourDetails.tourOperation.id,
-                numberOfGuests: formValues.numberOfGuests, // Tổng số người
-                adultCount: formValues.numberOfGuests, // Tất cả đều tính là người lớn
-                childCount: 0, // Không phân biệt trẻ em
-                contactName: formValues.contactName,
+                tourSlotId: selectedSlot?.id || '',
+                numberOfGuests: formValues.numberOfGuests,
                 contactPhone: formValues.contactPhone,
-                contactEmail: formValues.contactEmail,
                 specialRequests: formValues.specialRequests,
-                tourSlotId: selectedSlot?.id // Include selected slot ID
+                guests: formValues.guests, // ✅ NEW: Individual guest info
+                
+                // 🔄 LEGACY: Keep for backward compatibility
+                tourOperationId: tourDetails.tourOperation.id,
+                adultCount: formValues.numberOfGuests,
+                childCount: 0,
+                contactName: formValues.contactName,
+                contactEmail: formValues.contactEmail
             };
 
-            console.log('Booking request:', bookingRequest); // Debug log
-
             const validation = validateBookingRequest(bookingRequest);
-            console.log('Validation result:', validation); // Debug log
 
             if (!validation.isValid) {
                 message.error(validation.errors.join(', '));
                 return;
             }
 
-            setSubmitting(true);
             const response = await createTourBooking(bookingRequest, token);
-            console.log('Booking response:', response); // Debug log
 
             if (response.success && response.data) {
-                console.log('Booking data:', response.data); // Debug log
                 message.success('Đặt tour thành công! Đang chuyển đến trang thanh toán...');
 
                 // === ENHANCED PAYMENT SYSTEM (ONLY) ===
-                console.log('Using Enhanced Payment System for tour booking');
 
-                if (response.data?.bookingId && response.data?.finalPrice) {
-                    // Use Enhanced Payment System only
-                    await createPaymentLink({
-                        tourBookingId: response.data.bookingId,
-                        amount: response.data.finalPrice,
-                        description: `Tour Booking - ${response.data.bookingCode || response.data.bookingId}`
-                    });
-                    // createPaymentLink automatically redirects to PayOS
-                } else {
-                    console.error('Missing booking ID or price for enhanced payment');
-                    console.log('Debug - bookingId:', response.data?.bookingId, 'finalPrice from API:', response.data?.finalPrice, 'priceCalculation:', priceCalculation?.finalPrice);
-
-                    // Fallback to legacy payment URL
-                    if (response.data?.paymentUrl) {
-                        setTimeout(() => {
-                            redirectToPayOsPayment(response.data!.paymentUrl!);
-                        }, 1500);
-                    } else {
-                        message.error('Không thể tạo thanh toán, vui lòng thử lại');
+                // ✅ ENHANCED PAYMENT: Flexible approach theo plan BE với duplicate prevention
+                try {
+                    // Prevent duplicate payment calls
+                    if (paymentProcessing) {
+                        return;
                     }
+                    
+                    setPaymentProcessing(true);
+                    
+                    // Extract payment info từ backend response
+                    const paymentRequest: CreatePaymentRequest = {
+                        // Primary: Use tourBookingId if available
+                        tourBookingId: response.data?.id || response.data?.bookingId,
+                        
+                        // Fallback: Use bookingCode as identifier
+                        bookingCode: response.data?.bookingCode,
+                        
+                        // Amount: Try multiple sources
+                        amount: response.data?.totalPrice || 
+                               response.data?.finalPrice || 
+                               priceCalculation?.finalPrice || 
+                               0,
+                        
+                        description: `Tour Booking - ${response.data?.bookingCode || 'Individual QR System'}`
+                    };
+                    
+                    // Validate required fields
+                    if (!paymentRequest.amount || paymentRequest.amount <= 0) {
+                        throw new Error('Invalid payment amount');
+                    }
+                    
+                    if (!paymentRequest.tourBookingId && !paymentRequest.bookingCode) {
+                        throw new Error('No booking identifier found');
+                    }
+                    
+                    // Create payment link
+                    await createPaymentLink(paymentRequest);
+                    
+                } catch (enhancedError: any) {
+                    console.error('Enhanced payment failed:', enhancedError);
+                    message.error(`Không thể tạo thanh toán: ${enhancedError.message || 'Lỗi không xác định'}`);
+                } finally {
+                    setPaymentProcessing(false);
                 }
             } else {
                 message.error(response.message || 'Có lỗi xảy ra khi đặt tour');
             }
         } catch (error: any) {
             console.error('Booking error:', error);
-            console.error('Error response data:', error.response?.data); // Debug log
             message.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra khi đặt tour');
         } finally {
             setSubmitting(false);
+            setPaymentProcessing(false);
         }
     };
 
@@ -720,6 +809,76 @@ const BookingPage: React.FC = () => {
                                             maxLength={500}
                                         />
                                     </Form.Item>
+
+                                    {/* ✅ NEW: Individual guest information */}
+                                    <Divider>Thông tin từng khách hàng</Divider>
+
+                                    {Array.from({ length: formValues.numberOfGuests }, (_, index) => {
+                                        // Safe check to ensure guests array exists
+                                        const currentGuests = formValues.guests || [];
+                                        return (
+                                        <Card key={index} size="small" style={{ marginBottom: 16 }}>
+                                            <Title level={5}>Khách hàng {index + 1}</Title>
+
+                                            <Row gutter={16}>
+                                                <Col xs={24} sm={12}>
+                                                    <Form.Item
+                                                        name={['guests', index, 'guestName']}
+                                                        label="Họ và tên"
+                                                        rules={[
+                                                            { required: true, message: 'Vui lòng nhập tên khách hàng' },
+                                                            { min: 2, message: 'Tên phải có ít nhất 2 ký tự' },
+                                                            { max: 100, message: 'Tên không quá 100 ký tự' }
+                                                        ]}
+                                                        initialValue={currentGuests[index]?.guestName || ''}
+                                                    >
+                                                        <Input
+                                                            prefix={<UserOutlined />}
+                                                            placeholder="Nhập họ và tên đầy đủ"
+                                                            onChange={(e) => updateGuestInfo(index, 'guestName', e.target.value)}
+                                                        />
+                                                    </Form.Item>
+                                                </Col>
+
+                                                <Col xs={24} sm={12}>
+                                                    <Form.Item
+                                                        name={['guests', index, 'guestEmail']}
+                                                        label="Email"
+                                                        rules={[
+                                                            { required: true, message: 'Vui lòng nhập email' },
+                                                            { type: 'email', message: 'Email không hợp lệ' },
+                                                            {
+                                                                validator: (_, value) => validateUniqueEmail(value, index, currentGuests)
+                                                            }
+                                                        ]}
+                                                        initialValue={currentGuests[index]?.guestEmail || ''}
+                                                    >
+                                                        <Input
+                                                            prefix={<MailOutlined />}
+                                                            placeholder="email@example.com"
+                                                            onChange={(e) => updateGuestInfo(index, 'guestEmail', e.target.value)}
+                                                        />
+                                                    </Form.Item>
+                                                </Col>
+                                            </Row>
+
+                                            <Form.Item
+                                                name={['guests', index, 'guestPhone']}
+                                                label="Số điện thoại (tùy chọn)"
+                                                rules={[
+                                                    { pattern: /^[0-9+\-\s()]+$/, message: 'Số điện thoại không hợp lệ' }
+                                                ]}
+                                                initialValue={currentGuests[index]?.guestPhone || ''}
+                                            >
+                                                <Input
+                                                    prefix={<PhoneOutlined />}
+                                                    placeholder="0123456789"
+                                                    onChange={(e) => updateGuestInfo(index, 'guestPhone', e.target.value)}
+                                                />
+                                            </Form.Item>
+                                        </Card>
+                                        );
+                                    })}
                                 </Form>
 
                                 <div style={{ textAlign: 'right', marginTop: 24 }}>
@@ -794,7 +953,7 @@ const BookingPage: React.FC = () => {
                                             type="primary"
                                             size="large"
                                             loading={submitting}
-                                            disabled={availability && !availability.isAvailable}
+                                            disabled={submitting || (availability && !availability.isAvailable)}
                                             onClick={handleSubmit}
                                             icon={<CreditCardOutlined />}
                                         >

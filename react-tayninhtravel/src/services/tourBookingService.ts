@@ -272,32 +272,20 @@ export const createTourBooking = async (request: CreateTourBookingRequest, token
         };
     }
 
-    const response = await axios.post('/UserTourBooking/create-booking', request, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+        // Try individual QR endpoint first
+        const response = await axios.post('/UserTourBooking/create-booking', request, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
 
-    // Transform response to match expected format
-    if (response.data.success && response.data.data) {
-        const bookingData = response.data.data;
-        return {
-            success: true,
-            data: {
-                success: true,
-                message: response.data.message,
-                bookingId: bookingData.id,
-                bookingCode: bookingData.bookingCode,
-                paymentUrl: bookingData.checkoutUrl,
-                originalPrice: bookingData.totalPrice, // Will be calculated by backend
-                discountPercent: 0,
-                finalPrice: bookingData.totalPrice,
-                pricingType: 'Individual QR System',
-                bookingDate: bookingData.createdAt || new Date().toISOString(),
-                tourStartDate: bookingData.tourSlotDate
-            }
-        };
-    }
-
+    // Return raw response - let Enhanced Payment handle what it gets
+    console.log('Debug - Individual QR booking response:', response.data);
     return response.data;
+        
+    } catch (error: any) {
+        console.error('Individual QR booking failed:', error);
+        throw error; // Let the caller handle the error
+    }
 };
 
 /**
@@ -306,23 +294,28 @@ export const createTourBooking = async (request: CreateTourBookingRequest, token
 export const createLegacyTourBooking = async (request: LegacyCreateTourBookingRequest, token: string): Promise<ApiResponse<CreateBookingResult>> => {
     console.warn('Using legacy booking system - consider upgrading to Individual QR System');
     
-    const response = await axios.post('/UserTourBooking/create-booking-legacy', request, {
+    // Use the same endpoint but with legacy request format
+    const response = await axios.post('/UserTourBooking/create-booking', request, {
         headers: { Authorization: `Bearer ${token}` }
     });
 
     // Transform response to match expected format
-    if (response.data.success && response.data.bookingData) {
-        const bookingData = response.data.bookingData;
+    if (response.data.success) {
+        const bookingData = response.data.data || response.data;
+        
+        console.log('Legacy booking response:', response.data);
+        console.log('Legacy bookingData:', bookingData);
+        
         return {
             success: true,
             data: {
                 success: true,
-                message: response.data.message,
-                bookingId: bookingData.id,
+                message: response.data.message || 'Tạo booking thành công',
+                bookingId: bookingData.id || bookingData.bookingId,
                 bookingCode: bookingData.bookingCode,
-                paymentUrl: undefined,
-                originalPrice: bookingData.tourOperation?.price || 0,
-                discountPercent: 0,
+                paymentUrl: bookingData.checkoutUrl || bookingData.paymentUrl,
+                originalPrice: bookingData.totalPrice || bookingData.originalPrice || 0,
+                discountPercent: bookingData.discountPercent || 0,
                 finalPrice: bookingData.totalPrice,
                 pricingType: 'Legacy',
                 bookingDate: bookingData.bookingDate,
