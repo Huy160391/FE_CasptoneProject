@@ -127,6 +127,7 @@ const TourTemplateFormModal: React.FC<TourTemplateFormModalProps> = ({
                             <Select
                                 placeholder="Chọn ngày trong tuần"
                                 onChange={(value) => console.log('Schedule day changed:', value)}
+                                disabled={!!editingTemplate}
                             >
                                 <Option value={ScheduleDay.Saturday}>
                                     {SCHEDULE_DAY_LABELS[ScheduleDay.Saturday]} (Giá trị: {ScheduleDay.Saturday})
@@ -151,7 +152,7 @@ const TourTemplateFormModal: React.FC<TourTemplateFormModalProps> = ({
                                 { type: 'number', min: 1, max: 12, message: 'Tháng phải từ 1 đến 12' }
                             ]}
                         >
-                            <Select placeholder="Chọn tháng">
+                            <Select placeholder="Chọn tháng" disabled={!!editingTemplate}>
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                                     <Option key={month} value={month}>
                                         Tháng {month}
@@ -174,6 +175,7 @@ const TourTemplateFormModal: React.FC<TourTemplateFormModalProps> = ({
                                 max={2030}
                                 placeholder="Nhập năm"
                                 style={{ width: '100%' }}
+                                disabled={!!editingTemplate}
                             />
                         </Form.Item>
                     </Col>
