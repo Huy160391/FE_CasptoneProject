@@ -288,20 +288,20 @@ export const getSpecialtyShopById = async (id: string, token?: string): Promise<
 // Error handler for API calls
 export const handleApiError = (error: any): string => {
     console.error('API Error Details:', error);
-    
+
     if (error.response?.status === 400) {
         const responseData = error.response.data;
-        
+
         // Check for validation errors array first
         if (responseData.validationErrors && Array.isArray(responseData.validationErrors) && responseData.validationErrors.length > 0) {
             return responseData.validationErrors.join('\n');
         }
-        
+
         // Check for detailed error message from API
         if (responseData.message) {
             return responseData.message;
         }
-        
+
         // Check for errors object (sometimes API returns errors in different format)
         if (responseData.errors) {
             const errorMessages = [];
@@ -316,7 +316,7 @@ export const handleApiError = (error: any): string => {
                 return errorMessages.join('\n');
             }
         }
-        
+
         return 'Dữ liệu không hợp lệ';
     } else if (error.response?.status === 403) {
         return 'Bạn không có quyền thực hiện thao tác này';
@@ -389,11 +389,27 @@ export const activatePublicTourDetails = async (tourDetailsId: string, token?: s
     return response.data;
 };
 
+// Huỷ slot tour
+export const cancelTourSlot = async (
+    slotId: string,
+    reason: string,
+    additionalMessage?: string,
+    token?: string
+): Promise<ApiResponse<any>> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const requestBody = {
+        reason,
+        additionalMessage: additionalMessage || ''
+    };
+    const response = await axios.post(`/TourSlot/${slotId}/cancel-public`, requestBody, { headers });
+    return response.data;
+};
+
 // Mời thủ công hướng dẫn viên cho TourDetails
 export const manualInviteGuide = async (
-    tourDetailsId: string, 
-    guideId: string, 
-    additionalMessage?: string, 
+    tourDetailsId: string,
+    guideId: string,
+    additionalMessage?: string,
     token?: string
 ): Promise<ApiResponse<any>> => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};

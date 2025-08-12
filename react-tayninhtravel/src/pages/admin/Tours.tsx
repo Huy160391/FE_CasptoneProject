@@ -125,19 +125,46 @@ const Tours = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
+      width: 120,
+      render: (text: string) => (
+        text.length > 10 ? (
+          <span title={text} style={{ cursor: 'pointer' }}>
+            {text.slice(0, 10)}...
+          </span>
+        ) : text
+      ),
       sorter: (a: PendingTour, b: PendingTour) => (a.id > b.id ? 1 : -1),
     },
     {
-      title: 'Tour',
-      dataIndex: 'tourTemplateName',
-      key: 'tourTemplateName',
+      title: 'Tên tour',
+      dataIndex: 'title',
+      key: 'title',
       render: (text: string, record: PendingTour) => (
         <div className="tour-cell">
           <img src={record.imageUrl || (record.imageUrls && record.imageUrls[0])} alt={text} className="tour-image" />
           <span>{text}</span>
         </div>
       ),
-      sorter: (a: PendingTour, b: PendingTour) => a.tourTemplateName.localeCompare(b.tourTemplateName),
+      sorter: (a: PendingTour, b: PendingTour) => a.title.localeCompare(b.title),
+    },
+    {
+      title: 'Số khách tối đa',
+      dataIndex: ['tourOperation', 'maxGuests'],
+      key: 'maxGuests',
+      render: (_: any, record: PendingTour) => record.tourOperation?.maxGuests ?? '-',
+    },
+    {
+      title: 'Giá',
+      dataIndex: ['tourOperation', 'price'],
+      key: 'price',
+      render: (_: any, record: PendingTour) => record.tourOperation?.price ? `${record.tourOperation.price.toLocaleString()}₫` : '-',
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (text: string) => new Date(text).toLocaleString('vi-VN'),
+      sorter: (a: PendingTour, b: PendingTour) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     },
     {
       title: 'Công ty tổ chức',
