@@ -41,7 +41,7 @@ interface BookingHistoryProps {
     data?: Array<any>; // Keep for backward compatibility
 }
 
-const getStatusText = (status: BookingStatus): string => {
+const getBookingStatusText = (status: BookingStatus): string => {
     switch (status) {
         case BookingStatus.Pending:
             return 'Chờ thanh toán';
@@ -58,7 +58,7 @@ const getStatusText = (status: BookingStatus): string => {
     }
 };
 
-const getStatusColor = (status: BookingStatus): string => {
+const getBookingStatusColor = (status: BookingStatus): string => {
     switch (status) {
         case BookingStatus.Pending:
             return 'orange';
@@ -240,7 +240,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                 <Option value={BookingStatus.Pending}>{t('bookingHistory.statuses.pending', 'Chờ thanh toán')}</Option>
                                 <Option value={BookingStatus.Confirmed}>{t('bookingHistory.statuses.confirmed', 'Đã xác nhận')}</Option>
                                 <Option value={BookingStatus.Completed}>{t('bookingHistory.statuses.completed', 'Đã hoàn thành')}</Option>
-                                <Option value={BookingStatus.CancelledByCustomer}>{t('bookingHistory.statuses.cancelled', 'Đã hủy')}</Option>
+                                <Option value={BookingStatus.Cancelled}>{t('bookingHistory.statuses.cancelled', 'Đã hủy')}</Option>
                                 <Option value={BookingStatus.Refunded}>{t('bookingHistory.statuses.refunded', 'Đã hoàn tiền')}</Option>
 
                             </Select>
@@ -336,12 +336,10 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                     key: 'numberOfGuests',
                                     width: 80,
                                     align: 'center',
-                                    render: (guests, record) => (
+                                    render: (guests) => (
                                         <div>
                                             <Text strong>{guests}</Text>
-                                            <div style={{ fontSize: '11px', color: '#666' }}>
-                                                {record.adultCount}NL, {record.childCount}TE
-                                            </div>
+                                            {/* Adult/Child count removed - not available in TourBookingDto */}
                                         </div>
                                     )
                                 },
