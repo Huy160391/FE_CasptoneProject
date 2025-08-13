@@ -5,21 +5,11 @@
 .tour-price-display .ant-typography {
   color: #222;
 }
-.tour-price-display .ant-tag {
-  background: #fff0f0;
-  color: #c00;
-}
-
 body.dark-mode .tour-price-display {
   background: transparent;
 }
 body.dark-mode .tour-price-display .ant-typography {
   color: #eee !important;
-}
-body.dark-mode .tour-price-display .ant-tag {
-  background: #2a2a2a;
-  color: #ff7875;
-  border-color: #ff7875;
 }
 
 .tour-price-final {

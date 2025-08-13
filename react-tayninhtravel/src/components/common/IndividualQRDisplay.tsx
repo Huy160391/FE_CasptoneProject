@@ -40,7 +40,7 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       message.success(`Đã tải QR code cho ${guestName}`);
     } catch (error) {
       message.error('Có lỗi khi tải QR code');
@@ -77,7 +77,7 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
       return;
     }
 
-    const qrCodesHtml = guests.map((guest, index) => 
+    const qrCodesHtml = guests.map((guest, index) =>
       guest.qrCodeData ? `
         <div style="page-break-after: ${index < guests.length - 1 ? 'always' : 'auto'}; padding: 20px; text-align: center;">
           <h2 style="margin-bottom: 10px;">${guest.guestName}</h2>
@@ -113,14 +113,14 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
           <script>
             // Generate QR codes after page loads
             window.onload = function() {
-              ${guests.map(guest => 
-                guest.qrCodeData ? `
+              ${guests.map(guest =>
+      guest.qrCodeData ? `
                   QRCode.toCanvas(document.getElementById('qr-${guest.id}'), '${guest.qrCodeData}', {
                     width: 200,
                     height: 200
                   });
                 ` : ''
-              ).join('')}
+    ).join('')}
               
               setTimeout(() => window.print(), 500);
             };
@@ -151,20 +151,20 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
       <Title level={4} style={{ marginBottom: 16 }}>
         🎫 QR Codes cá nhân
       </Title>
-      
+
       {/* Bulk Actions */}
       {guests.some(g => g.qrCodeData) && (
         <div style={{ marginBottom: 24 }}>
           <Space>
-            <Button 
-              icon={<PrinterOutlined />} 
+            <Button
+              icon={<PrinterOutlined />}
               onClick={printAllQRCodes}
               type="primary"
             >
               In tất cả QR codes
             </Button>
-            <Button 
-              icon={<DownloadOutlined />} 
+            <Button
+              icon={<DownloadOutlined />}
               onClick={downloadAllQRCodes}
             >
               Tải tất cả QR codes
@@ -182,7 +182,7 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
               title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Text strong>{guest.guestName}</Text>
-                  <Tag 
+                  <Tag
                     color={guest.isCheckedIn ? 'success' : 'default'}
                     icon={guest.isCheckedIn ? <CheckCircleOutlined /> : <ClockCircleOutlined />}
                   >
@@ -199,7 +199,7 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
                   <br />
                   <Text style={{ fontSize: 13, wordBreak: 'break-all' }}>{guest.guestEmail}</Text>
                 </div>
-                
+
                 {guest.guestPhone && (
                   <div>
                     <Text type="secondary" style={{ fontSize: 12 }}>Phone:</Text>
@@ -210,16 +210,16 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
 
                 {/* QR Code */}
                 <Divider style={{ margin: '8px 0' }} />
-                
+
                 {guest.qrCodeData ? (
                   <div style={{ textAlign: 'center' }}>
-                    <QRCode 
-                      value={guest.qrCodeData} 
+                    <QRCode
+                      value={guest.qrCodeData}
                       size={120}
                       level="M"
                       includeMargin
                     />
-                    
+
                     {/* QR Actions */}
                     <div style={{ marginTop: 8 }}>
                       <Space size="small">

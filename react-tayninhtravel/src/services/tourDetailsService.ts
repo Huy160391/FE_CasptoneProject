@@ -40,6 +40,24 @@ export interface TourDetail {
         scheduleDay: string;
         isAvailable: boolean;
     }>;
+    availableSlots?: import("../types/tour").TourSlot[];
+    tourTemplate?: {
+        id: string;
+        title: string;
+        templateType: string;
+        scheduleDays: string;
+        scheduleDaysVietnamese?: string;
+        startLocation?: string;
+        endLocation?: string;
+        month?: number;
+        year?: number;
+        images?: Array<{ id: string; url: string }>;
+        createdBy?: {
+            id: string;
+            name: string;
+            email: string;
+        };
+    };
 }
 
 /**

@@ -257,11 +257,14 @@ export interface TourSlot {
     tourTemplateId: string;
     tourDate: string;
     scheduleDay: ScheduleDay;
-    status: TourSlotStatus;
+    status: string | TourSlotStatus;
     tourDetailsId?: string | null;
     isActive: boolean;
     createdAt: string;
     updatedAt?: string | null;
+    maxGuests: number;
+    currentBookings: number;
+    availableSpots: number;
 }
 
 // TourDetails interfaces - Updated to match backend TourDetailDto
@@ -288,6 +291,7 @@ export interface TourDetails {
     isActive: boolean;
     createdAt: string;
     updatedAt?: string;
+    availableSlots?: TourSlot[];
 }
 
 // TourDetailsSpecialtyShop interface for invited shops
