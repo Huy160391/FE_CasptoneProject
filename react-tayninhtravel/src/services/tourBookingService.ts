@@ -4,9 +4,8 @@ import { TourDetailsStatus } from '../types/tour';
 import { mapStringToStatusEnum } from '../utils/statusMapper';
 import { 
     GuestInfoRequest, 
-    TourBookingDto, 
-    CreateTourBookingRequest as IndividualQRCreateRequest,
-    TourBookingGuest 
+    TourBookingDto,
+    BookingStatus
 } from '../types/individualQR';
 
 // ===== TOUR BOOKING TYPES =====
@@ -91,7 +90,11 @@ export interface CreateTourBookingRequest {
     numberOfGuests: number;    // Required, 1-50, phải = guests.length
     contactPhone?: string;     // Optional, max 20 chars
     specialRequests?: string;  // Optional, max 500 chars
-    guests: GuestInfoRequest[]; // Required, min 1 guest
+    bookingType?: 'Individual' | 'GroupRepresentative'; // NEW: Booking type
+    groupName?: string;        // NEW: Group name for GroupRepresentative
+    groupDescription?: string; // NEW: Group description for GroupRepresentative
+    groupRepresentative?: GuestInfoRequest; // NEW: Representative info for GroupRepresentative
+    guests?: GuestInfoRequest[]; // Optional for GroupRepresentative, required for Individual
 }
 
 // 🔄 LEGACY: Backward compatibility (Deprecated)
@@ -172,15 +175,8 @@ export interface TourBooking {
     tourOperation?: TourOperationSummary;
 }
 
-export enum BookingStatus {
-    Pending = 0,
-    Confirmed = 1,
-    CancelledByCustomer = 2,
-    CancelledByCompany = 3,
-    Completed = 4,
-    NoShow = 5,
-    Refunded = 6
-}
+// BookingStatus is now imported from individualQR.ts
+export { BookingStatus };
 
 // ===== TOUR BOOKING API SERVICES =====
 
@@ -521,14 +517,10 @@ export const getBookingStatusText = (status: BookingStatus): string => {
             return 'Chờ thanh toán';
         case BookingStatus.Confirmed:
             return 'Đã xác nhận';
-        case BookingStatus.CancelledByCustomer:
-            return 'Đã hủy bởi khách hàng';
-        case BookingStatus.CancelledByCompany:
-            return 'Đã hủy bởi công ty';
+        case BookingStatus.Cancelled:
+            return 'Đã hủy';
         case BookingStatus.Completed:
             return 'Đã hoàn thành';
-        case BookingStatus.NoShow:
-            return 'Không xuất hiện';
         case BookingStatus.Refunded:
             return 'Đã hoàn tiền';
         default:
@@ -545,13 +537,10 @@ export const getBookingStatusColor = (status: BookingStatus): string => {
             return 'orange';
         case BookingStatus.Confirmed:
             return 'green';
-        case BookingStatus.CancelledByCustomer:
-        case BookingStatus.CancelledByCompany:
+        case BookingStatus.Cancelled:
             return 'red';
         case BookingStatus.Completed:
             return 'blue';
-        case BookingStatus.NoShow:
-            return 'volcano';
         case BookingStatus.Refunded:
             return 'purple';
         default:
@@ -585,41 +574,77 @@ export const validateIndividualQRBookingRequest = (request: CreateTourBookingReq
         errors.push('Số lượng người không được quá 50');
     }
 
-    // Validate guests array
-    if (!request.guests || request.guests.length === 0) {
-        errors.push('Thông tin khách hàng là bắt buộc');
-    } else {
-        // Validate guest count matches
-        if (request.guests.length !== request.numberOfGuests) {
-            errors.push(`Số lượng thông tin khách hàng (${request.guests.length}) phải khớp với số lượng khách đã chọn (${request.numberOfGuests})`);
+    // Check booking type to determine validation logic
+    const isGroupRepresentative = request.bookingType === 'GroupRepresentative';
+    const isIndividual = request.bookingType === 'Individual' || !request.bookingType;
+
+    // Validate based on booking type
+    if (isGroupRepresentative) {
+        // For GroupRepresentative: only need 1 guest record OR groupRepresentative info
+        if (request.groupRepresentative) {
+            // Validate group representative info
+            if (!request.groupRepresentative.guestName?.trim()) {
+                errors.push('Tên người đại diện là bắt buộc');
+            } else if (request.groupRepresentative.guestName.trim().length < 2) {
+                errors.push('Tên người đại diện phải có ít nhất 2 ký tự');
+            }
+
+            if (!request.groupRepresentative.guestEmail?.trim()) {
+                errors.push('Email người đại diện là bắt buộc');
+            } else if (!isValidEmail(request.groupRepresentative.guestEmail)) {
+                errors.push('Email người đại diện không hợp lệ');
+            }
+        } else if (!request.guests || request.guests.length === 0) {
+            errors.push('Thông tin người đại diện là bắt buộc');
+        } else {
+            // Validate the first guest as representative
+            const representative = request.guests[0];
+            if (!representative.guestName?.trim()) {
+                errors.push('Tên người đại diện là bắt buộc');
+            }
+            if (!representative.guestEmail?.trim()) {
+                errors.push('Email người đại diện là bắt buộc');
+            } else if (!isValidEmail(representative.guestEmail)) {
+                errors.push('Email người đại diện không hợp lệ');
+            }
         }
-
-        // Validate each guest
-        request.guests.forEach((guest, index) => {
-            if (!guest.guestName?.trim()) {
-                errors.push(`Tên khách hàng thứ ${index + 1} là bắt buộc`);
-            } else if (guest.guestName.trim().length < 2) {
-                errors.push(`Tên khách hàng thứ ${index + 1} phải có ít nhất 2 ký tự`);
-            } else if (guest.guestName.length > 100) {
-                errors.push(`Tên khách hàng thứ ${index + 1} không được quá 100 ký tự`);
+    } else if (isIndividual) {
+        // For Individual: need guest info for each person
+        if (!request.guests || request.guests.length === 0) {
+            errors.push('Thông tin khách hàng là bắt buộc');
+        } else {
+            // Validate guest count matches
+            if (request.guests.length !== request.numberOfGuests) {
+                errors.push(`Số lượng thông tin khách hàng (${request.guests.length}) phải khớp với số lượng khách đã chọn (${request.numberOfGuests})`);
             }
 
-            if (!guest.guestEmail?.trim()) {
-                errors.push(`Email khách hàng thứ ${index + 1} là bắt buộc`);
-            } else if (!isValidEmail(guest.guestEmail)) {
-                errors.push(`Email khách hàng thứ ${index + 1} không hợp lệ`);
-            }
+            // Validate each guest
+            request.guests.forEach((guest, index) => {
+                if (!guest.guestName?.trim()) {
+                    errors.push(`Tên khách hàng thứ ${index + 1} là bắt buộc`);
+                } else if (guest.guestName.trim().length < 2) {
+                    errors.push(`Tên khách hàng thứ ${index + 1} phải có ít nhất 2 ký tự`);
+                } else if (guest.guestName.length > 100) {
+                    errors.push(`Tên khách hàng thứ ${index + 1} không được quá 100 ký tự`);
+                }
 
-            if (guest.guestPhone && guest.guestPhone.length > 20) {
-                errors.push(`Số điện thoại khách hàng thứ ${index + 1} không được quá 20 ký tự`);
-            }
-        });
+                if (!guest.guestEmail?.trim()) {
+                    errors.push(`Email khách hàng thứ ${index + 1} là bắt buộc`);
+                } else if (!isValidEmail(guest.guestEmail)) {
+                    errors.push(`Email khách hàng thứ ${index + 1} không hợp lệ`);
+                }
 
-        // Validate unique emails
-        const emails = request.guests.map(g => g.guestEmail.toLowerCase());
-        const uniqueEmails = new Set(emails);
-        if (emails.length !== uniqueEmails.size) {
-            errors.push('Email khách hàng phải unique trong cùng booking');
+                if (guest.guestPhone && guest.guestPhone.length > 20) {
+                    errors.push(`Số điện thoại khách hàng thứ ${index + 1} không được quá 20 ký tự`);
+                }
+            });
+
+            // Validate unique emails
+            const emails = request.guests.map(g => g.guestEmail.toLowerCase());
+            const uniqueEmails = new Set(emails);
+            if (emails.length !== uniqueEmails.size) {
+                errors.push('Email khách hàng phải unique trong cùng booking');
+            }
         }
     }
 

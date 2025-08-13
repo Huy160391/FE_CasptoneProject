@@ -1,534 +1,612 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
-    Card,
-    Form,
-    Input,
-    InputNumber,
-    Button,
-    Steps,
-    Row,
-    Col,
-    Typography,
-    Divider,
-    Alert,
-    Spin,
-    message,
-    Space,
-    Tag,
-    Descriptions
-} from 'antd';
+  CreditCardOutlined,
+  InfoCircleOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import {
-    UserOutlined,
-    PhoneOutlined,
-    MailOutlined,
-    TeamOutlined,
-    CreditCardOutlined,
-    InfoCircleOutlined
-} from '@ant-design/icons';
-import { useAuthStore } from '../store/useAuthStore';
+  Alert,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Radio,
+  Row,
+  Space,
+  Spin,
+  Steps,
+  Tag,
+  Typography,
+} from "antd";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import LoginModal from "../components/auth/LoginModal";
+import { useEnhancedPayment } from "../services/enhancedPaymentService";
+import { formatCurrency } from "../services/paymentService";
 import {
-    getTourDetailsForBooking,
-    calculateBookingPrice,
-    createTourBooking,
-    checkTourAvailability,
-    validateBookingRequest,
-    TourDetailsForBooking,
-    PriceCalculation,
-    CreateTourBookingRequest
-} from '../services/tourBookingService';
-import { GuestInfoRequest } from '../types/individualQR';
-import { tourSlotService, TourSlotDto } from '../services/tourSlotService';
-import { redirectToPayOsPayment, formatCurrency } from '../services/paymentService';
-import { useEnhancedPayment } from '../services/enhancedPaymentService';
-import LoginModal from '../components/auth/LoginModal';
-import { getDefaultTourImage } from '../utils/imageUtils';
-
+  calculateBookingPrice,
+  checkTourAvailability,
+  createTourBooking,
+  CreateTourBookingRequest,
+  getTourDetailsForBooking,
+  PriceCalculation,
+  TourDetailsForBooking,
+  validateBookingRequest,
+} from "../services/tourBookingService";
+import { TourSlotDto, tourSlotService } from "../services/tourSlotService";
+import { useAuthStore } from "../store/useAuthStore";
+import { GuestInfoRequest } from "../types/individualQR";
+import { getDefaultTourImage } from "../utils/imageUtils";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
 
 interface BookingFormData {
-    numberOfGuests: number;
-    contactName: string;
-    contactPhone: string;
-    contactEmail: string;
-    specialRequests?: string;
-    guests: GuestInfoRequest[]; // ✅ NEW: Individual guest info
+  bookingType: "representative" | "individual"; // NEW: Booking type selection
+  numberOfGuests: number;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  specialRequests?: string;
+  guests: GuestInfoRequest[]; // ✅ NEW: Individual guest info
 }
 
 const BookingPage: React.FC = () => {
-    const { tourId } = useParams<{ tourId: string }>();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { isAuthenticated, token, user } = useAuthStore();
-    const { createPaymentLink } = useEnhancedPayment();
+  const { tourId } = useParams<{ tourId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated, token, user } = useAuthStore();
+  const { createPaymentLink } = useEnhancedPayment();
 
-    const [form] = Form.useForm<BookingFormData>();
-    const [currentStep, setCurrentStep] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [calculating, setCalculating] = useState(false);
-    const [paymentProcessing, setPaymentProcessing] = useState(false); // ✅ NEW: Prevent duplicate payment calls
+  const [form] = Form.useForm<BookingFormData>();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [calculating, setCalculating] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false); // ✅ NEW: Prevent duplicate payment calls
 
-    const [tourDetails, setTourDetails] = useState<TourDetailsForBooking | null>(null);
-    const [priceCalculation, setPriceCalculation] = useState<PriceCalculation | null>(null);
-    const [availability, setAvailability] = useState<any>(null);
-    const [error, setError] = useState<string | null>(null);
+  const [tourDetails, setTourDetails] = useState<TourDetailsForBooking | null>(
+    null
+  );
+  const [priceCalculation, setPriceCalculation] =
+    useState<PriceCalculation | null>(null);
+  const [availability, setAvailability] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-    const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
-    const [bookingData, setBookingData] = useState<any>(null);
-    const [formValues, setFormValues] = useState<BookingFormData>({
-        numberOfGuests: 1,
-        contactName: '',
-        contactPhone: '',
-        contactEmail: '',
-        specialRequests: '',
-        guests: [{ guestName: '', guestEmail: '', guestPhone: '' }] // ✅ NEW
-    });
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [bookingData, setBookingData] = useState<any>(null);
+  const [formValues, setFormValues] = useState<BookingFormData>({
+    bookingType: "representative", // Default to representative booking
+    numberOfGuests: 1,
+    contactName: "",
+    contactPhone: "",
+    contactEmail: "",
+    specialRequests: "",
+    guests: [{ guestName: "", guestEmail: "", guestPhone: "" }], // ✅ NEW
+  });
 
-    // Tour slots state
-    const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
-    const [selectedSlot, setSelectedSlot] = useState<TourSlotDto | null>(null);
-    const [slotsLoading, setSlotsLoading] = useState(false);
+  // Tour slots state
+  const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<TourSlotDto | null>(null);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
-    // Always use Enhanced Payment System
+  // Always use Enhanced Payment System
 
+  // Get initial booking data from navigation state
+  useEffect(() => {
+    if (location.state?.bookingDetails) {
+      setBookingData(location.state.bookingDetails);
+    }
+  }, [location.state]);
 
+  // Load tour details
+  useEffect(() => {
+    const loadTourDetails = async () => {
+      if (!tourId) {
+        setError("Không tìm thấy ID tour");
+        setLoading(false);
+        return;
+      }
 
-    // Get initial booking data from navigation state
-    useEffect(() => {
-        if (location.state?.bookingDetails) {
-            setBookingData(location.state.bookingDetails);
+      try {
+        setLoading(true);
+        const response = await getTourDetailsForBooking(tourId);
+
+        if (response.success && response.data) {
+          setTourDetails(response.data);
+
+          // Load tour slots
+          loadTourSlots(response.data.id);
+
+          // Pre-fill form with user data if available
+          const initialValues = {
+            bookingType: "representative" as const,
+            numberOfGuests: bookingData?.numberOfGuests || 1,
+            contactName: user?.name || "",
+            contactEmail: user?.email || "",
+            contactPhone: user?.phone || "",
+            specialRequests: "",
+          };
+
+          // Update both form and state
+          form.setFieldsValue(initialValues);
+          setFormValues({
+            ...initialValues,
+            guests: [],
+          });
+        } else {
+          setError(response.message || "Không thể tải thông tin tour");
         }
-    }, [location.state]);
-
-    // Load tour details
-    useEffect(() => {
-        const loadTourDetails = async () => {
-            if (!tourId) {
-                setError('Không tìm thấy ID tour');
-                setLoading(false);
-                return;
-            }
-
-            try {
-                setLoading(true);
-                const response = await getTourDetailsForBooking(tourId);
-
-                if (response.success && response.data) {
-                    setTourDetails(response.data);
-
-                    // Load tour slots
-                    loadTourSlots(response.data.id);
-
-                    // Pre-fill form with user data if available
-                    const initialValues = {
-                        numberOfGuests: bookingData?.numberOfGuests || 1,
-                        contactName: user?.name || '',
-                        contactEmail: user?.email || '',
-                        contactPhone: user?.phone || '',
-                        specialRequests: ''
-                    };
-
-                    // Update both form and state
-                    form.setFieldsValue(initialValues);
-                    setFormValues(initialValues);
-                } else {
-                    setError(response.message || 'Không thể tải thông tin tour');
-                }
-            } catch (error: any) {
-                console.error('Error loading tour details:', error);
-                setError(error.message || 'Có lỗi xảy ra khi tải thông tin tour');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadTourDetails();
-    }, [tourId, user, form, bookingData]);
-
-    // Load tour slots
-    const loadTourSlots = async (tourDetailsId: string) => {
-        try {
-            setSlotsLoading(true);
-            const response = await tourSlotService.getSlotsByTourDetails(tourDetailsId, token ?? undefined);
-            console.log('Raw tour slots response:', response);
-            
-            if (response.success && response.data) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0); // Start of today
-                
-                console.log('Current date for filtering:', today);
-                console.log('All slots before filtering:', response.data);
-                
-                // Filter: only show active slots with available spots from today onward
-                const availableSlots = response.data.filter(slot => {
-                    const slotDate = new Date(slot.tourDate);
-                    const isNotPast = slotDate >= today; // Not in the past
-                    const hasAvailableSpots = (slot.availableSpots || 0) > 0; // Has available spots
-                    
-                    console.log(`Slot ${slot.id}:`, {
-                        tourDate: slot.tourDate,
-                        slotDateISO: slotDate.toISOString(),
-                        todayISO: today.toISOString(),
-                        isActive: slot.isActive,
-                        status: slot.status,
-                        statusName: slot.statusName,
-                        availableSpots: slot.availableSpots,
-                        maxGuests: slot.maxGuests,
-                        currentBookings: slot.currentBookings,
-                        isNotPast,
-                        hasAvailableSpots,
-                        willShow: slot.isActive && isNotPast && hasAvailableSpots // Must be active, not past, and have spots
-                    });
-                    
-                    // Show slots that are: active, not in the past, and have available spots
-                    return slot.isActive && isNotPast && hasAvailableSpots;
-                });
-                
-                console.log('Available slots after filtering:', availableSlots);
-                setTourSlots(availableSlots);
-
-                // Auto-select first available slot if only one
-                if (availableSlots.length === 1) {
-                    setSelectedSlot(availableSlots[0]);
-                }
-                
-                // Clear selected slot if it's no longer available
-                if (selectedSlot && !availableSlots.find(slot => slot.id === selectedSlot.id)) {
-                    setSelectedSlot(null);
-                }
-            }
-        } catch (error) {
-            console.error('Error loading tour slots:', error);
-        } finally {
-            setSlotsLoading(false);
-        }
+      } catch (error: any) {
+        console.error("Error loading tour details:", error);
+        setError(error.message || "Có lỗi xảy ra khi tải thông tin tour");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Calculate price when guest count changes
-    const handleGuestCountChange = async (values: Partial<BookingFormData>) => {
-        if (!tourDetails || !values.numberOfGuests) return;
+    loadTourDetails();
+  }, [tourId, user, form, bookingData]);
 
-        try {
-            setCalculating(true);
-            const response = await calculateBookingPrice({
-                tourDetailsId: tourDetails.id,
-                numberOfGuests: values.numberOfGuests
-            }, token ?? undefined);
+  // Load tour slots
+  const loadTourSlots = async (tourDetailsId: string) => {
+    try {
+      setSlotsLoading(true);
+      const response = await tourSlotService.getSlotsByTourDetails(
+        tourDetailsId,
+        token ?? undefined
+      );
+      console.log("Raw tour slots response:", response);
 
-            if (response.success && response.data) {
-                setPriceCalculation(response.data);
+      if (response.success && response.data) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Start of today
 
-                // Check availability
-                const availabilityResponse = await checkTourAvailability(
-                    tourDetails.tourOperation.id,
-                    values.numberOfGuests,
-                    token ?? undefined
-                );
+        console.log("Current date for filtering:", today);
+        console.log("All slots before filtering:", response.data);
 
-                if (availabilityResponse.success) {
-                    console.log('Availability data:', availabilityResponse.data); // Debug log
-                    setAvailability(availabilityResponse.data);
-                }
-            }
-        } catch (error: any) {
-            console.error('Error calculating price:', error);
-            message.error('Không thể tính giá tour');
-        } finally {
-            setCalculating(false);
+        // Filter: only show active slots with available spots from today onward
+        const availableSlots = response.data.filter((slot) => {
+          const slotDate = new Date(slot.tourDate);
+          const isNotPast = slotDate >= today; // Not in the past
+          const hasAvailableSpots = (slot.availableSpots || 0) > 0; // Has available spots
+
+          console.log(`Slot ${slot.id}:`, {
+            tourDate: slot.tourDate,
+            slotDateISO: slotDate.toISOString(),
+            todayISO: today.toISOString(),
+            isActive: slot.isActive,
+            status: slot.status,
+            statusName: slot.statusName,
+            availableSpots: slot.availableSpots,
+            maxGuests: slot.maxGuests,
+            currentBookings: slot.currentBookings,
+            isNotPast,
+            hasAvailableSpots,
+            willShow: slot.isActive && isNotPast && hasAvailableSpots, // Must be active, not past, and have spots
+          });
+
+          // Show slots that are: active, not in the past, and have available spots
+          return slot.isActive && isNotPast && hasAvailableSpots;
+        });
+
+        console.log("Available slots after filtering:", availableSlots);
+        setTourSlots(availableSlots);
+
+        // Auto-select first available slot if only one
+        if (availableSlots.length === 1) {
+          setSelectedSlot(availableSlots[0]);
         }
-    };
 
-    // ✅ NEW: Helper functions for individual guests
-    const updateGuestInfo = (index: number, field: keyof GuestInfoRequest, value: string) => {
-        const updatedGuests = [...formValues.guests];
-        updatedGuests[index] = { ...updatedGuests[index], [field]: value };
+        // Clear selected slot if it's no longer available
+        if (
+          selectedSlot &&
+          !availableSlots.find((slot) => slot.id === selectedSlot.id)
+        ) {
+          setSelectedSlot(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading tour slots:", error);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
 
-        setFormValues(prev => ({
-            ...prev,
-            guests: updatedGuests
-        }));
-    };
+  // Calculate price when guest count changes
+  const handleGuestCountChange = async (values: Partial<BookingFormData>) => {
+    if (!tourDetails || !values.numberOfGuests) return;
 
-    const validateUniqueEmail = (email: string, currentIndex: number, guests: GuestInfoRequest[]) => {
-        if (!email) return Promise.resolve();
+    try {
+      setCalculating(true);
+      const response = await calculateBookingPrice(
+        {
+          tourDetailsId: tourDetails.id,
+          numberOfGuests: values.numberOfGuests,
+        },
+        token ?? undefined
+      );
 
-        const duplicateIndex = guests.findIndex((guest, index) =>
-            index !== currentIndex && guest.guestEmail.toLowerCase() === email.toLowerCase()
+      if (response.success && response.data) {
+        setPriceCalculation(response.data);
+
+        // Check availability
+        const availabilityResponse = await checkTourAvailability(
+          tourDetails.tourOperation.id,
+          values.numberOfGuests,
+          token ?? undefined
         );
 
-        if (duplicateIndex !== -1) {
-            return Promise.reject(new Error(`Email đã được sử dụng cho khách hàng ${duplicateIndex + 1}`));
+        if (availabilityResponse.success) {
+          console.log("Availability data:", availabilityResponse.data); // Debug log
+          setAvailability(availabilityResponse.data);
         }
+      }
+    } catch (error: any) {
+      console.error("Error calculating price:", error);
+      message.error("Không thể tính giá tour");
+    } finally {
+      setCalculating(false);
+    }
+  };
 
-        return Promise.resolve();
-    };
+  // ✅ NEW: Helper functions for individual guests
+  const updateGuestInfo = (
+    index: number,
+    field: keyof GuestInfoRequest,
+    value: string
+  ) => {
+    const updatedGuests = [...formValues.guests];
+    updatedGuests[index] = { ...updatedGuests[index], [field]: value };
 
-    const handleGuestArrayUpdate = (allValues: BookingFormData) => {
-        const newGuestCount = allValues.numberOfGuests;
-        const currentGuests = formValues.guests || []; // Safe fallback
+    setFormValues((prev) => ({
+      ...prev,
+      guests: updatedGuests,
+    }));
+  };
 
-        // Auto-adjust guests array
-        const newGuests = Array.from({ length: newGuestCount }, (_, index) => {
-            if (index < currentGuests.length) {
-                return currentGuests[index]; // Keep existing data
-            } else {
-                // Auto-populate first guest with contact info
-                if (index === 0 && allValues.contactName && allValues.contactEmail) {
-                    return {
-                        guestName: allValues.contactName,
-                        guestEmail: allValues.contactEmail,
-                        guestPhone: allValues.contactPhone || ''
-                    };
-                }
-                return { guestName: '', guestEmail: '', guestPhone: '' };
-            }
-        });
+  const validateUniqueEmail = (
+    email: string,
+    currentIndex: number,
+    guests: GuestInfoRequest[]
+  ) => {
+    if (!email) return Promise.resolve();
 
-        setFormValues(prev => ({
-            ...prev,
-            guests: newGuests
-        }));
+    const duplicateIndex = guests.findIndex(
+      (guest, index) =>
+        index !== currentIndex &&
+        guest.guestEmail.toLowerCase() === email.toLowerCase()
+    );
 
-        // Continue with existing price calculation logic...
-        if (tourDetails && selectedSlot) {
-            handleGuestCountChange({ numberOfGuests: allValues.numberOfGuests });
+    if (duplicateIndex !== -1) {
+      return Promise.reject(
+        new Error(`Email đã được sử dụng cho khách hàng ${duplicateIndex + 1}`)
+      );
+    }
+
+    return Promise.resolve();
+  };
+
+  const handleGuestArrayUpdate = (allValues: BookingFormData) => {
+    const newGuestCount = allValues.numberOfGuests;
+    const currentGuests = formValues.guests || []; // Safe fallback
+
+    // Auto-adjust guests array
+    const newGuests = Array.from({ length: newGuestCount }, (_, index) => {
+      if (index < currentGuests.length) {
+        return currentGuests[index]; // Keep existing data
+      } else {
+        // Auto-populate first guest with contact info
+        if (index === 0 && allValues.contactName && allValues.contactEmail) {
+          return {
+            guestName: allValues.contactName,
+            guestEmail: allValues.contactEmail,
+            guestPhone: allValues.contactPhone || "",
+          };
         }
-    };
+        return { guestName: "", guestEmail: "", guestPhone: "" };
+      }
+    });
 
-    const handleFormValuesChange = (changedValues: Partial<BookingFormData>, allValues: BookingFormData) => {
-        // Save form values to state
-        setFormValues(allValues);
+    setFormValues((prev) => ({
+      ...prev,
+      guests: newGuests,
+    }));
 
-        if (changedValues.numberOfGuests) {
-            // Update price calculation (original function)
-            handleGuestCountChange(changedValues);
-            // Update guests array (new function)
-            handleGuestArrayUpdate(allValues);
-        }
-    };
+    // Continue with existing price calculation logic...
+    if (tourDetails && selectedSlot) {
+      handleGuestCountChange({ numberOfGuests: allValues.numberOfGuests });
+    }
+  };
 
-    const handleNext = () => {
-        // Validate slot selection for step 0
-        if (currentStep === 0) {
-            if (tourSlots.length > 0 && !selectedSlot) {
-                message.error('Vui lòng chọn ngày tour');
-                return;
-            }
-        }
+  const handleFormValuesChange = (
+    changedValues: Partial<BookingFormData>,
+    allValues: BookingFormData
+  ) => {
+    // Save form values to state
+    setFormValues(allValues);
 
-        form.validateFields().then(() => {
-            setCurrentStep(currentStep + 1);
-        }).catch(() => {
-            message.error('Vui lòng điền đầy đủ thông tin');
-        });
-    };
+    if (changedValues.numberOfGuests) {
+      // Update price calculation (original function)
+      handleGuestCountChange(changedValues);
+      // Update guests array (new function)
+      handleGuestArrayUpdate(allValues);
+    }
+  };
 
-    const handlePrev = () => {
-        setCurrentStep(currentStep - 1);
-    };
+  const handleNext = () => {
+    // Validate slot selection for step 0
+    if (currentStep === 0) {
+      if (tourSlots.length > 0 && !selectedSlot) {
+        message.error("Vui lòng chọn ngày tour");
+        return;
+      }
+    }
 
-    const handleSubmit = async () => {
-        // Prevent double submission
-        if (submitting) {
-            return;
-        }
+    form
+      .validateFields()
+      .then(() => {
+        setCurrentStep(currentStep + 1);
+      })
+      .catch(() => {
+        message.error("Vui lòng điền đầy đủ thông tin");
+      });
+  };
 
-        setSubmitting(true);
+  const handlePrev = () => {
+    setCurrentStep(currentStep - 1);
+  };
 
-        if (!isAuthenticated) {
-            setIsLoginModalVisible(true);
-            return;
-        }
+  const handleSubmit = async () => {
+    // Prevent double submission
+    if (submitting) {
+      return;
+    }
 
-        if (!tourDetails || !token) {
-            message.error('Thông tin không đầy đủ để đặt tour');
-            return;
-        }
+    setSubmitting(true);
 
-        try {
+    if (!isAuthenticated) {
+      setIsLoginModalVisible(true);
+      return;
+    }
+
+    if (!tourDetails || !token) {
+      message.error("Thông tin không đầy đủ để đặt tour");
+      return;
+    }
+
+    try {
             // Use form values from state (since form might not be rendered in current step)
 
-            // ✅ NEW: Individual QR Booking Request
+            // ✅ NEW: Enhanced booking request with proper backend API structure
+            let guestsData: GuestInfoRequest[] = [];
+            
+            if (formValues.bookingType === 'representative') {
+                // For representative booking: Create guest records for all numberOfGuests
+                // First guest is the representative with full info
+                // Other guests are placeholders to satisfy backend validation
+                guestsData = [];
+                
+                // Add the representative as first guest
+                guestsData.push({
+                    guestName: formValues.contactName,
+                    guestEmail: formValues.contactEmail,
+                    guestPhone: formValues.contactPhone
+                });
+                
+                // Add placeholder guests for the rest
+                for (let i = 1; i < formValues.numberOfGuests; i++) {
+                    guestsData.push({
+                        guestName: `Khách ${i + 1}`,
+                        guestEmail: `guest${i + 1}_${Date.now()}@placeholder.com`, // Unique placeholder email
+                        guestPhone: ''
+                    });
+                }
+            } else {
+                // For individual booking: Use the actual guest data
+                guestsData = formValues.guests;
+            }
+
             const bookingRequest: CreateTourBookingRequest = {
                 tourSlotId: selectedSlot?.id || '',
                 numberOfGuests: formValues.numberOfGuests,
                 contactPhone: formValues.contactPhone,
                 specialRequests: formValues.specialRequests,
-                guests: formValues.guests, // ✅ NEW: Individual guest info
+                bookingType: formValues.bookingType === 'individual' ? 'Individual' : 'GroupRepresentative',
                 
-                // 🔄 LEGACY: Keep for backward compatibility
-                tourOperationId: tourDetails.tourOperation.id,
-                adultCount: formValues.numberOfGuests,
-                childCount: 0,
-                contactName: formValues.contactName,
-                contactEmail: formValues.contactEmail
+                // For group representative booking
+                ...(formValues.bookingType === 'representative' && {
+                    groupName: `Nhóm ${formValues.contactName}`,
+                    groupDescription: `Đặt tour cho ${formValues.numberOfGuests} người`,
+                    groupRepresentative: {
+                        guestName: formValues.contactName,
+                        guestEmail: formValues.contactEmail,
+                        guestPhone: formValues.contactPhone
+                    }
+                }),
+                
+                // Always send the guests array with correct number of records
+                guests: guestsData
             };
 
-            const validation = validateBookingRequest(bookingRequest);
+      const validation = validateBookingRequest(bookingRequest);
 
-            if (!validation.isValid) {
-                message.error(validation.errors.join(', '));
-                return;
-            }
+      if (!validation.isValid) {
+        message.error(validation.errors.join(", "));
+        return;
+      }
 
-            const response = await createTourBooking(bookingRequest, token);
+      const response = await createTourBooking(bookingRequest, token);
 
-            if (response.success && response.data) {
-                message.success('Đặt tour thành công! Đang chuyển đến trang thanh toán...');
+      if (response.success && response.data) {
+        message.success(
+          "Đặt tour thành công! Đang chuyển đến trang thanh toán..."
+        );
 
-                // === ENHANCED PAYMENT SYSTEM (ONLY) ===
+        // === ENHANCED PAYMENT SYSTEM (ONLY) ===
 
-                // ✅ ENHANCED PAYMENT: Flexible approach theo plan BE với duplicate prevention
-                try {
-                    // Prevent duplicate payment calls
-                    if (paymentProcessing) {
-                        return;
-                    }
-                    
-                    setPaymentProcessing(true);
-                    
-                    // Extract payment info từ backend response
-                    const paymentRequest: CreatePaymentRequest = {
-                        // Primary: Use tourBookingId if available
-                        tourBookingId: response.data?.id || response.data?.bookingId,
-                        
-                        // Fallback: Use bookingCode as identifier
-                        bookingCode: response.data?.bookingCode,
-                        
-                        // Amount: Try multiple sources
-                        amount: response.data?.totalPrice || 
-                               response.data?.finalPrice || 
-                               priceCalculation?.finalPrice || 
-                               0,
-                        
-                        description: `Tour Booking - ${response.data?.bookingCode || 'Individual QR System'}`
-                    };
-                    
-                    // Validate required fields
-                    if (!paymentRequest.amount || paymentRequest.amount <= 0) {
-                        throw new Error('Invalid payment amount');
-                    }
-                    
-                    if (!paymentRequest.tourBookingId && !paymentRequest.bookingCode) {
-                        throw new Error('No booking identifier found');
-                    }
-                    
-                    // Create payment link
-                    await createPaymentLink(paymentRequest);
-                    
-                } catch (enhancedError: any) {
-                    console.error('Enhanced payment failed:', enhancedError);
-                    message.error(`Không thể tạo thanh toán: ${enhancedError.message || 'Lỗi không xác định'}`);
-                } finally {
-                    setPaymentProcessing(false);
-                }
-            } else {
-                message.error(response.message || 'Có lỗi xảy ra khi đặt tour');
-            }
-        } catch (error: any) {
-            console.error('Booking error:', error);
-            message.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra khi đặt tour');
+        // ✅ ENHANCED PAYMENT: Flexible approach theo plan BE với duplicate prevention
+        try {
+          // Prevent duplicate payment calls
+          if (paymentProcessing) {
+            return;
+          }
+
+          setPaymentProcessing(true);
+
+          // Extract payment info từ backend response
+          const paymentRequest = {
+            // Primary: Use tourBookingId if available
+            tourBookingId: response.data?.bookingId,
+
+            // Fallback: Use bookingCode as identifier
+            bookingCode: response.data?.bookingCode,
+
+            // Amount: Try multiple sources
+            amount: priceCalculation?.finalPrice || 0,
+
+            description: `Tour Booking - ${
+              response.data?.bookingCode || "Individual QR System"
+            }`,
+          };
+
+          // Validate required fields
+          if (!paymentRequest.amount || paymentRequest.amount <= 0) {
+            throw new Error("Invalid payment amount");
+          }
+
+          if (!paymentRequest.tourBookingId && !paymentRequest.bookingCode) {
+            throw new Error("No booking identifier found");
+          }
+
+          // Create payment link
+          await createPaymentLink(paymentRequest);
+        } catch (enhancedError: any) {
+          console.error("Enhanced payment failed:", enhancedError);
+          message.error(
+            `Không thể tạo thanh toán: ${
+              enhancedError.message || "Lỗi không xác định"
+            }`
+          );
         } finally {
-            setSubmitting(false);
-            setPaymentProcessing(false);
+          setPaymentProcessing(false);
         }
-    };
-
-    if (loading) {
-        return (
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '60vh'
-            }}>
-                <Spin size="large" />
-            </div>
-        );
+      } else {
+        message.error(response.message || "Có lỗi xảy ra khi đặt tour");
+      }
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      message.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Có lỗi xảy ra khi đặt tour"
+      );
+    } finally {
+      setSubmitting(false);
+      setPaymentProcessing(false);
     }
+  };
 
-    if (error || !tourDetails) {
-        return (
-            <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-                <Alert
-                    message="Không thể tải thông tin tour"
-                    description={error || 'Tour không tồn tại hoặc đã bị xóa'}
-                    type="error"
-                    showIcon
-                    action={
-                        <Button type="primary" onClick={() => navigate('/things-to-do')}>
-                            Xem tour khác
-                        </Button>
-                    }
-                />
-            </div>
-        );
-    }
-
-    const steps = [
-        {
-            title: 'Thông tin tour',
-            icon: <InfoCircleOutlined />
-        },
-        {
-            title: 'Thông tin khách hàng',
-            icon: <UserOutlined />
-        },
-        {
-            title: 'Xác nhận & Thanh toán',
-            icon: <CreditCardOutlined />
-        }
-    ];
-
+  if (loading) {
     return (
-        <div style={{ padding: '20px', maxWidth: 1200, margin: '0 auto' }}>
-            <Title level={2} style={{ textAlign: 'center', marginBottom: 32 }}>
-                Đặt Tour: {tourDetails.title}
-            </Title>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
-            <Steps current={currentStep} style={{ marginBottom: 32 }}>
-                {steps.map((step, index) => (
-                    <Step key={index} title={step.title} icon={step.icon} />
-                ))}
-            </Steps>
+  if (error || !tourDetails) {
+    return (
+      <div style={{ padding: "40px 20px", textAlign: "center" }}>
+        <Alert
+          message="Không thể tải thông tin tour"
+          description={error || "Tour không tồn tại hoặc đã bị xóa"}
+          type="error"
+          showIcon
+          action={
+            <Button type="primary" onClick={() => navigate("/things-to-do")}>
+              Xem tour khác
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
-            <Row gutter={24}>
-                <Col xs={24} lg={16}>
-                    <Card>
-                        {currentStep === 0 && (
-                            <div>
-                                <Title level={4}>Thông tin tour</Title>
-                                <Descriptions column={1} bordered>
-                                    <Descriptions.Item label="Tên tour">
-                                        {tourDetails.title}
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Điểm khởi hành">
-                                        {tourDetails.startLocation}
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Điểm kết thúc">
-                                        {tourDetails.endLocation}
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Giá cơ bản">
-                                        {formatCurrency(tourDetails.tourOperation.price)} / người
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Số chỗ tối đa">
-                                        {tourDetails.tourOperation.maxGuests} người
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Đã đặt">
-                                        {tourDetails.tourOperation.currentBookings} người
-                                    </Descriptions.Item>
-                                    {/* Tour Slot Selection */}
-                                    <Descriptions.Item label="Chọn ngày tour" span={2}>
-                                        {slotsLoading ? (
-                                            <div style={{ textAlign: 'center', padding: '20px' }}>
-                                                <Spin /> Đang tải lịch trình...
-                                            </div>
-                                        ) : tourSlots.length > 0 ? (
-                                            <div>
-                                                <style>{`
+  const steps = [
+    {
+      title: "Thông tin tour",
+      icon: <InfoCircleOutlined />,
+    },
+    {
+      title: "Thông tin khách hàng",
+      icon: <UserOutlined />,
+    },
+    {
+      title: "Xác nhận & Thanh toán",
+      icon: <CreditCardOutlined />,
+    },
+  ];
+
+  return (
+    <div style={{ padding: "20px", maxWidth: 1200, margin: "0 auto" }}>
+      <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
+        Đặt Tour: {tourDetails.title}
+      </Title>
+
+      <Steps current={currentStep} style={{ marginBottom: 32 }}>
+        {steps.map((step, index) => (
+          <Step key={index} title={step.title} icon={step.icon} />
+        ))}
+      </Steps>
+
+      <Row gutter={24}>
+        <Col xs={24} lg={16}>
+          <Card>
+            {currentStep === 0 && (
+              <div>
+                <Title level={4}>Thông tin tour</Title>
+                <Descriptions column={1} bordered>
+                  <Descriptions.Item label="Tên tour">
+                    {tourDetails.title}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Điểm khởi hành">
+                    {tourDetails.startLocation}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Điểm kết thúc">
+                    {tourDetails.endLocation}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Giá cơ bản">
+                    {formatCurrency(tourDetails.tourOperation.price)} / người
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Số chỗ tối đa">
+                    {tourDetails.tourOperation.maxGuests} người
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Đã đặt">
+                    {tourDetails.tourOperation.currentBookings} người
+                  </Descriptions.Item>
+                  {/* Tour Slot Selection */}
+                  <Descriptions.Item label="Chọn ngày tour" span={2}>
+                    {slotsLoading ? (
+                      <div style={{ textAlign: "center", padding: "20px" }}>
+                        <Spin /> Đang tải lịch trình...
+                      </div>
+                    ) : tourSlots.length > 0 ? (
+                      <div>
+                        <style>{`
                                                     .tour-slot {
                                                         padding: 12px 16px;
                                                         border-radius: 8px;
@@ -586,480 +664,639 @@ const BookingPage: React.FC = () => {
                                                         background-color: #2a1215;
                                                     }
                                                 `}</style>
-                                                <div style={{ marginBottom: 12 }}>
-                                                    <Text type="secondary">Chọn ngày bạn muốn tham gia tour:</Text>
-                                                </div>
-                                                <div
-                                                    className="tour-slot-container"
-                                                    style={{
-                                                        display: 'flex',
-                                                        flexWrap: 'wrap',
-                                                        gap: '12px'
-                                                    }}
-                                                >
-                                                    {tourSlots.map(slot => {
-                                                        const availableSpots = slot.availableSpots || 0;
-                                                        const isSoldOut = availableSpots === 0;
-                                                        const isLowAvailability = availableSpots > 0 && availableSpots < 5;
-                                                        
-                                                        return (
-                                                        <div
-                                                            key={slot.id}
-                                                            className={`tour-slot ${selectedSlot?.id === slot.id ? 'selected' : ''} ${
-                                                                isLowAvailability ? 'low-availability' : ''
-                                                            } ${
-                                                                isSoldOut ? 'sold-out' : ''
-                                                            }`}
-                                                            onClick={(e) => {
-                                                                // Prevent clicking on sold out slots
-                                                                if (isSoldOut) {
-                                                                    e.preventDefault();
-                                                                    return;
-                                                                }
+                        <div style={{ marginBottom: 12 }}>
+                          <Text type="secondary">
+                            Chọn ngày bạn muốn tham gia tour:
+                          </Text>
+                        </div>
+                        <div
+                          className="tour-slot-container"
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "12px",
+                          }}>
+                          {tourSlots.map((slot) => {
+                            const availableSpots = slot.availableSpots || 0;
+                            const isSoldOut = availableSpots === 0;
+                            const isLowAvailability =
+                              availableSpots > 0 && availableSpots < 5;
 
-                                                                // Click animation
-                                                                if (e.currentTarget) {
-                                                                    e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
-                                                                    setTimeout(() => {
-                                                                        if (e.currentTarget) {
-                                                                            e.currentTarget.style.transform = '';
-                                                                        }
-                                                                    }, 100);
-                                                                }
+                            return (
+                              <div
+                                key={slot.id}
+                                className={`tour-slot ${
+                                  selectedSlot?.id === slot.id ? "selected" : ""
+                                } ${
+                                  isLowAvailability ? "low-availability" : ""
+                                } ${isSoldOut ? "sold-out" : ""}`}
+                                onClick={(e) => {
+                                  // Prevent clicking on sold out slots
+                                  if (isSoldOut) {
+                                    e.preventDefault();
+                                    return;
+                                  }
 
-                                                                setSelectedSlot(slot);
-                                                                // Recalculate pricing when slot changes
-                                                                const currentValues = form.getFieldsValue();
-                                                                handleGuestCountChange(currentValues);
-                                                            }}
-                                                        >
-                                                            <div style={{ textAlign: 'center' }}>
-                                                                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-                                                                    {slot.formattedDateWithDay}
-                                                                </div>
-                                                                <div style={{ fontSize: '12px', marginBottom: '4px' }}>
-                                                                    {selectedSlot?.id === slot.id ? '✓ Đã chọn' : slot.statusName}
-                                                                </div>
-                                                                <div style={{ 
-                                                                    fontSize: '11px', 
-                                                                    color: availableSpots > 5 ? '#52c41a' : 
-                                                                           availableSpots > 0 ? '#faad14' : '#ff4d4f',
-                                                                    fontWeight: 'bold'
-                                                                }}>
-                                                                    {availableSpots > 0 
-                                                                        ? `Còn ${availableSpots} chỗ`
-                                                                        : 'Hết chỗ'
-                                                                    }
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                                {!selectedSlot && (
-                                                    <Alert
-                                                        message="Vui lòng chọn ngày tour"
-                                                        type="warning"
-                                                        showIcon
-                                                        style={{ marginTop: 12 }}
-                                                    />
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <Alert
-                                                    message="Hiện tại chưa có lịch trình khả dụng cho tour này"
-                                                    description="Các tour slots có thể đã được đặt hết hoặc không có chỗ trống. Vui lòng liên hệ để biết thêm thông tin."
-                                                    type="info"
-                                                    showIcon
-                                                />
-                                                {/* Debug info - remove in production */}
-                                                <div style={{ marginTop: 8, fontSize: '12px', color: '#666' }}>
-                                                    Debug: tourSlots.length = {tourSlots.length}, slotsLoading = {slotsLoading.toString()}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </Descriptions.Item>
-                                </Descriptions>
+                                  // Click animation
+                                  if (e.currentTarget) {
+                                    e.currentTarget.style.transform =
+                                      "translateY(0) scale(0.98)";
+                                    setTimeout(() => {
+                                      if (e.currentTarget) {
+                                        e.currentTarget.style.transform = "";
+                                      }
+                                    }, 100);
+                                  }
 
-                                {tourDetails.description && (
-                                    <div style={{ marginTop: 16 }}>
-                                        <Title level={5}>Mô tả tour</Title>
-                                        <Paragraph>{tourDetails.description}</Paragraph>
-                                    </div>
-                                )}
-
-                                {tourDetails.timeline && tourDetails.timeline.length > 0 && (
-                                    <div style={{ marginTop: 16 }}>
-                                        <Title level={5}>Lịch trình tour</Title>
-                                        {tourDetails.timeline
-                                            .sort((a, b) => a.sortOrder - b.sortOrder)
-                                            .map((item) => (
-                                            <Card key={item.id} size="small" style={{ marginBottom: 8 }}>
-                                                <Space>
-                                                    <Tag color="blue">{item.checkInTime}</Tag>
-                                                    <Text strong>{item.activity}</Text>
-                                                </Space>
-                                                {item.specialtyShop && (
-                                                    <div style={{ marginTop: 4 }}>
-                                                        <Text type="secondary">
-                                                            📍 {item.specialtyShop.shopName}
-                                                            {item.specialtyShop.location &&
-                                                                ` - ${item.specialtyShop.location}`
-                                                            }
-                                                        </Text>
-                                                    </div>
-                                                )}
-                                            </Card>
-                                        ))}
-                                    </div>
-                                )}
-
-                                <div style={{ textAlign: 'right', marginTop: 24 }}>
-                                    <Button type="primary" onClick={handleNext}>
-                                        Tiếp tục
-                                    </Button>
+                                  setSelectedSlot(slot);
+                                  // Recalculate pricing when slot changes
+                                  const currentValues = form.getFieldsValue();
+                                  handleGuestCountChange(currentValues);
+                                }}>
+                                <div style={{ textAlign: "center" }}>
+                                  <div
+                                    style={{
+                                      fontWeight: "bold",
+                                      marginBottom: "4px",
+                                    }}>
+                                    {slot.formattedDateWithDay}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: "12px",
+                                      marginBottom: "4px",
+                                    }}>
+                                    {selectedSlot?.id === slot.id
+                                      ? "✓ Đã chọn"
+                                      : slot.statusName}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: "11px",
+                                      color:
+                                        availableSpots > 5
+                                          ? "#52c41a"
+                                          : availableSpots > 0
+                                          ? "#faad14"
+                                          : "#ff4d4f",
+                                      fontWeight: "bold",
+                                    }}>
+                                    {availableSpots > 0
+                                      ? `Còn ${availableSpots} chỗ`
+                                      : "Hết chỗ"}
+                                  </div>
                                 </div>
-                            </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {!selectedSlot && (
+                          <Alert
+                            message="Vui lòng chọn ngày tour"
+                            type="warning"
+                            showIcon
+                            style={{ marginTop: 12 }}
+                          />
                         )}
-
-                        {currentStep === 1 && (
-                            <div>
-                                <Title level={4}>Thông tin khách hàng</Title>
-                                <Form
-                                    form={form}
-                                    layout="vertical"
-                                    onValuesChange={handleFormValuesChange}
-                                    initialValues={{
-                                        numberOfGuests: 1,
-                                        contactName: '',
-                                        contactPhone: '',
-                                        contactEmail: '',
-                                        specialRequests: ''
-                                    }}
-                                >
-                                    <Row gutter={16}>
-                                        <Col xs={24} sm={12}>
-                                            <Form.Item
-                                                name="numberOfGuests"
-                                                label="Số người"
-                                                rules={[
-                                                    { required: true, message: 'Vui lòng nhập số người' },
-                                                    { type: 'number', min: 1, message: 'Phải có ít nhất 1 người' }
-                                                ]}
-                                            >
-                                                <InputNumber
-                                                    min={1}
-                                                    max={50}
-                                                    style={{ width: '100%' }}
-                                                    prefix={<TeamOutlined />}
-                                                    placeholder="Nhập số người"
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                    </Row>
-
-                                    <Divider />
-
-                                    <Form.Item
-                                        name="contactName"
-                                        label="Tên người liên hệ"
-                                        rules={[
-                                            { required: true, message: 'Vui lòng nhập tên người liên hệ' },
-                                            { max: 100, message: 'Tên không được quá 100 ký tự' }
-                                        ]}
-                                    >
-                                        <Input prefix={<UserOutlined />} placeholder="Nhập tên đầy đủ" />
-                                    </Form.Item>
-
-                                    <Row gutter={16}>
-                                        <Col xs={24} sm={12}>
-                                            <Form.Item
-                                                name="contactPhone"
-                                                label="Số điện thoại"
-                                                rules={[
-                                                    { required: true, message: 'Vui lòng nhập số điện thoại' },
-                                                    { pattern: /^[0-9+\-\s()]+$/, message: 'Số điện thoại không hợp lệ' }
-                                                ]}
-                                            >
-                                                <Input prefix={<PhoneOutlined />} placeholder="0123456789" />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col xs={24} sm={12}>
-                                            <Form.Item
-                                                name="contactEmail"
-                                                label="Email"
-                                                rules={[
-                                                    { required: true, message: 'Vui lòng nhập email' },
-                                                    { type: 'email', message: 'Email không hợp lệ' }
-                                                ]}
-                                            >
-                                                <Input prefix={<MailOutlined />} placeholder="email@example.com" />
-                                            </Form.Item>
-                                        </Col>
-                                    </Row>
-
-                                    <Form.Item
-                                        name="specialRequests"
-                                        label="Yêu cầu đặc biệt (tùy chọn)"
-                                    >
-                                        <Input.TextArea
-                                            rows={3}
-                                            placeholder="Ví dụ: Ăn chay, dị ứng thực phẩm, yêu cầu phòng riêng..."
-                                            maxLength={500}
-                                        />
-                                    </Form.Item>
-
-                                    {/* ✅ NEW: Individual guest information */}
-                                    <Divider>Thông tin từng khách hàng</Divider>
-
-                                    {Array.from({ length: formValues.numberOfGuests }, (_, index) => {
-                                        // Safe check to ensure guests array exists
-                                        const currentGuests = formValues.guests || [];
-                                        return (
-                                        <Card key={index} size="small" style={{ marginBottom: 16 }}>
-                                            <Title level={5}>Khách hàng {index + 1}</Title>
-
-                                            <Row gutter={16}>
-                                                <Col xs={24} sm={12}>
-                                                    <Form.Item
-                                                        name={['guests', index, 'guestName']}
-                                                        label="Họ và tên"
-                                                        rules={[
-                                                            { required: true, message: 'Vui lòng nhập tên khách hàng' },
-                                                            { min: 2, message: 'Tên phải có ít nhất 2 ký tự' },
-                                                            { max: 100, message: 'Tên không quá 100 ký tự' }
-                                                        ]}
-                                                        initialValue={currentGuests[index]?.guestName || ''}
-                                                    >
-                                                        <Input
-                                                            prefix={<UserOutlined />}
-                                                            placeholder="Nhập họ và tên đầy đủ"
-                                                            onChange={(e) => updateGuestInfo(index, 'guestName', e.target.value)}
-                                                        />
-                                                    </Form.Item>
-                                                </Col>
-
-                                                <Col xs={24} sm={12}>
-                                                    <Form.Item
-                                                        name={['guests', index, 'guestEmail']}
-                                                        label="Email"
-                                                        rules={[
-                                                            { required: true, message: 'Vui lòng nhập email' },
-                                                            { type: 'email', message: 'Email không hợp lệ' },
-                                                            {
-                                                                validator: (_, value) => validateUniqueEmail(value, index, currentGuests)
-                                                            }
-                                                        ]}
-                                                        initialValue={currentGuests[index]?.guestEmail || ''}
-                                                    >
-                                                        <Input
-                                                            prefix={<MailOutlined />}
-                                                            placeholder="email@example.com"
-                                                            onChange={(e) => updateGuestInfo(index, 'guestEmail', e.target.value)}
-                                                        />
-                                                    </Form.Item>
-                                                </Col>
-                                            </Row>
-
-                                            <Form.Item
-                                                name={['guests', index, 'guestPhone']}
-                                                label="Số điện thoại (tùy chọn)"
-                                                rules={[
-                                                    { pattern: /^[0-9+\-\s()]+$/, message: 'Số điện thoại không hợp lệ' }
-                                                ]}
-                                                initialValue={currentGuests[index]?.guestPhone || ''}
-                                            >
-                                                <Input
-                                                    prefix={<PhoneOutlined />}
-                                                    placeholder="0123456789"
-                                                    onChange={(e) => updateGuestInfo(index, 'guestPhone', e.target.value)}
-                                                />
-                                            </Form.Item>
-                                        </Card>
-                                        );
-                                    })}
-                                </Form>
-
-                                <div style={{ textAlign: 'right', marginTop: 24 }}>
-                                    <Space>
-                                        <Button onClick={handlePrev}>
-                                            Quay lại
-                                        </Button>
-                                        <Button type="primary" onClick={handleNext}>
-                                            Tiếp tục
-                                        </Button>
-                                    </Space>
-                                </div>
-                            </div>
-                        )}
-
-                        {currentStep === 2 && (
-                            <div>
-                                <Title level={4}>Xác nhận thông tin & Thanh toán</Title>
-
-                                <Alert
-                                    message="Vui lòng kiểm tra lại thông tin trước khi thanh toán"
-                                    type="info"
-                                    showIcon
-                                    style={{ marginBottom: 16 }}
-                                />
-
-                                <Descriptions title="Thông tin tour" column={1} bordered>
-                                    <Descriptions.Item label="Tên tour">
-                                        {tourDetails.title}
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Ngày tour">
-                                        {selectedSlot?.formattedDateWithDay || 'Chưa chọn'}
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Số khách">
-                                        {formValues.numberOfGuests} người
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Người liên hệ">
-                                        {formValues.contactName}
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Điện thoại">
-                                        {formValues.contactPhone}
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Email">
-                                        {formValues.contactEmail}
-                                    </Descriptions.Item>
-                                    {formValues.specialRequests && (
-                                        <Descriptions.Item label="Yêu cầu đặc biệt">
-                                            {formValues.specialRequests}
-                                        </Descriptions.Item>
-                                    )}
-                                </Descriptions>
-
-                                {availability && !availability.isAvailable && (
-                                    <Alert
-                                        message="Tour đã hết chỗ"
-                                        description="Số lượng khách yêu cầu vượt quá số chỗ còn lại"
-                                        type="error"
-                                        showIcon
-                                        style={{ marginTop: 16 }}
-                                    />
-                                )}
-
-                                {/* Payment System Selection - Hidden, always use Enhanced */}
-                                {/* Enhanced Payment System is now the only option */}
-
-                                <div style={{ textAlign: 'right', marginTop: 24 }}>
-                                    <Space>
-                                        <Button onClick={handlePrev}>
-                                            Quay lại
-                                        </Button>
-                                        <Button
-                                            type="primary"
-                                            size="large"
-                                            loading={submitting}
-                                            disabled={submitting || (availability && !availability.isAvailable)}
-                                            onClick={handleSubmit}
-                                            icon={<CreditCardOutlined />}
-                                        >
-                                            {submitting ? 'Đang xử lý...' : 'Đặt tour & Thanh toán'}
-                                        </Button>
-                                    </Space>
-                                </div>
-                            </div>
-                        )}
-                    </Card>
-                </Col>
-
-                <Col xs={24} lg={8}>
-                    <Card title="Tóm tắt đơn hàng" style={{ position: 'sticky', top: 20 }}>
-                        <img
-                            src={tourDetails.imageUrl || getDefaultTourImage(tourDetails.title)}
-                            alt={tourDetails.title}
-                            style={{ width: '100%', height: 150, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }}
+                      </div>
+                    ) : (
+                      <div>
+                        <Alert
+                          message="Hiện tại chưa có lịch trình khả dụng cho tour này"
+                          description="Các tour slots có thể đã được đặt hết hoặc không có chỗ trống. Vui lòng liên hệ để biết thêm thông tin."
+                          type="info"
+                          showIcon
                         />
+                        {/* Debug info - remove in production */}
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: "12px",
+                            color: "#666",
+                          }}>
+                          Debug: tourSlots.length = {tourSlots.length},
+                          slotsLoading = {slotsLoading.toString()}
+                        </div>
+                      </div>
+                    )}
+                  </Descriptions.Item>
+                </Descriptions>
 
-                        <Title level={5}>{tourDetails.title}</Title>
+                {tourDetails.description && (
+                  <div style={{ marginTop: 16 }}>
+                    <Title level={5}>Mô tả tour</Title>
+                    <Paragraph>{tourDetails.description}</Paragraph>
+                  </div>
+                )}
 
-                        <Divider />
-
-                        {calculating ? (
-                            <div style={{ textAlign: 'center', padding: 20 }}>
-                                <Spin />
-                                <Text style={{ display: 'block', marginTop: 8 }}>Đang tính giá...</Text>
+                {tourDetails.timeline && tourDetails.timeline.length > 0 && (
+                  <div style={{ marginTop: 16 }}>
+                    <Title level={5}>Lịch trình tour</Title>
+                    {tourDetails.timeline
+                      .sort((a, b) => a.sortOrder - b.sortOrder)
+                      .map((item) => (
+                        <Card
+                          key={item.id}
+                          size="small"
+                          style={{ marginBottom: 8 }}>
+                          <Space>
+                            <Tag color="blue">{item.checkInTime}</Tag>
+                            <Text strong>{item.activity}</Text>
+                          </Space>
+                          {item.specialtyShop && (
+                            <div style={{ marginTop: 4 }}>
+                              <Text type="secondary">
+                                📍 {item.specialtyShop.shopName}
+                                {item.specialtyShop.location &&
+                                  ` - ${item.specialtyShop.location}`}
+                              </Text>
                             </div>
-                        ) : priceCalculation ? (
+                          )}
+                        </Card>
+                      ))}
+                  </div>
+                )}
+
+                <div style={{ textAlign: "right", marginTop: 24 }}>
+                  <Button type="primary" onClick={handleNext}>
+                    Tiếp tục
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 1 && (
+              <div>
+                <Title level={4}>Thông tin khách hàng</Title>
+                <Form
+                  form={form}
+                  layout="vertical"
+                  onValuesChange={handleFormValuesChange}
+                  initialValues={{
+                    bookingType: "representative",
+                    numberOfGuests: 1,
+                    contactName: "",
+                    contactPhone: "",
+                    contactEmail: "",
+                    specialRequests: "",
+                  }}>
+                  {/* NEW: Booking Type Selection */}
+                  <Form.Item
+                    name="bookingType"
+                    label="Loại đặt tour"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn loại đặt tour",
+                      },
+                    ]}>
+                    <Radio.Group>
+                      <Space direction="vertical">
+                        <Radio value="representative">
+                          <Space>
+                            <UserOutlined />
                             <div>
-                                <div style={{ marginBottom: 8 }}>
-                                    <Text>Giá gốc ({priceCalculation.numberOfGuests} người):</Text>
-                                    <Text style={{ float: 'right' }}>
-                                        {formatCurrency(priceCalculation.totalOriginalPrice)}
-                                    </Text>
-                                </div>
-
-                                {priceCalculation.discountPercent > 0 && (
-                                    <div style={{ marginBottom: 8 }}>
-                                        <Text type="success">
-                                            Giảm giá ({priceCalculation.discountPercent}%):
-                                        </Text>
-                                        <Text style={{ float: 'right', color: '#52c41a' }}>
-                                            -{formatCurrency(priceCalculation.discountAmount)}
-                                        </Text>
-                                    </div>
-                                )}
-
-                                <Divider style={{ margin: '8px 0' }} />
-
-                                <div style={{ marginBottom: 16 }}>
-                                    <Text strong style={{ fontSize: 16 }}>Tổng cộng:</Text>
-                                    <Text strong style={{ float: 'right', fontSize: 18, color: '#f5222d' }}>
-                                        {formatCurrency(priceCalculation.finalPrice)}
-                                    </Text>
-                                </div>
-
-                                {priceCalculation.isEarlyBird && (
-                                    <Tag color="green" style={{ marginBottom: 8 }}>
-                                        🎉 Ưu đãi đặt sớm
-                                    </Tag>
-                                )}
-
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                    Loại giá: {priceCalculation.pricingType}
-                                </Text>
+                              <strong>Đặt tour theo người đại diện</strong>
+                              <div style={{ fontSize: "12px", color: "#666" }}>
+                                Chỉ cần thông tin người liên hệ chính, phù hợp
+                                cho nhóm/gia đình
+                              </div>
                             </div>
-                        ) : (
-                            <Text type="secondary">Chọn số lượng khách để xem giá</Text>
-                        )}
-
-                        {availability && (
-                            <div style={{ marginTop: 16 }}>
-                                <Divider />
-                                <div style={{ marginBottom: 8 }}>
-                                    <Text>Chỗ trống:</Text>
-                                    <Text style={{ float: 'right' }}>
-                                        {availability.availableSlots}/{availability.maxGuests}
-                                    </Text>
-                                </div>
-                                {availability.availableSlots < 5 && (
-                                    <Alert
-                                        message={`Chỉ còn ${availability.availableSlots} chỗ trống!`}
-                                        type="warning"
-                                        showIcon
-                                    />
-                                )}
+                          </Space>
+                        </Radio>
+                        <Radio value="individual">
+                          <Space>
+                            <TeamOutlined />
+                            <div>
+                              <strong>Đặt tour theo từng cá nhân</strong>
+                              <div style={{ fontSize: "12px", color: "#666" }}>
+                                Cần thông tin chi tiết từng khách, mỗi người
+                                nhận QR code riêng
+                              </div>
                             </div>
-                        )}
-                    </Card>
-                </Col>
-            </Row>
+                          </Space>
+                        </Radio>
+                      </Space>
+                    </Radio.Group>
+                  </Form.Item>
 
-            <LoginModal
-                isVisible={isLoginModalVisible}
-                onClose={() => setIsLoginModalVisible(false)}
-                onRegisterClick={() => {}}
-                onLoginSuccess={() => {
-                    setIsLoginModalVisible(false);
-                    // Retry booking after login
-                    handleSubmit();
-                }}
+                  <Row gutter={16}>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        name="numberOfGuests"
+                        label="Số người"
+                        rules={[
+                          { required: true, message: "Vui lòng nhập số người" },
+                          {
+                            type: "number",
+                            min: 1,
+                            message: "Phải có ít nhất 1 người",
+                          },
+                        ]}>
+                        <InputNumber
+                          min={1}
+                          max={50}
+                          style={{ width: "100%" }}
+                          prefix={<TeamOutlined />}
+                          placeholder="Nhập số người"
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Divider />
+
+                  <Form.Item
+                    name="contactName"
+                    label="Tên người liên hệ"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập tên người liên hệ",
+                      },
+                      { max: 100, message: "Tên không được quá 100 ký tự" },
+                    ]}>
+                    <Input
+                      prefix={<UserOutlined />}
+                      placeholder="Nhập tên đầy đủ"
+                    />
+                  </Form.Item>
+
+                  <Row gutter={16}>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        name="contactPhone"
+                        label="Số điện thoại"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Vui lòng nhập số điện thoại",
+                          },
+                          {
+                            pattern: /^[0-9+\-\s()]+$/,
+                            message: "Số điện thoại không hợp lệ",
+                          },
+                        ]}>
+                        <Input
+                          prefix={<PhoneOutlined />}
+                          placeholder="0123456789"
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        name="contactEmail"
+                        label="Email"
+                        rules={[
+                          { required: true, message: "Vui lòng nhập email" },
+                          { type: "email", message: "Email không hợp lệ" },
+                        ]}>
+                        <Input
+                          prefix={<MailOutlined />}
+                          placeholder="email@example.com"
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Form.Item
+                    name="specialRequests"
+                    label="Yêu cầu đặc biệt (tùy chọn)">
+                    <Input.TextArea
+                      rows={3}
+                      placeholder="Ví dụ: Ăn chay, dị ứng thực phẩm, yêu cầu phòng riêng..."
+                      maxLength={500}
+                    />
+                  </Form.Item>
+
+                  {/* ✅ NEW: Individual guest information - Only show if individual booking type selected */}
+                  {formValues.bookingType === "individual" && (
+                    <>
+                      <Divider>Thông tin từng khách hàng</Divider>
+                      <Alert
+                        message="Lưu ý"
+                        description="Mỗi khách hàng sẽ nhận được mã QR riêng để check-in tại các điểm dừng chân"
+                        type="info"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                      />
+                    </>
+                  )}
+
+                  {formValues.bookingType === "individual" &&
+                    Array.from(
+                      { length: formValues.numberOfGuests },
+                      (_, index) => {
+                        // Safe check to ensure guests array exists
+                        const currentGuests = formValues.guests || [];
+                        return (
+                          <Card
+                            key={index}
+                            size="small"
+                            style={{ marginBottom: 16 }}>
+                            <Title level={5}>Khách hàng {index + 1}</Title>
+
+                            <Row gutter={16}>
+                              <Col xs={24} sm={12}>
+                                <Form.Item
+                                  name={["guests", index, "guestName"]}
+                                  label="Họ và tên"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Vui lòng nhập tên khách hàng",
+                                    },
+                                    {
+                                      min: 2,
+                                      message: "Tên phải có ít nhất 2 ký tự",
+                                    },
+                                    {
+                                      max: 100,
+                                      message: "Tên không quá 100 ký tự",
+                                    },
+                                  ]}
+                                  initialValue={
+                                    currentGuests[index]?.guestName || ""
+                                  }>
+                                  <Input
+                                    prefix={<UserOutlined />}
+                                    placeholder="Nhập họ và tên đầy đủ"
+                                    onChange={(e) =>
+                                      updateGuestInfo(
+                                        index,
+                                        "guestName",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </Form.Item>
+                              </Col>
+
+                              <Col xs={24} sm={12}>
+                                <Form.Item
+                                  name={["guests", index, "guestEmail"]}
+                                  label="Email"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Vui lòng nhập email",
+                                    },
+                                    {
+                                      type: "email",
+                                      message: "Email không hợp lệ",
+                                    },
+                                    {
+                                      validator: (_, value) =>
+                                        validateUniqueEmail(
+                                          value,
+                                          index,
+                                          currentGuests
+                                        ),
+                                    },
+                                  ]}
+                                  initialValue={
+                                    currentGuests[index]?.guestEmail || ""
+                                  }>
+                                  <Input
+                                    prefix={<MailOutlined />}
+                                    placeholder="email@example.com"
+                                    onChange={(e) =>
+                                      updateGuestInfo(
+                                        index,
+                                        "guestEmail",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </Form.Item>
+                              </Col>
+                            </Row>
+
+                            <Form.Item
+                              name={["guests", index, "guestPhone"]}
+                              label="Số điện thoại (tùy chọn)"
+                              rules={[
+                                {
+                                  pattern: /^[0-9+\-\s()]+$/,
+                                  message: "Số điện thoại không hợp lệ",
+                                },
+                              ]}
+                              initialValue={
+                                currentGuests[index]?.guestPhone || ""
+                              }>
+                              <Input
+                                prefix={<PhoneOutlined />}
+                                placeholder="0123456789"
+                                onChange={(e) =>
+                                  updateGuestInfo(
+                                    index,
+                                    "guestPhone",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </Form.Item>
+                          </Card>
+                        );
+                      }
+                    )}
+                </Form>
+
+                <div style={{ textAlign: "right", marginTop: 24 }}>
+                  <Space>
+                    <Button onClick={handlePrev}>Quay lại</Button>
+                    <Button type="primary" onClick={handleNext}>
+                      Tiếp tục
+                    </Button>
+                  </Space>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div>
+                <Title level={4}>Xác nhận thông tin & Thanh toán</Title>
+
+                <Alert
+                  message="Vui lòng kiểm tra lại thông tin trước khi thanh toán"
+                  type="info"
+                  showIcon
+                  style={{ marginBottom: 16 }}
+                />
+
+                <Descriptions title="Thông tin tour" column={1} bordered>
+                  <Descriptions.Item label="Tên tour">
+                    {tourDetails.title}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Ngày tour">
+                    {selectedSlot?.formattedDateWithDay || "Chưa chọn"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Số khách">
+                    {formValues.numberOfGuests} người
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Người liên hệ">
+                    {formValues.contactName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Điện thoại">
+                    {formValues.contactPhone}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Email">
+                    {formValues.contactEmail}
+                  </Descriptions.Item>
+                  {formValues.specialRequests && (
+                    <Descriptions.Item label="Yêu cầu đặc biệt">
+                      {formValues.specialRequests}
+                    </Descriptions.Item>
+                  )}
+                </Descriptions>
+
+                {availability && !availability.isAvailable && (
+                  <Alert
+                    message="Tour đã hết chỗ"
+                    description="Số lượng khách yêu cầu vượt quá số chỗ còn lại"
+                    type="error"
+                    showIcon
+                    style={{ marginTop: 16 }}
+                  />
+                )}
+
+                {/* Payment System Selection - Hidden, always use Enhanced */}
+                {/* Enhanced Payment System is now the only option */}
+
+                <div style={{ textAlign: "right", marginTop: 24 }}>
+                  <Space>
+                    <Button onClick={handlePrev}>Quay lại</Button>
+                    <Button
+                      type="primary"
+                      size="large"
+                      loading={submitting}
+                      disabled={
+                        submitting ||
+                        (availability && !availability.isAvailable)
+                      }
+                      onClick={handleSubmit}
+                      icon={<CreditCardOutlined />}>
+                      {submitting ? "Đang xử lý..." : "Đặt tour & Thanh toán"}
+                    </Button>
+                  </Space>
+                </div>
+              </div>
+            )}
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card
+            title="Tóm tắt đơn hàng"
+            style={{ position: "sticky", top: 20 }}>
+            <img
+              src={
+                tourDetails.imageUrl || getDefaultTourImage(tourDetails.title)
+              }
+              alt={tourDetails.title}
+              style={{
+                width: "100%",
+                height: 150,
+                objectFit: "cover",
+                borderRadius: 8,
+                marginBottom: 16,
+              }}
             />
-        </div>
-    );
+
+            <Title level={5}>{tourDetails.title}</Title>
+
+            <Divider />
+
+            {calculating ? (
+              <div style={{ textAlign: "center", padding: 20 }}>
+                <Spin />
+                <Text style={{ display: "block", marginTop: 8 }}>
+                  Đang tính giá...
+                </Text>
+              </div>
+            ) : priceCalculation ? (
+              <div>
+                <div style={{ marginBottom: 8 }}>
+                  <Text>
+                    Giá gốc ({priceCalculation.numberOfGuests} người):
+                  </Text>
+                  <Text style={{ float: "right" }}>
+                    {formatCurrency(priceCalculation.totalOriginalPrice)}
+                  </Text>
+                </div>
+
+                {priceCalculation.discountPercent > 0 && (
+                  <div style={{ marginBottom: 8 }}>
+                    <Text type="success">
+                      Giảm giá ({priceCalculation.discountPercent}%):
+                    </Text>
+                    <Text style={{ float: "right", color: "#52c41a" }}>
+                      -{formatCurrency(priceCalculation.discountAmount)}
+                    </Text>
+                  </div>
+                )}
+
+                <Divider style={{ margin: "8px 0" }} />
+
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong style={{ fontSize: 16 }}>
+                    Tổng cộng:
+                  </Text>
+                  <Text
+                    strong
+                    style={{ float: "right", fontSize: 18, color: "#f5222d" }}>
+                    {formatCurrency(priceCalculation.finalPrice)}
+                  </Text>
+                </div>
+
+                {priceCalculation.isEarlyBird && (
+                  <Tag color="green" style={{ marginBottom: 8 }}>
+                    🎉 Ưu đãi đặt sớm
+                  </Tag>
+                )}
+
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Loại giá: {priceCalculation.pricingType}
+                </Text>
+              </div>
+            ) : (
+              <Text type="secondary">Chọn số lượng khách để xem giá</Text>
+            )}
+
+            {availability && (
+              <div style={{ marginTop: 16 }}>
+                <Divider />
+                <div style={{ marginBottom: 8 }}>
+                  <Text>Chỗ trống:</Text>
+                  <Text style={{ float: "right" }}>
+                    {availability.availableSlots}/{availability.maxGuests}
+                  </Text>
+                </div>
+                {availability.availableSlots < 5 && (
+                  <Alert
+                    message={`Chỉ còn ${availability.availableSlots} chỗ trống!`}
+                    type="warning"
+                    showIcon
+                  />
+                )}
+              </div>
+            )}
+          </Card>
+        </Col>
+      </Row>
+
+      <LoginModal
+        isVisible={isLoginModalVisible}
+        onClose={() => setIsLoginModalVisible(false)}
+        onRegisterClick={() => {}}
+        onLoginSuccess={() => {
+          setIsLoginModalVisible(false);
+          // Retry booking after login
+          handleSubmit();
+        }}
+      />
+    </div>
+  );
 };
 
 export default BookingPage;

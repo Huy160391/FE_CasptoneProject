@@ -181,6 +181,7 @@ export interface TourOperationSummary {
   maxGuests: number;
   currentBookings: number;
   tourStartDate?: string;
+  tourSlotDate?: string;
   guideId?: string;
   guideName?: string;
   guidePhone?: string;

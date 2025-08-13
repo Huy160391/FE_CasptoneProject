@@ -15,8 +15,7 @@ import {
     Tooltip,
     Space,
     notification,
-    Modal,
-    FloatButton
+    Modal
 } from 'antd';
 import {
     MailOutlined,
@@ -30,8 +29,7 @@ import {
     CheckOutlined,
     CloseOutlined,
     ReloadOutlined,
-    FireOutlined,
-    ExclamationCircleOutlined
+    FireOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -70,7 +68,7 @@ const TourGuideDashboard: React.FC = () => {
     // New states for HDV tour management
     const [activeTours, setActiveTours] = useState<ActiveTour[]>([]);
     const [activeToursLoading, setActiveToursLoading] = useState(false);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [refreshTrigger] = useState(0);
 
     // Helper function to show schedule conflict error
     const showScheduleConflictError = (errorMessage: string) => {
@@ -479,7 +477,7 @@ const TourGuideDashboard: React.FC = () => {
                 </div>
             </div>
 
-            <Spin spinning={loading}>
+            <Spin spinning={loading || activeToursLoading}>
                 {/* Profile Section */}
                 <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
                     <Col span={24}>

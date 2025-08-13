@@ -28,14 +28,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import {
-    getMyBookings,
-    TourBooking,
-    BookingStatus,
-    getBookingStatusText,
-    getBookingStatusColor
+    getMyBookings
 } from '../services/tourBookingService';
 import { formatCurrency } from '../services/paymentService';
-import { hasIndividualQRs, TourBookingDto } from '../types/individualQR';
+import { hasIndividualQRs, TourBookingDto, BookingStatus } from '../types/individualQR';
 import IndividualQRDisplay from '../components/common/IndividualQRDisplay';
 
 const { Title, Text } = Typography;
@@ -46,11 +42,45 @@ interface BookingHistoryProps {
     data?: Array<any>; // Keep for backward compatibility
 }
 
+const getStatusText = (status: BookingStatus): string => {
+    switch (status) {
+        case BookingStatus.Pending:
+            return 'Chờ thanh toán';
+        case BookingStatus.Confirmed:
+            return 'Đã xác nhận';
+        case BookingStatus.Cancelled:
+            return 'Đã hủy';
+        case BookingStatus.Completed:
+            return 'Hoàn thành';
+        case BookingStatus.Refunded:
+            return 'Đã hoàn tiền';
+        default:
+            return 'Không xác định';
+    }
+};
+
+const getStatusColor = (status: BookingStatus): string => {
+    switch (status) {
+        case BookingStatus.Pending:
+            return 'orange';
+        case BookingStatus.Confirmed:
+            return 'green';
+        case BookingStatus.Cancelled:
+            return 'red';
+        case BookingStatus.Completed:
+            return 'blue';
+        case BookingStatus.Refunded:
+            return 'purple';
+        default:
+            return 'default';
+    }
+};
+
 const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
     const { t } = useTranslation();
     const { token, isAuthenticated } = useAuthStore();
 
-    const [bookings, setBookings] = useState<TourBooking[]>([]);
+    const [bookings, setBookings] = useState<TourBookingDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -65,7 +95,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
     const [includeInactive, setIncludeInactive] = useState(true);
 
     // Modal
-    const [selectedBooking, setSelectedBooking] = useState<TourBooking | null>(null);
+    const [selectedBooking, setSelectedBooking] = useState<TourBookingDto | null>(null);
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
 
     // Load bookings
@@ -132,7 +162,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
         loadBookings(1, searchKeyword, statusFilter, checked);
     };
 
-    const handleViewDetail = (booking: TourBooking) => {
+    const handleViewDetail = (booking: TourBookingDto) => {
         setSelectedBooking(booking);
         setIsDetailModalVisible(true);
     };
@@ -202,7 +232,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                 <Option value={BookingStatus.Pending}>Chờ thanh toán</Option>
                                 <Option value={BookingStatus.Confirmed}>Đã xác nhận</Option>
                                 <Option value={BookingStatus.Completed}>Đã hoàn thành</Option>
-                                <Option value={BookingStatus.CancelledByCustomer}>Đã hủy</Option>
+                                <Option value={BookingStatus.Cancelled}>Đã hủy</Option>
                                 <Option value={BookingStatus.Refunded}>Đã hoàn tiền</Option>
                             </Select>
                         </Col>
@@ -271,8 +301,8 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                         title={
                                             <Space>
                                                 <Text strong>{booking.tourOperation?.tourTitle || 'Tour'}</Text>
-                                                <Tag color={getBookingStatusColor(booking.status)}>
-                                                    {getBookingStatusText(booking.status)}
+                                                <Tag color={getStatusColor(booking.status)}>
+                                                    {getStatusText(booking.status)}
                                                 </Tag>
                                             </Space>
                                         }
@@ -281,9 +311,9 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                                 <Text>
                                                     <CalendarOutlined /> Ngày đặt: {new Date(booking.bookingDate).toLocaleDateString('vi-VN')}
                                                 </Text>
-                                                {booking.tourOperation?.tourDate && (
+                                                {booking.tourOperation?.tourSlotDate && (
                                                     <Text>
-                                                        <CalendarOutlined /> Ngày tour: {new Date(booking.tourOperation.tourDate).toLocaleDateString('vi-VN')}
+                                                        <CalendarOutlined /> Ngày tour: {new Date(booking.tourOperation.tourSlotDate).toLocaleDateString('vi-VN')}
                                                     </Text>
                                                 )}
                                                 <Text>
@@ -350,15 +380,15 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                 {selectedBooking.tourOperation?.tourTitle || 'N/A'}
                             </Descriptions.Item>
 
-                            {selectedBooking.tourOperation?.tourDescription && (
+                            {selectedBooking.tourOperation?.tourTitle && (
                                 <Descriptions.Item label="Mô tả tour">
-                                    {selectedBooking.tourOperation.tourDescription}
+                                    {selectedBooking.tourOperation.tourTitle}
                                 </Descriptions.Item>
                             )}
 
-                            {selectedBooking.tourOperation?.tourDate && (
+                            {selectedBooking.tourOperation?.tourSlotDate && (
                                 <Descriptions.Item label="Ngày tour">
-                                    {new Date(selectedBooking.tourOperation.tourDate).toLocaleDateString('vi-VN')}
+                                    {new Date(selectedBooking.tourOperation.tourSlotDate).toLocaleDateString('vi-VN')}
                                 </Descriptions.Item>
                             )}
 
@@ -372,14 +402,13 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                             )}
 
                             <Descriptions.Item label="Trạng thái">
-                                <Tag color={getBookingStatusColor(selectedBooking.status)}>
-                                    {getBookingStatusText(selectedBooking.status)}
+                                <Tag color={getStatusColor(selectedBooking.status)}>
+                                    {getStatusText(selectedBooking.status)}
                                 </Tag>
                             </Descriptions.Item>
 
                             <Descriptions.Item label="Số lượng khách">
                                 {selectedBooking.numberOfGuests} người
-                                ({selectedBooking.adultCount} người lớn, {selectedBooking.childCount} trẻ em)
                             </Descriptions.Item>
 
                             <Descriptions.Item label="Giá gốc">
@@ -456,14 +485,14 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                         )}
 
                         {/* ✅ NEW: Individual QR System Display */}
-                        {hasIndividualQRs(selectedBooking as TourBookingDto) ? (
+                        {hasIndividualQRs(selectedBooking) ? (
                             <div style={{ marginTop: 24 }}>
                                 <IndividualQRDisplay
-                                    guests={(selectedBooking as TourBookingDto).guests || []}
+                                    guests={selectedBooking.guests || []}
                                     bookingCode={selectedBooking.bookingCode}
                                     tourTitle={selectedBooking.tourOperation?.tourTitle}
                                     totalPrice={selectedBooking.totalPrice}
-                                    tourDate={selectedBooking.tourOperation?.tourDate}
+                                    tourDate={selectedBooking.tourOperation?.tourSlotDate}
                                 />
                             </div>
                         ) : selectedBooking.qrCodeData ? (

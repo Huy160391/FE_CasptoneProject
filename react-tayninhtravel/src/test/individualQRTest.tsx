@@ -4,7 +4,7 @@ import { TourBookingGuest, CreateTourBookingRequest } from '../types/individualQ
 import IndividualQRDisplay from '../components/common/IndividualQRDisplay';
 import { validateBookingRequest } from '../services/tourBookingService';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 /**
  * 🧪 Individual QR System Test Component

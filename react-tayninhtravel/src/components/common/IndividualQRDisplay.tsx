@@ -3,7 +3,6 @@ import { Card, Button, Space, Tag, Typography, Row, Col, Divider, message } from
 import { DownloadOutlined, PrinterOutlined, ShareAltOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import QRCode from 'qrcode.react';
 import { TourBookingGuest } from '../../types/individualQR';
-import { formatCurrency } from '../../services/paymentService';
 
 const { Title, Text } = Typography;
 
@@ -18,9 +17,7 @@ interface IndividualQRDisplayProps {
 const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
   guests,
   bookingCode,
-  tourTitle,
-  totalPrice,
-  tourDate
+  tourTitle
 }) => {
 
   // Download single QR code
@@ -29,7 +26,7 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
 
     try {
       const canvas = document.createElement('canvas');
-      const qr = new (window as any).QRCode(canvas, {
+      new (window as any).QRCode(canvas, {
         text: qrCodeData,
         width: 300,
         height: 300,
@@ -178,7 +175,7 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
 
       {/* Individual QR Cards */}
       <Row gutter={[16, 16]}>
-        {guests.map((guest, index) => (
+        {guests.map((guest) => (
           <Col xs={24} sm={12} md={8} lg={6} key={guest.id}>
             <Card
               size="small"

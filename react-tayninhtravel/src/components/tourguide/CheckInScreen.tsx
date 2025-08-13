@@ -1,6 +1,7 @@
 import { getTourOperationByDetailsId } from "@/services/tourcompanyService";
 import {
   checkInGuest,
+  checkInGuestWithOverride,
   getTourBookings,
   TourBooking,
 } from "@/services/tourguideService";
@@ -8,6 +9,7 @@ import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  ExclamationCircleOutlined,
   PhoneOutlined,
   QrcodeOutlined,
   ScanOutlined,
@@ -19,6 +21,7 @@ import {
   Badge,
   Button,
   Card,
+  Checkbox,
   Divider,
   Input,
   List,
@@ -27,6 +30,7 @@ import {
   Progress,
   Space,
   Tag,
+  Tooltip,
   Typography,
 } from "antd";
 import React, { useEffect, useState } from "react";

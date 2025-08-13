@@ -60,7 +60,7 @@ const TourActiveList: React.FC<TourActiveListProps> = ({ refreshTrigger }) => {
     // Get tour status color
     const getTourStatusColor = (tour: ActiveTour) => {
         const now = new Date();
-        const tourDate = new Date(tour.tourDate);
+        const tourDate = new Date(tour.startDate);
         const hoursDiff = (tourDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
         if (hoursDiff <= 1) return 'red'; // Tour sắp bắt đầu hoặc đang diễn ra
@@ -71,7 +71,7 @@ const TourActiveList: React.FC<TourActiveListProps> = ({ refreshTrigger }) => {
     // Get tour status text
     const getTourStatusText = (tour: ActiveTour) => {
         const now = new Date();
-        const tourDate = new Date(tour.tourDate);
+        const tourDate = new Date(tour.startDate);
         const hoursDiff = (tourDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
         if (hoursDiff <= 0) return 'Đang diễn ra';
@@ -197,9 +197,9 @@ const TourActiveList: React.FC<TourActiveListProps> = ({ refreshTrigger }) => {
                                             <Space direction="vertical" style={{ width: '100%' }}>
                                                 <Space>
                                                     <CalendarOutlined />
-                                                    <Text>{new Date(tour.tourDate).toLocaleDateString('vi-VN')}</Text>
+                                                    <Text>{new Date(tour.startDate).toLocaleDateString('vi-VN')}</Text>
                                                     <ClockCircleOutlined />
-                                                    <Text>{new Date(tour.tourDate).toLocaleTimeString('vi-VN', { 
+                                                    <Text>{new Date(tour.startDate).toLocaleTimeString('vi-VN', { 
                                                         hour: '2-digit', 
                                                         minute: '2-digit' 
                                                     })}</Text>
@@ -234,7 +234,7 @@ const TourActiveList: React.FC<TourActiveListProps> = ({ refreshTrigger }) => {
             {/* Quick Actions Alert */}
             {activeTours.some(tour => {
                 const now = new Date();
-                const tourDate = new Date(tour.tourDate);
+                const tourDate = new Date(tour.startDate);
                 const hoursDiff = (tourDate.getTime() - now.getTime()) / (1000 * 60 * 60);
                 return hoursDiff <= 1 && tour.checkedInCount < tour.bookingsCount;
             }) && (
@@ -251,7 +251,7 @@ const TourActiveList: React.FC<TourActiveListProps> = ({ refreshTrigger }) => {
                             onClick={() => {
                                 const urgentTour = activeTours.find(tour => {
                                     const now = new Date();
-                                    const tourDate = new Date(tour.tourDate);
+                                    const tourDate = new Date(tour.startDate);
                                     const hoursDiff = (tourDate.getTime() - now.getTime()) / (1000 * 60 * 60);
                                     return hoursDiff <= 1 && tour.checkedInCount < tour.bookingsCount;
                                 });
