@@ -62,6 +62,11 @@ const SpecialityShopSidebar = () => {
             icon: <WalletOutlined />,
             label: <Link to="/speciality-shop/wallet">Quản lý ví</Link>,
         },
+        {
+            key: '/speciality-shop/customers',
+            icon: <UserOutlined />,
+            label: <Link to="/speciality-shop/customers">Khách hàng đặt trước</Link>,
+        },
     ];
 
     return (

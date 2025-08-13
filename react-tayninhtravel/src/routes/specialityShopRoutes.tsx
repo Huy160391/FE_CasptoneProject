@@ -5,6 +5,7 @@ import Products from '../pages/specialityshop/Products';
 import Orders from '../pages/specialityshop/Orders';
 import Reviews from '../pages/specialityshop/Reviews';
 import WalletManagement from '../pages/specialityshop/WalletManagement';
+import CustomerList from '../pages/specialityshop/CustomerList';
 
 export const specialityShopRoutes = [
     {
@@ -21,6 +22,7 @@ export const specialityShopRoutes = [
                     { path: 'orders', element: <Orders /> },
                     { path: 'reviews', element: <Reviews /> },
                     { path: 'wallet', element: <WalletManagement /> },
+                    { path: 'customers', element: <CustomerList /> },
                 ],
             },
         ],

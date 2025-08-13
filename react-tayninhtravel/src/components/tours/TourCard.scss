@@ -189,7 +189,7 @@
         }
 
         .seats-left {
-          color: white;
+          color: #222;
           font-weight: 500;
           font-size: 13px;
         }
@@ -343,5 +343,9 @@ body.dark-mode {
         color: rgba(255, 255, 255, 0.9) !important;
       }
     }
+  }
+
+  .seats-left {
+    color: #fff !important;
   }
 }

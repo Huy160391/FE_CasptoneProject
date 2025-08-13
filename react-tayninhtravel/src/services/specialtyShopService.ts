@@ -1,3 +1,4 @@
+
 import axios from '../config/axios';
 import { Product, GetProductsParams, GetProductsResponse } from '../types';
 
@@ -12,6 +13,16 @@ export interface CreateProductData {
     IsSale?: boolean;
     SalePercent?: number;
 }
+
+export const getVisitorsBuyProduct = async (params: {
+    pageIndex?: number;
+    pageSize?: number;
+    fromDate?: string;
+    toDate?: string;
+}) => {
+    const response = await axios.get('/SpecialtyShop/Visitors-Buy-Product', { params });
+    return response.data;
+};
 
 export interface UpdateProductData extends Partial<CreateProductData> {
     // Có thể cập nhật các field khác nếu cần
