@@ -27,10 +27,11 @@ export interface TourDetail {
         activity: string;
         checkInTime: string;
         sortOrder: number;
+        specialtyShopId: string;
         specialtyShop?: {
-            id: string;
-            name: string;
-            address?: string;
+            specialtyShopId: string;
+            shopName: string;
+            location?: string;
         };
     }>;
     tourDates?: Array<{
@@ -57,13 +58,13 @@ export class TourDetailsService {
         // Note: token is automatically handled by axios interceptor from localStorage
         // but we keep this parameter for explicit token passing if needed
         const headers: any = {};
-        
+
         if (token) {
             headers.Authorization = `Bearer ${token}`;
         }
 
-        const response = await axios.get(`${this.baseUrl}/${tourId}`, { 
-            headers: Object.keys(headers).length > 0 ? headers : undefined 
+        const response = await axios.get(`${this.baseUrl}/${tourId}`, {
+            headers: Object.keys(headers).length > 0 ? headers : undefined
         });
         return response.data;
     }

@@ -60,6 +60,8 @@ export interface ApiBlogPost {
     totalLikes: number;
     totalDislikes: number;
     totalComments: number;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface ApiGetBlogsResponse {

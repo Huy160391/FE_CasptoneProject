@@ -8,6 +8,52 @@ import type { TourGuideApplication } from '@/types';
 export type { AdminBlogPost, SupportTicket, AdminSupportTicket } from '../types';
 
 class AdminService {
+    /**
+     * Lấy danh sách order sản phẩm
+     * @param params { pageIndex, pageSize, payOsOrderCode, status }
+     * @returns Danh sách order và thông tin phân trang
+     */
+    async getAllProductOrders(params: {
+        pageIndex?: number;
+        pageSize?: number;
+        payOsOrderCode?: string;
+        status?: string;
+    } = {}): Promise<{
+        orders: any[];
+        totalPages: number;
+        totalRecord: number;
+        pageIndex: number | null;
+        pageSize: number | null;
+        statusCode: number;
+        message: string | null;
+        success: boolean;
+    }> {
+        try {
+            const response = await axios.get('/Product/GetAllOrder', { params });
+            return {
+                orders: response.data.data || [],
+                totalPages: response.data.totalPages || 0,
+                totalRecord: response.data.totalRecord || 0,
+                pageIndex: response.data.pageIndex ?? null,
+                pageSize: response.data.pageSize ?? null,
+                statusCode: response.data.statusCode,
+                message: response.data.message ?? null,
+                success: response.data.success ?? false
+            };
+        } catch (error) {
+            console.error('Error fetching product orders:', error);
+            return {
+                orders: [],
+                totalPages: 0,
+                totalRecord: 0,
+                pageIndex: null,
+                pageSize: null,
+                statusCode: 500,
+                message: 'Error fetching product orders',
+                success: false
+            };
+        }
+    }
     // Lấy danh sách tour chờ duyệt
     async getAllTours({
         page = 0,
@@ -215,7 +261,23 @@ class AdminService {
         try {
             let endpoint = 'Cms/SupportTicket';
             if (status) {
-                endpoint += `?status=${encodeURIComponent(status)}`;
+                // Convert status string to number for API compatibility
+                let statusNumber: number;
+                switch (status) {
+                    case 'Open':
+                        statusNumber = 0;
+                        break;
+                    case 'Closed':
+                        statusNumber = 3;
+                        break;
+                    default:
+                        // If status is unexpected, don't add filter
+                        statusNumber = -1;
+                }
+
+                if (statusNumber >= 0) {
+                    endpoint += `?status=${statusNumber}`;
+                }
             }
 
             const response = await axios.get<AdminSupportTicket[]>(endpoint);
@@ -240,11 +302,8 @@ class AdminService {
                 case 'Open':
                     statusNumber = 0;
                     break;
-                case 'Resolved':
-                    statusNumber = 1;
-                    break;
-                case 'Rejected':
-                    statusNumber = 2;
+                case 'Closed':
+                    statusNumber = 3;
                     break;
                 default:
                     throw new Error('Invalid status');
@@ -265,7 +324,7 @@ class AdminService {
                 throw new Error('Response cannot be empty');
             }
 
-            await axios.put(`SupportTickets/Admin/${ticketId}/respond`, { response: response.trim() });
+            await axios.post(`Cms/${ticketId}/Reply-SupportTicket`, { commentText: response.trim() });
         } catch (error) {
             this.handleError(error, 'Error sending ticket response');
         }
@@ -279,22 +338,64 @@ class AdminService {
             throw new Error('Missing required ticket fields');
         }
 
-        // Status validation
-        const status = Number(ticket.status);
+        // Status validation - keep original status from API
         let ticketStatus: TicketStatus;
 
-        switch (status) {
-            case 0:
+        if (typeof ticket.status === 'string') {
+            // Validate that the status is one of the allowed values
+            const validStatuses: TicketStatus[] = ['Open', 'Closed'];
+            const statusCapitalized = ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1).toLowerCase();
+
+            if (validStatuses.includes(statusCapitalized as TicketStatus)) {
+                ticketStatus = statusCapitalized as TicketStatus;
+            } else {
+                // Log warning but default to 'Open' for unknown status
+                console.warn('Unknown ticket status:', ticket.status, 'defaulting to Open');
                 ticketStatus = 'Open';
-                break;
-            case 1:
-                ticketStatus = 'Resolved';
-                break;
-            case 2:
-                ticketStatus = 'Rejected';
-                break;
-            default:
-                throw new Error('Invalid ticket status');
+            }
+        } else {
+            // If status is a number, convert to string equivalent
+            const status = Number(ticket.status);
+            switch (status) {
+                case 0:
+                    ticketStatus = 'Open';
+                    break;
+                case 3:
+                    ticketStatus = 'Closed';
+                    break;
+                default:
+                    console.warn('Unknown ticket status number:', status, 'defaulting to Open');
+                    ticketStatus = 'Open';
+            }
+        }
+
+        // Process images - handle different formats from API
+        let processedImages: { id: string; url: string }[] = [];
+
+        if (Array.isArray(ticket.images)) {
+            processedImages = ticket.images.map((img: any, index: number) => {
+                if (typeof img === 'string') {
+                    // If images are just URLs
+                    return { id: `img_${index}`, url: img };
+                } else if (img && typeof img === 'object') {
+                    // If images are objects, try to extract url
+                    return {
+                        id: img.id || img.imageId || `img_${index}`,
+                        url: img.url || img.imageUrl || img.src || ''
+                    };
+                }
+                return { id: `img_${index}`, url: '' };
+            }).filter((img: { id: string; url: string }) => img.url); // Filter out empty URLs
+        }
+
+        // Process response/comments - API uses "comments" array instead of "response" string
+        let responseText = '';
+        if (ticket.response) {
+            responseText = ticket.response;
+        } else if (Array.isArray(ticket.comments) && ticket.comments.length > 0) {
+            // Get the latest comment as response
+            const latestComment = ticket.comments[ticket.comments.length - 1];
+            responseText = latestComment.commentText || '';
         }
 
         return {
@@ -304,10 +405,10 @@ class AdminService {
             status: ticketStatus,
             createdAt: ticket.createdAt || new Date().toISOString(),
             userId: ticket.userId || '',
-            userName: ticket.userName || '',
+            userName: ticket.userName || ticket.userEmail || 'Unknown User', // Fallback to userEmail if userName not available
             userEmail: ticket.userEmail || '',
-            images: Array.isArray(ticket.images) ? ticket.images : [],
-            response: ticket.response
+            images: processedImages,
+            response: responseText
         };
     } private handleError(error: unknown, context: string): Error {
         if (error && typeof error === 'object' && 'response' in error) {
@@ -438,6 +539,202 @@ class AdminService {
     async rejectShopRegistration(applicationId: string, reason: string): Promise<any> {
         const response = await axios.post(`SpecialtyShopApplication/${applicationId}/reject`, { rejectionReason: reason });
         return response.data;
+    }
+
+    // Dashboard Statistics
+    async getDashboardStats(year: number, month: number): Promise<{
+        totalAccounts: number;
+        newAccountsThisMonth: number;
+        bookingsThisMonth: number;
+        ordersThisMonth: number;
+        totalRevenue: number;
+        withdrawRequestsTotal: number;
+        withdrawRequestsApprove: number;
+        newTourGuidesThisMonth: number;
+        newShopsThisMonth: number;
+        newPostsThisMonth: number;
+        revenueByShop: any[];
+    }> {
+        try {
+            const params = {
+                year,
+                month
+            };
+
+            const response = await axios.get('/Admin/Dashboard', { params });
+
+            // Validate and return with default values if needed
+            return {
+                totalAccounts: response.data.totalAccounts || 0,
+                newAccountsThisMonth: response.data.newAccountsThisMonth || 0,
+                bookingsThisMonth: response.data.bookingsThisMonth || 0,
+                ordersThisMonth: response.data.ordersThisMonth || 0,
+                totalRevenue: response.data.totalRevenue || 0,
+                withdrawRequestsTotal: response.data.withdrawRequestsTotal || 0,
+                withdrawRequestsApprove: response.data.withdrawRequestsApprove || 0,
+                newTourGuidesThisMonth: response.data.newTourGuidesThisMonth || 0,
+                newShopsThisMonth: response.data.newShopsThisMonth || 0,
+                newPostsThisMonth: response.data.newPostsThisMonth || 0,
+                revenueByShop: response.data.revenueByShop || []
+            };
+        } catch (error) {
+            console.error('Error fetching dashboard stats:', error);
+            this.handleError(error, 'Error fetching dashboard statistics');
+
+            // Return default values on error
+            return {
+                totalAccounts: 0,
+                newAccountsThisMonth: 0,
+                bookingsThisMonth: 0,
+                ordersThisMonth: 0,
+                totalRevenue: 0,
+                withdrawRequestsTotal: 0,
+                withdrawRequestsApprove: 0,
+                newTourGuidesThisMonth: 0,
+                newShopsThisMonth: 0,
+                newPostsThisMonth: 0,
+                revenueByShop: []
+            };
+        }
+    }
+
+    // Specialty Shop Management
+    async getSpecialtyShopById(shopId: string): Promise<any> {
+        try {
+            const response = await axios.get(`/SpecialtyShop/${shopId}`);
+            return response.data.data || response.data;
+        } catch (error) {
+            console.error(`Error fetching shop ${shopId}:`, error);
+            this.handleError(error, 'Error fetching shop details');
+            return null;
+        }
+    }
+
+    async getSpecialtyShops({
+        pageIndex = 0,
+        pageSize = 10,
+        includeInactive = false,
+        searchTerm = ''
+    }: {
+        pageIndex?: number;
+        pageSize?: number;
+        includeInactive?: boolean;
+        searchTerm?: string;
+    } = {}): Promise<{
+        shops: any[];
+        totalCount: number;
+        pageIndex: number;
+        pageSize: number;
+        isSuccess: boolean;
+        message: string;
+    }> {
+        try {
+            const params: any = {
+                pageIndex,
+                pageSize,
+                includeInactive
+            };
+
+            if (searchTerm) {
+                params.searchTerm = searchTerm;
+            }
+
+            const response = await axios.get<{
+                data: any[];
+                isSuccess: boolean;
+                statusCode: number;
+                message: string;
+                success: boolean;
+                validationErrors: any[];
+            }>('/SpecialtyShop', { params });
+
+            // Validate response structure
+            if (!response.data || typeof response.data !== 'object') {
+                throw new Error('Invalid response format from server');
+            }
+
+            const shops = Array.isArray(response.data.data) ? response.data.data : [];
+
+            return {
+                shops: shops,
+                totalCount: shops.length, // API might not provide total count, using array length
+                pageIndex: pageIndex,
+                pageSize: pageSize,
+                isSuccess: response.data.isSuccess || false,
+                message: response.data.message || 'Retrieved shops successfully'
+            };
+
+        } catch (error) {
+            console.error('Error fetching specialty shops:', error);
+            this.handleError(error, 'Error fetching specialty shops');
+
+            // Return default values on error
+            return {
+                shops: [],
+                totalCount: 0,
+                pageIndex: pageIndex || 0,
+                pageSize: pageSize || 10,
+                isSuccess: false,
+                message: 'Failed to fetch shops'
+            };
+        }
+    }
+
+    // Tour Guide Management
+    async getTourGuides(params: {
+        pageIndex?: number;
+        pageSize?: number;
+        textSearch?: string;
+        Active?: boolean;
+        isAvailable?: boolean;
+    } = {}) {
+        try {
+            const {
+                pageIndex = 0,
+                pageSize = 10,
+                textSearch = '',
+                Active,
+                isAvailable
+            } = params;
+
+            const queryParams: any = {
+                pageIndex,
+                pageSize
+            };
+
+            if (textSearch) {
+                queryParams.textSearch = textSearch;
+            }
+            if (Active !== undefined) {
+                queryParams.Active = Active;
+            }
+            if (isAvailable !== undefined) {
+                queryParams.isAvailable = isAvailable;
+            }
+
+            const response = await axios.get('/Cms/TourGuide', { params: queryParams });
+
+            return {
+                isSuccess: true,
+                tourGuides: response.data.data || [],
+                totalCount: response.data.totalRecord || 0,
+                totalPages: response.data.totalPages || 0,
+                pageIndex: response.data.pageIndex || params.pageIndex || 0,
+                pageSize: response.data.pageSize || params.pageSize || 10,
+                message: 'Lấy danh sách hướng dẫn viên thành công'
+            };
+        } catch (error: any) {
+            console.error('Error fetching tour guides:', error);
+            return {
+                isSuccess: false,
+                tourGuides: [],
+                totalCount: 0,
+                totalPages: 0,
+                pageIndex: params.pageIndex || 0,
+                pageSize: params.pageSize || 10,
+                message: error?.response?.data?.message || 'Không thể lấy danh sách hướng dẫn viên'
+            };
+        }
     }
 }
 

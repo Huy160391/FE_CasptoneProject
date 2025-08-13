@@ -32,6 +32,7 @@ import {
 import { EnhancedPaymentService } from '../../services/enhancedPaymentService';
 import { useAuthStore } from '../../store/useAuthStore';
 import { getPaymentErrorMessage } from '../../utils/retryUtils';
+import { useCart } from '../../hooks/useCart';
 
 const { Text } = Typography;
 
@@ -52,6 +53,7 @@ const UnifiedPaymentSuccess: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthStore();
+    const { clearCart } = useCart();
 
     // Retry configuration
     const maxRetries = 3;
@@ -87,6 +89,7 @@ const UnifiedPaymentSuccess: React.FC = () => {
                     info: tourResponse.data
                 };
             }
+            console.log('it is a tour booking');
         } catch (error) {
             console.log('Not a tour booking, trying product order...');
         }
@@ -100,6 +103,7 @@ const UnifiedPaymentSuccess: React.FC = () => {
                     info: productResponse.data
                 };
             }
+            console.log('it is a product order');
         } catch (error) {
             console.log('Not a product order either');
         }
@@ -150,6 +154,12 @@ const UnifiedPaymentSuccess: React.FC = () => {
                             orderCode: callbackRequest.orderCode || '',
                             status: callbackRequest.status || 'PAID'
                         });
+
+                        // ALWAYS call legacy payment functions for business logic
+                        if (response.success) {
+                            console.log('Enhanced payment successful, calling legacy functions for business logic...');
+                            await processPaymentSuccess(detection.type, callbackRequest);
+                        }
                     } catch (enhancedError) {
                         console.log('Enhanced payment failed, falling back to legacy:', enhancedError);
                         setUseEnhancedPayment(false);
@@ -159,7 +169,9 @@ const UnifiedPaymentSuccess: React.FC = () => {
                     response = await processPaymentSuccess(detection.type, callbackRequest);
                 }
 
-                if (!response.success) {
+                if (response.success) {
+                    clearCart(); // Chỉ clear cart khi thanh toán thành công
+                } else {
                     setError(response.message || 'Có lỗi xảy ra khi xử lý thanh toán');
                 }
 
@@ -184,9 +196,9 @@ const UnifiedPaymentSuccess: React.FC = () => {
     const handleViewHistory = () => {
         if (paymentData?.type === 'tour') {
             if (isAuthenticated) {
-                navigate('/my-bookings');
+                navigate('/booking-history');
             } else {
-                navigate('/login', { state: { from: '/my-bookings' } });
+                navigate('/login', { state: { from: '/booking-history' } });
             }
         } else {
             navigate('/orders');
@@ -326,12 +338,12 @@ const UnifiedPaymentSuccess: React.FC = () => {
             <div style={{ textAlign: 'center', marginTop: 32 }}>
                 <Space size="large">
                     <Button type="primary" size="large" onClick={handleViewHistory}>
-                        <HistoryOutlined /> 
+                        <HistoryOutlined />
                         {isProductPayment ? 'Xem đơn hàng của tôi' : 'Xem booking của tôi'}
                     </Button>
 
                     <Button size="large" onClick={handleContinueShopping}>
-                        <ShoppingCartOutlined /> 
+                        <ShoppingCartOutlined />
                         {isProductPayment ? 'Tiếp tục mua sắm' : 'Khám phá thêm tour'}
                     </Button>
 

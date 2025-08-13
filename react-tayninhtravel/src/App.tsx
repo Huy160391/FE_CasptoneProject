@@ -2,7 +2,7 @@ import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ConfigProvider, theme as antTheme } from 'antd';
 import routes from './routes';
-import CustomChatbot from './components/ChatBot/CustomChatbot';
+import AIChatWrapper from './components/ChatBot';
 import { useThemeStore } from './store/useThemeStore';
 import appInitService from './services/appInitService';
 import './styles/global.scss';
@@ -69,7 +69,7 @@ const App = () => {
     <ConfigProvider theme={theme}>
       <Router>
         <AppRoutes />
-        <CustomChatbot />
+        <AIChatWrapper version="enhanced" />
       </Router>
     </ConfigProvider>
   );

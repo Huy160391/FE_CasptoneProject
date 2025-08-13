@@ -61,7 +61,7 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
                                 strong
                                 style={{
                                     fontSize: fontSize.current,
-                                    color: '#ff4d4f'
+                                    color: 'white'
                                 }}
                             >
                                 {formatPriceNumber(pricingInfo.finalPrice)}₫
@@ -80,7 +80,10 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
                         /* Regular Price */
                         <Text
                             strong
-                            style={{ fontSize: fontSize.current }}
+                            style={{
+                                fontSize: fontSize.current,
+                                color: 'white'
+                            }}
                         >
                             {formatPriceNumber(pricingInfo.finalPrice)}₫
                         </Text>
@@ -123,30 +126,6 @@ const TourPriceDisplay: React.FC<TourPriceDisplayProps> = ({
                             </Tag>
                         )}
                     </Space>
-                )}
-
-                {/* Per Guest Note */}
-                {numberOfGuests === 1 && (
-                    <Text type="secondary" style={{ fontSize: '12px' }}>
-                        {t('tours.perGuest', '/ khách')}
-                    </Text>
-                )}
-
-                {/* Multiple Guests Note */}
-                {numberOfGuests > 1 && (
-                    <Text type="secondary" style={{ fontSize: '12px' }}>
-                        {t('tours.totalForGuests', `Tổng cho ${numberOfGuests} khách`, { count: numberOfGuests })}
-                    </Text>
-                )}
-
-                {/* Savings Display */}
-                {pricingInfo.isEarlyBird && pricingInfo.discountAmount > 0 && (
-                    <Text
-                        type="success"
-                        style={{ fontSize: '12px', fontWeight: 500 }}
-                    >
-                        {t('tours.saving', `Tiết kiệm ${formatPriceNumber(pricingInfo.discountAmount)}₫`, { amount: formatPriceNumber(pricingInfo.discountAmount) })}
-                    </Text>
                 )}
             </Space>
         </div>

@@ -1,4 +1,4 @@
-import { Row, Col, Card, Statistic, Table, Progress, Button, Space } from 'antd';
+import { Row, Col, Card, Statistic, Table, Progress, Button, Space, Spin, message, DatePicker } from 'antd';
 import {
     ShopOutlined,
     ShoppingCartOutlined,
@@ -8,11 +8,69 @@ import {
     BankOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/store/useAuthStore';
+import {
+    getDashboardData,
+    getRecentOrders,
+    getTopSellingProducts,
+    type DashboardData,
+    type ShopOrder
+} from '@/services/specialtyShopService';
+import dayjs from 'dayjs';
 import './Dashboard.scss';
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const { token } = useAuthStore();
 
+    // State management
+    const [loading, setLoading] = useState(true);
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    const [recentOrders, setRecentOrders] = useState<ShopOrder[]>([]);
+    const [topProducts, setTopProducts] = useState<Array<{
+        id: string;
+        name: string;
+        soldQuantity: number;
+        revenue: number;
+        imageUrl?: string;
+    }>>([]);
+
+    // Date state for filtering
+    const [selectedDate, setSelectedDate] = useState(dayjs());
+
+    // Fetch dashboard data
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
+
+                // Get year and month from selected date
+                const year = selectedDate.year();
+                const month = selectedDate.month() + 1; // dayjs month is 0-based, so add 1
+
+                // Fetch all data in parallel
+                const [dashboard, orders, products] = await Promise.all([
+                    getDashboardData(year, month, token || undefined),
+                    getRecentOrders(5, token || undefined),
+                    getTopSellingProducts(5, token || undefined)
+                ]);
+
+                setDashboardData(dashboard);
+                setRecentOrders(orders);
+                setTopProducts(products);
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                message.error('Không thể tải dữ liệu dashboard');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, [token, selectedDate]); // Add selectedDate to dependency array
+
+    // Type for statistics item
     type StatItem = {
         title: string;
         value: number;
@@ -22,121 +80,78 @@ const Dashboard = () => {
         suffix?: string;
     };
 
-    // Mock data for statistics
-    const stats: StatItem[] = [
-        {
-            title: 'Tổng sản phẩm',
-            value: 45,
-            icon: <ShopOutlined />,
-            color: '#1677ff',
-        },
-        {
-            title: 'Đơn hàng mới',
-            value: 12,
-            icon: <ShoppingCartOutlined />,
-            color: '#52c41a',
-        },
-        {
-            title: 'Doanh thu tháng',
-            value: 8500000,
-            prefix: '₫',
-            icon: <DollarOutlined />,
-            color: '#faad14',
-        },
-        {
-            title: 'Số dư ví',
-            value: 2500000,
-            prefix: '₫',
-            icon: <WalletOutlined />,
-            color: '#722ed1',
-        },
-    ];
+    // Dynamic stats based on API data
+    const getStats = (): StatItem[] => {
+        if (!dashboardData) return [];
+
+        return [
+            {
+                title: 'Tổng sản phẩm',
+                value: dashboardData.totalProducts,
+                icon: <ShopOutlined />,
+                color: '#1677ff',
+            },
+            {
+                title: 'Tổng đơn hàng',
+                value: dashboardData.totalOrders,
+                icon: <ShoppingCartOutlined />,
+                color: '#52c41a',
+            },
+            {
+                title: 'Tổng doanh thu',
+                value: dashboardData.totalRevenue,
+                prefix: '₫',
+                icon: <DollarOutlined />,
+                color: '#faad14',
+            },
+            {
+                title: 'Số dư ví',
+                value: dashboardData.wallet,
+                prefix: '₫',
+                icon: <WalletOutlined />,
+                color: '#722ed1',
+            },
+        ];
+    };
 
     // Additional stats for second row
-    const additionalStats: StatItem[] = [
-        {
-            title: 'Đánh giá trung bình',
-            value: 4.5,
-            suffix: '/5',
-            icon: <StarOutlined />,
-            color: '#f5222d',
-        },
-    ];
+    const getAdditionalStats = (): StatItem[] => {
+        if (!dashboardData) return [];
 
-    // Mock data for recent orders
-    const recentOrders = [
-        {
-            key: '1',
-            id: 'ORD-001',
-            customer: 'Nguyễn Văn A',
-            product: 'Bánh tráng Tây Ninh',
-            date: '2025-06-28',
-            amount: '250,000 ₫',
-            status: 'Hoàn thành',
-        },
-        {
-            key: '2',
-            id: 'ORD-002',
-            customer: 'Trần Thị B',
-            product: 'Nước mắm Phú Quốc',
-            date: '2025-06-27',
-            amount: '180,000 ₫',
-            status: 'Đang xử lý',
-        },
-        {
-            key: '3',
-            id: 'ORD-003',
-            customer: 'Lê Văn C',
-            product: 'Kẹo dừa Bến Tre',
-            date: '2025-06-26',
-            amount: '320,000 ₫',
-            status: 'Đã giao',
-        },
-        {
-            key: '4',
-            id: 'ORD-004',
-            customer: 'Phạm Thị D',
-            product: 'Chà bông Hà Nội',
-            date: '2025-06-25',
-            amount: '150,000 ₫',
-            status: 'Đã hủy',
-        },
-        {
-            key: '5',
-            id: 'ORD-005',
-            customer: 'Hoàng Văn E',
-            product: 'Bánh phồng tôm',
-            date: '2025-06-24',
-            amount: '280,000 ₫',
-            status: 'Hoàn thành',
-        },
-    ];
+        return [
+            {
+                title: 'Đánh giá shop',
+                value: dashboardData.shopAverageRating,
+                suffix: '/5',
+                icon: <StarOutlined />,
+                color: '#f5222d',
+            },
+        ];
+    };
 
+    // Table columns for orders
     const orderColumns = [
         {
-            title: 'Mã đơn hàng',
-            dataIndex: 'id',
-            key: 'id',
+            title: 'Mã PayOS',
+            dataIndex: 'payOsOrderCode',
+            key: 'payOsOrderCode',
         },
         {
             title: 'Khách hàng',
-            dataIndex: 'customer',
-            key: 'customer',
-        },
-        {
-            title: 'Sản phẩm',
-            dataIndex: 'product',
-            key: 'product',
+            dataIndex: 'userName',
+            key: 'userName',
         },
         {
             title: 'Ngày đặt',
-            dataIndex: 'date',
-            key: 'date',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
         },
         {
             title: 'Số tiền',
-            dataIndex: 'amount',
-            key: 'amount',
+            dataIndex: 'totalAfterDiscount',
+            key: 'totalAfterDiscount',
+            render: (amount: number) => `${amount.toLocaleString()} ₫`,
         },
         {
             title: 'Trạng thái',
@@ -144,47 +159,51 @@ const Dashboard = () => {
             key: 'status',
             render: (status: string) => {
                 let color = '';
-                if (status === 'Hoàn thành' || status === 'Đã giao') color = 'success';
-                else if (status === 'Đang xử lý') color = 'processing';
-                else if (status === 'Đã hủy') color = 'error';
+                let text = '';
+                if (status === 'Paid') {
+                    color = 'success';
+                    text = 'Đã thanh toán';
+                } else if (status === 'Pending') {
+                    color = 'processing';
+                    text = 'Chờ xử lý';
+                } else if (status === 'Cancelled') {
+                    color = 'error';
+                    text = 'Đã hủy';
+                } else {
+                    text = status;
+                }
 
-                return <span className={`status-tag ${color}`}>{status}</span>;
+                return <span className={`status-tag ${color}`}>{text}</span>;
             },
         },
     ];
 
-    // Mock data for top products
-    const topProducts = [
-        {
-            name: 'Bánh tráng Tây Ninh',
-            sold: 45,
-            percent: 85,
-        },
-        {
-            name: 'Nước mắm Phú Quốc',
-            sold: 38,
-            percent: 72,
-        },
-        {
-            name: 'Kẹo dừa Bến Tre',
-            sold: 29,
-            percent: 55,
-        },
-        {
-            name: 'Chà bông Hà Nội',
-            sold: 24,
-            percent: 45,
-        },
-        {
-            name: 'Bánh phồng tôm',
-            sold: 18,
-            percent: 34,
-        },
-    ];
+    if (loading) {
+        return (
+            <div className="specialityshop-dashboard-page">
+                <div style={{ textAlign: 'center', padding: '50px' }}>
+                    <Spin size="large" />
+                </div>
+            </div>
+        );
+    }
+
+    const stats = getStats();
+    const additionalStats = getAdditionalStats();
 
     return (
         <div className="specialityshop-dashboard-page">
-            <h1 className="page-title">Dashboard</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h1 className="page-title">Dashboard</h1>
+                <DatePicker
+                    picker="month"
+                    value={selectedDate}
+                    onChange={(date) => setSelectedDate(date || dayjs())}
+                    format="MM/YYYY"
+                    placeholder="Chọn tháng/năm"
+                    allowClear={false}
+                />
+            </div>
 
             <Row gutter={[16, 16]}>
                 {stats.map((stat, index) => (
@@ -213,7 +232,7 @@ const Dashboard = () => {
                 <Col xs={24} lg={16}>
                     <Card title="Đơn hàng gần đây" className="recent-orders-card">
                         <Table
-                            dataSource={recentOrders}
+                            dataSource={recentOrders.map((order, index) => ({ ...order, key: order.payOsOrderCode || order.id || index }))}
                             columns={orderColumns}
                             pagination={false}
                             size="small"
@@ -227,9 +246,12 @@ const Dashboard = () => {
                             <div className="product-item" key={index}>
                                 <div className="product-info">
                                     <span className="product-name">{product.name}</span>
-                                    <span className="product-sold">{product.sold} đã bán</span>
+                                    <span className="product-sold">{product.soldQuantity} đã bán</span>
                                 </div>
-                                <Progress percent={product.percent} size="small" />
+                                <Progress
+                                    percent={Math.min(100, (product.soldQuantity / Math.max(...topProducts.map(p => p.soldQuantity))) * 100)}
+                                    size="small"
+                                />
                             </div>
                         ))}
                     </Card>
@@ -237,7 +259,7 @@ const Dashboard = () => {
             </Row>
 
             {/* Additional Stats Row */}
-            <Row gutter={[16, 16]}>
+            <Row gutter={[16, 16]} className="dashboard-row">
                 {additionalStats.map((stat, index) => (
                     <Col xs={24} sm={12} md={6} key={index}>
                         <Card className="stat-card">

@@ -1,0 +1,243 @@
+// User Detail Modal Styles
+.user-detail-modal {
+  .ant-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .user-detail-content {
+    .user-detail-header {
+      padding: 24px 20px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+
+      .user-avatar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+        img {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 3px solid #e9ecef;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+      }
+
+      .user-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+
+        .user-name {
+          font-size: 18px;
+          font-weight: 600;
+          margin: 0;
+          color: #212529;
+        }
+
+        .status-tag {
+          border-radius: 12px !important;
+          font-weight: 500 !important;
+        }
+      }
+    }
+
+    .user-detail-body {
+      padding: 0;
+
+      .info-section {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        background: #fff;
+
+        &:last-of-type {
+          border-bottom: none;
+        }
+
+        .section-content {
+          h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            color: #495057;
+            background: #f5f5f5;
+            padding: 6px 16px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          }
+
+          .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 24px;
+
+            .label {
+              font-size: 14px;
+              color: #6c757d;
+              font-weight: 400;
+            }
+
+            .value {
+              font-size: 14px;
+              color: #212529;
+              font-weight: 500;
+              text-align: right;
+              max-width: 60%;
+              word-break: break-word;
+
+              &.user-id {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: #f8f9fa;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 13px;
+                color: #495057;
+              }
+            }
+          }
+        }
+      }
+
+      .modal-footer {
+        display: flex;
+        gap: 12px;
+        padding: 20px;
+        background: #fff;
+        border-top: 1px solid #f0f0f0;
+
+        .close-btn, .edit-btn {
+          flex: 1;
+          height: 36px;
+          border-radius: 6px;
+          font-weight: 500;
+        }
+
+        .close-btn {
+          border-color: #d9d9d9;
+          color: #595959;
+
+          &:hover {
+            border-color: #40a9ff;
+            color: #40a9ff;
+          }
+        }
+
+        .edit-btn {
+          background: #1890ff;
+          border-color: #1890ff;
+
+          &:hover {
+            background: #40a9ff;
+            border-color: #40a9ff;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark Mode styles
+.user-detail-modal.dark-theme {
+  .ant-modal-content {
+    background: #1f1f1f !important;
+  }
+
+  .user-detail-content {
+    .user-detail-header {
+      background: #2d2d2d !important;
+      border-bottom: 1px solid #3a3a3a !important;
+
+      .user-info {
+        .user-name {
+          color: #ffffff !important;
+        }
+      }
+
+      .user-avatar img {
+        border-color: #3a3a3a !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      .ant-tag {
+        background: #1890ff !important;
+        color: #ffffff !important;
+        border-color: #1890ff !important;
+      }
+    }
+
+    .user-detail-body {
+      .info-section {
+        background: #2d2d2d !important;
+        border-bottom: 1px solid #3a3a3a !important;
+
+        .section-content {
+          h3 {
+            color: #ffffff !important;
+            background: #3a3a3a !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+          }
+
+          .info-row {
+            .label {
+              color: #e0e0e0 !important;
+            }
+
+            .value {
+              color: #ffffff !important;
+
+              &.user-id {
+                background: #3a3a3a !important;
+                color: #e0e0e0 !important;
+              }
+            }
+          }
+        }
+      }
+
+      .modal-footer {
+        background: #2d2d2d !important;
+        border-top: 1px solid #3a3a3a !important;
+
+        .close-btn {
+          background: #3a3a3a !important;
+          border-color: #3a3a3a !important;
+          color: #e0e0e0 !important;
+
+          &:hover {
+            background: #4a4a4a !important;
+            border-color: #4a4a4a !important;
+            color: #ffffff !important;
+          }
+        }
+
+        .edit-btn {
+          background: #1890ff !important;
+          border-color: #1890ff !important;
+
+          &:hover {
+            background: #40a9ff !important;
+            border-color: #40a9ff !important;
+          }
+        }
+      }
+    }
+  }
+}

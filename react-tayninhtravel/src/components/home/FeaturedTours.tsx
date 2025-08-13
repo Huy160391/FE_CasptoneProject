@@ -6,43 +6,20 @@ import { getFeaturedTourDetails } from '../../services/tourcompanyService'
 import { checkTourAvailability } from '../../services/tourBookingService'
 import { TourDetailsStatus } from '../../types/tour'
 import { useAuthStore } from '../../store/useAuthStore'
+import { TourDetail as ServiceTourDetail } from '../../services/tourDetailsService'
 
-import TourCard from '../common/TourCard'
+import TourCard from '../tours/TourCard'
 import LoginModal from '../auth/LoginModal'
 import { mapStringToStatusEnum } from '../../utils/statusMapper'
 import './FeaturedTours.scss'
 import '@/styles/custom-buttons.scss'
-
-
-
-interface TourDetail {
-  id: string;
-  title: string;
-  description: string;
-  tourTemplateName: string;
-  imageUrls: string[]; // New field for multiple images
-  imageUrl?: string; // Backward compatibility - first image
-  createdAt: string;
-  tourOperation?: {
-    id: string;
-    price: number;
-    maxGuests: number;
-    currentBookings: number;
-    isActive: boolean;
-  };
-  timeline?: Array<{
-    activity: string;
-    checkInTime: string;
-  }>;
-  status: string | number; // API trả về string, components convert thành number
-}
 
 const FeaturedTours = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuthStore()
 
-  const [tours, setTours] = useState<TourDetail[]>([])
+  const [tours, setTours] = useState<ServiceTourDetail[]>([])
   const [loading, setLoading] = useState(true)
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
   const { token } = useAuthStore()
@@ -70,20 +47,20 @@ const FeaturedTours = () => {
 
       if (response.success && response.data) {
         // Filter only public tours (status 8) - tours available for customer booking
-        const publicTours = response.data.filter((tour: TourDetail) => {
+        const publicTours = response.data.filter((tour: ServiceTourDetail) => {
           const mappedStatus = mapStringToStatusEnum(tour.status);
           return mappedStatus === TourDetailsStatus.Public;
         })
-        
+
         // Convert string status to number enum for TourCard compatibility
-        const selectedTours = publicTours.slice(0, 4).map((tour: TourDetail) => ({
+        const selectedTours = publicTours.slice(0, 4).map((tour: ServiceTourDetail) => ({
           ...tour,
           status: mapStringToStatusEnum(tour.status)
         }))
         setTours(selectedTours)
 
         // Load real-time availability for each tour
-        selectedTours.forEach((tour: TourDetail) => {
+        selectedTours.forEach((tour: ServiceTourDetail) => {
           if (tour.tourOperation?.id) {
             loadRealTimeAvailability(tour.tourOperation.id)
           }
@@ -99,7 +76,7 @@ const FeaturedTours = () => {
   }
 
   // Handle booking button click
-  const handleBookNow = (tour: TourDetail) => {
+  const handleBookNow = (tour: ServiceTourDetail) => {
     if (!isAuthenticated) {
       // Show login modal if user is not authenticated
       setIsLoginModalVisible(true)
@@ -126,7 +103,7 @@ const FeaturedTours = () => {
   }
 
   // Handle view tour details
-  const handleViewDetails = (tour: TourDetail) => navigate(`/tour-details/${tour.id}`)
+  const handleViewDetails = (tour: ServiceTourDetail) => navigate(`/tour-details/${tour.id}`)
 
 
 
@@ -161,7 +138,7 @@ const FeaturedTours = () => {
     <section className="featured-tours">
       <div className="section-header">
         <h2>{t('home.featuredToursTitle')}</h2>
-        <p className="section-subtitle">Khám phá những tour du lịch hấp dẫn nhất tại Tây Ninh</p>
+        <p className="section-subtitle">{t('home.featuredToursSubtitle')}</p>
       </div>
 
       <Row gutter={[24, 32]}>

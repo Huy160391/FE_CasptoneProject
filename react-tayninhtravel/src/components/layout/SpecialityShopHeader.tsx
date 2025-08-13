@@ -1,7 +1,7 @@
 import { Layout, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import ThemeToggle from '../common/ThemeToggle';
-import LanguageSwitcher from '../common/LanguageSwitcher';
+// ...existing code...
 import NotificationBell from '../common/NotificationBell';
 import './SpecialityShopHeader.scss';
 
@@ -16,7 +16,6 @@ const SpecialityShopHeader = () => {
                 <div className="page-title">{t('specialityShop.header.title', 'Quản lý cửa hàng đặc sản')}</div>
                 <Space className="header-actions" size="middle">
                     <ThemeToggle />
-                    <LanguageSwitcher />
                     <div className="notification-bell">
                         <NotificationBell />
                     </div>

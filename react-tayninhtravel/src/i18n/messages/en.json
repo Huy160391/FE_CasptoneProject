@@ -27,7 +27,8 @@
         "register": "Register",
         "bookings": "Book Tour",
         "activities": "Activities",
-        "shop": "Shop",
+        "shop": "Souvenirs",
+        "shops": "Souvenir Shops",
         "blog": "Blog",
         "contact": "Contact"
     },
@@ -37,7 +38,6 @@
             "users": "Users Management",
             "orders": "Orders Management",
             "tours": "Tours Management",
-            "reviews": "Reviews Management",
             "blogs": "Blogs Management",
             "cvManagement": "CV Management",
             "supportTickets": "Support Tickets",
@@ -199,14 +199,26 @@
             "response": "Response",
             "updateStatus": "Update Status",
             "markInProgress": "In Progress",
-            "markResolved": "Resolved",
-            "markRejected": "Rejected",
+            "markClosed": "Close Ticket",
+            "markOpen": "Reopen Ticket",
             "yourResponse": "Your Response",
             "responseHint": "Enter your response to the ticket...",
-            "downloadAttachment": "Download Attachment"
+            "downloadAttachment": "Download Attachment",
+            "viewAttachment": "View Attachment",
+            "responseSuccess": "Response sent successfully",
+            "statusUpdateSuccess": "Ticket status updated to {{status}}",
+            "errors": {
+                "fetchFailed": "Failed to load tickets",
+                "statusUpdateFailed": "Failed to update ticket status",
+                "responseFailed": "Failed to send response"
+            }
         }
     },
     "tours": {
+        "route": "{{from}} → {{to}}",
+        "reviewCount": "({{count}} reviews)",
+        "minCapacityPlaceholder": "Minimum guests",
+        "unitPerson": "person",
         "earlyBirdTooltip": "Save {{percent}}% for early booking",
         "earlyBirdTag": "Early Bird -{{percent}}%",
         "earlyBirdCountdownTooltip": "Days left for Early Bird discount",
@@ -225,8 +237,20 @@
             "notReady": "Not Ready"
         },
         "contactForPrice": "Contact",
-        "seatsLeft": "{{count}} seats left",
-        "imageCount": "images"
+        "seatsLeft": "seats left",
+        "imageCount": "images",
+        "filters": "Filters",
+        "destinations": "Destinations",
+        "priceRange": "Price Range",
+        "availableOnly": "Available only",
+        "minRating": "Minimum Rating",
+        "minCapacity": "Minimum Capacity",
+        "days": "days",
+        "flexible": "Flexible",
+        "maxParticipants": "Max participants",
+        "startDate": "Start date",
+        "person": "person",
+        "unavailable": "Unavailable"
     },
     "thingsToDo": {
         "pageTitle": "Explore Tay Ninh",
@@ -235,7 +259,8 @@
         "duration": "Duration",
         "price": "Price",
         "rating": "Rating",
-        "viewDetails": "View Details"
+        "viewDetails": "View Details",
+        "noToursFound": "No tours found matching your search criteria"
     },
     "thingsToDoDetail": {
         "tourNotFound": "Tour not found",
@@ -447,6 +472,8 @@
                 "invalidLicenseFormat": "Only .pdf, .jpg, .jpeg, .png files are accepted!",
                 "licenseTooLarge": "File size must be less than 5MB!",
                 "selectLicense": "Select File",
+                "totalProducts": "Products",
+                "paginationInfo": "Page info",
                 "email": "Email",
                 "emailRequired": "Please enter your email!",
                 "emailInvalid": "Invalid email format!",
@@ -480,11 +507,25 @@
             "response": "Response"
         }
     },
+    "about": {
+        "title": "About Us",
+        "subtitle": "Discover the story, mission, and team behind Tay Ninh Travel",
+        "storyTitle": "Our Story",
+        "storyParagraph1": "Tay Ninh Travel was founded in 2010 with the desire to introduce the beauty of Tay Ninh to domestic and international tourists. From a small company with just a few employees, we have grown into one of the leading travel agencies in Tay Ninh.",
+        "storyParagraph2": "With an experienced team deeply knowledgeable about the local area, we proudly offer memorable travel experiences, from exploring majestic Ba Den Mountain, visiting the sacred Cao Dai Holy See, to enjoying the unique cuisine of this land.",
+        "missionVisionTitle": "Mission & Vision",
+        "missionTitle": "Mission",
+        "missionText": "We are committed to providing customers with quality, safe, and memorable travel experiences in Tay Ninh. At the same time, we contribute to promoting the image, culture, and people of Tay Ninh to friends at home and abroad.",
+        "visionTitle": "Vision",
+        "visionText": "To become the leading travel agency in Tay Ninh and the Southeast region, trusted by customers and highly regarded by partners. We aim for sustainable tourism development, respecting the environment and local communities.",
+        "teamTitle": "Our Team"
+    },
     "home": {
         "welcome": "Welcome to Tay Ninh Tour",
         "explore": "Explore Vietnam's beauty in one day",
         "discover": "Discover Now",
         "featuredToursTitle": "Featured Tours",
+        "featuredToursSubtitle": "Discover the most attractive tours in Tay Ninh",
         "whyChooseUs": "Why Choose Tay Ninh Tour?",
         "tourInfo": {
             "duration": "Duration",
@@ -579,6 +620,7 @@
         "errorDescription": "An error occurred while processing your cart. Please try again later."
     },
     "checkout": {
+        "promotionTitle": "Promotion",
         "title": "Checkout",
         "emptyCart": "Cart is Empty",
         "emptyCartDescription": "Please add products to your cart before checkout",
@@ -663,8 +705,27 @@
         "orderError": "Order Failed",
         "orderErrorDescription": "An error occurred while placing the order. Please try again."
     },
+    "shopList": {
+        "title": "Shop List",
+        "subtitle": "Discover featured specialty shops in Tay Ninh.",
+        "searchPlaceholder": "Search for shops...",
+        "filters": "Filters",
+        "status": "Status",
+        "allStatus": "All statuses",
+        "active": "Active",
+        "inactive": "Inactive",
+        "minimumRating": "Minimum rating",
+        "allRating": "All",
+        "rating3": "3 stars and up",
+        "rating4": "4 stars and up",
+        "rating45": "4.5 stars and up",
+        "rating2": "2 stars and up",
+        "resetFilters": "Reset filters",
+        "loading": "Loading data...",
+        "noShopsFound": "No shops found"
+    },
     "shop": {
-        "title": "Souvenir Shop",
+        "title": "Souvenir Products",
         "subtitle": "Discover unique products from Tay Ninh",
         "searchPlaceholder": "Search products...",
         "sortBy": "Sort by",
@@ -693,7 +754,9 @@
         "soldCount": "Sold {{count}}",
         "loading": "Loading products...",
         "priceRange": "Price Range",
-        "inStockOnly": "Show in-stock only"
+        "inStockOnly": "Show in-stock only",
+        "totalProducts": "Products",
+        "of": "of"
     },
     "common": {
         "actions": "Actions",
@@ -736,6 +799,7 @@
         "finish": "Finish",
         "continue": "Continue",
         "close": "Close",
+        "refresh": "Refresh",
         "open": "Open",
         "yes": "Yes",
         "no": "No",
@@ -754,7 +818,9 @@
         "removeFromFavorites": "Removed from favorites",
         "addToFavorites": "Added to favorites",
         "bookTourSuccess": "Tour booked successfully",
-        "bookTourDescription": "Added {{participants}} tickets for {{name}} to cart"
+        "bookTourDescription": "Added {{participants}} tickets for {{name}} to cart",
+        "favorite": "Favorite",
+        "share": "Share"
     },
     "auth": {
         "email": "Email",
@@ -905,20 +971,27 @@
             "address": "123 ABC Street, XYZ District, Tay Ninh City",
             "phone": "+84 123 456 789",
             "email": "info@tayninhtravel.com"
-        }
+        },
+        "language": "Language"
     },
     "contact": {
         "submitSuccess": "Thank you for contacting us! We will respond as soon as possible."
     },
     "support": {
         "title": "Contact Support",
-        "submitSuccess": "Thank you for your message. We will contact you soon.",
+        "subtitle": "We are here to help you 24/7",
+        "phone": "Phone",
+        "email": "Email",
+        "workingHours": "Working Hours",
+        "workingHoursContent": "Mon - Fri: 8:00 AM - 5:00 PM\nSat - Sun: 8:00 AM - 12:00 PM",
+        "address": "Address",
+        "addressContent": "123 ABC Street, XYZ Ward, Tay Ninh City, Tay Ninh Province",
         "formTitle": "Send Support Request",
         "formSubtitle": "Fill in the form below and we will get back to you as soon as possible",
-        "subtitle": "We are here to help you 24/7",
-        "hint": "All fields marked with * are required",
         "mapTitle": "Our Location",
+        "submitSuccess": "Thank you for your message. We will contact you soon.",
         "loginRequired": "Please login to submit a support request",
+        "hint": "All fields marked with * are required",
         "loginModal": {
             "title": "Login Required",
             "content": "You need to login to submit a support request.",
@@ -1078,6 +1151,23 @@
             "personalInfo": "Personal Information",
             "changePassword": "Change Password"
         }
+    },
+    "blog": {
+        "of": "of",
+        "headerTitle": "Tay Ninh Travel Blog",
+        "headerDesc": "Discover stories, experiences, and useful information about Tay Ninh",
+        "searchPlaceholder": "Search blog posts...",
+        "searchButton": "Search",
+        "byAuthor": "By {{author}}",
+        "likes": "likes",
+        "comments": "comments",
+        "sortNewest": "Newest",
+        "sortOldest": "Oldest",
+        "sortAtoZ": "A-Z",
+        "sortZtoA": "Z-A",
+        "totalPosts": "Posts",
+        "paginationInfo": "Page info",
+        "noPostsFound": "No blog posts found"
     },
     "tourGuide": {
         "sidebar": {
@@ -1467,8 +1557,126 @@
         "TraditionalMassage": "Traditional massage"
     },
     "chatbot": {
+        "title": "TNDT AI Assistant",
         "greeting": "Hello! How can I help you today?",
-        "inputPlaceholder": "Type a message..."
+        "inputPlaceholder": "Type a message...",
+        "errors": {
+            "loginRequired": "You need to login to use chat.",
+            "cannotLoadSessions": "Cannot load chat sessions.",
+            "cannotCreateSession": "Cannot create new chat session.",
+            "createSessionError": "An error occurred while creating chat session.",
+            "cannotSendMessage": "Cannot send message. Please try again.",
+            "sendMessageError": "An error occurred while sending message."
+        },
+        "sessions": {
+            "history": "Chat History",
+            "noSessions": "No chat sessions yet",
+            "delete": "Delete Chat Session",
+            "deleteConfirm": "Are you sure you want to delete the chat session \"{title}\"?",
+            "deleteWarning": "This action cannot be undone.",
+            "edit": "Rename Chat Session",
+            "editPrompt": "Enter new name for the chat session:",
+            "editPlaceholder": "Enter new name..."
+        },
+        "chatTypes": {
+            "tour": "Tour Consultation",
+            "product": "Product Consultation",
+            "tayninh": "Tay Ninh Information",
+            "default": "TNDT AI Chat",
+            "selectType": "Select consultation type:",
+            "descriptions": {
+                "tour": "Tour advice, pricing, bookings",
+                "product": "Local specialty shopping advice",
+                "tayninh": "Local history and culture"
+            }
+        },
+        "actions": {
+            "creating": "Creating...",
+            "startChat": "Start chat",
+            "sendMessage": "Send message",
+            "closeChat": "Close chat",
+            "newChat": "New chat",
+            "rename": "Rename",
+            "delete": "Delete",
+            "cancel": "Cancel",
+            "save": "Save"
+        },
+        "tooltips": {
+            "sessionHistory": "Chat history",
+            "newChat": "New chat",
+            "closeChat": "Close chat",
+            "rename": "Rename",
+            "delete": "Delete",
+            "sendMessage": "Send message",
+            "startChat": "Start chat"
+        },
+        "placeholders": {
+            "typeMessage": "Type a message...",
+            "startChatMessage": "Type a message to start ...",
+            "newName": "Enter new name..."
+        },
+        "welcome": {
+            "title": "Welcome to TNDT AI Assistant!",
+            "instructions": "To start chatting, please:",
+            "steps": {
+                "selectType": "Select the appropriate consultation type above",
+                "startChat": "Click \"Start chat\" button or use the + icon in the header",
+                "languageNote": "Currently we only support Vietnamese language"
+            }
+        },
+        "conversation": {
+            "startTitle": "Start conversation",
+            "startMessage": "Type a message to start chatting with AI assistant."
+        },
+        "topicRedirect": {
+            "confirmMessage": "{suggestion}\n\nDo you want to create a new chat session?"
+        }
+    },
+    "bookingHistory": {
+        "title": "Booking History",
+        "description": "Manage and track your tour bookings",
+        "searchPlaceholder": "Search by tour name, booking code...",
+        "filterByStatus": "Filter by status",
+        "showCancelled": "Show cancelled",
+        "total": "Total",
+        "bookings": "bookings",
+        "viewDetails": "Details",
+        "guide": "Guide",
+        "columns": {
+            "bookingCode": "Booking Code",
+            "tourName": "Tour Name",
+            "tourDate": "Tour Date",
+            "guestCount": "Guest Count",
+            "totalAmount": "Total Amount",
+            "status": "Status",
+            "bookingDate": "Booking Date",
+            "actions": "Actions"
+        },
+        "statuses": {
+            "completed": "Completed",
+            "cancelled": "Cancelled",
+            "confirmed": "Confirmed",
+            "pending": "Pending"
+        }
+    },
+    "commentHistory": {
+        "title": "Review History",
+        "description": "Manage and view your tour reviews",
+        "noReviews": "You have no reviews yet",
+        "columns": {
+            "tourName": "Tour Name",
+            "rating": "Rating",
+            "comment": "Comment",
+            "date": "Review Date"
+        }
+    },
+    "supportTicketHistory": {
+        "title": "Support Request History",
+        "description": "Track your support requests and their processing status"
+    },
+    "registerHistory": {
+        "title": "Registration History",
+        "description": "Track your shop and tour guide registration status"
     },
     "orderHistory": {
         "title": "Order History",
@@ -1509,11 +1717,12 @@
         "noOrders": "You have no orders yet",
         "close": "Close",
         "orderInformation": "Order Information",
+        "deliveryStatus": "Delivery Status",
+        "delivered": "Delivered",
+        "notDelivered": "Not Delivered",
         "statuses": {
-            "pending": "Pending",
-            "confirmed": "Confirmed",
-            "processing": "Processing",
-            "shipping": "Shipping",
+            "paid": "Paid",
+            "notDelivered": "Not Delivered",
             "delivered": "Delivered",
             "cancelled": "Cancelled"
         },
@@ -1522,5 +1731,58 @@
             "paid": "Paid",
             "refunded": "Refunded"
         }
+    },
+    "tour": {
+        "notFoundTitle": "Cannot load tour information",
+        "notFoundText": "Tour does not exist or has been deleted",
+        "detailTitle": "Tour Details",
+        "route": "Route",
+        "duration": "Duration",
+        "days": "days",
+        "flexible": "Flexible",
+        "reviews": "reviews",
+        "scheduleDetail": "Detailed Schedule",
+        "noScheduleDetail": "No detailed schedule",
+        "infoTitle": "Tour Information",
+        "included": "Included",
+        "guide": "Professional guide",
+        "insurance": "Travel insurance",
+        "transport": "Transportation as per program",
+        "notIncluded": "Not included",
+        "personalCost": "Personal expenses",
+        "extraDrink": "Drinks outside the program",
+        "guideTip": "Tip for guide",
+        "reviewTitle": "Review",
+        "writeReview": "Write review",
+        "contact": "Contact",
+        "perPerson": "/ person",
+        "onlyLeft": "Only {{count}} spots left!",
+        "full": "Full",
+        "maxGuests": "Max guests",
+        "booked": "Booked",
+        "availableSpots": "Available spots",
+        "startDate": "Start date",
+        "bookNow": "Book now",
+        "needLogin": "Login required to book",
+        "active": "Active",
+        "inactive": "Inactive",
+        "unitPerson": "person",
+        "unitSpot": "spot",
+        "location": {
+            "nuiBaDen": "Ba Den Mountain",
+            "toaThanh": "Tay Ninh Holy See",
+            "hoDauTieng": "Dau Tieng Lake",
+            "thacGiangDien": "Giang Dien Waterfall",
+            "vuonQuocGiaLoGo": "Lo Go-Xa Mat National Park"
+        },
+        "search": {
+            "destinationPlaceholder": "Select destination",
+            "allLocations": "All locations",
+            "datePlaceholder": "Select departure date",
+            "keywordPlaceholder": "Search tours...",
+            "searchButton": "Search"
+        },
+        "found": "Tours found",
+        "toal": "Total tours"
     }
 }

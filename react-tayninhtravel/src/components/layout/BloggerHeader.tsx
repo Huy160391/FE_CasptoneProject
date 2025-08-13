@@ -1,7 +1,7 @@
 import { Layout, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import ThemeToggle from '../common/ThemeToggle';
-import LanguageSwitcher from '../common/LanguageSwitcher';
+// ...existing code...
 import NotificationBell from '../common/NotificationBell';
 import './BloggerHeader.scss';
 
@@ -16,7 +16,6 @@ const BloggerHeader = () => {
                 <div className="page-title">{t('blogger.header.title')}</div>
                 <Space className="header-actions" size="middle">
                     <ThemeToggle />
-                    <LanguageSwitcher />
                     <div className="notification-bell">
                         <NotificationBell />
                     </div>

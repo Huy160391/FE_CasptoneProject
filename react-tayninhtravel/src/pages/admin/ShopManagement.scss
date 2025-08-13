@@ -1,0 +1,634 @@
+.shop-management {
+  &.light-mode {
+    .page-header {
+      .header-title h1 {
+        color: #262626;
+      }
+    }
+    
+    .filters-section {
+      background: #fafafa;
+      border-color: #f0f0f0;
+      
+      .filter-item label {
+        color: #595959;
+      }
+    }
+    
+    .shop-info {
+      .shop-header {
+        .shop-avatar {
+          border-color: #f0f0f0;
+        }
+        
+        .shop-details .shop-name {
+          color: #262626;
+        }
+      }
+      
+      .shop-description {
+        color: #8c8c8c;
+      }
+    }
+    
+    .representative-info {
+      .rep-name {
+        color: #262626;
+      }
+      
+      .rep-contact div {
+        color: #8c8c8c;
+        
+        .anticon {
+          color: #bfbfbf;
+        }
+      }
+    }
+    
+    .location-text {
+      color: #8c8c8c;
+      
+      .anticon {
+        color: #bfbfbf;
+      }
+    }
+    
+    .rating-display .rating-value {
+      color: #8c8c8c;
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: #f5f5f5 !important;
+    }
+  }
+  
+  &.dark-mode {
+    .page-header {
+      .header-title h1 {
+        color: #f0f0f0;
+      }
+    }
+    
+    .filters-section {
+      background: #141414;
+      border-color: #303030;
+      
+      .filter-item label {
+        color: #d9d9d9;
+      }
+    }
+    
+    .shop-info {
+      .shop-header {
+        .shop-avatar {
+          border-color: #303030;
+        }
+        
+        .shop-details .shop-name {
+          color: #f0f0f0;
+        }
+      }
+      
+      .shop-description {
+        color: #bfbfbf;
+      }
+    }
+    
+    .representative-info {
+      .rep-name {
+        color: #f0f0f0;
+      }
+      
+      .rep-contact div {
+        color: #bfbfbf;
+        
+        .anticon {
+          color: #8c8c8c;
+        }
+      }
+    }
+    
+    .location-text {
+      color: #bfbfbf;
+      
+      .anticon {
+        color: #8c8c8c;
+      }
+    }
+    
+    .rating-display .rating-value {
+      color: #bfbfbf;
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: #262626 !important;
+    }
+    
+    .shop-detail .shop-logo-section {
+      background: #141414;
+      border-color: #303030;
+      
+      h4 {
+        color: #f0f0f0;
+      }
+      
+      img {
+        background: #1f1f1f;
+        border-color: #303030;
+      }
+    }
+  }
+  
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      .header-icon {
+        font-size: 24px;
+        color: #1890ff;
+      }
+      
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+    }
+    
+    .header-stats {
+      display: flex;
+      gap: 8px;
+    }
+  }
+  
+  .filters-section {
+    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: 6px;
+    border: 1px solid;
+    transition: all 0.3s ease;
+    
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      label {
+        margin: 0;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+    }
+  }
+  
+  // Table cell styles
+  .shop-info {
+    .shop-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      
+      .shop-avatar {
+        border: 1px solid;
+        transition: border-color 0.3s ease;
+      }
+      
+      .shop-details {
+        flex: 1;
+        
+        .shop-name {
+          font-weight: 600;
+          margin-bottom: 4px;
+          transition: color 0.3s ease;
+        }
+        
+        .shop-type {
+          .ant-tag {
+            margin: 0;
+          }
+        }
+      }
+    }
+    
+    .shop-description {
+      font-size: 12px;
+      line-height: 1.4;
+      transition: color 0.3s ease;
+    }
+  }
+  
+  .representative-info {
+    .rep-name {
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.3s ease;
+    }
+    
+    .rep-contact {
+      div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        margin-bottom: 2px;
+        transition: color 0.3s ease;
+        
+        .anticon {
+          transition: color 0.3s ease;
+        }
+      }
+    }
+  }
+  
+  .location-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s ease;
+    
+    .anticon {
+      transition: color 0.3s ease;
+    }
+  }
+  
+  .operating-hours {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 12px;
+    
+    .anticon {
+      margin-bottom: 4px;
+      color: #1890ff;
+    }
+  }
+  
+  .rating-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    
+    .ant-rate {
+      font-size: 14px;
+    }
+    
+    .rating-value {
+      font-size: 12px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+  }
+  
+  // Modal styles
+  .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    
+    .anticon {
+      color: #1890ff;
+    }
+  }
+  
+  .shop-detail {
+    .ant-descriptions {
+      margin-bottom: 24px;
+      
+      .ant-descriptions-item-label {
+        font-weight: 500;
+      }
+    }
+    
+    .shop-logo-section {
+      text-align: center;
+      padding: 16px;
+      border: 1px solid;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      
+      h4 {
+        margin-bottom: 12px;
+        transition: color 0.3s ease;
+      }
+      
+      img {
+        border: 1px solid;
+        border-radius: 6px;
+        padding: 8px;
+        transition: all 0.3s ease;
+      }
+    }
+  }
+  
+  // Responsive design
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    
+    .filters-section {
+      .ant-space {
+        width: 100%;
+        
+        .ant-space-item {
+          width: 100%;
+          
+          .ant-input {
+            width: 100% !important;
+          }
+        }
+      }
+    }
+    
+    .shop-info .shop-description {
+      display: none;
+    }
+    
+    .representative-info .rep-contact {
+      display: none;
+    }
+  }
+}
+
+// Animation for smooth transitions
+.ant-table-tbody > tr > td {
+  transition: all 0.3s ease;
+}
+
+// Custom switch styling
+.ant-switch {
+  &.ant-switch-checked {
+    background-color: #52c41a;
+  }
+  
+  &:not(.ant-switch-checked) {
+    background-color: #ff4d4f;
+  }
+}
+
+// Loading state improvements
+.ant-table-placeholder {
+  .ant-empty {
+    margin: 40px 0;
+  }
+}
+
+.ant-spin-container {
+  min-height: 200px;
+}
+
+// Dark mode for Ant Design components
+.shop-management.dark-mode {
+  // Table dark mode
+  .ant-table {
+    background-color: #141414;
+    
+    .ant-table-thead > tr > th {
+      background-color: #262626;
+      color: #f0f0f0;
+      border-bottom-color: #303030;
+    }
+    
+    .ant-table-tbody > tr > td {
+      background-color: #1f1f1f;
+      color: #d9d9d9;
+      border-bottom-color: #303030;
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background-color: #262626 !important;
+    }
+  }
+  
+  // Card dark mode
+  .ant-card {
+    background-color: #1f1f1f;
+    border-color: #303030;
+    
+    .ant-card-body {
+      color: #d9d9d9;
+    }
+  }
+  
+  // Input dark mode
+  .ant-input {
+    background-color: #262626;
+    border-color: #434343;
+    color: #d9d9d9;
+    
+    &:hover {
+      border-color: #1890ff;
+    }
+    
+    &:focus {
+      border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+    
+    &::placeholder {
+      color: #8c8c8c;
+    }
+  }
+  
+  // Tag dark mode
+  .ant-tag {
+    &.ant-tag-blue {
+      background-color: rgba(24, 144, 255, 0.2);
+      border-color: #1890ff;
+      color: #69c0ff;
+    }
+    
+    &.ant-tag-green {
+      background-color: rgba(82, 196, 26, 0.2);
+      border-color: #52c41a;
+      color: #95de64;
+    }
+    
+    &.ant-tag-red {
+      background-color: rgba(255, 77, 79, 0.2);
+      border-color: #ff4d4f;
+      color: #ff7875;
+    }
+    
+    &.ant-tag-orange {
+      background-color: rgba(250, 173, 20, 0.2);
+      border-color: #faad14;
+      color: #ffc53d;
+    }
+    
+    &.ant-tag-purple {
+      background-color: rgba(114, 46, 209, 0.2);
+      border-color: #722ed1;
+      color: #b37feb;
+    }
+    
+    &.ant-tag-cyan {
+      background-color: rgba(19, 194, 194, 0.2);
+      border-color: #13c2c2;
+      color: #5cdbd3;
+    }
+  }
+  
+  // Button dark mode
+  .ant-btn {
+    &:not(.ant-btn-primary) {
+      background-color: #262626;
+      border-color: #434343;
+      color: #d9d9d9;
+      
+      &:hover {
+        background-color: #303030;
+        border-color: #1890ff;
+        color: #40a9ff;
+      }
+    }
+  }
+  
+  // Modal dark mode
+  .ant-modal {
+    .ant-modal-content {
+      background-color: #1f1f1f;
+      
+      .ant-modal-header {
+        background-color: #1f1f1f;
+        border-bottom-color: #303030;
+        
+        .ant-modal-title {
+          color: #f0f0f0;
+        }
+      }
+      
+      .ant-modal-body {
+        color: #d9d9d9;
+        
+        .ant-descriptions {
+          .ant-descriptions-item-label {
+            background-color: #262626;
+            color: #f0f0f0;
+          }
+          
+          .ant-descriptions-item-content {
+            color: #d9d9d9;
+          }
+        }
+      }
+      
+      .ant-modal-footer {
+        background-color: #1f1f1f;
+        border-top-color: #303030;
+      }
+    }
+  }
+  
+  // Tooltip dark mode
+  .ant-tooltip {
+    .ant-tooltip-inner {
+      background-color: #434343;
+      color: #f0f0f0;
+    }
+    
+    .ant-tooltip-arrow::before {
+      background-color: #434343;
+    }
+  }
+  
+  // Pagination dark mode
+  .ant-pagination {
+    .ant-pagination-item {
+      background-color: #262626;
+      border-color: #434343;
+      
+      a {
+        color: #d9d9d9;
+      }
+      
+      &:hover {
+        border-color: #1890ff;
+        
+        a {
+          color: #40a9ff;
+        }
+      }
+      
+      &.ant-pagination-item-active {
+        background-color: #1890ff;
+        border-color: #1890ff;
+        
+        a {
+          color: #fff;
+        }
+      }
+    }
+    
+    .ant-pagination-prev,
+    .ant-pagination-next {
+      .ant-pagination-item-link {
+        background-color: #262626;
+        border-color: #434343;
+        color: #d9d9d9;
+        
+        &:hover {
+          background-color: #303030;
+          border-color: #1890ff;
+          color: #40a9ff;
+        }
+      }
+    }
+    
+    .ant-pagination-options {
+      .ant-select {
+        .ant-select-selector {
+          background-color: #262626;
+          border-color: #434343;
+          color: #d9d9d9;
+        }
+      }
+    }
+  }
+  
+  // Switch dark mode
+  .ant-switch {
+    &:not(.ant-switch-checked) {
+      background-color: #434343;
+    }
+  }
+  
+  // Rate dark mode
+  .ant-rate {
+    .ant-rate-star {
+      color: #434343;
+      
+      &.ant-rate-star-full {
+        color: #fadb14;
+      }
+      
+      &.ant-rate-star-half {
+        .ant-rate-star-first {
+          color: #fadb14;
+        }
+        
+        .ant-rate-star-second {
+          color: #434343;
+        }
+      }
+    }
+  }
+}

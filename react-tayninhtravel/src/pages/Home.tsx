@@ -14,8 +14,8 @@ const Home = () => {
   return (
     <div className="home-page">
       <HeroSection />
-      <TourismHighlights />
       <div className="container">
+        <TourismHighlights />
         <FeaturedTours />
         <BlogPosts />
         <BestSellers />

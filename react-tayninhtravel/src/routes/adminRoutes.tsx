@@ -3,11 +3,13 @@ import Dashboard from '@/pages/admin/Dashboard';
 import UserManagement from '@/pages/admin/UserManagement';
 import Orders from '@/pages/admin/Orders';
 import Tours from '@/pages/admin/Tours';
-import Reviews from '@/pages/admin/Reviews';
 import Blogs from '@/pages/admin/Blogs';
 import CVManagement from '@/pages/admin/CVManagement';
 import SupportTickets from '@/pages/admin/SupportTickets';
 import ShopRegistrationManagement from '@/pages/admin/ShopRegistrationManagement';
+import ShopManagement from '@/pages/admin/ShopManagement';
+import TourGuideManagement from '@/pages/admin/TourGuideManagement';
+import VoucherManagement from '@/pages/admin/VoucherManagement';
 import { AdminWithdrawalManagement } from '@/components/admin';
 
 export const adminRoutes: RouteObject[] = [
@@ -22,26 +24,16 @@ export const adminRoutes: RouteObject[] = [
                 element: <UserManagement />,
             },
             {
-                path: 'orders',
-                element: <Orders />,
+                path: 'tour-guides',
+                element: <TourGuideManagement />,
             },
             {
-                path: 'tours',
-                element: <Tours />,
-            },
-            {
-                path: 'reviews',
-                element: <Reviews />,
-            }, {
-                path: 'blogs',
-                element: <Blogs />,
-            }, {
                 path: 'CVManagement',
                 element: <CVManagement />,
             },
             {
-                path: 'support-tickets',
-                element: <SupportTickets />,
+                path: 'shops',
+                element: <ShopManagement />,
             },
             {
                 path: 'shop-registrations',
@@ -50,6 +42,26 @@ export const adminRoutes: RouteObject[] = [
             {
                 path: 'withdrawal-requests',
                 element: <AdminWithdrawalManagement />,
+            },
+            {
+                path: 'orders',
+                element: <Orders />,
+            },
+            {
+                path: 'vouchers',
+                element: <VoucherManagement />,
+            },
+            {
+                path: 'tours',
+                element: <Tours />,
+            },
+            {
+                path: 'blogs',
+                element: <Blogs />,
+            },
+            {
+                path: 'support-tickets',
+                element: <SupportTickets />,
             },
         ],
     },

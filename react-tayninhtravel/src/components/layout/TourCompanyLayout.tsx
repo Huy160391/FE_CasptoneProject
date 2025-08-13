@@ -18,7 +18,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useTranslation } from 'react-i18next';
 import ThemeToggle from '../common/ThemeToggle';
-import LanguageSwitcher from '../common/LanguageSwitcher';
+// ...existing code...
 import NotificationBell from '../common/NotificationBell';
 import './TourCompanyLayout.scss';
 
@@ -168,7 +168,6 @@ const TourCompanyLayout: React.FC = () => {
                             <NotificationBell />
                         </div>
                         <ThemeToggle />
-                        <LanguageSwitcher />
                     </div>
                 </Header>
                 <Content className="tour-company-content">

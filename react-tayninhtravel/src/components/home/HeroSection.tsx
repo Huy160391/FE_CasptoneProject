@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import SearchBar from './SearchBar'
+import SearchBar from '../../pages/TourSearchBar'
 import './HeroSection.scss'
 
 const HeroSection = () => {

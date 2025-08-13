@@ -187,12 +187,12 @@ const UnifiedPaymentCancel: React.FC = () => {
     const handleViewHistory = () => {
         if (paymentData?.type === 'tour') {
             if (isAuthenticated) {
-                navigate('/my-bookings');
+                navigate('/profile', { state: { activeTab: 'booking-history' } });
             } else {
-                navigate('/login', { state: { from: '/my-bookings' } });
+                navigate('/login', { state: { from: '/profile' } });
             }
         } else {
-            navigate('/orders');
+            navigate('/profile', { state: { activeTab: 'order-history' } });
         }
     };
 
@@ -342,14 +342,14 @@ const UnifiedPaymentCancel: React.FC = () => {
                         </Button>
 
                         <Button size="large" onClick={handleViewHistory}>
-                            <HistoryOutlined /> 
+                            <HistoryOutlined />
                             {isProductPayment ? 'Xem đơn hàng' : 'Xem booking'}
                         </Button>
                     </Space>
 
                     <Space size="middle">
                         <Button size="large" onClick={handleContinueShopping}>
-                            <ShoppingCartOutlined /> 
+                            <ShoppingCartOutlined />
                             {isProductPayment ? 'Tiếp tục mua sắm' : 'Khám phá tour khác'}
                         </Button>
 

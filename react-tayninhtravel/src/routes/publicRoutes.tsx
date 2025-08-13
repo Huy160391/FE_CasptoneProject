@@ -3,7 +3,9 @@ import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Support from '@/pages/Support';
 import Shop from '@/pages/Shop';
+import ShopList from '@/pages/ShopList';
 import ProductDetail from '@/pages/ProductDetail';
+import ShopDetail from '@/pages/ShopDetail';
 import ThingsToDo from '@/pages/ThingsToDo';
 import ThingsToDoDetail from '@/pages/ThingsToDoDetail';
 import Blog from '@/pages/Blog';
@@ -15,10 +17,14 @@ import OrderSuccess from '@/pages/OrderSuccess';
 import NotFound from '@/pages/NotFound';
 import Unauthorized from '@/pages/Unauthorized';
 import BookingPage from '@/pages/BookingPage';
-import TourPaymentSuccess from '@/pages/TourPaymentSuccess';
-import TourPaymentCancel from '@/pages/TourPaymentCancel';
-import ProductPaymentSuccess from '@/pages/ProductPaymentSuccess';
-import ProductPaymentCancel from '@/pages/ProductPaymentCancel';
+import TourPaymentSuccess from '@/./components/payment/TourPaymentSuccess';
+import TourPaymentCancel from '@/./components/payment/TourPaymentCancel';
+import ProductPaymentSuccess from '@/./components/payment/ProductPaymentSuccess';
+import ProductPaymentCancel from '@/./components/payment/ProductPaymentCancel';
+// import TourPaymentSuccess from '@/pages/TourPaymentSuccess';
+// import TourPaymentCancel from '@/pages/TourPaymentCancel';
+// import ProductPaymentSuccess from '@/pages/ProductPaymentSuccess';
+// import ProductPaymentCancel from '@/pages/ProductPaymentCancel';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancel from '@/pages/PaymentCancel';
 import BookingHistory from '@/pages/BookingHistory';
@@ -45,8 +51,16 @@ export const publicRoutes: RouteObject[] = [
         element: <Shop />,
     },
     {
+        path: '/shops',
+        element: <ShopList />,
+    },
+    {
         path: '/shop/product/:id',
         element: <ProductDetail />,
+    },
+    {
+        path: '/shop/:shopId',
+        element: <ShopDetail />,
     },
     {
         path: '/cart',

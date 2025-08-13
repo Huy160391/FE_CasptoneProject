@@ -1,0 +1,765 @@
+.tour-guide-management {
+  &.light-mode {
+    .page-header {
+      .header-title h1 {
+        color: #262626;
+      }
+    }
+    
+    .filters-section {
+      background: #fafafa;
+      border-color: #f0f0f0;
+      
+      .filter-item label {
+        color: #595959;
+      }
+    }
+    
+    .guide-info {
+      .guide-header {
+        .guide-avatar {
+          border-color: #f0f0f0;
+        }
+        
+        .guide-details .guide-name {
+          color: #262626;
+        }
+      }
+    }
+    
+    .contact-info .contact-item {
+      color: #8c8c8c;
+      
+      .anticon {
+        color: #bfbfbf;
+      }
+    }
+    
+    .rating-display .rating-score {
+      color: #262626;
+    }
+    
+    .tours-count .tours-icon {
+      color: #8c8c8c;
+    }
+    
+    .status-display .availability-text {
+      color: #8c8c8c;
+    }
+    
+    .date-display {
+      color: #8c8c8c;
+      
+      .anticon {
+        color: #bfbfbf;
+      }
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: #f5f5f5 !important;
+    }
+
+    // Tour Guide Detail Modal Light Mode
+    .tour-guide-detail-modal {
+      .guide-detail-header {
+        background-color: #fafafa;
+        border-bottom-color: #f0f0f0;
+
+        .guide-avatar-large {
+          .guide-avatar-border {
+            border-color: #f0f0f0 !important;
+          }
+        }
+
+        .guide-header-info {
+          .guide-name-title {
+            color: #262626;
+          }
+
+          .guide-username-text {
+            color: #666;
+          }
+
+          .guide-rating-header {
+            .rating-score {
+              color: #1890ff;
+            }
+          }
+        }
+
+        .guide-stats {
+          .stat-item {
+            .stat-number {
+              color: #1890ff;
+            }
+
+            .stat-number.stat-rating {
+              color: #1890ff;
+            }
+
+            .stat-label {
+              color: #666;
+            }
+          }
+        }
+      }
+
+      .guide-detail-body {
+        .detail-section {
+          .section-title {
+            color: #262626;
+          }
+
+          .info-grid {
+            .info-item {
+              background-color: #fafafa;
+              border-color: #f0f0f0;
+
+              .info-label {
+                color: #666;
+
+                .info-icon {
+                  color: #1890ff;
+                }
+              }
+
+              .info-value {
+                color: #262626;
+              }
+            }
+          }
+
+          .experience-content {
+            .experience-text {
+              color: #595959;
+            }
+          }
+
+          .notes-content {
+            .notes-text {
+              background-color: #f5f5f5;
+              color: #595959;
+            }
+          }
+        }
+      }
+
+      .guide-detail-footer {
+        background-color: #fafafa;
+        border-top-color: #f0f0f0;
+      }
+    }
+  }
+  
+  &.dark-mode {
+    .page-header {
+      .header-title h1 {
+        color: #f0f0f0;
+      }
+    }
+    
+    .filters-section {
+      background: #141414;
+      border-color: #303030;
+      
+      .filter-item label {
+        color: #d9d9d9;
+      }
+    }
+    
+    .guide-info {
+      .guide-header {
+        .guide-avatar {
+          border-color: #303030;
+        }
+        
+        .guide-details .guide-name {
+          color: #f0f0f0;
+        }
+      }
+    }
+    
+    .contact-info .contact-item {
+      color: #bfbfbf;
+      
+      .anticon {
+        color: #8c8c8c;
+      }
+    }
+    
+    .rating-display .rating-score {
+      color: #f0f0f0;
+    }
+    
+    .tours-count .tours-icon {
+      color: #bfbfbf;
+    }
+    
+    .status-display .availability-text {
+      color: #bfbfbf;
+    }
+    
+    .date-display {
+      color: #bfbfbf;
+      
+      .anticon {
+        color: #8c8c8c;
+      }
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: #262626 !important;
+    }
+    
+    .guide-detail .guide-avatar-section {
+      .guide-basic-info h3 {
+        color: #f0f0f0;
+      }
+      
+      .rating-text {
+        color: #d9d9d9;
+      }
+    }
+  }
+  
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      .header-icon {
+        font-size: 24px;
+        color: #1890ff;
+      }
+      
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+    }
+    
+    .header-stats {
+      display: flex;
+      gap: 8px;
+    }
+  }
+  
+  .filters-section {
+    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: 6px;
+    border: 1px solid;
+    transition: all 0.3s ease;
+    
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      label {
+        margin: 0;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+    }
+  }
+  
+  // Table cell styles
+  .guide-info {
+    .guide-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      
+      .guide-avatar {
+        border: 1px solid;
+        transition: border-color 0.3s ease;
+      }
+      
+      .guide-details {
+        flex: 1;
+        
+        .guide-name {
+          font-weight: 600;
+          margin-bottom: 4px;
+          transition: color 0.3s ease;
+        }
+        
+        .guide-specialization {
+          .ant-tag {
+            margin: 0;
+          }
+        }
+      }
+    }
+    
+    .guide-experience {
+      margin-top: 8px;
+    }
+  }
+  
+  .contact-info {
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      margin-bottom: 4px;
+      transition: color 0.3s ease;
+      
+      .anticon {
+        transition: color 0.3s ease;
+      }
+    }
+  }
+  
+  .rating-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    
+    .rating-score {
+      font-weight: 600;
+      font-size: 14px;
+      transition: color 0.3s ease;
+      
+      .anticon {
+        margin-right: 4px;
+      }
+    }
+    
+    .ant-rate {
+      font-size: 12px;
+    }
+  }
+  
+  .tours-count {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    
+    .tours-icon {
+      font-size: 16px;
+      transition: color 0.3s ease;
+    }
+  }
+  
+  .status-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    
+    .availability-text {
+      font-size: 11px;
+      text-align: center;
+      transition: color 0.3s ease;
+    }
+  }
+  
+  .date-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    justify-content: center;
+    transition: color 0.3s ease;
+    
+    .anticon {
+      transition: color 0.3s ease;
+    }
+  }
+  
+  // Modal styles
+  .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    
+    .anticon {
+      color: #1890ff;
+    }
+  }
+  
+  .guide-detail {
+    .guide-avatar-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 16px;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      background: #fafafa;
+      
+      .guide-basic-info {
+        flex: 1;
+        
+        h3 {
+          margin: 0 0 8px 0;
+          font-size: 20px;
+          font-weight: 600;
+          transition: color 0.3s ease;
+        }
+        
+        .rating-section {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          .rating-text {
+            font-weight: 500;
+            transition: color 0.3s ease;
+          }
+        }
+      }
+    }
+    
+    .ant-descriptions {
+      .ant-descriptions-item-label {
+        font-weight: 500;
+      }
+    }
+  }
+  
+  // Responsive design
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    
+    .filters-section {
+      .ant-space {
+        width: 100%;
+        
+        .ant-space-item {
+          width: 100%;
+          
+          .ant-input {
+            width: 100% !important;
+          }
+        }
+      }
+    }
+    
+    .contact-info {
+      .contact-item:last-child {
+        display: none;
+      }
+    }
+    
+    .guide-detail .guide-avatar-section {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+}
+
+// Animation for smooth transitions
+.ant-table-tbody > tr > td {
+  transition: all 0.3s ease;
+}
+
+// Custom switch styling for tour guide availability
+.tour-guide-management {
+  .ant-switch {
+    &.ant-switch-checked {
+      background-color: #52c41a;
+    }
+    
+    &:not(.ant-switch-checked) {
+      background-color: #faad14;
+    }
+  }
+}
+
+// Loading state improvements
+.ant-table-placeholder {
+  .ant-empty {
+    margin: 40px 0;
+  }
+}
+
+.ant-spin-container {
+  min-height: 200px;
+}
+
+// Dark mode for Ant Design components
+.tour-guide-management.dark-mode {
+  // Table dark mode
+  .ant-table {
+    background-color: #141414;
+    
+    .ant-table-thead > tr > th {
+      background-color: #262626;
+      color: #f0f0f0;
+      border-bottom-color: #303030;
+    }
+    
+    .ant-table-tbody > tr > td {
+      background-color: #1f1f1f;
+      color: #d9d9d9;
+      border-bottom-color: #303030;
+    }
+  }
+  
+  // Card dark mode
+  .ant-card {
+    background-color: #1f1f1f;
+    border-color: #303030;
+    
+    .ant-card-body {
+      color: #d9d9d9;
+    }
+  }
+  
+  // Input dark mode
+  .ant-input {
+    background-color: #262626;
+    border-color: #434343;
+    color: #d9d9d9;
+    
+    &:hover {
+      border-color: #1890ff;
+    }
+    
+    &:focus {
+      border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+    
+    &::placeholder {
+      color: #8c8c8c;
+    }
+  }
+  
+  // Tag dark mode
+  .ant-tag {
+    &.ant-tag-blue {
+      background-color: rgba(24, 144, 255, 0.2);
+      border-color: #1890ff;
+      color: #69c0ff;
+    }
+    
+    &.ant-tag-green {
+      background-color: rgba(82, 196, 26, 0.2);
+      border-color: #52c41a;
+      color: #95de64;
+    }
+    
+    &.ant-tag-red {
+      background-color: rgba(255, 77, 79, 0.2);
+      border-color: #ff4d4f;
+      color: #ff7875;
+    }
+    
+    &.ant-tag-orange {
+      background-color: rgba(250, 173, 20, 0.2);
+      border-color: #faad14;
+      color: #ffc53d;
+    }
+    
+    &.ant-tag-purple {
+      background-color: rgba(114, 46, 209, 0.2);
+      border-color: #722ed1;
+      color: #b37feb;
+    }
+  }
+  
+  // Button dark mode
+  .ant-btn {
+    &:not(.ant-btn-primary) {
+      background-color: #262626;
+      border-color: #434343;
+      color: #d9d9d9;
+      
+      &:hover {
+        background-color: #303030;
+        border-color: #1890ff;
+        color: #40a9ff;
+      }
+    }
+  }
+  
+  // Modal dark mode
+  .ant-modal {
+    .ant-modal-content {
+      background-color: #1f1f1f;
+      
+      .ant-modal-header {
+        background-color: #1f1f1f;
+        border-bottom-color: #303030;
+        
+        .ant-modal-title {
+          color: #f0f0f0;
+        }
+      }
+      
+      .ant-modal-body {
+        color: #d9d9d9;
+        
+        .guide-detail .guide-avatar-section {
+          background-color: #262626;
+          border-color: #303030;
+        }
+        
+        .ant-descriptions {
+          .ant-descriptions-item-label {
+            background-color: #262626;
+            color: #f0f0f0;
+          }
+          
+          .ant-descriptions-item-content {
+            color: #d9d9d9;
+          }
+        }
+      }
+      
+      .ant-modal-footer {
+        background-color: #1f1f1f;
+        border-top-color: #303030;
+      }
+    }
+  }
+  
+  // Badge dark mode
+  .ant-badge {
+    .ant-badge-count {
+      background-color: #1890ff;
+      color: #fff;
+    }
+  }
+  
+  // Rate dark mode
+  .ant-rate {
+    .ant-rate-star {
+      color: #434343;
+      
+      &.ant-rate-star-full {
+        color: #fadb14;
+      }
+      
+      &.ant-rate-star-half {
+        .ant-rate-star-first {
+          color: #fadb14;
+        }
+        
+        .ant-rate-star-second {
+          color: #434343;
+        }
+      }
+    }
+  }
+
+  // Tour Guide Detail Modal Dark Mode
+  .tour-guide-detail-modal {
+    .ant-modal-content {
+      background-color: #1f1f1f;
+    }
+
+    .guide-detail-header {
+      background-color: #262626;
+      border-bottom-color: #434343;
+
+      .guide-avatar-large {
+        .guide-avatar-border {
+          border-color: #434343 !important;
+        }
+      }
+
+      .guide-header-info {
+        .guide-name-title {
+          color: #ffffff;
+        }
+
+        .guide-username-text {
+          color: #bfbfbf;
+        }
+
+        .guide-rating-header {
+          .rating-score {
+            color: #40a9ff;
+          }
+        }
+      }
+
+      .guide-stats {
+        .stat-item {
+          .stat-number {
+            color: #40a9ff;
+          }
+
+          .stat-number.stat-rating {
+            color: #40a9ff;
+          }
+
+          .stat-label {
+            color: #bfbfbf;
+          }
+        }
+      }
+    }
+
+    .guide-detail-body {
+      background-color: #1f1f1f;
+
+      .detail-section {
+        .section-title {
+          color: #ffffff;
+        }
+
+        .info-grid {
+          .info-item {
+            background-color: #262626;
+            border-color: #434343;
+
+            .info-label {
+              color: #bfbfbf;
+
+              .info-icon {
+                color: #40a9ff;
+              }
+            }
+
+            .info-value {
+              color: #ffffff;
+            }
+          }
+        }
+
+        .experience-content {
+          .experience-text {
+            color: #d9d9d9;
+          }
+        }
+
+        .notes-content {
+          .notes-text {
+            background-color: #141414;
+            color: #d9d9d9;
+          }
+        }
+      }
+    }
+
+    .guide-detail-footer {
+      background-color: #262626;
+      border-top-color: #434343;
+    }
+  }
+}
