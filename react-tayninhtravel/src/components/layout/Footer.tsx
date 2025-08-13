@@ -1,3 +1,4 @@
+import LanguageSwitcher from '../common/LanguageSwitcher'
 import { Layout, Row, Col, Typography, Space, Divider } from 'antd'
 import { Link } from 'react-router-dom'
 import {
@@ -21,9 +22,9 @@ const Footer = () => {
   return (
     <AntFooter className="footer">
       <div className="footer-container">
-        <Row gutter={[24, 24]}>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <div className="footer-section">
+        <Row gutter={[24, 24]} wrap={false} justify="space-between" align="middle">
+          <Col xs={24} sm={12} md={8} lg={4} style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="footer-section" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Title level={4}>{t('footer.companyName')}</Title>
               <div className="footer-description">
                 {t('footer.description')}
@@ -44,31 +45,28 @@ const Footer = () => {
               </Space>
             </div>
           </Col>
-
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <div className="footer-section">
+          <Col xs={24} sm={12} md={8} lg={4} style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="footer-section" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Title level={4}>{t('navigation.tours')}</Title>
               <ul className="footer-links">
               </ul>
               <ul className="footer-links">
-                <li><Link to="/tours/tay-ninh">Tour Tây Ninh</Link></li>
+                <li><Link to="/things-to-do">Tour Tây Ninh</Link></li>
               </ul>
             </div>
           </Col>
-
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <div className="footer-section">
+          <Col xs={24} sm={12} md={8} lg={4} style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="footer-section" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Title level={4}>{t('navigation.services')}</Title>
               <ul className="footer-links">
               </ul>
               <ul className="footer-links">
-                <li><Link to="/services/day-tours">Tour trong ngày</Link></li>
+                <li><Link to="/things-to-do">Tour du lịch</Link></li>
               </ul>
             </div>
           </Col>
-
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <div className="footer-section">
+          <Col xs={24} sm={12} md={8} lg={4} style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="footer-section" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Title level={4}>{t('navigation.contact')}</Title>
               <ul className="contact-info">
                 <li>
@@ -86,10 +84,14 @@ const Footer = () => {
               </ul>
             </div>
           </Col>
+          <Col xs={24} sm={12} md={8} lg={4} style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="footer-section" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Title level={4}>{t('footer.language')}</Title>
+              <LanguageSwitcher />
+            </div>
+          </Col>
         </Row>
-
         <Divider style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-
         <div className="footer-bottom">
           <Text style={{ color: '#fff' }}>© {new Date().getFullYear()} Tay Ninh Tour. All Rights Reserved.</Text>
         </div>

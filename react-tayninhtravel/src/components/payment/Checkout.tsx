@@ -12,7 +12,7 @@ import {
     Breadcrumb,
     Table,
     Image,
-    Alert,
+    Modal,
     Checkbox,
     Form,
     Input
@@ -320,6 +320,25 @@ const Checkout = () => {
 
             if (res.orderId) {
                 // Then create enhanced payment link
+                if (res.promotionMessages) {
+                    await new Promise<void>(resolve => {
+                        const modal = Modal.info({
+                            title: t('checkout.promotionTitle', 'Khuyến mãi'),
+                            content: (
+                                <div style={{ textAlign: 'center', fontSize: 16 }}>
+                                    {res.promotionMessages.join(', ')}
+                                </div>
+                            ),
+                            centered: true,
+                            okButtonProps: { style: { display: 'none' } },
+                            onOk: () => resolve()
+                        });
+                        setTimeout(() => {
+                            modal.destroy();
+                            resolve();
+                        }, 3000);
+                    });
+                }
                 await createPaymentLink({
                     orderId: res.orderId,
                     amount: getTotalPrice(),
@@ -500,19 +519,6 @@ const Checkout = () => {
                                             </Radio>
                                         ))}
                                     </Radio.Group>
-                                    <Alert
-                                        type="info"
-                                        message={t('checkout.bankTransferInfo')}
-                                        description={
-                                            <div>
-                                                <p><strong>{t('checkout.bankName')}:</strong> Ngân hàng TMCP Á Châu (ACB)</p>
-                                                <p><strong>{t('checkout.accountNumber')}:</strong> 123456789</p>
-                                                <p><strong>{t('checkout.accountName')}:</strong> CONG TY TNHH TAY NINH TRAVEL</p>
-                                                <p><strong>{t('checkout.transferContent')}:</strong> [Mã đơn hàng] - [Số điện thoại]</p>
-                                            </div>
-                                        }
-                                        style={{ marginTop: 16 }}
-                                    />
                                 </Card>
 
                                 {/* Form nhập địa chỉ khi chọn giao hàng tận nhà (ship_cod) */}

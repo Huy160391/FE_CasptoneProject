@@ -7,6 +7,7 @@ import {
   HomeOutlined,
   AppstoreOutlined,
   ShoppingOutlined,
+  ShopOutlined,
   InfoCircleOutlined,
   PhoneOutlined,
   ShoppingCartOutlined,
@@ -18,7 +19,7 @@ import {
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from '../common/ThemeToggle'
-import LanguageSwitcher from '../common/LanguageSwitcher'
+// ...existing code...
 import NotificationBell from '../common/NotificationBell'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
@@ -113,6 +114,11 @@ const Navbar = () => {
       key: '/shop',
       icon: <ShoppingOutlined />,
       label: <Link to="/shop">{t('navigation.shop')}</Link>
+    },
+    {
+      key: '/shops',
+      icon: <ShopOutlined />,
+      label: <Link to="/shops">{t('navigation.shops')}</Link>
     },
     {
       key: '/blog',
@@ -229,8 +235,6 @@ const Navbar = () => {
           <div className="navbar-right">
             <Space size={12}>
               <ThemeToggle />
-              <LanguageSwitcher />
-
               {isAuthenticated && (
                 <div className="notification-bell">
                   <NotificationBell />

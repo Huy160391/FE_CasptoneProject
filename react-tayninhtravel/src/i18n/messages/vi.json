@@ -3,7 +3,8 @@
         "review": {
             "title": "Đánh giá sản phẩm",
             "submit": "Gửi đánh giá",
-            "success": "Đánh giá thành công",
+            "paginationInfo": "{{from}}-{{to}} của {{total}} sản phẩm",
+            "totalProducts": "{{total}} sản phẩm",
             "thankYou": "Cảm ơn bạn đã đánh giá sản phẩm!",
             "error": "Có lỗi xảy ra",
             "submitFailed": "Gửi đánh giá thất bại. Vui lòng thử lại.",
@@ -27,7 +28,8 @@
         "register": "Đăng ký",
         "bookings": "Đặt tour",
         "activities": "Hoạt động",
-        "shop": "Cửa hàng",
+        "shop": "Sản phẩm lưu niệm",
+        "shops": "Cửa hàng lưu niệm",
         "blog": "Blog",
         "contact": "Liên hệ"
     },
@@ -272,6 +274,10 @@
         }
     },
     "tours": {
+        "route": "{{from}} → {{to}}",
+        "reviewCount": "({{count}} đánh giá)",
+        "minCapacityPlaceholder": "Số người tối thiểu",
+        "unitPerson": "người",
         "earlyBirdTooltip": "Giảm {{percent}}% cho khách đặt sớm",
         "earlyBirdTag": "Early Bird -{{percent}}%",
         "earlyBirdCountdownTooltip": "Số ngày còn lại để được giảm giá Early Bird",
@@ -290,7 +296,7 @@
             "notReady": "Chưa sẵn sàng"
         },
         "contactForPrice": "Liên hệ",
-        "seatsLeft": "Còn {{count}} chỗ",
+        "seatsLeft": "chỗ trống",
         "imageCount": "ảnh",
         "filters": "Bộ lọc",
         "destinations": "Điểm đến",
@@ -520,11 +526,25 @@
             }
         }
     },
+    "about": {
+        "title": "Về chúng tôi",
+        "subtitle": "Khám phá câu chuyện, sứ mệnh và đội ngũ đằng sau Tây Ninh Travel",
+        "storyTitle": "Câu chuyện của chúng tôi",
+        "storyParagraph1": "Tây Ninh Travel được thành lập vào năm 2010 với mong muốn giới thiệu vẻ đẹp của Tây Ninh đến với du khách trong và ngoài nước. Từ một công ty nhỏ chỉ với vài nhân viên, chúng tôi đã phát triển thành một trong những đơn vị lữ hành hàng đầu tại Tây Ninh.",
+        "storyParagraph2": "Với đội ngũ nhân viên giàu kinh nghiệm và am hiểu về địa phương, chúng tôi tự hào mang đến cho khách hàng những trải nghiệm du lịch đáng nhớ, từ khám phá núi Bà Đen hùng vĩ, tham quan Tòa Thánh Cao Đài linh thiêng đến thưởng thức ẩm thực đặc sắc của vùng đất này.",
+        "missionVisionTitle": "Sứ mệnh & Tầm nhìn",
+        "missionTitle": "Sứ mệnh",
+        "missionText": "Chúng tôi cam kết mang đến cho khách hàng những trải nghiệm du lịch chất lượng, an toàn và đáng nhớ tại Tây Ninh. Đồng thời, chúng tôi cũng góp phần quảng bá hình ảnh, văn hóa và con người Tây Ninh đến với bạn bè trong nước và quốc tế.",
+        "visionTitle": "Tầm nhìn",
+        "visionText": "Trở thành đơn vị lữ hành hàng đầu tại Tây Ninh và khu vực Đông Nam Bộ, được khách hàng tin tưởng lựa chọn và đối tác đánh giá cao. Chúng tôi hướng đến việc phát triển du lịch bền vững, tôn trọng môi trường và cộng đồng địa phương.",
+        "teamTitle": "Đội ngũ của chúng tôi"
+    },
     "home": {
         "welcome": "Chào mừng đến với Tay Ninh Tour",
         "explore": "Khám phá vẻ đẹp Việt Nam trong một ngày",
         "discover": "Khám phá ngay",
         "featuredToursTitle": "Tour Nổi Bật",
+        "featuredToursSubtitle": "Khám phá những tour du lịch hấp dẫn nhất tại Tây Ninh",
         "whyChooseUs": "Tại sao chọn Tây Ninh Tour?",
         "tourInfo": {
             "duration": "Thời gian",
@@ -619,6 +639,7 @@
         "errorDescription": "Đã xảy ra lỗi khi xử lý giỏ hàng. Vui lòng thử lại sau."
     },
     "checkout": {
+        "promotionTitle": "Khuyến mãi",
         "title": "Thanh toán",
         "emptyCart": "Giỏ hàng trống",
         "emptyCartDescription": "Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán",
@@ -705,8 +726,27 @@
         "orderError": "Đặt hàng thất bại",
         "orderErrorDescription": "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại."
     },
+    "shopList": {
+        "title": "Danh sách cửa hàng",
+        "subtitle": "Khám phá các cửa hàng đặc sản nổi bật tại Tây Ninh.",
+        "searchPlaceholder": "Tìm kiếm cửa hàng...",
+        "filters": "Bộ lọc",
+        "status": "Trạng thái",
+        "allStatus": "Tất cả trạng thái",
+        "active": "Hoạt động",
+        "inactive": "Không hoạt động",
+        "minimumRating": "Đánh giá tối thiểu",
+        "allRating": "Tất cả",
+        "rating3": "3 sao trở lên",
+        "rating4": "4 sao trở lên",
+        "rating45": "4.5 sao trở lên",
+        "rating2": "2 sao trở lên",
+        "resetFilters": "Đặt lại bộ lọc",
+        "loading": "Đang tải dữ liệu...",
+        "noShopsFound": "Không tìm thấy cửa hàng nào"
+    },
     "shop": {
-        "title": "Cửa hàng lưu niệm",
+        "title": "Sản phẩm lưu niệm",
         "subtitle": "Khám phá các sản phẩm đặc trưng của Tây Ninh",
         "categories": {
             "all": "Tất cả danh mục",
@@ -735,7 +775,9 @@
         "soldCount": "Đã bán {{count}}",
         "loading": "Đang tải sản phẩm...",
         "priceRange": "Khoảng giá",
-        "inStockOnly": "Chỉ hiển thị hàng có sẵn"
+        "inStockOnly": "Chỉ hiển thị hàng có sẵn",
+        "totalProducts": "Sản phẩm",
+        "of": "trên"
     },
     "common": {
         "actions": "Thao tác",
@@ -797,7 +839,9 @@
         "removeFromFavorites": "Đã xóa khỏi danh sách yêu thích",
         "addToFavorites": "Đã thêm vào danh sách yêu thích",
         "bookTourSuccess": "Đặt tour thành công",
-        "bookTourDescription": "Đã thêm {{participants}} vé tour {{name}} vào giỏ hàng"
+        "bookTourDescription": "Đã thêm {{participants}} vé tour {{name}} vào giỏ hàng",
+        "favorite": "Yêu thích",
+        "share": "Chia sẻ"
     },
     "auth": {
         "email": "Email",
@@ -867,7 +911,8 @@
             "address": "123 Đường ABC, Quận XYZ, TP. Tây Ninh",
             "phone": "+84 123 456 789",
             "email": "info@tayninhtravel.com"
-        }
+        },
+        "language": "Ngôn ngữ"
     },
     "profile": {
         "personalInfo": "Thông tin cá nhân",
@@ -1152,6 +1197,23 @@
             "personalInfo": "Thông tin cá nhân",
             "changePassword": "Đổi mật khẩu"
         }
+    },
+    "blog": {
+        "of": "của",
+        "headerTitle": "Blog Du Lịch Tây Ninh",
+        "headerDesc": "Khám phá những câu chuyện, kinh nghiệm và thông tin hữu ích về Tây Ninh",
+        "searchPlaceholder": "Tìm kiếm bài viết...",
+        "searchButton": "Tìm kiếm",
+        "byAuthor": "Bởi {{author}}",
+        "likes": "lượt thích",
+        "comments": "bình luận",
+        "sortNewest": "Mới nhất",
+        "sortOldest": "Cũ nhất",
+        "sortAtoZ": "A-Z",
+        "sortZtoA": "Z-A",
+        "totalPosts": "Bài viết",
+        "paginationInfo": "Thông tin trang",
+        "noPostsFound": "Không tìm thấy bài viết nào"
     },
     "tourGuide": {
         "sidebar": {
@@ -1713,5 +1775,58 @@
             "paid": "Đã thanh toán",
             "refunded": "Đã hoàn tiền"
         }
+    },
+    "tour": {
+        "notFoundTitle": "Không thể tải thông tin tour",
+        "notFoundText": "Tour không tồn tại hoặc đã bị xóa",
+        "detailTitle": "Chi tiết tour",
+        "route": "Tuyến đường",
+        "duration": "Thời gian",
+        "days": "ngày",
+        "flexible": "Linh hoạt",
+        "reviews": "đánh giá",
+        "scheduleDetail": "Lịch trình chi tiết",
+        "noScheduleDetail": "Chưa có lịch trình chi tiết",
+        "infoTitle": "Thông tin tour",
+        "included": "Bao gồm",
+        "guide": "Hướng dẫn viên chuyên nghiệp",
+        "insurance": "Bảo hiểm du lịch",
+        "transport": "Vận chuyển theo chương trình",
+        "notIncluded": "Không bao gồm",
+        "personalCost": "Chi phí cá nhân",
+        "extraDrink": "Đồ uống ngoài chương trình",
+        "guideTip": "Tiền tip cho hướng dẫn viên",
+        "reviewTitle": "Đánh giá",
+        "writeReview": "Viết đánh giá",
+        "contact": "Liên hệ",
+        "perPerson": "/ người",
+        "onlyLeft": "Chỉ còn {{count}} chỗ trống!",
+        "full": "Hết chỗ",
+        "maxGuests": "Sức chứa tối đa",
+        "booked": "Đã đặt",
+        "availableSpots": "Chỗ trống",
+        "startDate": "Ngày bắt đầu",
+        "bookNow": "Đặt tour ngay",
+        "needLogin": "Cần đăng nhập để đặt tour",
+        "active": "Đang hoạt động",
+        "inactive": "Chưa sẵn sàng",
+        "unitPerson": "người",
+        "unitSpot": "chỗ",
+        "location": {
+            "nuiBaDen": "Núi Bà Đen",
+            "toaThanh": "Tòa Thánh Tây Ninh",
+            "hoDauTieng": "Hồ Dầu Tiếng",
+            "thacGiangDien": "Thác Giang Điền",
+            "vuonQuocGiaLoGo": "Vườn Quốc Gia Lò Gò - Xa Mát"
+        },
+        "search": {
+            "destinationPlaceholder": "Chọn điểm đến",
+            "allLocations": "Tất cả địa điểm",
+            "datePlaceholder": "Chọn ngày khởi hành",
+            "keywordPlaceholder": "Tìm kiếm tour...",
+            "searchButton": "Tìm kiếm"
+        },
+        "found": "Tour",
+        "total": "Tổng số tour"
     }
 }

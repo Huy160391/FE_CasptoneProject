@@ -138,7 +138,7 @@ const FeaturedTours = () => {
     <section className="featured-tours">
       <div className="section-header">
         <h2>{t('home.featuredToursTitle')}</h2>
-        <p className="section-subtitle">Khám phá những tour du lịch hấp dẫn nhất tại Tây Ninh</p>
+        <p className="section-subtitle">{t('home.featuredToursSubtitle')}</p>
       </div>
 
       <Row gutter={[24, 32]}>
