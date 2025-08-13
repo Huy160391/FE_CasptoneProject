@@ -859,6 +859,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
                     {/* Ẩn tab Hướng dẫn viên nếu status là pending */}
                     {tourDetails && tourDetails.status !== 0 && String(tourDetails.status).toLowerCase() !== 'pending' && tourDetails.status !== 2 && String(tourDetails.status).toLowerCase() !== 'rejected' && (
+
                         <TabPane
                             tab={
                                 <span>

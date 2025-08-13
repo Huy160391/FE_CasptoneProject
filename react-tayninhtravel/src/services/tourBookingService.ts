@@ -2,6 +2,11 @@ import axios from '../config/axios';
 import { ApiResponse } from '../types/api';
 import { TourDetailsStatus } from '../types/tour';
 import { mapStringToStatusEnum } from '../utils/statusMapper';
+import { 
+    GuestInfoRequest, 
+    TourBookingDto,
+    BookingStatus
+} from '../types/individualQR';
 
 // ===== TOUR BOOKING TYPES =====
 
@@ -79,7 +84,21 @@ export interface TourDate {
     bookedSlots?: number;
 }
 
+// ✅ NEW: Individual QR System Request (Primary)
 export interface CreateTourBookingRequest {
+    tourSlotId: string;        // Required - slot cụ thể user chọn
+    numberOfGuests: number;    // Required, 1-50, phải = guests.length
+    contactPhone?: string;     // Optional, max 20 chars
+    specialRequests?: string;  // Optional, max 500 chars
+    bookingType?: 'Individual' | 'GroupRepresentative'; // NEW: Booking type
+    groupName?: string;        // NEW: Group name for GroupRepresentative
+    groupDescription?: string; // NEW: Group description for GroupRepresentative
+    groupRepresentative?: GuestInfoRequest; // NEW: Representative info for GroupRepresentative
+    guests?: GuestInfoRequest[]; // Optional for GroupRepresentative, required for Individual
+}
+
+// 🔄 LEGACY: Backward compatibility (Deprecated)
+export interface LegacyCreateTourBookingRequest {
     tourOperationId: string;
     numberOfGuests: number; // Tổng số người
     adultCount: number; // Sẽ bằng tổng số người
@@ -156,15 +175,8 @@ export interface TourBooking {
     tourOperation?: TourOperationSummary;
 }
 
-export enum BookingStatus {
-    Pending = 0,
-    Confirmed = 1,
-    CancelledByCustomer = 2,
-    CancelledByCompany = 3,
-    Completed = 4,
-    NoShow = 5,
-    Refunded = 6
-}
+// BookingStatus is now imported from individualQR.ts
+export { BookingStatus };
 
 // ===== TOUR BOOKING API SERVICES =====
 
@@ -242,28 +254,66 @@ export const calculateBookingPrice = async (request: CalculatePriceRequest, toke
 };
 
 /**
- * Tạo booking tour mới (yêu cầu authentication)
+ * ✅ NEW: Individual QR System - Tạo booking với guest info (Primary)
  */
 export const createTourBooking = async (request: CreateTourBookingRequest, token: string): Promise<ApiResponse<CreateBookingResult>> => {
+    console.log('Creating booking with Individual QR System:', request);
+    
+    // Validate request format
+    const validation = validateIndividualQRBookingRequest(request);
+    if (!validation.isValid) {
+        return {
+            success: false,
+            message: validation.errors.join(', ')
+        };
+    }
+
+    try {
+        // Try individual QR endpoint first
+        const response = await axios.post('/UserTourBooking/create-booking', request, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+    // Return raw response - let Enhanced Payment handle what it gets
+    console.log('Debug - Individual QR booking response:', response.data);
+    return response.data;
+        
+    } catch (error: any) {
+        console.error('Individual QR booking failed:', error);
+        throw error; // Let the caller handle the error
+    }
+};
+
+/**
+ * 🔄 LEGACY: Backward compatibility support
+ */
+export const createLegacyTourBooking = async (request: LegacyCreateTourBookingRequest, token: string): Promise<ApiResponse<CreateBookingResult>> => {
+    console.warn('Using legacy booking system - consider upgrading to Individual QR System');
+    
+    // Use the same endpoint but with legacy request format
     const response = await axios.post('/UserTourBooking/create-booking', request, {
         headers: { Authorization: `Bearer ${token}` }
     });
 
     // Transform response to match expected format
-    if (response.data.success && response.data.bookingData) {
-        const bookingData = response.data.bookingData;
+    if (response.data.success) {
+        const bookingData = response.data.data || response.data;
+        
+        console.log('Legacy booking response:', response.data);
+        console.log('Legacy bookingData:', bookingData);
+        
         return {
             success: true,
             data: {
                 success: true,
-                message: response.data.message,
-                bookingId: bookingData.id,
+                message: response.data.message || 'Tạo booking thành công',
+                bookingId: bookingData.id || bookingData.bookingId,
                 bookingCode: bookingData.bookingCode,
-                paymentUrl: undefined, // PayOS integration sẽ được thêm sau
-                originalPrice: bookingData.tourOperation?.price || 0,
-                discountPercent: 0,
+                paymentUrl: bookingData.checkoutUrl || bookingData.paymentUrl,
+                originalPrice: bookingData.totalPrice || bookingData.originalPrice || 0,
+                discountPercent: bookingData.discountPercent || 0,
                 finalPrice: bookingData.totalPrice,
-                pricingType: 'Standard',
+                pricingType: 'Legacy',
                 bookingDate: bookingData.bookingDate,
                 tourStartDate: bookingData.tourOperation?.tourDate
             }
@@ -274,7 +324,7 @@ export const createTourBooking = async (request: CreateTourBookingRequest, token
 };
 
 /**
- * Lấy danh sách booking của user hiện tại
+ * ✅ UPDATED: Lấy danh sách booking với Individual QR support
  */
 export const getMyBookings = async (token: string, params?: {
     pageIndex?: number;
@@ -283,7 +333,7 @@ export const getMyBookings = async (token: string, params?: {
     searchKeyword?: string;
     includeInactive?: boolean;
 }): Promise<ApiResponse<{
-    items: TourBooking[];
+    items: TourBookingDto[];
     totalCount: number;
     pageIndex: number;
     pageSize: number;
@@ -297,20 +347,21 @@ export const getMyBookings = async (token: string, params?: {
         ...(params?.includeInactive !== undefined && { includeInactive: params.includeInactive })
     };
 
-    const response = await axios.get('/TourBooking/my-bookings', {
+    const response = await axios.get('/UserTourBooking/my-bookings', {
         headers: { Authorization: `Bearer ${token}` },
         params: queryParams
     });
 
-    // Transform response to match expected format
-    if ((response.data.success || response.data.isSuccess) && response.data.bookings) {
+    // Transform response to support Individual QR system
+    if (response.data.success && response.data.data) {
         return {
             success: true,
             data: {
-                items: response.data.bookings.map((booking: any) => ({
+                items: response.data.data.items?.map((booking: any) => ({
                     ...booking,
-                    numberOfGuests: booking.totalGuests || booking.numberOfGuests,
+                    numberOfGuests: booking.numberOfGuests,
                     statusName: booking.statusName || getBookingStatusText(booking.status),
+                    guests: booking.guests || [], // ✅ NEW: Individual guests with QR codes
                     tourOperation: booking.tourOperation ? {
                         id: booking.tourOperation.id,
                         price: booking.tourOperation.price,
@@ -324,11 +375,11 @@ export const getMyBookings = async (token: string, params?: {
                         currentBookings: 0,
                         isActive: true
                     } : undefined
-                })),
-                totalCount: response.data.pagination?.totalItems || 0,
-                pageIndex: response.data.pagination?.currentPage || 0,
-                pageSize: response.data.pagination?.pageSize || 10,
-                totalPages: response.data.pagination?.totalPages || 1
+                })) || [],
+                totalCount: response.data.data.totalCount || 0,
+                pageIndex: response.data.data.pageIndex || 0,
+                pageSize: response.data.data.pageSize || 10,
+                totalPages: response.data.data.totalPages || 1
             }
         };
     }
@@ -466,14 +517,10 @@ export const getBookingStatusText = (status: BookingStatus): string => {
             return 'Chờ thanh toán';
         case BookingStatus.Confirmed:
             return 'Đã xác nhận';
-        case BookingStatus.CancelledByCustomer:
-            return 'Đã hủy bởi khách hàng';
-        case BookingStatus.CancelledByCompany:
-            return 'Đã hủy bởi công ty';
+        case BookingStatus.Cancelled:
+            return 'Đã hủy';
         case BookingStatus.Completed:
             return 'Đã hoàn thành';
-        case BookingStatus.NoShow:
-            return 'Không xuất hiện';
         case BookingStatus.Refunded:
             return 'Đã hoàn tiền';
         default:
@@ -490,13 +537,10 @@ export const getBookingStatusColor = (status: BookingStatus): string => {
             return 'orange';
         case BookingStatus.Confirmed:
             return 'green';
-        case BookingStatus.CancelledByCustomer:
-        case BookingStatus.CancelledByCompany:
+        case BookingStatus.Cancelled:
             return 'red';
         case BookingStatus.Completed:
             return 'blue';
-        case BookingStatus.NoShow:
-            return 'volcano';
         case BookingStatus.Refunded:
             return 'purple';
         default:
@@ -511,9 +555,118 @@ const isValidEmail = (email: string): boolean => {
 };
 
 /**
- * Validate booking request
+ * ✅ NEW: Validate Individual QR booking request
  */
-export const validateBookingRequest = (request: CreateTourBookingRequest): { isValid: boolean; errors: string[] } => {
+export const validateIndividualQRBookingRequest = (request: CreateTourBookingRequest): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    // Validate tourSlotId
+    if (!request.tourSlotId?.trim()) {
+        errors.push('Vui lòng chọn ngày tour');
+    }
+
+    // Validate numberOfGuests
+    if (!request.numberOfGuests || request.numberOfGuests < 1) {
+        errors.push('Số lượng người phải lớn hơn 0');
+    }
+
+    if (request.numberOfGuests > 50) {
+        errors.push('Số lượng người không được quá 50');
+    }
+
+    // Check booking type to determine validation logic
+    const isGroupRepresentative = request.bookingType === 'GroupRepresentative';
+    const isIndividual = request.bookingType === 'Individual' || !request.bookingType;
+
+    // Validate based on booking type
+    if (isGroupRepresentative) {
+        // For GroupRepresentative: only need 1 guest record OR groupRepresentative info
+        if (request.groupRepresentative) {
+            // Validate group representative info
+            if (!request.groupRepresentative.guestName?.trim()) {
+                errors.push('Tên người đại diện là bắt buộc');
+            } else if (request.groupRepresentative.guestName.trim().length < 2) {
+                errors.push('Tên người đại diện phải có ít nhất 2 ký tự');
+            }
+
+            if (!request.groupRepresentative.guestEmail?.trim()) {
+                errors.push('Email người đại diện là bắt buộc');
+            } else if (!isValidEmail(request.groupRepresentative.guestEmail)) {
+                errors.push('Email người đại diện không hợp lệ');
+            }
+        } else if (!request.guests || request.guests.length === 0) {
+            errors.push('Thông tin người đại diện là bắt buộc');
+        } else {
+            // Validate the first guest as representative
+            const representative = request.guests[0];
+            if (!representative.guestName?.trim()) {
+                errors.push('Tên người đại diện là bắt buộc');
+            }
+            if (!representative.guestEmail?.trim()) {
+                errors.push('Email người đại diện là bắt buộc');
+            } else if (!isValidEmail(representative.guestEmail)) {
+                errors.push('Email người đại diện không hợp lệ');
+            }
+        }
+    } else if (isIndividual) {
+        // For Individual: need guest info for each person
+        if (!request.guests || request.guests.length === 0) {
+            errors.push('Thông tin khách hàng là bắt buộc');
+        } else {
+            // Validate guest count matches
+            if (request.guests.length !== request.numberOfGuests) {
+                errors.push(`Số lượng thông tin khách hàng (${request.guests.length}) phải khớp với số lượng khách đã chọn (${request.numberOfGuests})`);
+            }
+
+            // Validate each guest
+            request.guests.forEach((guest, index) => {
+                if (!guest.guestName?.trim()) {
+                    errors.push(`Tên khách hàng thứ ${index + 1} là bắt buộc`);
+                } else if (guest.guestName.trim().length < 2) {
+                    errors.push(`Tên khách hàng thứ ${index + 1} phải có ít nhất 2 ký tự`);
+                } else if (guest.guestName.length > 100) {
+                    errors.push(`Tên khách hàng thứ ${index + 1} không được quá 100 ký tự`);
+                }
+
+                if (!guest.guestEmail?.trim()) {
+                    errors.push(`Email khách hàng thứ ${index + 1} là bắt buộc`);
+                } else if (!isValidEmail(guest.guestEmail)) {
+                    errors.push(`Email khách hàng thứ ${index + 1} không hợp lệ`);
+                }
+
+                if (guest.guestPhone && guest.guestPhone.length > 20) {
+                    errors.push(`Số điện thoại khách hàng thứ ${index + 1} không được quá 20 ký tự`);
+                }
+            });
+
+            // Validate unique emails
+            const emails = request.guests.map(g => g.guestEmail.toLowerCase());
+            const uniqueEmails = new Set(emails);
+            if (emails.length !== uniqueEmails.size) {
+                errors.push('Email khách hàng phải unique trong cùng booking');
+            }
+        }
+    }
+
+    // Validate optional fields
+    if (request.contactPhone && request.contactPhone.length > 20) {
+        errors.push('Số điện thoại liên hệ không được quá 20 ký tự');
+    }
+
+    if (request.specialRequests && request.specialRequests.length > 500) {
+        errors.push('Yêu cầu đặc biệt không được quá 500 ký tự');
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+};
+
+/**
+ * 🔄 LEGACY: Backward compatibility validation
+ */
+export const validateLegacyBookingRequest = (request: LegacyCreateTourBookingRequest): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
     if (!request.tourOperationId) {
@@ -540,4 +693,16 @@ export const validateBookingRequest = (request: CreateTourBookingRequest): { isV
         isValid: errors.length === 0,
         errors
     };
+};
+
+/**
+ * Universal validation - auto-detect booking type
+ */
+export const validateBookingRequest = (request: CreateTourBookingRequest | LegacyCreateTourBookingRequest): { isValid: boolean; errors: string[] } => {
+    // Check if this is Individual QR request (has guests array)
+    if ('guests' in request && request.guests) {
+        return validateIndividualQRBookingRequest(request as CreateTourBookingRequest);
+    } else {
+        return validateLegacyBookingRequest(request as LegacyCreateTourBookingRequest);
+    }
 };

@@ -4,6 +4,7 @@ import { ConfigProvider, theme as antTheme } from 'antd';
 import routes from './routes';
 import AIChatWrapper from './components/ChatBot';
 import { useThemeStore } from './store/useThemeStore';
+import appInitService from './services/appInitService';
 import './styles/global.scss';
 
 const AppRoutes = () => {
@@ -13,6 +14,16 @@ const AppRoutes = () => {
 
 const App = () => {
   const { isDarkMode, setDarkMode } = useThemeStore();
+
+  // Initialize app services and validate token on mount
+  useEffect(() => {
+    appInitService.initialize();
+
+    // Cleanup on unmount
+    return () => {
+      appInitService.cleanup();
+    };
+  }, []);
 
   // Check for system preferences
   useEffect(() => {

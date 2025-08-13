@@ -30,3 +30,6 @@ dist-ssr
 # Config files (keep template, ignore actual config)
 src/config/constants.ts
 !src/config/constants.template.ts
+
+# Crush AI assistant directory
+.crush/
