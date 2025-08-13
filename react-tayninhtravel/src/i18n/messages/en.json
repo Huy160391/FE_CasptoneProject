@@ -756,7 +756,18 @@
         "priceRange": "Price Range",
         "inStockOnly": "Show in-stock only",
         "totalProducts": "Products",
-        "of": "of"
+        "of": "of",
+        "status": {
+            "active": "Active",
+            "pending": "Pending",
+            "suspended": "Suspended"
+        },
+        "specialty": {
+            "souvenir": "Souvenir Shop",
+            "localSpecialties": "Local Specialties Shop"
+        },
+        "defaultType": "Souvenir Shop",
+        "viewButton": "View Shop"
     },
     "common": {
         "actions": "Actions",

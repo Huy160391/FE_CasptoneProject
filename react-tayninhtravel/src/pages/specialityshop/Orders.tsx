@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Table, Card, Button, Input, Space, Tag, Modal, message, Descriptions } from 'antd';
 import { EyeOutlined, SearchOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -18,6 +19,7 @@ const SpecialityShopOrders = () => {
         pageSize: 10,
         total: 0
     });
+    const location = useLocation();
 
     // Lấy token từ localStorage (hoặc từ context nếu có)
     const getToken = () => localStorage.getItem('token');
@@ -58,6 +60,19 @@ const SpecialityShopOrders = () => {
     useEffect(() => {
         fetchOrders();
     }, []);
+
+    // Nếu có orderId trên query, tự động mở modal chi tiết đơn hàng
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const orderId = params.get('orderId');
+        if (orderId && orders.length > 0) {
+            const found = orders.find(o => o.id === orderId);
+            if (found) {
+                setSelectedOrder(found);
+                setIsModalVisible(true);
+            }
+        }
+    }, [location.search, orders]);
 
     // Fetch lại khi thay đổi filter
     useEffect(() => {
