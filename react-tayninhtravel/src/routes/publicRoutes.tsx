@@ -3,6 +3,7 @@ import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Support from '@/pages/Support';
 import Shop from '@/pages/Shop';
+import ShopList from '@/pages/ShopList';
 import ProductDetail from '@/pages/ProductDetail';
 import ShopDetail from '@/pages/ShopDetail';
 import ThingsToDo from '@/pages/ThingsToDo';
@@ -48,6 +49,10 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/shop',
         element: <Shop />,
+    },
+    {
+        path: '/shops',
+        element: <ShopList />,
     },
     {
         path: '/shop/product/:id',

@@ -192,13 +192,19 @@
 
     .pagination-container {
       padding: 40px 0 20px;
-
+      float: right;
       .pagination-controls {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 16px;
         flex-wrap: wrap;
+        width: auto;
+        text-align: right;
+        margin-right: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
 
         .results-info {
           font-size: 14px;
@@ -224,7 +230,7 @@
             }
 
             &.ant-pagination-item-active {
-              background: linear-gradient(135deg, #1677ff, #40a9ff);
+              background: linear-gradient(135deg, #69c0ff, #91d5ff);
               border-color: #1677ff;
               transform: translateY(-1px);
               box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
@@ -236,25 +242,50 @@
             }
           }
 
-          .ant-pagination-jump-prev,
-          .ant-pagination-jump-next {
-            border-radius: 8px;
-          }
+            .ant-pagination-jump-prev,
+      .ant-pagination-jump-next {
+        border-radius: 8px;
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 4px;
+        transition: all 0.3s ease;
 
-          .ant-pagination-prev,
-          .ant-pagination-next {
-            border-radius: 8px;
-            border-color: rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
+        &:hover {
+          border-color: #69c0ff;
+          color: #69c0ff;
+        }
+      }
 
-            &:hover {
-              border-color: #1677ff;
-              color: #1677ff;
-              transform: translateY(-1px);
-              box-shadow: 0 2px 8px rgba(22, 119, 255, 0.2);
-            }
+      .ant-pagination-prev,
+      .ant-pagination-next {
+        border: none !important;
+        background: none !important;
+        box-shadow: none !important;
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 4px;
+        transition: all 0.3s ease;
+
+        .anticon {
+          color: #333;
+          font-size: 18px;
+        }
+
+        &:hover {
+          .anticon {
+            color: #69c0ff;
           }
         }
+      }
+    }
+        
+        
 
         // Responsive adjustments
         @media (max-width: 768px) {
@@ -279,7 +310,7 @@
       }
     }
   }
-}
+
 
 // Dark mode support
 body.dark-mode {
@@ -331,8 +362,13 @@ body.dark-mode {
         }
       }
 
-      .pagination-controls .results-info {
-        color: rgba(255, 255, 255, 0.65);
+      .pagination-controls {
+        .results-info {
+          color: rgba(255, 255, 255, 0.65);
+        }
+        .results-info-total {
+          color: rgba(255, 255, 255, 0.65);
+        }
       }
 
       // Pagination styling for dark mode

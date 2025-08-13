@@ -1,12 +1,18 @@
 .shop-page {
   padding: 40px 0;
-
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 16px;
+.results-info-total {
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
   }
-
+      .pagination-controls {
+        display: inline-block;
+        width: auto;
+        text-align: right;
+        margin-right: 0;
+        margin-top: 0;
+        margin-bottom: 0;}
   // Shop Header - Centered
   .shop-header {
     text-align: center;
@@ -152,7 +158,8 @@
     }
 
     .pagination-container {
-      padding: 40px 0 20px;
+  padding: 40px 0 20px;
+  float: right;
 
       .pagination-controls {
         display: flex;
@@ -545,7 +552,12 @@ body.dark-mode {
         .results-info {
           color: rgba(255, 255, 255, 0.65);
         }
-
+        .results-info-total {
+          color: rgba(255, 255, 255, 0.65);
+          font-size: 15px;
+          font-weight: 500;
+          white-space: nowrap;
+        }
         .sort-controls span {
           color: rgba(255, 255, 255, 0.65);
         }
@@ -570,7 +582,7 @@ body.dark-mode {
             }
 
             &.ant-pagination-item-active {
-              background: linear-gradient(135deg, #69c0ff, #91d5ff);
+              background: linear-gradient(135deg, #40a9ff, #52c41a);
               border-color: #69c0ff;
               box-shadow: 0 4px 12px rgba(105, 192, 255, 0.4);
 
@@ -580,59 +592,50 @@ body.dark-mode {
               }
             }
           }
+          
 
-          .ant-pagination-jump-prev,
-          .ant-pagination-jump-next {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.65);
+            .ant-pagination-jump-prev,
+      .ant-pagination-jump-next {
+        border-radius: 8px;
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 4px;
+        transition: all 0.3s ease;
 
-            &:hover {
-              background: rgba(255, 255, 255, 0.12);
-              border-color: #69c0ff;
-              color: #69c0ff;
-            }
-          }
+        &:hover {
+          border-color: #69c0ff;
+          color: #69c0ff;
+        }
+      }
 
-          .ant-pagination-prev,
-          .ant-pagination-next {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.65);
+      .ant-pagination-prev,
+      .ant-pagination-next {
+        border: none !important;
+        background: none !important;
+        box-shadow: none !important;
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 4px;
+        transition: all 0.3s ease;
 
-            &:hover {
-              background: rgba(255, 255, 255, 0.12);
-              border-color: #69c0ff;
-              color: #69c0ff;
-              box-shadow: 0 2px 6px rgba(105, 192, 255, 0.2);
-            }
+        .anticon {
+          color: #333;
+          font-size: 18px;
+        }
 
-            &:focus {
-              background: rgba(255, 255, 255, 0.12);
-              border-color: #69c0ff;
-              color: #69c0ff;
-            }
-          }
-
-          .ant-pagination-options-quick-jumper {
-            input {
-              background: rgba(255, 255, 255, 0.08);
-              border-color: rgba(255, 255, 255, 0.15);
-              color: rgba(255, 255, 255, 0.85);
-
-              &:focus {
-                background: rgba(255, 255, 255, 0.12);
-                border-color: #69c0ff;
-                box-shadow: 0 0 0 2px rgba(105, 192, 255, 0.2);
-              }
-
-              &::placeholder {
-                color: rgba(255, 255, 255, 0.45);
-              }
-            }
+        &:hover {
+          .anticon {
+            color: #69c0ff;
           }
         }
       }
+    }}
     }
 
     .product-card {

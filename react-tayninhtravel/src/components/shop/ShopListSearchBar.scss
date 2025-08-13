@@ -1,0 +1,101 @@
+.shop-search-bar {
+    margin-bottom: 40px;
+    
+    .search-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .search-item {
+        &.search {
+          flex: 1;
+          max-width: 400px;
+
+          @media (max-width: 768px) {
+            width: 100%;
+            max-width: none;
+          }
+
+          .ant-input-affix-wrapper {
+            border-radius: 8px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+
+            &:hover {
+              border-color: #1890ff;
+            }
+
+            &:focus-within {
+              border-color: #1890ff;
+              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+            }
+
+            .ant-input {
+              font-size: 16px;
+            }
+
+            .anticon {
+              color: rgba(0, 0, 0, 0.45);
+            }
+          }
+        }
+
+        &.button {
+          .ant-btn {
+            height: 40px;
+            border-radius: 8px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1890ff, #69c0ff);
+            border: none;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+            transition: all 0.3s ease;
+
+            &:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+            }
+
+            @media (max-width: 768px) {
+              width: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+
+body.dark-mode {
+    .shop-search-bar {
+        .search-container {
+            .search-item {
+                &.search {
+                    .ant-input-affix-wrapper {
+                        background-color: rgba(255, 255, 255, 0.04);
+                        border-color: rgba(255, 255, 255, 0.15);
+
+                        .ant-input {
+                            background-color: transparent;
+                            color: rgba(255, 255, 255, 0.85);
+
+                            &::placeholder {
+                                color: rgba(255, 255, 255, 0.45);
+                            }
+                        }
+
+                        &:hover {
+                            border-color: #1890ff;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

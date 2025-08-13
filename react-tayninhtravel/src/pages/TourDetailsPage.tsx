@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     Card,
@@ -45,6 +46,7 @@ import { getDefaultTourImage } from '../utils/imageUtils';
 const { Title, Text, Paragraph } = Typography;
 
 const TourDetailsPage: React.FC = () => {
+    const { t } = useTranslation();
     const { tourId } = useParams<{ tourId: string }>();
     const navigate = useNavigate();
     const { isAuthenticated, token } = useAuthStore();
@@ -199,10 +201,10 @@ const TourDetailsPage: React.FC = () => {
             <div className="tour-detail-page">
                 <div className="container">
                     <div className="not-found">
-                        <Title level={3}>Không thể tải thông tin tour</Title>
-                        <Text>{error || 'Tour không tồn tại hoặc đã bị xóa'}</Text>
+                        <Title level={3}>{t('tour.notFoundTitle')}</Title>
+                        <Text>{error || t('tour.notFoundText')}</Text>
                         <Button type="primary" onClick={handleGoBack}>
-                            Về trang trước
+                            {t('common.back')}
                         </Button>
                     </div>
                 </div>
@@ -230,8 +232,8 @@ const TourDetailsPage: React.FC = () => {
                     <Breadcrumb
                         className="breadcrumb"
                         items={[
-                            { title: <Link to="/">Trang chủ</Link> },
-                            { title: <Link to="/things-to-do">Hoạt động</Link> },
+                            { title: <Link to="/">{t('navigation.home')}</Link> },
+                            { title: <Link to="/things-to-do">{t('navigation.activities')}</Link> },
                             { title: tour.title }
                         ]}
                     />
@@ -242,7 +244,7 @@ const TourDetailsPage: React.FC = () => {
                         onClick={handleGoBack}
                         className="back-button"
                     >
-                        Quay lại
+                        {t('common.back')}
                     </Button>
 
                     <Title level={1} className="tour-title">
@@ -261,7 +263,7 @@ const TourDetailsPage: React.FC = () => {
                         {/* Status tag overlay */}
                         <div className="tour-status-overlay">
                             <Tag color={tour.tourOperation?.isActive ? 'green' : 'orange'}>
-                                {tour.tourOperation?.isActive ? 'Đang hoạt động' : 'Chưa sẵn sàng'}
+                                {tour.tourOperation?.isActive ? t('tour.active') : t('tour.inactive')}
                             </Tag>
                         </div>
                     </div>
@@ -282,23 +284,23 @@ const TourDetailsPage: React.FC = () => {
                     {/* Main Content */}
                     <Col xs={24} lg={16} className="tour-details">
                         <Card className="tour-description">
-                            <Title level={4}>Chi tiết tour</Title>
+                            <Title level={4}>{t('tour.detailTitle')}</Title>
 
                             {/* Tour meta info */}
                             <div className="tour-meta-info">
                                 <div className="meta-row">
                                     <div className="meta-item">
                                         <EnvironmentOutlined />
-                                        <span><strong>Tuyến đường:</strong> {tour.startLocation} → {tour.endLocation}</span>
+                                        <span><strong>{t('tour.route')}:</strong> {tour.startLocation} → {tour.endLocation}</span>
                                     </div>
                                 </div>
 
                                 <div className="meta-row">
                                     <div className="meta-item">
                                         <ClockCircleOutlined />
-                                        <span><strong>Thời gian:</strong> {tour.tourOperation?.tourStartDate && tour.tourOperation?.tourEndDate
-                                            ? `${Math.ceil((new Date(tour.tourOperation.tourEndDate).getTime() - new Date(tour.tourOperation.tourStartDate).getTime()) / (1000 * 60 * 60 * 24))} ngày`
-                                            : 'Linh hoạt'
+                                        <span><strong>{t('tour.duration')}:</strong> {tour.tourOperation?.tourStartDate && tour.tourOperation?.tourEndDate
+                                            ? `${Math.ceil((new Date(tour.tourOperation.tourEndDate).getTime() - new Date(tour.tourOperation.tourStartDate).getTime()) / (1000 * 60 * 60 * 24))} ${t('tour.days')}`
+                                            : t('tour.flexible')
                                         }</span>
                                     </div>
                                 </div>
@@ -307,7 +309,7 @@ const TourDetailsPage: React.FC = () => {
                                     <div className="meta-rating">
                                         <StarOutlined style={{ color: '#faad14' }} />
                                         <Rate disabled defaultValue={averageRating} style={{ fontSize: '14px' }} />
-                                        <Text className="review-count">({mockReviews.length} đánh giá)</Text>
+                                        <Text className="review-count">({mockReviews.length} {t('tour.reviews')})</Text>
                                     </div>
                                 </div>
                             </div>
@@ -324,7 +326,7 @@ const TourDetailsPage: React.FC = () => {
                             items={[
                                 {
                                     key: '1',
-                                    label: 'Lịch trình chi tiết',
+                                    label: t('tour.scheduleDetail'),
                                     children: (
                                         <div>
                                             {tour.timeline && tour.timeline.length > 0 ? (
@@ -341,12 +343,24 @@ const TourDetailsPage: React.FC = () => {
                                                                     <Text>{item.activity}</Text>
                                                                     {item.specialtyShop && (
                                                                         <div style={{ marginTop: 4 }}>
-                                                                            <Text type="secondary">
-                                                                                📍 {item.specialtyShop.name}
-                                                                                {item.specialtyShop.address &&
-                                                                                    ` - ${item.specialtyShop.address}`
-                                                                                }
-                                                                            </Text>
+                                                                            {item.specialtyShopId ? (
+                                                                                <Link
+                                                                                    to={`/shop/${item.specialtyShopId}`}
+                                                                                    style={{ color: '#1677ff', textDecoration: 'underline', cursor: 'pointer', fontWeight: 500 }}
+                                                                                >
+                                                                                    📍 {item.specialtyShop.shopName}
+                                                                                    {item.specialtyShop.location &&
+                                                                                        ` - ${item.specialtyShop.location}`
+                                                                                    }
+                                                                                </Link>
+                                                                            ) : (
+                                                                                <span style={{ color: '#888' }}>
+                                                                                    📍 {item.specialtyShop.shopName}
+                                                                                    {item.specialtyShop.location &&
+                                                                                        ` - ${item.specialtyShop.location}`
+                                                                                    }
+                                                                                </span>
+                                                                            )}
                                                                         </div>
                                                                     )}
                                                                 </div>
@@ -355,48 +369,48 @@ const TourDetailsPage: React.FC = () => {
                                                     }
                                                 />
                                             ) : (
-                                                <Text type="secondary">Chưa có lịch trình chi tiết</Text>
+                                                <Text type="secondary">{t('tour.noScheduleDetail')}</Text>
                                             )}
                                         </div>
                                     )
                                 },
                                 {
                                     key: '2',
-                                    label: 'Thông tin tour',
+                                    label: t('tour.infoTitle'),
                                     children: (
                                         <div className="included-excluded">
                                             <div className="included">
-                                                <Title level={5}>Bao gồm</Title>
+                                                <Title level={5}>{t('tour.included')}</Title>
                                                 <ul>
                                                     <li>
                                                         <CheckCircleOutlined className="included-icon" />
-                                                        Hướng dẫn viên chuyên nghiệp
+                                                        {t('tour.guide')}
                                                     </li>
                                                     <li>
                                                         <CheckCircleOutlined className="included-icon" />
-                                                        Bảo hiểm du lịch
+                                                        {t('tour.insurance')}
                                                     </li>
                                                     <li>
                                                         <CheckCircleOutlined className="included-icon" />
-                                                        Vận chuyển theo chương trình
+                                                        {t('tour.transport')}
                                                     </li>
                                                 </ul>
                                             </div>
 
                                             <div className="excluded">
-                                                <Title level={5}>Không bao gồm</Title>
+                                                <Title level={5}>{t('tour.notIncluded')}</Title>
                                                 <ul>
                                                     <li>
                                                         <InfoCircleOutlined className="excluded-icon" />
-                                                        Chi phí cá nhân
+                                                        {t('tour.personalCost')}
                                                     </li>
                                                     <li>
                                                         <InfoCircleOutlined className="excluded-icon" />
-                                                        Đồ uống ngoài chương trình
+                                                        {t('tour.extraDrink')}
                                                     </li>
                                                     <li>
                                                         <InfoCircleOutlined className="excluded-icon" />
-                                                        Tiền tip cho hướng dẫn viên
+                                                        {t('tour.guideTip')}
                                                     </li>
                                                 </ul>
                                             </div>
@@ -405,17 +419,17 @@ const TourDetailsPage: React.FC = () => {
                                 },
                                 {
                                     key: '3',
-                                    label: `Đánh giá (${mockReviews.length})`,
+                                    label: `${t('tour.reviewTitle')} (${mockReviews.length})`,
                                     children: (
                                         <div className="reviews-section">
                                             <div className="reviews-summary">
                                                 <div className="rating-summary">
                                                     <Title level={2}>{averageRating.toFixed(1)}</Title>
                                                     <Rate disabled defaultValue={averageRating} />
-                                                    <Text>{mockReviews.length} đánh giá</Text>
+                                                    <Text>{mockReviews.length} {t('tour.reviews')}</Text>
                                                 </div>
                                                 <Button type="primary" icon={<StarOutlined />}>
-                                                    Viết đánh giá
+                                                    {t('tour.writeReview')}
                                                 </Button>
                                             </div>
 
@@ -466,8 +480,8 @@ const TourDetailsPage: React.FC = () => {
                                     />
                                 ) : (
                                     <>
-                                        <Text className="current-price">Liên hệ</Text>
-                                        <Text className="price-per">/ người</Text>
+                                        <Text className="current-price">{t('tour.contact')}</Text>
+                                        <Text className="price-per">{t('tour.perPerson')}</Text>
                                     </>
                                 )}
                             </div>
@@ -479,7 +493,7 @@ const TourDetailsPage: React.FC = () => {
                                 <div className="availability-info warning">
                                     <div className="availability-text">
                                         <TeamOutlined />
-                                        <Text>Chỉ còn {availableSlots} chỗ trống!</Text>
+                                        <Text>{t('tour.onlyLeft', { count: availableSlots })}</Text>
                                     </div>
                                 </div>
                             )}
@@ -488,7 +502,7 @@ const TourDetailsPage: React.FC = () => {
                                 <div className="availability-info error">
                                     <div className="availability-text">
                                         <TeamOutlined />
-                                        <Text>Tour đã hết chỗ</Text>
+                                        <Text>{t('tour.full')}</Text>
                                     </div>
                                 </div>
                             )}
@@ -497,32 +511,32 @@ const TourDetailsPage: React.FC = () => {
                             <Descriptions column={1} size="small" className="tour-info-grid">
                                 {tour.tourOperation && (
                                     <>
-                                        <Descriptions.Item label="Sức chứa tối đa">
+                                        <Descriptions.Item label={t('tour.maxGuests')}>
                                             <Space>
                                                 <TeamOutlined />
-                                                {tour.tourOperation.maxGuests} người
+                                                {tour.tourOperation.maxGuests} {t('tour.unitPerson')}
                                             </Space>
                                         </Descriptions.Item>
 
-                                        <Descriptions.Item label="Đã đặt">
+                                        <Descriptions.Item label={t('tour.booked')}>
                                             <Space>
                                                 <ShoppingCartOutlined />
                                                 {realTimeAvailability
                                                     ? realTimeAvailability.currentBookings
-                                                    : (tour.tourOperation.currentBookings || 0)} người
+                                                    : (tour.tourOperation.currentBookings || 0)} {t('tour.unitPerson')}
                                             </Space>
                                         </Descriptions.Item>
 
-                                        <Descriptions.Item label="Chỗ trống">
+                                        <Descriptions.Item label={t('tour.availableSpots')}>
                                             <Space>
                                                 <Text style={{ color: availableSlots > 5 ? 'green' : 'orange' }}>
-                                                    {availableSlots} chỗ
+                                                    {availableSlots} {t('tour.unitSpot')}
                                                 </Text>
                                             </Space>
                                         </Descriptions.Item>
 
                                         {tour.tourOperation.tourStartDate && (
-                                            <Descriptions.Item label="Ngày bắt đầu">
+                                            <Descriptions.Item label={t('tour.startDate')}>
                                                 <Space>
                                                     <CalendarOutlined />
                                                     {new Date(tour.tourOperation.tourStartDate).toLocaleDateString('vi-VN')}
@@ -545,22 +559,22 @@ const TourDetailsPage: React.FC = () => {
                                 icon={<CalendarOutlined />}
                                 className="book-button"
                             >
-                                {availableSlots === 0 ? 'Hết chỗ' : 'Đặt tour ngay'}
+                                {availableSlots === 0 ? t('tour.full') : t('tour.bookNow')}
                             </Button>
 
                             {!isAuthenticated && (
                                 <Text type="secondary" style={{ display: 'block', textAlign: 'center', marginTop: 8 }}>
-                                    Cần đăng nhập để đặt tour
+                                    {t('tour.needLogin')}
                                 </Text>
                             )}
 
                             {/* Action Buttons */}
                             <div className="action-buttons">
                                 <Button icon={<HeartOutlined />} className="action-button">
-                                    Yêu thích
+                                    {t('common.favorite')}
                                 </Button>
                                 <Button icon={<ShareAltOutlined />} className="action-button">
-                                    Chia sẻ
+                                    {t('common.share')}
                                 </Button>
                             </div>
                         </Card>

@@ -8,7 +8,6 @@ import {
     Badge,
     Divider,
     Empty,
-    Spin,
     message,
     Tag
 } from 'antd';
@@ -231,11 +230,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ visible, onClose 
                 )}
 
                 {/* Notifications List */}
-                {loading && notifications.length === 0 ? (
-                    <div className="loading-container">
-                        <Spin size="large" />
-                    </div>
-                ) : notifications.length === 0 ? (
+                {notifications.length === 0 ? (
                     <Empty
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
                         description="Không có thông báo nào"

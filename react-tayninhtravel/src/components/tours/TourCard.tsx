@@ -114,7 +114,7 @@ const TourCard = ({ tour, onBookNow, onViewDetails }: TourCardProps) => {
                             <Space>
                                 <UserOutlined />
                                 <span className="seats-left">
-                                    Còn {(tour.tourOperation.maxGuests - (tour.tourOperation.currentBookings || 0))} chỗ trống
+                                    {tour.tourOperation.maxGuests - (tour.tourOperation.currentBookings || 0)} {t('tours.seatsLeft')}
                                 </span>
                             </Space>
                         </div>

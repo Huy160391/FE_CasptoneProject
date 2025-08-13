@@ -4,7 +4,7 @@ import { FilterOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { Product } from '@/types'
 import { publicService } from '@/services/publicService'
-import ShopSearchBar from '@/components/shop/ShopSearchBar'
+import SearchBarCommon from '@/components/common/SearchBarCommon'
 import ProductCard from '@/components/shop/ProductCard'
 import { getCategoryViLabel } from '@/utils/categoryViLabels'
 import './Shop.scss'
@@ -29,12 +29,24 @@ const Shop = () => {
   const [showInStockOnly, setShowInStockOnly] = useState(false)
   const [products, setProducts] = useState<ShopProduct[]>([])
   const [loading, setLoading] = useState(false)
+  const [resetting, setResetting] = useState(false)
+  const [filtering, setFiltering] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [totalRecords, setTotalRecords] = useState(0)
   const { t, i18n } = useTranslation()
 
   const pageSize = 6
 
+  // Hàm đặt lại bộ lọc
+  const resetFilters = () => {
+    setResetting(true);
+    setSelectedCategories([]);
+    setPriceRange([0, 500000]);
+    setShowInStockOnly(false);
+    setSearchText('');
+    setCurrentPage(1);
+    setTimeout(() => setResetting(false), 500); // Giả lập loading khi reset
+  }
   // Fetch products from API
   useEffect(() => {
     fetchProducts()
@@ -97,18 +109,24 @@ const Shop = () => {
   }
 
   const handleCategoryChange = (checkedValues: string[]) => {
-    setSelectedCategories(checkedValues)
-    setCurrentPage(1)
+    setFiltering(true);
+    setSelectedCategories(checkedValues);
+    setCurrentPage(1);
+    setTimeout(() => setFiltering(false), 500);
   }
 
   const handlePriceRangeChange = (value: number | number[]) => {
-    setPriceRange(value as [number, number])
-    setCurrentPage(1)
+    setFiltering(true);
+    setPriceRange(value as [number, number]);
+    setCurrentPage(1);
+    setTimeout(() => setFiltering(false), 500);
   }
 
   const handleInStockChange = (e: any) => {
-    setShowInStockOnly(e.target.checked)
-    setCurrentPage(1)
+    setFiltering(true);
+    setShowInStockOnly(e.target.checked);
+    setCurrentPage(1);
+    setTimeout(() => setFiltering(false), 500);
   }
 
   const toggleFilters = () => {
@@ -151,10 +169,12 @@ const Shop = () => {
         </div>
 
         {/* Search Bar */}
-        <ShopSearchBar
+        <SearchBarCommon
           onSearch={handleSearch}
-          onCategoryChange={setSelectedCategories}
-          searchText={searchText}
+          loading={loading}
+          placeholder={t('shop.searchPlaceholder')}
+          className="shop-search-bar"
+          buttonText={t('common.search')}
         />
 
         {/* Loading State */}
@@ -241,6 +261,18 @@ const Shop = () => {
                         {t('shop.inStockOnly')}
                       </Checkbox>
                     </div>
+                    {/* Nút Đặt lại bộ lọc */}
+                    <div className="filter-section">
+                      <Button
+                        type="default"
+                        icon={<FilterOutlined />}
+                        onClick={resetFilters}
+                        block
+                        loading={resetting || filtering}
+                      >
+                        {t('shopList.resetFilters')}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -263,9 +295,8 @@ const Shop = () => {
                   <div className="pagination-container">
                     <div className="pagination-controls">
                       <div className="results-info">
-                        <span>{totalRecords} sản phẩm</span>
+                        <span>{totalRecords} {t('shop.totalProducts')}</span>
                       </div>
-
                       <Pagination
                         current={currentPage}
                         total={totalRecords}
@@ -273,9 +304,11 @@ const Shop = () => {
                         onChange={handlePageChange}
                         showSizeChanger={false}
                         showQuickJumper
-                        showTotal={(total, range) =>
-                          `${range[0]}-${range[1]} của ${total} sản phẩm`
-                        }
+                        showTotal={(total, range) => (
+                          <span className="results-info-total">
+                            {range[0]}-{range[1]} {t('shop.of')} {total} {t('shop.totalProducts')}
+                          </span>
+                        )}
                       />
                     </div>
                   </div>

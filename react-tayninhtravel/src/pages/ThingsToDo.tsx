@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Row, Col, Pagination, Empty, Spin, message, Typography, Button, Slider, Checkbox, Divider, InputNumber } from 'antd'
-import { FilterOutlined, UserOutlined } from '@ant-design/icons'
+import { ReloadOutlined, FilterOutlined, UserOutlined } from '@ant-design/icons'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
@@ -168,6 +168,15 @@ const ThingsToDo = () => {
     setShowFilters(!showFilters)
   }
 
+  const resetFilters = () => {
+    setSearchKeyword('');
+    setSelectedDate(null);
+    setPriceRange([0, 10000000]);
+    setShowAvailableOnly(false);
+    setMaxGuests(null);
+    setCurrentPage(1);
+  };
+
   // Filter tours based on search criteria
   const filteredTours = tours.filter(tour => {
     // Match destination - simplified to always true for now
@@ -321,9 +330,9 @@ const ThingsToDo = () => {
                       onChange={handleMaxGuestsChange}
                       min={1}
                       max={100}
-                      placeholder="Số người tối thiểu"
+                      placeholder={t('tours.minCapacityPlaceholder')}
                       style={{ width: '100%' }}
-                      suffix="người"
+                      suffix={t('tours.unitPerson')}
                     />
                     {maxGuests && (
                       <div className="guests-text">
@@ -342,6 +351,16 @@ const ThingsToDo = () => {
                     >
                       {t('tours.availableOnly')}
                     </Checkbox>
+                  </div>
+                  <div className="filter-section">
+                    <Button
+                      type="default"
+                      icon={<ReloadOutlined />}
+                      onClick={resetFilters}
+                      block
+                    >
+                      {t('shopList.resetFilters')}
+                    </Button>
                   </div>
                 </div>
               )}
@@ -376,7 +395,7 @@ const ThingsToDo = () => {
                 <div className="pagination-container">
                   <div className="pagination-controls">
                     <div className="results-info">
-                      <span>{filteredTours.length} tours tìm thấy</span>
+                      <span>{filteredTours.length} {t('tour.found')}</span>
                     </div>
 
                     {filteredTours.length > 0 && (
@@ -388,8 +407,9 @@ const ThingsToDo = () => {
                         showSizeChanger={false}
                         showQuickJumper={filteredTours.length > pageSize}
                         showTotal={(total, range) =>
-                          `${range[0]}-${range[1]} của ${total} tours`
-                        }
+                          <span className="results-info-total">
+                            {range[0]}-{range[1]} {t('shop.of')} {total} {t('tour.total')}
+                          </span>}
                       />
                     )}
                   </div>

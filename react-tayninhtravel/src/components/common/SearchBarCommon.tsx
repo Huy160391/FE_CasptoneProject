@@ -1,8 +1,6 @@
 import { Input, Button } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import './SearchBarCommon.scss';
-
 
 interface SearchBarCommonProps {
     onSearch: (keyword: string) => void;
@@ -12,7 +10,6 @@ interface SearchBarCommonProps {
     buttonText?: string;
 }
 
-
 const SearchBarCommon = ({ onSearch, loading, placeholder, className, buttonText }: SearchBarCommonProps) => {
     const [keyword, setKeyword] = useState('');
 
@@ -21,7 +18,7 @@ const SearchBarCommon = ({ onSearch, loading, placeholder, className, buttonText
     };
 
     return (
-        <div className={className || "search-bar-common"}>
+        <div className={`search-bar-common${className ? ` ${className}` : ''}`}>
             <Input
                 className="keyword-input"
                 placeholder={placeholder || "Tìm kiếm..."}
@@ -32,10 +29,9 @@ const SearchBarCommon = ({ onSearch, loading, placeholder, className, buttonText
             />
             <Button
                 type="primary"
-                icon={<SearchOutlined />}
                 onClick={handleSearch}
                 loading={loading}
-                style={{ marginLeft: 8 }}
+                style={{ marginLeft: 8, height: 40, fontSize: '16px', fontWeight: 600, padding: '0 24px' }}
             >
                 {buttonText || "Tìm kiếm"}
             </Button>

@@ -1,13 +1,15 @@
-import { Select, DatePicker, Input, Button } from 'antd';
-import { SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { DatePicker, Input, Button } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import './TourSearchBar.scss';
 
-const { Option } = Select;
+// const { Option } = Select;
 
 const TourSearchBar = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -19,13 +21,13 @@ const TourSearchBar = () => {
     const [date, setDate] = useState<any>(dateParam ? dayjs(dateParam) : null);
     const [keyword, setKeyword] = useState<string>(keywordParam || '');
 
-    const locations = [
-        { value: 'nui-ba-den', label: 'Núi Bà Đen' },
-        { value: 'toa-thanh', label: 'Tòa Thánh Tây Ninh' },
-        { value: 'ho-dau-tieng', label: 'Hồ Dầu Tiếng' },
-        { value: 'thac-giang-dien', label: 'Thác Giang Điền' },
-        { value: 'vuon-quoc-gia-lo-go', label: 'Vườn Quốc Gia Lò Gò - Xa Mát' }
-    ];
+    // const locations = [
+    //     { value: 'nui-ba-den', label: t('tour.location.nuiBaDen') },
+    //     { value: 'toa-thanh', label: t('tour.location.toaThanh') },
+    //     { value: 'ho-dau-tieng', label: t('tour.location.hoDauTieng') },
+    //     { value: 'thac-giang-dien', label: t('tour.location.thacGiangDien') },
+    //     { value: 'vuon-quoc-gia-lo-go', label: t('tour.location.vuonQuocGiaLoGo') }
+    // ];
 
     // Load search values from URL parameters on component mount
     useEffect(() => {
@@ -60,27 +62,28 @@ const TourSearchBar = () => {
     return (
         <div className="tour-search-bar">
             <div className="search-container">
-                <div className="search-item location">
+                {/* <div className="search-item location">
                     <Select
-                        placeholder="Chọn điểm đến"
+                        placeholder={t('tour.search.destinationPlaceholder')}
                         className="location-select"
                         suffixIcon={<EnvironmentOutlined />}
                         onChange={(value) => setLocation(value)}
                         value={location}
                     >
                         <Option value="all">Tất cả địa điểm</Option>
+                        <Option value="all">{t('tour.search.allLocations')}</Option>
                         {locations.map(location => (
                             <Option key={location.value} value={location.value}>
                                 {location.label}
                             </Option>
                         ))}
                     </Select>
-                </div>
+                </div> */}
 
                 <div className="search-item date">
                     <DatePicker
                         className="date-picker"
-                        placeholder="Chọn ngày khởi hành"
+                        placeholder={t('tour.search.datePlaceholder')}
                         format="DD/MM/YYYY"
                         onChange={(value) => setDate(value)}
                         value={date}
@@ -88,7 +91,7 @@ const TourSearchBar = () => {
                 </div>
 
                 <Input
-                    placeholder="Tìm kiếm tour..."
+                    placeholder={t('tour.search.keywordPlaceholder')}
                     prefix={<SearchOutlined />}
                     className="keyword-input"
                     style={{ height: '42px' }}
@@ -98,7 +101,7 @@ const TourSearchBar = () => {
                 />
 
                 <Button type="primary" className="search-button" onClick={handleSearch}>
-                    Tìm kiếm
+                    {t('tour.search.searchButton')}
                 </Button>
             </div>
         </div>
