@@ -237,13 +237,6 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                 onChange={handleStatusFilter}
                                 value={statusFilter}
                             >
-
-<!--                                 <Option value={BookingStatus.Pending}>Chờ thanh toán</Option>
-                                <Option value={BookingStatus.Confirmed}>Đã xác nhận</Option>
-                                <Option value={BookingStatus.Completed}>Đã hoàn thành</Option>
-                                <Option value={BookingStatus.Cancelled}>Đã hủy</Option>
-                                <Option value={BookingStatus.Refunded}>Đã hoàn tiền</Option> -->
-
                                 <Option value={BookingStatus.Pending}>{t('bookingHistory.statuses.pending', 'Chờ thanh toán')}</Option>
                                 <Option value={BookingStatus.Confirmed}>{t('bookingHistory.statuses.confirmed', 'Đã xác nhận')}</Option>
                                 <Option value={BookingStatus.Completed}>{t('bookingHistory.statuses.completed', 'Đã hoàn thành')}</Option>
