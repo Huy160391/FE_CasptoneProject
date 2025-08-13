@@ -51,9 +51,11 @@ const TourCard = ({ tour, onBookNow, onViewDetails }: TourCardProps) => {
         ? tour.imageUrls[0]
         : tour.imageUrl || '/src/assets/Tay Ninh 4.jpg' // Default fallback image
 
-    // Check if tour is available
-    const isAvailable = tour.tourOperation?.isActive &&
-        (tour.tourOperation?.maxGuests || 0) > (tour.tourOperation?.currentBookings || 0) // Active và còn chỗ
+    // Check if tour is available: at least one slot is 'Available' (string) and has seats left
+    const hasAvailableSlot = Array.isArray(tour.availableSlots) && tour.availableSlots.some(
+        slot => String(slot.status).toLowerCase() === 'available' && Number(slot.availableSpots) > 0
+    );
+    const isAvailable = hasAvailableSlot;
 
     return (
         <div className="tour-card-wrapper">
@@ -94,7 +96,7 @@ const TourCard = ({ tour, onBookNow, onViewDetails }: TourCardProps) => {
                         <Space>
                             <EnvironmentOutlined />
                             <span>
-                                {tour.startLocation} → {tour.endLocation}
+                                {tour.tourTemplate?.startLocation} → {tour.tourTemplate?.endLocation}
                             </span>
                         </Space>
                     </div>
@@ -104,7 +106,6 @@ const TourCard = ({ tour, onBookNow, onViewDetails }: TourCardProps) => {
                         <Space>
                             <StarOutlined style={{ color: '#faad14' }} />
                             <span>4.5</span>
-                            <span className="review-count">(128)</span>
                         </Space>
                     </div>
 

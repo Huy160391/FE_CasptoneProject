@@ -440,8 +440,8 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
                             </Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label="Trạng thái">
-                            <Tag color={getStatusColor(selectedSlot.status)}>
-                                {getTourSlotStatusLabel(selectedSlot.status)}
+                            <Tag color={getStatusColor(selectedSlot.status as TourSlotStatus)}>
+                                {getTourSlotStatusLabel(selectedSlot.status as TourSlotStatus)}
                             </Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label="Hoạt động">

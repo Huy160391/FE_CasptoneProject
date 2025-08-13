@@ -107,18 +107,19 @@ const ThingsToDo = () => {
   // Handle booking button click
   const handleBookNow = (tour: TourDetail) => {
     if (!isAuthenticated) {
-      // Show login modal if user is not authenticated
       setIsLoginModalVisible(true)
       return
     }
 
-    // Check if tour has active operation
-    if (!tour.tourOperation || !tour.tourOperation.isActive) {
-      message.error('Tour này hiện không khả dụng để đặt')
-      return
-    }
+    // // Check if tour has active operation and available slots
+    // const hasAvailableSlot = Array.isArray(tour.availableSlots) && tour.availableSlots.some(
+    //   slot => String(slot.status).toLowerCase() === 'available' && Number(slot.availableSpots) > 0
+    // );
+    // if (!tour.tourOperation || !tour.tourOperation.isActive || !hasAvailableSlot) {
+    //   message.error('Tour này hiện không khả dụng để đặt')
+    //   return
+    // }
 
-    // Navigate to booking page
     message.info({
       content: 'Đang chuyển đến trang đặt tour...',
       duration: 1

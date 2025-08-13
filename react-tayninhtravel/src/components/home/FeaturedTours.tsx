@@ -83,11 +83,11 @@ const FeaturedTours = () => {
       return
     }
 
-    // Check if tour has active operation
-    if (!tour.tourOperation || !tour.tourOperation.isActive) {
-      message.error('Tour này hiện không khả dụng để đặt')
-      return
-    }
+    // // Check if tour has active operation
+    // if (!tour.tourOperation || !tour.tourOperation.isActive) {
+    //   message.error('Tour này hiện không khả dụng để đặt')
+    //   return
+    // }
 
     // Navigate to booking page
     message.info({
