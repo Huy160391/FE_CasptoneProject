@@ -2,6 +2,12 @@ import React, { useEffect } from 'react';
 import { Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
 import { message } from 'antd';
+import { jwtDecode } from 'jwt-decode';
+
+interface JWTPayload {
+    exp?: number;
+    [key: string]: any;
+}
 
 interface ProtectedRouteProps {
     children?: React.ReactNode;
@@ -14,9 +20,40 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     requiredRole,
     requireAuth = true
 }) => {
-    const { isAuthenticated, user } = useAuthStore();
+    const { isAuthenticated, user, logout } = useAuthStore();
     const navigate = useNavigate();
     const location = useLocation();
+
+    // Validate token on mount and when authentication state changes
+    useEffect(() => {
+        if (requireAuth && isAuthenticated) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const decoded = jwtDecode<JWTPayload>(token);
+                    if (decoded.exp) {
+                        const currentTime = Date.now() / 1000;
+                        if (decoded.exp < currentTime) {
+                            // Token expired
+                            console.warn('Token expired in ProtectedRoute');
+                            message.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+                            logout();
+                            navigate('/login');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error validating token in ProtectedRoute:', error);
+                    message.error('Token không hợp lệ. Vui lòng đăng nhập lại.');
+                    logout();
+                    navigate('/login');
+                }
+            } else if (requireAuth) {
+                // No token but auth required
+                logout();
+                navigate('/login');
+            }
+        }
+    }, [isAuthenticated, requireAuth, logout, navigate]);
 
     // Debug logging
     console.log('ProtectedRoute Debug:', {
@@ -70,7 +107,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
     // Check authentication
     if (requireAuth && (!isAuthenticated || !user)) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/login" replace />;
     }
 
     // Check role permission

@@ -1,6 +1,12 @@
 import axios from 'axios';
 import { API_BASE_URL } from './constants';
 import { createTimezoneRequestInterceptor, createTimezoneResponseInterceptor } from '../utils/apiHelpers';
+import { jwtDecode } from 'jwt-decode';
+
+interface JWTPayload {
+    exp?: number;
+    [key: string]: any;
+}
 
 // Development logging
 const isDevelopment = import.meta.env.DEV;
@@ -25,6 +31,47 @@ axiosInstance.interceptors.request.use(
         // Lấy token từ localStorage hoặc store
         const token = localStorage.getItem('token');
         if (token) {
+            // Kiểm tra token còn hợp lệ không trước khi gửi request
+            try {
+                const decoded = jwtDecode<JWTPayload>(token);
+                if (decoded.exp) {
+                    const currentTime = Date.now() / 1000;
+                    if (decoded.exp < currentTime) {
+                        // Token đã hết hạn, clear và redirect
+                        console.warn('Token expired, redirecting to login');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('refreshToken');
+                        localStorage.removeItem('tokenExpirationTime');
+                        localStorage.removeItem('auth-storage');
+                        
+                        // Redirect to login
+                        if (window.location.pathname !== '/login' && 
+                            window.location.pathname !== '/' &&
+                            !window.location.pathname.includes('/404')) {
+                            window.location.href = '/login';
+                        }
+                        
+                        // Cancel the request
+                        return Promise.reject(new Error('Token expired'));
+                    }
+                }
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                // Invalid token, clear and redirect
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('auth-storage');
+                
+                if (window.location.pathname !== '/login' && 
+                    window.location.pathname !== '/' &&
+                    !window.location.pathname.includes('/404')) {
+                    window.location.href = '/login';
+                }
+                
+                return Promise.reject(new Error('Invalid token'));
+            }
+            
             config.headers.Authorization = `Bearer ${token}`;
         }
 
@@ -91,14 +138,24 @@ axiosInstance.interceptors.response.use(
         } else if (error.code === 'ERR_NETWORK') {
             // Xử lý lỗi network (không kết nối được server)
             console.error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng hoặc server có đang chạy không.');
+        } else if (error.message === 'Token expired' || error.message === 'Invalid token') {
+            // Token errors from request interceptor
+            console.error('Authentication error:', error.message);
         } else if (error.response) {
             // Xử lý các lỗi từ server
             switch (error.response.status) {
                 case 401:
-                    // Unauthorized - Xóa token và chuyển về trang 404
+                    // Unauthorized - Xóa token và chuyển về trang login
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
-                    window.location.href = '/404';
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('tokenExpirationTime');
+                    localStorage.removeItem('auth-storage');
+                    
+                    // Redirect to login instead of 404
+                    if (window.location.pathname !== '/login') {
+                        window.location.href = '/login';
+                    }
                     break;
                 case 403:
                     // Forbidden
