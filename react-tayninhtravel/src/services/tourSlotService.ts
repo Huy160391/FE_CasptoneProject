@@ -9,11 +9,11 @@ export interface TourSlotDto {
     scheduleDayName: string; // Vietnamese day name
     status: number; // TourSlotStatus enum value
     statusName: string; // Vietnamese status name
-    maxGuests?: number; // Added from API response
-    currentBookings?: number; // Added from API response
-    availableSpots?: number; // Added from API response
+    maxGuests?: number; // Independent capacity per slot
+    currentBookings?: number; // Independent bookings per slot
+    availableSpots?: number; // Calculated from slot's own capacity
     isActive: boolean;
-    isBookable?: boolean; // Added from API response
+    isBookable?: boolean; // ✅ NEW: Backend calculated bookable flag (primary source)
     tourTemplate?: {
         id: string;
         title: string;

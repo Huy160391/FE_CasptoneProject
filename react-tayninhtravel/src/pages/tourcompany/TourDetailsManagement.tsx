@@ -99,7 +99,7 @@ const TourDetailsManagement: React.FC = () => {
             const response = await getTourDetailsList({
                 pageIndex,
                 pageSize: pageSizeToUse,
-                includeInactive: false
+                includeInactive: true // Hiển thị tất cả tours bao gồm pending
             }, token ?? undefined);
 
             console.log('📡 TourDetails response structure:', {

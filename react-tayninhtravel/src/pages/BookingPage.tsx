@@ -33,6 +33,7 @@ import { formatCurrency } from "../services/paymentService";
 import {
   calculateBookingPrice,
   checkTourAvailability,
+  checkTourSlotCapacity,
   createTourBooking,
   CreateTourBookingRequest,
   getTourDetailsForBooking,
@@ -172,30 +173,27 @@ const BookingPage: React.FC = () => {
         console.log("Current date for filtering:", today);
         console.log("All slots before filtering:", response.data);
 
-        // Filter: only show active slots with available spots from today onward
-        const availableSlots = response.data.filter((slot) => {
-          const slotDate = new Date(slot.tourDate);
-          const isNotPast = slotDate >= today; // Not in the past
-          const hasAvailableSpots = (slot.availableSpots || 0) > 0; // Has available spots
+                        // ✅ SIMPLIFIED: Show ALL slots, no filtering - handle click behavior instead
+                        const availableSlots = response.data.filter((slot) => {
+                          const slotDate = new Date(slot.tourDate);
+                          const isNotPast = slotDate >= today;
+                          
+                          console.log(`🔍 Slot ${slot.id} SIMPLE DEBUG:`, {
+                            tourDate: slot.tourDate,
+                            isActive: slot.isActive,
+                            status: slot.status,
+                            statusName: slot.statusName,
+                            maxGuests: slot.maxGuests,
+                            currentBookings: slot.currentBookings,
+                            availableSpots: slot.availableSpots,
+                            isNotPast: isNotPast,
+                            willShow: slot.isActive && isNotPast ? "✅ SHOW" : "❌ HIDE",
+                            hideReason: !slot.isActive ? "not active" : !isNotPast ? "in past" : null
+                          });
 
-          console.log(`Slot ${slot.id}:`, {
-            tourDate: slot.tourDate,
-            slotDateISO: slotDate.toISOString(),
-            todayISO: today.toISOString(),
-            isActive: slot.isActive,
-            status: slot.status,
-            statusName: slot.statusName,
-            availableSpots: slot.availableSpots,
-            maxGuests: slot.maxGuests,
-            currentBookings: slot.currentBookings,
-            isNotPast,
-            hasAvailableSpots,
-            willShow: slot.isActive && isNotPast && hasAvailableSpots, // Must be active, not past, and have spots
-          });
-
-          // Show slots that are: active, not in the past, and have available spots
-          return slot.isActive && isNotPast && hasAvailableSpots;
-        });
+                          // ✅ SIMPLIFIED: Only filter out inactive and past slots
+                          return slot.isActive && isNotPast;
+                        });
 
         console.log("Available slots after filtering:", availableSlots);
         setTourSlots(availableSlots);
@@ -222,7 +220,7 @@ const BookingPage: React.FC = () => {
 
   // Calculate price when guest count changes
   const handleGuestCountChange = async (values: Partial<BookingFormData>) => {
-    if (!tourDetails || !values.numberOfGuests) return;
+    if (!tourDetails || !values.numberOfGuests || !selectedSlot) return;
 
     try {
       setCalculating(true);
@@ -237,16 +235,28 @@ const BookingPage: React.FC = () => {
       if (response.success && response.data) {
         setPriceCalculation(response.data);
 
-        // Check availability
-        const availabilityResponse = await checkTourAvailability(
-          tourDetails.tourOperation.id,
+        // ✅ FIXED: Check slot-specific availability instead of TourOperation
+        const availabilityResponse = await checkTourSlotCapacity(
+          selectedSlot.id,
           values.numberOfGuests,
           token ?? undefined
         );
 
         if (availabilityResponse.success) {
-          console.log("Availability data:", availabilityResponse.data); // Debug log
+          console.log("Slot availability data:", availabilityResponse.data); // Debug log
           setAvailability(availabilityResponse.data);
+        } else {
+          console.warn("Failed to check slot availability:", availabilityResponse.message);
+          // Fallback to legacy TourOperation check
+          const legacyResponse = await checkTourAvailability(
+            tourDetails.tourOperation.id,
+            values.numberOfGuests,
+            token ?? undefined
+          );
+          if (legacyResponse.success) {
+            console.log("Fallback to operation availability:", legacyResponse.data);
+            setAvailability(legacyResponse.data);
+          }
         }
       }
     } catch (error: any) {
@@ -678,9 +688,13 @@ const BookingPage: React.FC = () => {
                           }}>
                           {tourSlots.map((slot) => {
                             const availableSpots = slot.availableSpots || 0;
-                            const isSoldOut = availableSpots === 0;
-                            const isLowAvailability =
-                              availableSpots > 0 && availableSpots < 5;
+                            
+                            // ✅ ENHANCED: Check both availableSpots and status for sold out logic  
+                            const isSoldOut = availableSpots === 0 || slot.statusName === "Đã đầy"; // Use statusName
+                            const isLowAvailability = availableSpots > 0 && availableSpots < 5;
+                            
+                            // ✅ NEW: Special case for FullyBooked but has spots (status inconsistency)
+                            const isInconsistent = slot.status === 2 && availableSpots > 0;
 
                             return (
                               <div
@@ -691,9 +705,17 @@ const BookingPage: React.FC = () => {
                                   isLowAvailability ? "low-availability" : ""
                                 } ${isSoldOut ? "sold-out" : ""}`}
                                 onClick={(e) => {
-                                  // Prevent clicking on sold out slots
-                                  if (isSoldOut) {
+                                  // ✅ FIXED: Check status as string (API returns string, not number!)
+                                  if (slot.status === "FullyBooked" || slot.statusName === "Đã đầy") {
                                     e.preventDefault();
+                                    message.warning("Slot này đã đầy, không thể đặt booking");
+                                    return;
+                                  }
+                                  
+                                  // Prevent clicking on slots with no available spots
+                                  if (availableSpots === 0) {
+                                    e.preventDefault();
+                                    message.warning("Slot này hết chỗ trống");
                                     return;
                                   }
 

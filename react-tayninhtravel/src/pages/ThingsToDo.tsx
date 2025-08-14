@@ -1,88 +1,109 @@
-import { useState, useEffect } from 'react'
-import { Row, Col, Pagination, Empty, Spin, message, Typography, Button, Slider, Checkbox, Divider, InputNumber } from 'antd'
-import { ReloadOutlined, FilterOutlined, UserOutlined } from '@ant-design/icons'
-import { useSearchParams, useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
-import { useTranslation } from 'react-i18next'
-import TourSearchBar from './TourSearchBar'
-import TourCard from '../components/tours/TourCard'
-import LoginModal from '../components/auth/LoginModal'
-import RegisterModal from '../components/auth/RegisterModal'
-import { tourDetailsService, TourDetail } from '../services/tourDetailsService'
-import { TourDetailsStatus } from '../types/tour'
-import { mapStringToStatusEnum } from '../utils/statusMapper'
-import { useAuthStore } from '../store/useAuthStore'
-import './ThingsToDo.scss'
+import {
+  FilterOutlined,
+  ReloadOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Checkbox,
+  Col,
+  Divider,
+  Empty,
+  InputNumber,
+  message,
+  Pagination,
+  Row,
+  Slider,
+  Spin,
+  Typography,
+} from "antd";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import LoginModal from "../components/auth/LoginModal";
+import RegisterModal from "../components/auth/RegisterModal";
+import TourCard from "../components/tours/TourCard";
+import { TourDetail, tourDetailsService } from "../services/tourDetailsService";
+import { useAuthStore } from "../store/useAuthStore";
+import { TourDetailsStatus } from "../types/tour";
+import { mapStringToStatusEnum } from "../utils/statusMapper";
+import "./ThingsToDo.scss";
+import TourSearchBar from "./TourSearchBar";
 
-const { Title } = Typography
+const { Title } = Typography;
 
 const ThingsToDo = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const locationParam = searchParams.get('location');
-  const dateParam = searchParams.get('date');
-  const keywordParam = searchParams.get('keyword');
+  const locationParam = searchParams.get("location");
+  const dateParam = searchParams.get("date");
+  const keywordParam = searchParams.get("keyword");
   const { t } = useTranslation();
   const { isAuthenticated } = useAuthStore();
 
   // State for search filters
-  const [selectedDestination, setSelectedDestination] = useState(locationParam ? locationParam : 'all')
-  const [searchKeyword, setSearchKeyword] = useState(keywordParam || '')
-  const [selectedDate, setSelectedDate] = useState(dateParam ? dayjs(dateParam) : null)
+  const [selectedDestination, setSelectedDestination] = useState(
+    locationParam ? locationParam : "all"
+  );
+  const [searchKeyword, setSearchKeyword] = useState(keywordParam || "");
+  const [selectedDate, setSelectedDate] = useState(
+    dateParam ? dayjs(dateParam) : null
+  );
 
   // State for tours data
-  const [tours, setTours] = useState<TourDetail[]>([])
-  const [loading, setLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [tours, setTours] = useState<TourDetail[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6; // Số items trên mỗi trang
 
   // State for modals
-  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
-  const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false)
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
 
   // State for filters
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000])
-  const [showFilters, setShowFilters] = useState(true)
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false)
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
+  const [showFilters, setShowFilters] = useState(true);
+  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   // const [minRating, setMinRating] = useState<number>(0) // Tạm ẩn vì API chưa có rating
-  const [maxGuests, setMaxGuests] = useState<number | null>(null)
+  const [maxGuests, setMaxGuests] = useState<number | null>(null);
 
   // Load tours from database
   const loadTours = async (page = 1) => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await tourDetailsService.getPublicTourDetailsList({
         pageIndex: page - 1, // API uses 0-based indexing
         pageSize: pageSize,
-        includeInactive: false
-      })
+        includeInactive: false,
+      });
 
       if (response.success && response.data) {
         // Filter only public tours (status 8) - tours available for customer booking
         const publicTours = response.data.filter((tour: TourDetail) => {
           const mappedStatus = mapStringToStatusEnum(tour.status);
           return mappedStatus === TourDetailsStatus.Public;
-        })
+        });
 
         // Convert string status to number enum for TourCard compatibility
         const toursWithStatus = publicTours.map((tour: TourDetail) => ({
           ...tour,
           status: mapStringToStatusEnum(tour.status),
           tourTemplateName: tour.title, // Use title as template name fallback
-          description: tour.description || '', // Ensure description is not undefined
-          timeline: tour.timeline || [] // Ensure timeline is not undefined
-        }))
+          description: tour.description || "", // Ensure description is not undefined
+          timeline: tour.timeline || [], // Ensure timeline is not undefined
+        }));
 
-        setTours(toursWithStatus)
+        setTours(toursWithStatus);
       }
     } catch (error) {
-      console.error('Error loading tours:', error)
-      message.error('Không thể tải danh sách tour. Vui lòng thử lại sau.')
-      setTours([])
+      console.error("Error loading tours:", error);
+      message.error("Không thể tải danh sách tour. Vui lòng thử lại sau.");
+      setTours([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Update search fields when URL params change
   useEffect(() => {
@@ -101,14 +122,14 @@ const ThingsToDo = () => {
 
   // Load tours on component mount
   useEffect(() => {
-    loadTours(currentPage)
-  }, [currentPage])
+    loadTours(currentPage);
+  }, [currentPage]);
 
   // Handle booking button click
   const handleBookNow = (tour: TourDetail) => {
     if (!isAuthenticated) {
-      setIsLoginModalVisible(true)
-      return
+      setIsLoginModalVisible(true);
+      return;
     }
 
     // // Check if tour has active operation and available slots
@@ -121,39 +142,40 @@ const ThingsToDo = () => {
     // }
 
     message.info({
-      content: 'Đang chuyển đến trang đặt tour...',
-      duration: 1
-    })
+      content: "Đang chuyển đến trang đặt tour...",
+      duration: 1,
+    });
 
     navigate(`/booking/${tour.id}`, {
       state: {
-        tourData: tour
-      }
-    })
-  }
+        tourData: tour,
+      },
+    });
+  };
 
   // Handle view tour details
-  const handleViewDetails = (tour: TourDetail) => navigate(`/tour-details/${tour.id}`)
+  const handleViewDetails = (tour: TourDetail) =>
+    navigate(`/tour-details/${tour.id}`);
 
   // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-  }
+  };
 
   // Filter handlers
   const handlePriceRangeChange = (value: number | number[]) => {
-    setPriceRange(value as [number, number])
-    setCurrentPage(1)
-  }
+    setPriceRange(value as [number, number]);
+    setCurrentPage(1);
+  };
 
   const handleAvailableOnlyChange = (e: any) => {
-    setShowAvailableOnly(e.target.checked)
-    setCurrentPage(1)
-  }
+    setShowAvailableOnly(e.target.checked);
+    setCurrentPage(1);
+  };
 
   // const handleRatingChange = (value: number) => {
   //   setMinRating(value)
@@ -161,16 +183,16 @@ const ThingsToDo = () => {
   // }
 
   const handleMaxGuestsChange = (value: number | null) => {
-    setMaxGuests(value)
-    setCurrentPage(1)
-  }
+    setMaxGuests(value);
+    setCurrentPage(1);
+  };
 
   const toggleFilters = () => {
-    setShowFilters(!showFilters)
-  }
+    setShowFilters(!showFilters);
+  };
 
   const resetFilters = () => {
-    setSearchKeyword('');
+    setSearchKeyword("");
     setSelectedDate(null);
     setPriceRange([0, 10000000]);
     setShowAvailableOnly(false);
@@ -179,14 +201,16 @@ const ThingsToDo = () => {
   };
 
   // Filter tours based on search criteria
-  const filteredTours = tours.filter(tour => {
+  const filteredTours = tours.filter((tour) => {
     // Match destination - simplified to always true for now
     const matchDestination = true;
 
     // Match keyword - search in title and description
-    const matchKeyword = searchKeyword === '' ||
+    const matchKeyword =
+      searchKeyword === "" ||
       tour.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      (tour.description && tour.description.toLowerCase().includes(searchKeyword.toLowerCase()));
+      (tour.description &&
+        tour.description.toLowerCase().includes(searchKeyword.toLowerCase()));
 
     // Filter by date if selected - simplified to always true for now
     const matchDate = true;
@@ -206,21 +230,29 @@ const ThingsToDo = () => {
     const tourMaxGuests = tour.tourOperation?.maxGuests || 0;
     const matchGuests = !maxGuests || tourMaxGuests >= maxGuests;
 
-    return matchDestination && matchKeyword && matchDate && matchPrice && matchAvailable && matchRating && matchGuests;
-  })
+    return (
+      matchDestination &&
+      matchKeyword &&
+      matchDate &&
+      matchPrice &&
+      matchAvailable &&
+      matchRating &&
+      matchGuests
+    );
+  });
 
-  console.log('Filter debug:', {
+  console.log("Filter debug:", {
     totalTours: tours.length,
     filteredTours: filteredTours.length,
     filters: {
       selectedDestination,
       searchKeyword,
-      selectedDate: selectedDate?.format('YYYY-MM-DD'),
+      selectedDate: selectedDate?.format("YYYY-MM-DD"),
       priceRange,
       showAvailableOnly,
-      maxGuests
-    }
-  })
+      maxGuests,
+    },
+  });
 
   // Calculate current page items
   const currentItems = filteredTours.slice(
@@ -233,15 +265,15 @@ const ThingsToDo = () => {
       <div className="things-to-do-page">
         <div className="container">
           <div className="page-header">
-            <h1>{t('thingsToDo.pageTitle')}</h1>
-            <p>{t('thingsToDo.pageSubtitle')}</p>
+            <h1>{t("thingsToDo.pageTitle")}</h1>
+            <p>{t("thingsToDo.pageSubtitle")}</p>
           </div>
-          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+          <div style={{ textAlign: "center", padding: "50px 0" }}>
             <Spin size="large" />
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -249,8 +281,8 @@ const ThingsToDo = () => {
       <div className="container">
         {/* Page Header */}
         <div className="page-header">
-          <Title level={2}>{t('thingsToDo.pageTitle')}</Title>
-          <p>{t('thingsToDo.pageSubtitle')}</p>
+          <Title level={2}>{t("thingsToDo.pageTitle")}</Title>
+          <p>{t("thingsToDo.pageSubtitle")}</p>
         </div>
 
         {/* Search Section */}
@@ -262,17 +294,17 @@ const ThingsToDo = () => {
         <Row gutter={[24, 24]} className="main-content">
           {/* Filter Sidebar */}
           <Col xs={24} md={6} className="filter-sidebar">
-            <div className={`filters-container ${showFilters ? 'show' : 'hide'}`}>
+            <div
+              className={`filters-container ${showFilters ? "show" : "hide"}`}>
               <div className="filter-header">
                 <Title level={4}>
-                  <FilterOutlined /> {t('tours.filters')}
+                  <FilterOutlined /> {t("tours.filters")}
                 </Title>
                 <Button
                   type="text"
                   onClick={toggleFilters}
-                  className="toggle-filters-btn"
-                >
-                  {showFilters ? 'Ẩn' : 'Hiện'}
+                  className="toggle-filters-btn">
+                  {showFilters ? "Ẩn" : "Hiện"}
                 </Button>
               </div>
 
@@ -280,7 +312,7 @@ const ThingsToDo = () => {
                 <div className="filter-content">
                   {/* Price Range Filter */}
                   <div className="filter-section">
-                    <Title level={5}>{t('tours.priceRange')}</Title>
+                    <Title level={5}>{t("tours.priceRange")}</Title>
                     <Slider
                       range
                       min={0}
@@ -289,13 +321,14 @@ const ThingsToDo = () => {
                       value={priceRange}
                       onChange={handlePriceRangeChange}
                       tooltip={{
-                        formatter: (value) => `${value?.toLocaleString('vi-VN')}₫`
+                        formatter: (value) =>
+                          `${value?.toLocaleString("vi-VN")}₫`,
                       }}
                     />
                     <div className="price-range-display">
-                      <span>{priceRange[0].toLocaleString('vi-VN')}₫</span>
+                      <span>{priceRange[0].toLocaleString("vi-VN")}₫</span>
                       <span> - </span>
-                      <span>{priceRange[1].toLocaleString('vi-VN')}₫</span>
+                      <span>{priceRange[1].toLocaleString("vi-VN")}₫</span>
                     </div>
                   </div>
 
@@ -324,16 +357,16 @@ const ThingsToDo = () => {
                   {/* Max Guests Filter */}
                   <div className="filter-section">
                     <Title level={5}>
-                      <UserOutlined /> {t('tours.minCapacity')}
+                      <UserOutlined /> {t("tours.minCapacity")}
                     </Title>
                     <InputNumber
                       value={maxGuests}
                       onChange={handleMaxGuestsChange}
                       min={1}
                       max={100}
-                      placeholder={t('tours.minCapacityPlaceholder')}
-                      style={{ width: '100%' }}
-                      suffix={t('tours.unitPerson')}
+                      placeholder={t("tours.minCapacityPlaceholder")}
+                      style={{ width: "100%" }}
+                      suffix={t("tours.unitPerson")}
                     />
                     {maxGuests && (
                       <div className="guests-text">
@@ -348,9 +381,8 @@ const ThingsToDo = () => {
                   <div className="filter-section">
                     <Checkbox
                       checked={showAvailableOnly}
-                      onChange={handleAvailableOnlyChange}
-                    >
-                      {t('tours.availableOnly')}
+                      onChange={handleAvailableOnlyChange}>
+                      {t("tours.availableOnly")}
                     </Checkbox>
                   </div>
                   <div className="filter-section">
@@ -358,9 +390,8 @@ const ThingsToDo = () => {
                       type="default"
                       icon={<ReloadOutlined />}
                       onClick={resetFilters}
-                      block
-                    >
-                      {t('shopList.resetFilters')}
+                      block>
+                      {t("shopList.resetFilters")}
                     </Button>
                   </div>
                 </div>
@@ -374,14 +405,17 @@ const ThingsToDo = () => {
             {currentItems.length === 0 ? (
               <div className="empty-state">
                 <Empty
-                  description={t('thingsToDo.noToursFound') || "Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm"}
+                  description={
+                    t("thingsToDo.noToursFound") ||
+                    "Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm"
+                  }
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               </div>
             ) : (
               <>
                 <Row gutter={[16, 24]} className="tours-grid">
-                  {currentItems.map(tour => (
+                  {currentItems.map((tour) => (
                     <Col xs={24} sm={12} lg={8} key={tour.id}>
                       <TourCard
                         tour={tour}
@@ -396,7 +430,9 @@ const ThingsToDo = () => {
                 <div className="pagination-container">
                   <div className="pagination-controls">
                     <div className="results-info">
-                      <span>{filteredTours.length} {t('tour.found')}</span>
+                      <span>
+                        {filteredTours.length} {t("tour.found")}
+                      </span>
                     </div>
 
                     {filteredTours.length > 0 && (
@@ -407,10 +443,12 @@ const ThingsToDo = () => {
                         onChange={handlePageChange}
                         showSizeChanger={false}
                         showQuickJumper={filteredTours.length > pageSize}
-                        showTotal={(total, range) =>
+                        showTotal={(total, range) => (
                           <span className="results-info-total">
-                            {range[0]}-{range[1]} {t('shop.of')} {total} {t('tour.total')}
-                          </span>}
+                            {range[0]}-{range[1]} {t("shop.of")} {total}{" "}
+                            {t("tour.total")}
+                          </span>
+                        )}
                       />
                     )}
                   </div>
@@ -425,8 +463,8 @@ const ThingsToDo = () => {
           isVisible={isLoginModalVisible}
           onClose={() => setIsLoginModalVisible(false)}
           onRegisterClick={() => {
-            setIsLoginModalVisible(false)
-            setIsRegisterModalVisible(true)
+            setIsLoginModalVisible(false);
+            setIsRegisterModalVisible(true);
           }}
         />
 
@@ -435,13 +473,13 @@ const ThingsToDo = () => {
           isVisible={isRegisterModalVisible}
           onClose={() => setIsRegisterModalVisible(false)}
           onLoginClick={() => {
-            setIsRegisterModalVisible(false)
-            setIsLoginModalVisible(true)
+            setIsRegisterModalVisible(false);
+            setIsLoginModalVisible(true);
           }}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ThingsToDo
+export default ThingsToDo;
