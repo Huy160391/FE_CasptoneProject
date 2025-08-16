@@ -694,7 +694,7 @@ const BookingPage: React.FC = () => {
                             const isLowAvailability = availableSpots > 0 && availableSpots < 5;
                             
                             // ✅ NEW: Special case for FullyBooked but has spots (status inconsistency)
-                            const isInconsistent = slot.status === 2 && availableSpots > 0;
+                            // Đã xoá biến isInconsistent vì không sử dụng
 
                             return (
                               <div
@@ -705,8 +705,8 @@ const BookingPage: React.FC = () => {
                                   isLowAvailability ? "low-availability" : ""
                                 } ${isSoldOut ? "sold-out" : ""}`}
                                 onClick={(e) => {
-                                  // ✅ FIXED: Check status as string (API returns string, not number!)
-                                  if (slot.status === "FullyBooked" || slot.statusName === "Đã đầy") {
+                                  // ✅ FIXED: Check status là số hoặc statusName là "Đã đầy"
+                                  if (slot.status === 2 || slot.statusName === "Đã đầy") {
                                     e.preventDefault();
                                     message.warning("Slot này đã đầy, không thể đặt booking");
                                     return;
