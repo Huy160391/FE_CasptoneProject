@@ -6,6 +6,7 @@ import TourManagement from '@/pages/tourcompany/TourManagement';
 import TransactionHistory from '@/pages/tourcompany/TransactionHistory';
 import ReviewHistory from '@/pages/tourcompany/ReviewHistory';
 import RevenueDashboard from '@/pages/tourcompany/RevenueDashboard';
+import TourCompanyWalletManagement from '@/pages/tourcompany/TourCompanyWalletManagement';
 
 
 export const tourCompanyRoutes: RouteObject[] = [
@@ -40,6 +41,13 @@ export const tourCompanyRoutes: RouteObject[] = [
                 path: 'revenue',
                 element: <RevenueDashboard />,
             }
+            ,
+            {
+                path: 'wallet',
+                element: <TourCompanyWalletManagement />,
+            }
+
+
         ],
     },
 ];

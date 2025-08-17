@@ -39,7 +39,7 @@ import shopWithdrawalService from '@/services/shopWithdrawalService';
 import { walletService } from '@/services/walletService';
 import { BankAccount, BankAccountFormData, WithdrawalFormData } from '@/types';
 import dayjs from 'dayjs';
-import './WalletManagement.scss';
+import './TourCompanyWalletManagement.scss';
 
 const { TabPane } = Tabs;
 const { Title } = Typography;
@@ -56,7 +56,7 @@ interface WalletStatistics {
     currentBalance: number;
 }
 
-const WalletManagement: React.FC = () => {
+const TourCompanyWalletManagement: React.FC = () => {
     const { user } = useAuthStore();
     const { isDarkMode } = useThemeStore();
     const [loading, setLoading] = useState(false);
@@ -103,24 +103,18 @@ const WalletManagement: React.FC = () => {
 
     const loadWalletData = async () => {
         if (!user?.id) return;
-
         try {
             setLoading(true);
-
-            // Load wallet info using walletService
-            const walletResponse = await walletService.getSpecialtyShopWallet();
-            console.log('Wallet response:', walletResponse); // Debug log
+            // Load wallet info giống specialtyshop
+            const walletResponse = await walletService.getTourCompanyWallet();
             if (walletResponse.isSuccess && walletResponse.data) {
                 setWalletInfo(walletResponse.data);
                 setBalance(walletResponse.data.wallet);
-                console.log('Wallet balance set to:', walletResponse.data.wallet); // Debug log
             }
-
             // Load bank accounts
             const accountsData = await shopWithdrawalService.getMyBankAccounts();
             setBankAccounts(accountsData || []);
         } catch (error) {
-            console.error('Error loading wallet data:', error);
             message.error('Không thể tải dữ liệu ví');
         } finally {
             setLoading(false);
@@ -129,58 +123,48 @@ const WalletManagement: React.FC = () => {
 
     const loadStatistics = async () => {
         if (!user?.id) return;
-
         try {
             setStatisticsLoading(true);
-
             // Load all withdrawal requests to calculate statistics
             const allRequestsResponse = await shopWithdrawalService.getMyWithdrawalRequestsWithParams(
                 undefined, // Get all statuses
                 1,         // First page
                 1000       // Large page size to get all data
             );
-
             const allRequests = allRequestsResponse.data || [];
-
-            console.log('Withdrawal requests loaded:', allRequests); // Debug log
-            console.log('Requests by status:', {
-                pending: allRequests.filter((req: any) => req.status === 'Pending'),
-                approved: allRequests.filter((req: any) => req.status === 'Approved'),
-                rejected: allRequests.filter((req: any) => req.status === 'Rejected')
-            }); // Debug log
-
             // Calculate statistics from withdrawal requests
+            // Khai báo kiểu WithdrawalRequest cho req
+            type WithdrawalRequest = {
+                status: string;
+                netAmount?: number;
+                amount: number;
+            };
             const stats = {
                 totalWithdrawals: allRequests.length,
-                pendingWithdrawals: allRequests.filter(req => req.status === 'Pending').length, // Pending
-                approvedWithdrawals: allRequests.filter(req => req.status === 'Approved').length, // Approved
-                rejectedWithdrawals: allRequests.filter(req => req.status === 'Rejected').length, // Rejected
+                pendingWithdrawals: allRequests.filter((req: WithdrawalRequest) => req.status === 'Pending').length,
+                approvedWithdrawals: allRequests.filter((req: WithdrawalRequest) => req.status === 'Approved').length,
+                rejectedWithdrawals: allRequests.filter((req: WithdrawalRequest) => req.status === 'Rejected').length,
                 totalWithdrawnAmount: allRequests
-                    .filter(req => req.status === 'Approved') // Only approved requests
-                    .reduce((sum, req) => sum + (req.netAmount || req.amount), 0),
+                    .filter((req: WithdrawalRequest) => req.status === 'Approved')
+                    .reduce((sum: number, req: WithdrawalRequest) => sum + (req.netAmount || req.amount), 0),
                 pendingAmount: allRequests
-                    .filter(req => req.status === 'Pending') // Only pending requests
-                    .reduce((sum, req) => sum + req.amount, 0),
+                    .filter((req: WithdrawalRequest) => req.status === 'Pending')
+                    .reduce((sum: number, req: WithdrawalRequest) => sum + req.amount, 0),
                 currentBalance: balance
             };
-
             setStatistics(stats);
-
-            // Only update balance from statistics if we don't have wallet info yet
             if (!walletInfo) {
                 setBalance(stats.currentBalance);
             }
         } catch (error) {
-            console.error('Error loading statistics:', error);
             message.error('Không thể tải thống kê');
-            // Keep mock data on error
             setStatistics({
-                totalWithdrawals: 15,
-                pendingWithdrawals: 3,
-                approvedWithdrawals: 10,
-                rejectedWithdrawals: 2,
-                totalWithdrawnAmount: 8500000,
-                pendingAmount: 1200000,
+                totalWithdrawals: 0,
+                pendingWithdrawals: 0,
+                approvedWithdrawals: 0,
+                rejectedWithdrawals: 0,
+                totalWithdrawnAmount: 0,
+                pendingAmount: 0,
                 currentBalance: balance
             });
         } finally {
@@ -190,10 +174,8 @@ const WalletManagement: React.FC = () => {
 
     const handleRefresh = () => {
         setRefreshTrigger(prev => prev + 1);
-        // loadStatistics will be called automatically via useEffect when walletInfo updates
     };
 
-    // Use walletService for currency formatting
     const formatCurrency = (amount: number): string => {
         return walletService.formatCurrency(amount);
     };
@@ -203,7 +185,6 @@ const WalletManagement: React.FC = () => {
         setEditingBankAccount(undefined);
         setIsBankAccountModalVisible(true);
     };
-
     const handleCreateAccount = async (data: BankAccountFormData) => {
         try {
             const requestData = shopWithdrawalService.formatBankAccountData(data);
@@ -211,11 +192,9 @@ const WalletManagement: React.FC = () => {
             message.success('Thêm tài khoản thành công');
             loadWalletData();
         } catch (error) {
-            console.error('Error creating account:', error);
             message.error('Có lỗi xảy ra khi thêm tài khoản');
         }
     };
-
     const handleUpdateAccount = async (id: string, data: BankAccountFormData) => {
         try {
             const requestData = shopWithdrawalService.formatBankAccountData(data);
@@ -223,33 +202,27 @@ const WalletManagement: React.FC = () => {
             message.success('Cập nhật tài khoản thành công');
             loadWalletData();
         } catch (error) {
-            console.error('Error updating account:', error);
             message.error('Có lỗi xảy ra khi cập nhật tài khoản');
         }
     };
-
     const handleDeleteAccount = async (id: string) => {
         try {
             await shopWithdrawalService.deleteBankAccount(id);
             message.success('Xóa tài khoản thành công');
             loadWalletData();
         } catch (error) {
-            console.error('Error deleting account:', error);
             message.error('Có lỗi xảy ra khi xóa tài khoản');
         }
     };
-
     const handleSetDefaultAccount = async (id: string) => {
         try {
             await shopWithdrawalService.setDefaultBankAccount(id);
             message.success('Đặt tài khoản mặc định thành công');
             loadWalletData();
         } catch (error) {
-            console.error('Error setting default account:', error);
             message.error('Có lỗi xảy ra khi đặt tài khoản mặc định');
         }
     };
-
     const handleBankAccountSubmit = async (data: BankAccountFormData) => {
         try {
             if (editingBankAccount) {
@@ -262,7 +235,6 @@ const WalletManagement: React.FC = () => {
             message.error('Có lỗi xảy ra');
         }
     };
-
     // Withdrawal handlers
     const handleWithdrawalRequest = () => {
         if (bankAccounts.length === 0) {
@@ -271,22 +243,17 @@ const WalletManagement: React.FC = () => {
         }
         setIsWithdrawalModalVisible(true);
     };
-
     const handleWithdrawalSubmit = async (data: WithdrawalFormData) => {
         try {
-            // Check if user can create withdrawal request first
             const canCreate = await shopWithdrawalService.canCreateWithdrawalRequest();
             if (!canCreate) {
                 message.error('Bạn không thể tạo yêu cầu rút tiền lúc này');
                 return;
             }
-
-            // Then validate withdrawal request
             const validation = await shopWithdrawalService.validateWithdrawalRequest({
                 amount: data.amount,
                 bankAccountId: data.bankAccountId
             });
-
             if (!validation.isValid) {
                 const errorMessage = validation.errors && Array.isArray(validation.errors)
                     ? validation.errors.join(', ')
@@ -294,29 +261,14 @@ const WalletManagement: React.FC = () => {
                 message.error(errorMessage);
                 return;
             }
-
-            // Finally create withdrawal request
             const requestData = shopWithdrawalService.formatWithdrawalData(data);
             await shopWithdrawalService.createWithdrawalRequest(requestData);
-
             message.success('Yêu cầu rút tiền đã được gửi');
             setIsWithdrawalModalVisible(false);
             loadWalletData();
-            // Trigger refresh for both statistics and history
             setRefreshTrigger(prev => prev + 1);
-        } catch (error: any) {
-            console.error('Error creating withdrawal request:', error);
-
-            // Handle different types of errors
-            let errorMessage = 'Có lỗi xảy ra khi tạo yêu cầu rút tiền';
-
-            if (error?.response?.data?.message) {
-                errorMessage = error.response.data.message;
-            } else if (error?.message) {
-                errorMessage = error.message;
-            }
-
-            message.error(errorMessage);
+        } catch (error) {
+            message.error('Có lỗi xảy ra khi tạo yêu cầu rút tiền');
         }
     };
 
@@ -374,7 +326,6 @@ const WalletManagement: React.FC = () => {
                     </Space>
                 </div>
             </div>
-
             {/* Statistics Cards */}
             <Row gutter={[16, 16]} className="statistics-section">
                 <Col xs={24} sm={12} lg={6}>
@@ -418,7 +369,6 @@ const WalletManagement: React.FC = () => {
                     </Card>
                 </Col>
             </Row>
-
             {/* Amount Statistics */}
             <Row gutter={[16, 16]} className="amount-statistics">
                 <Col xs={24} md={8}>
@@ -469,7 +419,6 @@ const WalletManagement: React.FC = () => {
                     </Card>
                 </Col>
             </Row>
-
             {/* Main Content Tabs */}
             <Card className="main-content">
                 <Tabs defaultActiveKey="accounts" size="large" className="wallet-tabs">
@@ -493,7 +442,6 @@ const WalletManagement: React.FC = () => {
                             onSetDefault={handleSetDefaultAccount}
                         />
                     </TabPane>
-
                     <TabPane
                         tab={
                             <Badge count={statistics.totalWithdrawals} size="small" color="green">
@@ -512,7 +460,6 @@ const WalletManagement: React.FC = () => {
                     </TabPane>
                 </Tabs>
             </Card>
-
             {/* Bank Account Modal */}
             <Modal
                 title={editingBankAccount ? 'Chỉnh sửa tài khoản ngân hàng' : 'Thêm tài khoản ngân hàng'}
@@ -529,7 +476,6 @@ const WalletManagement: React.FC = () => {
                     onCancel={() => setIsBankAccountModalVisible(false)}
                 />
             </Modal>
-
             {/* Withdrawal Request Modal */}
             <Modal
                 title="Yêu cầu rút tiền"
@@ -552,4 +498,4 @@ const WalletManagement: React.FC = () => {
     );
 };
 
-export default WalletManagement;
+export default TourCompanyWalletManagement;

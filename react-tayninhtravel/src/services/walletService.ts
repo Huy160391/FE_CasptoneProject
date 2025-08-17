@@ -1,17 +1,17 @@
 import axiosInstance from '../config/axios';
 
 // Types for Specialty Shop Wallet
-export interface SpecialtyShopWallet {
+export interface Wallet {
     id: string;
     userId: string;
-    shopName: string;
+    owner: string;
     wallet: number; // Số tiền trong ví (VND)
     updatedAt: string;
 }
 
 // Response structure based on API documentation
 export interface SpecialtyShopWalletResponse {
-    data: SpecialtyShopWallet;
+    data: Wallet;
     isSuccess: boolean;
     statusCode: number;
     message: string;
@@ -37,6 +37,17 @@ export const walletService = {
         }
     },
 
+    getTourCompanyWallet: async (): Promise<SpecialtyShopWalletResponse> => {
+        try {
+            const response = await axiosInstance.get<SpecialtyShopWalletResponse>('/Wallet/tour-company');
+            return response.data;
+        } catch (error: any) {
+            console.error('Error fetching tour company wallet:', error);
+            throw error;
+        }
+    },
+
+
     /**
      * Format currency amount to VND
      * @param amount - Số tiền
@@ -58,5 +69,7 @@ export const walletService = {
         return new Intl.NumberFormat('vi-VN').format(amount);
     }
 };
+
+
 
 export default walletService;

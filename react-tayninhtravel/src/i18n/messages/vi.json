@@ -1288,7 +1288,8 @@
             "tours": "Quản lý Tour",
             "transactions": "Lịch sử giao dịch",
             "reviews": "Lịch sử đánh giá",
-            "revenue": "Dashboard doanh thu",
+            "revenue": "Quản lý doanh thu",
+            "wallet": "Quản lý ví",
             "profile": "Thông tin cá nhân",
             "backToSite": "Về trang chủ",
             "logout": "Đăng xuất"
