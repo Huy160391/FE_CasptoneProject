@@ -173,27 +173,27 @@ const BookingPage: React.FC = () => {
         console.log("Current date for filtering:", today);
         console.log("All slots before filtering:", response.data);
 
-                        // ✅ SIMPLIFIED: Show ALL slots, no filtering - handle click behavior instead
-                        const availableSlots = response.data.filter((slot) => {
-                          const slotDate = new Date(slot.tourDate);
-                          const isNotPast = slotDate >= today;
-                          
-                          console.log(`🔍 Slot ${slot.id} SIMPLE DEBUG:`, {
-                            tourDate: slot.tourDate,
-                            isActive: slot.isActive,
-                            status: slot.status,
-                            statusName: slot.statusName,
-                            maxGuests: slot.maxGuests,
-                            currentBookings: slot.currentBookings,
-                            availableSpots: slot.availableSpots,
-                            isNotPast: isNotPast,
-                            willShow: slot.isActive && isNotPast ? "✅ SHOW" : "❌ HIDE",
-                            hideReason: !slot.isActive ? "not active" : !isNotPast ? "in past" : null
-                          });
+        // ✅ SIMPLIFIED: Show ALL slots, no filtering - handle click behavior instead
+        const availableSlots = response.data.filter((slot) => {
+          const slotDate = new Date(slot.tourDate);
+          const isNotPast = slotDate >= today;
 
-                          // ✅ SIMPLIFIED: Only filter out inactive and past slots
-                          return slot.isActive && isNotPast;
-                        });
+          console.log(`🔍 Slot ${slot.id} SIMPLE DEBUG:`, {
+            tourDate: slot.tourDate,
+            isActive: slot.isActive,
+            status: slot.status,
+            statusName: slot.statusName,
+            maxGuests: slot.maxGuests,
+            currentBookings: slot.currentBookings,
+            availableSpots: slot.availableSpots,
+            isNotPast: isNotPast,
+            willShow: slot.isActive && isNotPast ? "✅ SHOW" : "❌ HIDE",
+            hideReason: !slot.isActive ? "not active" : !isNotPast ? "in past" : null
+          });
+
+          // ✅ SIMPLIFIED: Only filter out inactive and past slots
+          return slot.isActive && isNotPast;
+        });
 
         console.log("Available slots after filtering:", availableSlots);
         setTourSlots(availableSlots);
@@ -393,58 +393,58 @@ const BookingPage: React.FC = () => {
     }
 
     try {
-            // Use form values from state (since form might not be rendered in current step)
+      // Use form values from state (since form might not be rendered in current step)
 
-            // ✅ NEW: Enhanced booking request with proper backend API structure
-            let guestsData: GuestInfoRequest[] = [];
-            
-            if (formValues.bookingType === 'representative') {
-                // For representative booking: Create guest records for all numberOfGuests
-                // First guest is the representative with full info
-                // Other guests are placeholders to satisfy backend validation
-                guestsData = [];
-                
-                // Add the representative as first guest
-                guestsData.push({
-                    guestName: formValues.contactName,
-                    guestEmail: formValues.contactEmail,
-                    guestPhone: formValues.contactPhone
-                });
-                
-                // Add placeholder guests for the rest
-                for (let i = 1; i < formValues.numberOfGuests; i++) {
-                    guestsData.push({
-                        guestName: `Khách ${i + 1}`,
-                        guestEmail: `guest${i + 1}_${Date.now()}@placeholder.com`, // Unique placeholder email
-                        guestPhone: ''
-                    });
-                }
-            } else {
-                // For individual booking: Use the actual guest data
-                guestsData = formValues.guests;
-            }
+      // ✅ NEW: Enhanced booking request with proper backend API structure
+      let guestsData: GuestInfoRequest[] = [];
 
-            const bookingRequest: CreateTourBookingRequest = {
-                tourSlotId: selectedSlot?.id || '',
-                numberOfGuests: formValues.numberOfGuests,
-                contactPhone: formValues.contactPhone,
-                specialRequests: formValues.specialRequests,
-                bookingType: formValues.bookingType === 'individual' ? 'Individual' : 'GroupRepresentative',
-                
-                // For group representative booking
-                ...(formValues.bookingType === 'representative' && {
-                    groupName: `Nhóm ${formValues.contactName}`,
-                    groupDescription: `Đặt tour cho ${formValues.numberOfGuests} người`,
-                    groupRepresentative: {
-                        guestName: formValues.contactName,
-                        guestEmail: formValues.contactEmail,
-                        guestPhone: formValues.contactPhone
-                    }
-                }),
-                
-                // Always send the guests array with correct number of records
-                guests: guestsData
-            };
+      if (formValues.bookingType === 'representative') {
+        // For representative booking: Create guest records for all numberOfGuests
+        // First guest is the representative with full info
+        // Other guests are placeholders to satisfy backend validation
+        guestsData = [];
+
+        // Add the representative as first guest
+        guestsData.push({
+          guestName: formValues.contactName,
+          guestEmail: formValues.contactEmail,
+          guestPhone: formValues.contactPhone
+        });
+
+        // Add placeholder guests for the rest
+        for (let i = 1; i < formValues.numberOfGuests; i++) {
+          guestsData.push({
+            guestName: `Khách ${i + 1}`,
+            guestEmail: `guest${i + 1}_${Date.now()}@placeholder.com`, // Unique placeholder email
+            guestPhone: ''
+          });
+        }
+      } else {
+        // For individual booking: Use the actual guest data
+        guestsData = formValues.guests;
+      }
+
+      const bookingRequest: CreateTourBookingRequest = {
+        tourSlotId: selectedSlot?.id || '',
+        numberOfGuests: formValues.numberOfGuests,
+        contactPhone: formValues.contactPhone,
+        specialRequests: formValues.specialRequests,
+        bookingType: formValues.bookingType === 'individual' ? 'Individual' : 'GroupRepresentative',
+
+        // For group representative booking
+        ...(formValues.bookingType === 'representative' && {
+          groupName: `Nhóm ${formValues.contactName}`,
+          groupDescription: `Đặt tour cho ${formValues.numberOfGuests} người`,
+          groupRepresentative: {
+            guestName: formValues.contactName,
+            guestEmail: formValues.contactEmail,
+            guestPhone: formValues.contactPhone
+          }
+        }),
+
+        // Always send the guests array with correct number of records
+        guests: guestsData
+      };
 
       const validation = validateBookingRequest(bookingRequest);
 
@@ -482,9 +482,8 @@ const BookingPage: React.FC = () => {
             // Amount: Try multiple sources
             amount: priceCalculation?.finalPrice || 0,
 
-            description: `Tour Booking - ${
-              response.data?.bookingCode || "Individual QR System"
-            }`,
+            description: `Tour Booking - ${response.data?.bookingCode || "Individual QR System"
+              }`,
           };
 
           // Validate required fields
@@ -501,8 +500,7 @@ const BookingPage: React.FC = () => {
         } catch (enhancedError: any) {
           console.error("Enhanced payment failed:", enhancedError);
           message.error(
-            `Không thể tạo thanh toán: ${
-              enhancedError.message || "Lỗi không xác định"
+            `Không thể tạo thanh toán: ${enhancedError.message || "Lỗi không xác định"
             }`
           );
         } finally {
@@ -515,8 +513,8 @@ const BookingPage: React.FC = () => {
       console.error("Booking error:", error);
       message.error(
         error.response?.data?.message ||
-          error.message ||
-          "Có lỗi xảy ra khi đặt tour"
+        error.message ||
+        "Có lỗi xảy ra khi đặt tour"
       );
     } finally {
       setSubmitting(false);
@@ -688,22 +686,20 @@ const BookingPage: React.FC = () => {
                           }}>
                           {tourSlots.map((slot) => {
                             const availableSpots = slot.availableSpots || 0;
-                            
+
                             // ✅ ENHANCED: Check both availableSpots and status for sold out logic  
                             const isSoldOut = availableSpots === 0 || slot.statusName === "Đã đầy"; // Use statusName
                             const isLowAvailability = availableSpots > 0 && availableSpots < 5;
-                            
+
                             // ✅ NEW: Special case for FullyBooked but has spots (status inconsistency)
                             // Đã xoá biến isInconsistent vì không sử dụng
 
                             return (
                               <div
                                 key={slot.id}
-                                className={`tour-slot ${
-                                  selectedSlot?.id === slot.id ? "selected" : ""
-                                } ${
-                                  isLowAvailability ? "low-availability" : ""
-                                } ${isSoldOut ? "sold-out" : ""}`}
+                                className={`tour-slot ${selectedSlot?.id === slot.id ? "selected" : ""
+                                  } ${isLowAvailability ? "low-availability" : ""
+                                  } ${isSoldOut ? "sold-out" : ""}`}
                                 onClick={(e) => {
                                   // ✅ FIXED: Check status là số hoặc statusName là "Đã đầy"
                                   if (slot.status === 2 || slot.statusName === "Đã đầy") {
@@ -711,7 +707,7 @@ const BookingPage: React.FC = () => {
                                     message.warning("Slot này đã đầy, không thể đặt booking");
                                     return;
                                   }
-                                  
+
                                   // Prevent clicking on slots with no available spots
                                   if (availableSpots === 0) {
                                     e.preventDefault();
@@ -759,8 +755,8 @@ const BookingPage: React.FC = () => {
                                         availableSpots > 5
                                           ? "#52c41a"
                                           : availableSpots > 0
-                                          ? "#faad14"
-                                          : "#ff4d4f",
+                                            ? "#faad14"
+                                            : "#ff4d4f",
                                       fontWeight: "bold",
                                     }}>
                                     {availableSpots > 0
@@ -1310,7 +1306,7 @@ const BookingPage: React.FC = () => {
       <LoginModal
         isVisible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
-        onRegisterClick={() => {}}
+        onRegisterClick={() => { }}
         onLoginSuccess={() => {
           setIsLoginModalVisible(false);
           // Retry booking after login

@@ -318,10 +318,10 @@ export interface UpdateBankAccountRequest {
 }
 
 export enum WithdrawalStatus {
-    Pending = 0,
-    Approved = 1,
-    Rejected = 2,
-    Cancelled = 3
+    Pending = "Pending",
+    Approved = "Approved",
+    Rejected = "Rejected",
+    Cancelled = "Cancelled"
 }
 
 export interface WithdrawalRequest {

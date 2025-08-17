@@ -22,7 +22,7 @@ import { WithdrawalRequestListParams, ProcessWithdrawalRequest } from '@/types';
  */
 export const getAdminWithdrawalRequests = async (
     params: {
-        status?: 0 | 1 | 2 | 3;
+        status?: 'Pending' | 'Approved' | 'Rejected' | 'Cancelled';
         pageNumber?: number;
         pageSize?: number;
         searchTerm?: string;

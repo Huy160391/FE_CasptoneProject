@@ -1,3 +1,13 @@
+// Đảm bảo màu chữ tab dễ đọc ở dark mode
+.tab-title-no-badge {
+  font-weight: 500;
+  color: #222 !important;
+  background: none !important;
+}
+
+.dark-mode .tab-title-no-badge {
+  color: #f5f5f5 !important;
+}
 .admin-withdrawal-management {
   padding: 24px;
   background: var(--bg-color, #f5f5f5);
