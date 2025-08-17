@@ -98,7 +98,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
 
     // Load bookings
-    const loadBookings = async (page = 1, keyword = '', status?: BookingStatus, includeInactiveBookings = includeInactive) => {
+    const loadBookings = async (page = 1, keyword = '', status?: BookingStatus) => {
         if (!token || !isAuthenticated) {
             setError('Vui lòng đăng nhập để xem lịch sử đặt tour');
             setLoading(false);
@@ -113,8 +113,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                 pageIndex: page - 1, // API uses 0-based indexing
                 pageSize,
                 searchKeyword: keyword || undefined,
-                status,
-                includeInactive: includeInactiveBookings
+                status
             });
 
             if (response.success && response.data) {
@@ -134,31 +133,31 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
 
     useEffect(() => {
         loadBookings();
-    }, [token, isAuthenticated, includeInactive]);
+    }, [token, isAuthenticated]);
 
     const handleSearch = (value: string) => {
         setSearchKeyword(value);
         setCurrentPage(1);
-        loadBookings(1, value, statusFilter, includeInactive);
+        loadBookings(1, value, statusFilter);
     };
 
     const handleStatusFilter = (status: BookingStatus | undefined) => {
         setStatusFilter(status);
         setCurrentPage(1);
-        loadBookings(1, searchKeyword, status, includeInactive);
+        loadBookings(1, searchKeyword, status);
     };
 
     const handlePageChange = (page: number, size?: number) => {
         if (size && size !== pageSize) {
             setPageSize(size);
         }
-        loadBookings(page, searchKeyword, statusFilter, includeInactive);
+        loadBookings(page, searchKeyword, statusFilter);
     };
 
     const handleIncludeInactiveChange = (checked: boolean) => {
         setIncludeInactive(checked);
         setCurrentPage(1);
-        loadBookings(1, searchKeyword, statusFilter, checked);
+        loadBookings(1, searchKeyword, statusFilter);
     };
 
     const handleViewDetail = (booking: TourBookingDto) => {
@@ -167,7 +166,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
     };
 
     const handleRefresh = () => {
-        loadBookings(currentPage, searchKeyword, statusFilter, includeInactive);
+        loadBookings(currentPage, searchKeyword, statusFilter);
     };
 
     // If using legacy data prop

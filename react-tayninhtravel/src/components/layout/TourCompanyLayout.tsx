@@ -12,7 +12,8 @@ import {
     LogoutOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
-    HomeOutlined
+    HomeOutlined,
+    WalletOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
@@ -33,7 +34,9 @@ const TourCompanyLayout: React.FC = () => {
     const { t } = useTranslation();
     const {
         token: { colorBgContainer },
-    } = theme.useToken(); const menuItems = [
+    } = theme.useToken();
+
+    const menuItems = [
         {
             key: '/tour-company/dashboard',
             icon: <DashboardOutlined />,
@@ -64,23 +67,27 @@ const TourCompanyLayout: React.FC = () => {
             icon: <BarChartOutlined />,
             label: t('tourCompany.sidebar.revenue'),
         },
+        {
+            key: '/tour-company/wallet',
+            icon: <WalletOutlined />,
+            label: t('tourCompany.sidebar.wallet'),
+        },
     ];
+    const handleProfile = () => {
+        navigate('/profile');
+    };
 
     const handleMenuClick = (key: string) => {
         navigate(key);
-    };
-
-    const handleLogout = () => {
-        logout();
-        navigate('/');
     };
 
     const handleBackToSite = () => {
         navigate('/');
     };
 
-    const handleProfile = () => {
-        navigate('/profile');
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
     };
 
     return (
