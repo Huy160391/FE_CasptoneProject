@@ -383,7 +383,7 @@ export const getMyBookings = async (
   }>
 > => {
   const queryParams = {
-    pageIndex: params?.pageIndex || 0,
+    pageIndex: params?.pageIndex || 1,
     pageSize: params?.pageSize || 10,
     ...(params?.status !== undefined && { status: params.status }),
     ...(params?.searchKeyword && { searchKeyword: params.searchKeyword })
