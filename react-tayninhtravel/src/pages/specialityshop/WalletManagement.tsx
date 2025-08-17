@@ -144,22 +144,22 @@ const WalletManagement: React.FC = () => {
 
             console.log('Withdrawal requests loaded:', allRequests); // Debug log
             console.log('Requests by status:', {
-                pending: allRequests.filter((req: any) => req.status === 0),
-                approved: allRequests.filter((req: any) => req.status === 1),
-                rejected: allRequests.filter((req: any) => req.status === 2)
+                pending: allRequests.filter((req: any) => req.status === 'Pending'),
+                approved: allRequests.filter((req: any) => req.status === 'Approved'),
+                rejected: allRequests.filter((req: any) => req.status === 'Rejected')
             }); // Debug log
 
             // Calculate statistics from withdrawal requests
             const stats = {
                 totalWithdrawals: allRequests.length,
-                pendingWithdrawals: allRequests.filter(req => req.status === 0).length, // Pending
-                approvedWithdrawals: allRequests.filter(req => req.status === 1).length, // Approved
-                rejectedWithdrawals: allRequests.filter(req => req.status === 2).length, // Rejected
+                pendingWithdrawals: allRequests.filter(req => req.status === 'Pending').length, // Pending
+                approvedWithdrawals: allRequests.filter(req => req.status === 'Approved').length, // Approved
+                rejectedWithdrawals: allRequests.filter(req => req.status === 'Rejected').length, // Rejected
                 totalWithdrawnAmount: allRequests
-                    .filter(req => req.status === 1) // Only approved requests
+                    .filter(req => req.status === 'Approved') // Only approved requests
                     .reduce((sum, req) => sum + (req.netAmount || req.amount), 0),
                 pendingAmount: allRequests
-                    .filter(req => req.status === 0) // Only pending requests
+                    .filter(req => req.status === 'Pending') // Only pending requests
                     .reduce((sum, req) => sum + req.amount, 0),
                 currentBalance: balance
             };
