@@ -7,7 +7,6 @@ import {
     Space,
     Empty,
     Image,
-    Tag,
     Row,
     Col,
     Breadcrumb,
@@ -95,11 +94,6 @@ const CartDetail = () => {
                     />
                     <div className="product-info">
                         <div className="product-name">{record.name}</div>
-                        <div className="product-type">
-                            <Tag color={record.type === 'product' ? 'blue' : 'green'}>
-                                {record.type === 'product' ? t('shop.product') : t('tour.tour')}
-                            </Tag>
-                        </div>
                         {/* {record.description && (
               <div className="product-description">{record.description}</div>
             )} */}
@@ -271,6 +265,7 @@ const CartDetail = () => {
                                 <Title level={4}>{t('cart.total')}:</Title>
                                 <Title level={4} className="total-price">{formatPrice(getTotalPrice())}</Title>
                             </div>
+                            <Text type="secondary" style={{ fontSize: '12px', marginLeft: 4 }}>{t('cart.vatIncluded')}</Text>
 
                             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                                 <Button

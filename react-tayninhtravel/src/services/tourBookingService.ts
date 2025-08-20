@@ -370,8 +370,12 @@ export const getMyBookings = async (
   params?: {
     pageIndex?: number;
     pageSize?: number;
-    status?: BookingStatus;
+    status?: string;
     searchKeyword?: string;
+    startDate?: string;
+    endDate?: string;
+    searchTerm?: string;
+    bookingCode?: string;
   }
 ): Promise<
   ApiResponse<{
@@ -386,7 +390,11 @@ export const getMyBookings = async (
     pageIndex: params?.pageIndex || 1,
     pageSize: params?.pageSize || 10,
     ...(params?.status !== undefined && { status: params.status }),
-    ...(params?.searchKeyword && { searchKeyword: params.searchKeyword })
+    ...(params?.searchKeyword && { searchKeyword: params.searchKeyword }),
+    ...(params?.startDate && { startDate: params.startDate }),
+    ...(params?.endDate && { endDate: params.endDate }),
+    ...(params?.searchTerm && { searchTerm: params.searchTerm }),
+    ...(params?.bookingCode && { bookingCode: params.bookingCode })
   };
 
   const response = await axios.get("/UserTourBooking/my-bookings", {
@@ -408,17 +416,7 @@ export const getMyBookings = async (
             guests: booking.guests || [], // ✅ NEW: Individual guests with QR codes
             tourOperation: booking.tourOperation
               ? {
-                id: booking.tourOperation.id,
-                price: booking.tourOperation.price,
-                maxGuests: booking.tourOperation.maxGuests,
-                tourTitle: booking.tourOperation.tourTitle,
-                tourDescription: booking.tourOperation.tourDescription,
-                tourDate: booking.tourOperation.tourDate,
-                guideName: booking.tourOperation.guideName,
-                guidePhone: booking.tourOperation.guidePhone,
-                // Legacy fields for backward compatibility
-                currentBookings: 0,
-                isActive: true,
+                ...booking.tourOperation // Map all fields, including tourStartDate
               }
               : undefined,
           })) || [],
@@ -627,17 +625,17 @@ export const getAvailableTours = async (params?: {
 /**
  * Format booking status thành tiếng Việt
  */
-export const getBookingStatusText = (status: BookingStatus): string => {
+export const getBookingStatusText = (status: string): string => {
   switch (status) {
-    case BookingStatus.Pending:
+    case "Pending":
       return "Chờ thanh toán";
-    case BookingStatus.Confirmed:
+    case "Confirmed":
       return "Đã xác nhận";
-    case BookingStatus.Cancelled:
+    case "Cancelled":
       return "Đã hủy";
-    case BookingStatus.Completed:
+    case "Completed":
       return "Đã hoàn thành";
-    case BookingStatus.Refunded:
+    case "Refunded":
       return "Đã hoàn tiền";
     default:
       return "Không xác định";
@@ -647,17 +645,17 @@ export const getBookingStatusText = (status: BookingStatus): string => {
 /**
  * Get booking status color for UI
  */
-export const getBookingStatusColor = (status: BookingStatus): string => {
+export const getBookingStatusColor = (status: string): string => {
   switch (status) {
-    case BookingStatus.Pending:
+    case "Pending":
       return "orange";
-    case BookingStatus.Confirmed:
+    case "Confirmed":
       return "green";
-    case BookingStatus.Cancelled:
+    case "Cancelled":
       return "red";
-    case BookingStatus.Completed:
+    case "Completed":
       return "blue";
-    case BookingStatus.Refunded:
+    case "Refunded":
       return "purple";
     default:
       return "default";

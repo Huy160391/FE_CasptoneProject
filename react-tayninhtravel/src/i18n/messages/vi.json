@@ -636,7 +636,8 @@
         "cartClearedDescription": "Tất cả sản phẩm đã được xóa khỏi giỏ hàng",
         "checkoutDescription": "Chức năng thanh toán đang được phát triển",
         "error": "Lỗi",
-        "errorDescription": "Đã xảy ra lỗi khi xử lý giỏ hàng. Vui lòng thử lại sau."
+        "errorDescription": "Đã xảy ra lỗi khi xử lý giỏ hàng. Vui lòng thử lại sau.",
+        "vatIncluded": "* Giá thành đã bao gồm VAT"
     },
     "checkout": {
         "promotionTitle": "Khuyến mãi",
@@ -1688,7 +1689,8 @@
         "viewDetails": "Chi tiết",
         "guide": "HDV",
         "columns": {
-            "bookingCode": "Mã đặt tour",
+            "bookingCode": "Mã thanh toán",
+            "tourCompanyName": "Công ty ",
             "tourName": "Tên tour",
             "tourDate": "Ngày tour",
             "guestCount": "Số khách",

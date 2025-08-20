@@ -1,3 +1,72 @@
+// Booking API response types
+export interface TourInforResponse {
+    success: boolean;
+    message: string;
+    data: {
+        items: TourInfor[];
+        totalCount: number;
+        pageIndex: number;
+        pageSize: number;
+        totalPages: number;
+        hasPreviousPage: boolean;
+        hasNextPage: boolean;
+    };
+    note?: string | null;
+}
+
+export interface TourInfor {
+    id: string;
+    tourOperationId: string;
+    userId: string;
+    numberOfGuests: number;
+    originalPrice: number;
+    discountPercent: number;
+    totalPrice: number;
+    status: string;
+    statusName: string;
+    bookingCode: string;
+    payOsOrderCode: string;
+    qrCodeData: string | null;
+    bookingDate: string;
+    confirmedDate: string | null;
+    cancelledDate: string | null;
+    cancellationReason: string | null;
+    customerNotes: string;
+    contactName: string;
+    contactPhone: string;
+    contactEmail: string;
+    specialRequests: string;
+    bookingType: string;
+    groupName: string | null;
+    groupDescription: string | null;
+    groupQRCodeData: string | null;
+    createdAt: string;
+    updatedAt: string;
+    guests: TourInforGuest[];
+    tourOperation: TourOperation;
+    user: TourInforUser;
+}
+
+export interface TourInforGuest {
+    id: string;
+    tourBookingId: string;
+    guestName: string;
+    guestEmail: string;
+    guestPhone: string;
+    isGroupRepresentative: boolean;
+    qrCodeData: string | null;
+    isCheckedIn: boolean;
+    checkInTime: string | null;
+    checkInNotes: string | null;
+    createdAt: string;
+}
+
+export interface TourInforUser {
+    id: string;
+    name: string;
+    email: string;
+    phoneNumber: string;
+}
 // PendingTour type for admin pending tour list (bỏ qua tourOperation)
 export interface PendingTour {
     id: string;
@@ -316,6 +385,8 @@ export interface CreateTourDetailsRequest {
 
 // TourOperation interfaces
 export interface TourOperation {
+    tourTitle?: string;
+    tourStartDate?: string;
     id: string;
     tourDetailsId: string;
     guideId?: string | null;

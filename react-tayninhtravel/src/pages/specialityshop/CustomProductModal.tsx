@@ -569,15 +569,26 @@ const CustomProductModal = ({
                                 Giá (₫)
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 className={`form-control ${errors.price ? 'error' : ''}`}
                                 name="price"
-                                value={formValues.price || 0}
-                                onChange={(e) => handleNumberChange(e, 'price')}
-                                min="0"
-                                step="1000"
+                                value={formValues.price ? formValues.price.toLocaleString('vi-VN') : ''}
+                                onChange={(e) => {
+                                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                                    setFormValues({
+                                        ...formValues,
+                                        price: raw === '' ? 0 : parseInt(raw, 10)
+                                    });
+                                    if (errors.price) {
+                                        setErrors({ ...errors, price: '' });
+                                    }
+                                }}
                             />
                             {errors.price && <div className="error-message">{errors.price}</div>}
+                            <div style={{ marginTop: 6, fontSize: '13px', color: '#d4380d', fontWeight: 600, background: 'rgba(255, 229, 204, 0.7)', padding: '6px 12px', borderRadius: 6 }}>
+                                * Hãy nhớ kiểm tra lại giá đã bao gồm thuế VAT chưa nhé. <br />
+                                Chúng tôi và cơ quan thuế đều yêu cầu giá công khai phải có VAT nếu thuộc diện chịu thuế.
+                            </div>
                         </div>
 
                         {/* Số lượng tồn kho */}
