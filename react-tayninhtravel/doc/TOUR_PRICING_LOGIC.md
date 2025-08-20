@@ -5,7 +5,7 @@
 ### 🎯 **1. Đặt sớm (Early Bird)**
 
 **Điều kiện:**
-- Khách hàng đặt tour trong **15 ngày đầu** sau khi tour được tạo/mở bán
+- Khách hàng đặt tour trong **14 ngày đầu** sau khi tour được tạo/mở bán
 - Tính từ ngày tour được tạo (`createdAt`) đến ngày đặt hiện tại
 
 **Ưu đãi:**
@@ -16,7 +16,7 @@
 ### 💰 **2. Đặt trễ (Last Minute)**
 
 **Điều kiện:**
-- Khách hàng đặt tour **sau 15 ngày đầu** (từ ngày thứ 16 trở đi)
+- Khách hàng đặt tour **sau 14 ngày đầu** (từ ngày thứ 15 trở đi)
 
 **Ưu đãi:**
 - **Không giảm giá** - thanh toán 100% giá tour
@@ -32,7 +32,7 @@ const tourCreatedDate = new Date(tourDetails.createdAt);
 const currentDate = new Date();
 const daysSinceCreated = Math.floor((currentDate.getTime() - tourCreatedDate.getTime()) / (1000 * 60 * 60 * 24));
 
-const isEarlyBird = daysSinceCreated <= 15;
+const isEarlyBird = daysSinceCreated <= 14;
 const discountPercent = isEarlyBird ? 25 : 0;
 ```
 
@@ -48,7 +48,7 @@ const finalPrice = totalOriginalPrice - discountAmount;
 
 ## 📊 **Ví dụ cụ thể**
 
-### **Ví dụ 1: Early Bird (Ngày 1-15)**
+### **Ví dụ 1: Early Bird (Ngày 1-14)**
 - **Tour được tạo:** 15/07/2025
 - **Khách đặt:** 20/07/2025 (5 ngày sau khi tạo)
 - **Giá gốc:** 100,000 VND/người
@@ -58,7 +58,7 @@ const finalPrice = totalOriginalPrice - discountAmount;
   - Giảm giá Early Bird: 50,000 VND (25%)
   - **Giá cuối cùng: 150,000 VND**
 
-### **Ví dụ 2: Standard (Ngày 16+)**
+### **Ví dụ 2: Standard (Ngày 15+)**
 - **Tour được tạo:** 15/07/2025
 - **Khách đặt:** 05/08/2025 (21 ngày sau khi tạo)
 - **Giá gốc:** 100,000 VND/người
@@ -131,9 +131,9 @@ export const calculateBookingPrice = async (request: CalculatePriceRequest, toke
 ## 🚀 **Testing**
 
 ### **Test Cases**
-1. **Early Bird (Day 1-15)**: Kiểm tra giảm giá 25%
-2. **Standard (Day 16+)**: Kiểm tra không giảm giá
-3. **Edge Case (Day 15)**: Kiểm tra ngày cuối Early Bird
+1. **Early Bird (Day 1-14)**: Kiểm tra giảm giá 25%
+2. **Standard (Day 15+)**: Kiểm tra không giảm giá
+3. **Edge Case (Day 14)**: Kiểm tra ngày cuối Early Bird
 4. **Multiple Guests**: Kiểm tra tính toán với nhiều khách
 5. **Error Handling**: Kiểm tra khi không có tourOperation
 

@@ -106,30 +106,46 @@ export interface TourSlotWithBookingsDto {
     id: string;
     title: string;
     description: string;
-    imageUrls: string[];
-    skillsRequired: string[];
-    status: number;
-    statusName: string;
-    createdAt: string;
-    tourTemplate: {
+    imageUrls?: string[];
+    skillsRequired?: string[];
+    status: string;
+    statusName?: string;
+    createdAt?: string;
+    timeline?: Array<{
+      id: string;
+      checkInTime: string;
+      activity: string;
+      sortOrder: number;
+      specialtyShop?: any;
+    }>;
+    tourTemplate?: {
       id: string;
       title: string;
       startLocation: string;
       endLocation: string;
       templateType: number;
     };
-    tourOperation: {
+  };
+  // ✅ FIXED: tourOperation at root level (not nested in tourDetails)
+  tourOperation?: {
+    id: string;
+    price: number;
+    maxGuests: number;
+    currentBookings: number;
+    availableSpots?: number;
+    status: string;
+    isActive: boolean;
+    tourGuide?: {
       id: string;
-      price: number;
-      maxGuests: number;
-      currentBookings: number;
-      availableSpots: number;
-      status: number;
-      isActive: boolean;
+      fullName: string;
+      phoneNumber: string;
+      email: string;
     };
   };
-  bookedUsers: BookedUserInfo[];
-  statistics: BookingStatistics;
+  // ✅ FIXED: bookings at root level (not bookedUsers)
+  bookings: BookedUserInfo[];
+  bookedUsers?: BookedUserInfo[]; // Keep for backward compatibility
+  statistics?: BookingStatistics;
 }
 
 export interface TourSlotWithBookingsResponse {
