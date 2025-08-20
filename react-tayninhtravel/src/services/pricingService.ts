@@ -25,7 +25,7 @@ export interface TourPricingData {
 /**
  * Constants for pricing logic (matching backend)
  */
-const EARLY_BIRD_WINDOW_DAYS = 15; // 15 ngày đầu sau khi mở bán
+const EARLY_BIRD_WINDOW_DAYS = 14; // 14 ngày đầu sau khi mở bán
 const MINIMUM_DAYS_BEFORE_TOUR = 30; // Tour phải khởi hành sau ít nhất 30 ngày
 const EARLY_BIRD_DISCOUNT_PERCENT = 25; // Giảm 25%
 
@@ -56,7 +56,7 @@ export const calculateTourPricing = (
         daysUntilTour = getDaysDifferenceVietnam(vietnamBookingDate, startDate);
 
         // Early bird conditions:
-        // 1. Booking within 15 days of tour creation
+        // 1. Booking within 14 days of tour creation
         // 2. Tour starts at least 30 days from booking date
         isEarlyBirdEligible =
             daysSinceCreated <= EARLY_BIRD_WINDOW_DAYS &&
