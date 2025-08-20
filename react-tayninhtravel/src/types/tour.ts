@@ -120,34 +120,34 @@ export interface PendingTour {
 }
 // Enums theo API specification
 export enum TourTemplateType {
-    FreeScenic = 1,      // Tour danh lam thắng cảnh (miễn phí vào cửa)
-    PaidAttraction = 2   // Tour khu vui chơi (có phí vào cửa)
+    FreeScenic = 1, // Tour danh lam thắng cảnh (miễn phí vào cửa)
+    PaidAttraction = 2, // Tour khu vui chơi (có phí vào cửa)
 }
 
 export enum ScheduleDay {
-    Sunday = 0,    // Chủ nhật ✅ Được phép
-    Saturday = 6   // Thứ bảy ✅ Được phép
+    Sunday = 0, // Chủ nhật ✅ Được phép
+    Saturday = 6, // Thứ bảy ✅ Được phép
     // Monday-Friday (1-5) KHÔNG được phép
 }
 
 export enum TourSlotStatus {
-    Available = 1,       // Slot có sẵn để booking
-    FullyBooked = 2,     // Slot đã được booking đầy
-    Cancelled = 3,       // Slot bị hủy
-    Completed = 4,       // Slot đã hoàn thành
-    InProgress = 5       // Slot đang trong quá trình thực hiện
+    Available = 1, // Slot có sẵn để booking
+    FullyBooked = 2, // Slot đã được booking đầy
+    Cancelled = 3, // Slot bị hủy
+    Completed = 4, // Slot đã hoàn thành
+    InProgress = 5, // Slot đang trong quá trình thực hiện
 }
 
 export enum TourDetailsStatus {
-    Pending = 0,                    // Chờ duyệt
-    Approved = 1,                   // Đã được duyệt
-    Rejected = 2,                   // Bị từ chối
-    Suspended = 3,                  // Tạm ngưng
-    AwaitingGuideAssignment = 4,    // Chờ phân công hướng dẫn viên
-    Cancelled = 5,                  // Đã hủy
-    AwaitingAdminApproval = 6,      // Chờ admin duyệt
-    WaitToPublic = 7,               // Chờ mở bán vé
-    Public = 8                      // Đã được public, khách hàng có thể booking
+    Pending = 0, // Chờ duyệt
+    Approved = 1, // Đã được duyệt
+    Rejected = 2, // Bị từ chối
+    Suspended = 3, // Tạm ngưng
+    AwaitingGuideAssignment = 4, // Chờ phân công hướng dẫn viên
+    Cancelled = 5, // Đã hủy
+    AwaitingAdminApproval = 6, // Chờ admin duyệt
+    WaitToPublic = 7, // Chờ mở bán vé
+    Public = 8, // Đã được public, khách hàng có thể booking
 }
 
 // export enum InvitationStatus {
@@ -158,12 +158,12 @@ export enum TourDetailsStatus {
 // }
 
 export enum TourOperationStatus {
-    Scheduled = 1,           // Operation đã được lên lịch và sẵn sàng
-    InProgress = 2,          // Operation đang được thực hiện
-    Completed = 3,           // Operation đã hoàn thành thành công
-    Cancelled = 4,           // Operation bị hủy
-    Postponed = 5,           // Operation bị hoãn
-    PendingConfirmation = 6  // Operation đang chờ xác nhận từ guide
+    Scheduled = 1, // Operation đã được lên lịch và sẵn sàng
+    InProgress = 2, // Operation đang được thực hiện
+    Completed = 3, // Operation đã hoàn thành thành công
+    Cancelled = 4, // Operation bị hủy
+    Postponed = 5, // Operation bị hoãn
+    PendingConfirmation = 6, // Operation đang chờ xác nhận từ guide
 }
 
 // TourGuide related types
@@ -240,7 +240,7 @@ export interface Tour {
     thumbnail?: string;
     maxGroupSize: number;
     minGroupSize?: number;
-    difficulty: 'easy' | 'medium' | 'hard';
+    difficulty: "easy" | "medium" | "hard";
     highlights: string[];
     included: string[];
     excluded?: string[];
@@ -269,8 +269,8 @@ export interface ApiResponse<T> {
     success: boolean;
     data?: T;
     totalCount?: number; // For paginated responses
-    pageIndex?: number;  // For paginated responses
-    pageSize?: number;   // For paginated responses
+    pageIndex?: number; // For paginated responses
+    pageSize?: number; // For paginated responses
     totalPages?: number; // For paginated responses
     validationErrors?: string[];
     fieldErrors?: Record<string, string[]>;
@@ -308,6 +308,15 @@ export interface CreateTourTemplateRequest {
     scheduleDays: ScheduleDay;
     month: number;
     year: number;
+    images: string[];
+}
+
+export interface CreateHolidayTourTemplateRequest {
+    title: string;
+    startLocation: string;
+    endLocation: string;
+    templateType: TourTemplateType;
+    tourDate: string; // Format: YYYY-MM-DD
     images: string[];
 }
 
@@ -385,8 +394,6 @@ export interface CreateTourDetailsRequest {
 
 // TourOperation interfaces
 export interface TourOperation {
-    tourTitle?: string;
-    tourStartDate?: string;
     id: string;
     tourDetailsId: string;
     guideId?: string | null;
@@ -620,102 +627,106 @@ export interface GetAllToursResponse {
 // Helper functions for enum mappings
 
 // Helper function to get tour details status text
-export const getTourDetailsStatusText = (status: TourDetailsStatus | number | string): string => {
+export const getTourDetailsStatusText = (
+    status: TourDetailsStatus | number | string
+): string => {
     // Handle string status from API
-    if (typeof status === 'string') {
+    if (typeof status === "string") {
         switch (status) {
-            case 'Pending':
-                return 'Chờ duyệt';
-            case 'Approved':
-                return 'Đã được duyệt';
-            case 'Rejected':
-                return 'Bị từ chối';
-            case 'Suspended':
-                return 'Tạm ngưng';
-            case 'AwaitingGuideAssignment':
-                return 'Chờ phân công hướng dẫn viên';
-            case 'Cancelled':
-                return 'Đã hủy';
-            case 'AwaitingAdminApproval':
-                return 'Chờ admin duyệt';
-            case 'WaitToPublic':
-                return 'Chờ mở bán vé';
-            case 'Public':
-                return 'Đã được public, khách hàng có thể booking';
+            case "Pending":
+                return "Chờ duyệt";
+            case "Approved":
+                return "Đã được duyệt";
+            case "Rejected":
+                return "Bị từ chối";
+            case "Suspended":
+                return "Tạm ngưng";
+            case "AwaitingGuideAssignment":
+                return "Chờ phân công hướng dẫn viên";
+            case "Cancelled":
+                return "Đã hủy";
+            case "AwaitingAdminApproval":
+                return "Chờ admin duyệt";
+            case "WaitToPublic":
+                return "Chờ mở bán vé";
+            case "Public":
+                return "Đã được public, khách hàng có thể booking";
             default:
-                return status || 'Không xác định';
+                return status || "Không xác định";
         }
     }
 
     // Handle enum/number status
-    const statusValue = typeof status === 'number' ? status : status;
+    const statusValue = typeof status === "number" ? status : status;
     switch (statusValue) {
         case TourDetailsStatus.Pending:
-            return 'Chờ duyệt';
+            return "Chờ duyệt";
         case TourDetailsStatus.Approved:
-            return 'Đã được duyệt';
+            return "Đã được duyệt";
         case TourDetailsStatus.Rejected:
-            return 'Bị từ chối';
+            return "Bị từ chối";
         case TourDetailsStatus.Suspended:
-            return 'Tạm ngưng';
+            return "Tạm ngưng";
         case TourDetailsStatus.AwaitingGuideAssignment:
-            return 'Chờ phân công hướng dẫn viên';
+            return "Chờ phân công hướng dẫn viên";
         case TourDetailsStatus.Cancelled:
-            return 'Đã hủy';
+            return "Đã hủy";
         case TourDetailsStatus.AwaitingAdminApproval:
-            return 'Chờ admin duyệt';
+            return "Chờ admin duyệt";
         case TourDetailsStatus.WaitToPublic:
-            return 'Chờ mở bán vé';
+            return "Chờ mở bán vé";
         case TourDetailsStatus.Public:
-            return 'Đã được public, khách hàng có thể booking';
+            return "Đã được public, khách hàng có thể booking";
         default:
-            return 'Không xác định';
+            return "Không xác định";
     }
 };
 
 // Helper function to get tour details status color for UI
-export const getTourDetailsStatusColor = (status: TourDetailsStatus | number | string): string => {
+export const getTourDetailsStatusColor = (
+    status: TourDetailsStatus | number | string
+): string => {
     // Handle string status from API
-    if (typeof status === 'string') {
+    if (typeof status === "string") {
         switch (status) {
-            case 'Pending':
-            case 'AwaitingAdminApproval':
-            case 'WaitToPublic':
-                return 'orange';
-            case 'Approved':
-            case 'Public':
-                return 'green';
-            case 'Rejected':
-            case 'Cancelled':
-                return 'red';
-            case 'Suspended':
-                return 'volcano';
-            case 'AwaitingGuideAssignment':
-                return 'blue';
+            case "Pending":
+            case "AwaitingAdminApproval":
+            case "WaitToPublic":
+                return "orange";
+            case "Approved":
+            case "Public":
+                return "green";
+            case "Rejected":
+            case "Cancelled":
+                return "red";
+            case "Suspended":
+                return "volcano";
+            case "AwaitingGuideAssignment":
+                return "blue";
             default:
-                return 'default';
+                return "default";
         }
     }
 
     // Handle enum/number status
-    const statusValue = typeof status === 'number' ? status : status;
+    const statusValue = typeof status === "number" ? status : status;
     switch (statusValue) {
         case TourDetailsStatus.Pending:
         case TourDetailsStatus.AwaitingAdminApproval:
         case TourDetailsStatus.WaitToPublic:
-            return 'orange';
+            return "orange";
         case TourDetailsStatus.Approved:
         case TourDetailsStatus.Public:
-            return 'green';
+            return "green";
         case TourDetailsStatus.Rejected:
         case TourDetailsStatus.Cancelled:
-            return 'red';
+            return "red";
         case TourDetailsStatus.Suspended:
-            return 'volcano';
+            return "volcano";
         case TourDetailsStatus.AwaitingGuideAssignment:
-            return 'blue';
+            return "blue";
         default:
-            return 'default';
+            return "default";
     }
 };
 
