@@ -394,6 +394,8 @@ export interface CreateTourDetailsRequest {
 
 // TourOperation interfaces
 export interface TourOperation {
+    tourTitle?: string;
+    tourStartDate?: string;
     id: string;
     tourDetailsId: string;
     guideId?: string | null;
@@ -412,6 +414,7 @@ export interface TourOperation {
     createdAt: string;
     updatedAt?: string | null;
 }
+
 
 export interface Guide {
     id: string;
