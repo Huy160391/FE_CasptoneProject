@@ -587,7 +587,7 @@ const CustomProductModal = ({
                             {errors.price && <div className="error-message">{errors.price}</div>}
                             <div style={{ marginTop: 6, fontSize: '13px', color: '#d4380d', fontWeight: 600, background: 'rgba(255, 229, 204, 0.7)', padding: '6px 12px', borderRadius: 6 }}>
                                 * Hãy nhớ kiểm tra lại giá đã bao gồm thuế VAT chưa nhé. <br />
-                                Chúng tôi và cơ quan thuế đều yêu cầu giá công khai phải có VAT nếu thuộc diện chịu thuế.
+                                Chúng tôi và cơ quan thuế đều yêu cầu giá công khai của sản phẩm phải có VAT nếu thuộc diện chịu thuế.
                             </div>
                         </div>
 
