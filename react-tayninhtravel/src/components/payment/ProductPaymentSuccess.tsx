@@ -82,6 +82,12 @@ const ProductPaymentSuccess: React.FC = () => {
                             if (enhancedResult.success) {
                                 console.log('Enhanced payment processing successful');
                                 setOrderInfo(transactionResponse.data.orderInfo);
+
+                                // ALWAYS call legacy handleProductPaymentSuccess for business logic
+                                console.log('Calling legacy handleProductPaymentSuccess for business logic...');
+                                const callbackRequest = createPayOsCallbackRequest(params);
+                                await handleProductPaymentSuccess(callbackRequest);
+
                                 return; // Success, exit early
                             }
                         }

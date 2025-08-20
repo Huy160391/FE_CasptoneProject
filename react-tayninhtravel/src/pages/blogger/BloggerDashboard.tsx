@@ -1,79 +1,134 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Table, Tag, Button, Space, message, Empty, Popconfirm } from 'antd';
+import { Card, Row, Col, Statistic, Table, Tag, Button, Space, message, Empty, Popconfirm, DatePicker, Spin, Alert } from 'antd';
 import {
     FileTextOutlined,
     EyeOutlined,
     LikeOutlined,
     EditOutlined,
     PlusOutlined,
-    DeleteOutlined
+    DeleteOutlined,
+    CheckCircleOutlined,
+    CloseCircleOutlined,
+    ClockCircleOutlined,
+    CommentOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ColumnsType } from 'antd/es/table';
 import bloggerService from '@/services/bloggerService';
 import type { BlogPost } from '@/types';
+import dayjs, { Dayjs } from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+// Configure dayjs plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import './BloggerDashboard.scss';
 
 const BloggerDashboard = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [loading, setLoading] = useState(false); const [stats, setStats] = useState({
+    const [loading, setLoading] = useState(false);
+    const [statsLoading, setStatsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
+
+    const [stats, setStats] = useState({
         totalPosts: 0,
-        acceptedPosts: 0,
+        approvedPosts: 0,
         pendingPosts: 0,
         rejectedPosts: 0,
         totalComments: 0,
         totalLikes: 0
     });
 
+    // Fetch dashboard stats by month/year
+    const fetchDashboardStats = async (year: number, month: number) => {
+        try {
+            setStatsLoading(true);
+            setError(null);
+
+            console.log(`Fetching blogger dashboard stats for ${month}/${year}`);
+
+            const statsData = await bloggerService.getDashboardStats(year, month);
+
+            console.log('Raw API response in component:', statsData);
+            console.log('Individual values:', {
+                totalPosts: statsData.totalPosts,
+                approvedPosts: statsData.approvedPosts,
+                pendingPosts: statsData.pendingPosts,
+                rejectedPosts: statsData.rejectedPosts,
+                totalComments: statsData.totalComments,
+                totalLikes: statsData.totalLikes
+            });
+            console.log('Current stats before update:', stats);
+
+            // Create new stats object with explicit values
+            const newStats = {
+                totalPosts: Number(statsData.totalPosts) || 0,
+                approvedPosts: Number(statsData.approvedPosts) || 0,
+                pendingPosts: Number(statsData.pendingPosts) || 0,
+                rejectedPosts: Number(statsData.rejectedPosts) || 0,
+                totalComments: Number(statsData.totalComments) || 0,
+                totalLikes: Number(statsData.totalLikes) || 0
+            };
+
+            console.log('New stats object to set:', newStats);
+
+            setStats(newStats);
+
+            console.log('Stats updated for:', { year, month });
+        } catch (err) {
+            console.error('Error fetching blogger dashboard stats:', err);
+            setError('Không thể tải dữ liệu thống kê');
+        } finally {
+            setStatsLoading(false);
+        }
+    };
+
+    const handleDateChange = (date: Dayjs | null) => {
+        if (date) {
+            setSelectedDate(date);
+        }
+    };
+
+    // Fetch recent posts
+    const fetchRecentPosts = async () => {
+        try {
+            setLoading(true);
+            const blogsResponse = await bloggerService.getMyBlogs({
+                pageIndex: 1,
+                pageSize: 10
+            });
+            console.log('Fetched posts:', blogsResponse.blogs);
+            console.log('First post createdAt:', blogsResponse.blogs[0]?.createdAt);
+            setPosts(blogsResponse.blogs);
+        } catch (error) {
+            console.error('Error fetching recent posts:', error);
+            message.error(t('blogger.dashboard.fetchError') || 'Failed to load recent posts');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Fetch data from API
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
+        const year = selectedDate.year();
+        const month = selectedDate.month() + 1; // dayjs month is 0-indexed
+        console.log(`Date changed to: ${month}/${year}`);
+        fetchDashboardStats(year, month);
+    }, [selectedDate]);
 
-                // Fetch recent posts
-                const blogsResponse = await bloggerService.getMyBlogs({
-                    pageIndex: 1,
-                    pageSize: 10
-                });
-                setPosts(blogsResponse.blogs);                // Try to fetch stats, fallback to calculated stats if endpoint doesn't exist
-                try {
-                    const statsResponse = await bloggerService.getBlogStats();
-                    // Map API response to match our state structure
-                    setStats({
-                        totalPosts: statsResponse.totalPosts,
-                        acceptedPosts: statsResponse.acceptedPosts,
-                        pendingPosts: statsResponse.pendingPosts,
-                        rejectedPosts: statsResponse.rejectedPosts,
-                        totalComments: statsResponse.totalViews || 0, // Map totalViews to totalComments
-                        totalLikes: statsResponse.totalLikes
-                    });
-                } catch (statsError) {
-                    // Calculate stats from posts if API endpoint doesn't exist
-                    const allPostsResponse = await bloggerService.getMyBlogs({
-                        pageIndex: 1,
-                        pageSize: 1000 // Get all posts for stats
-                    });
-                    const allPosts = allPostsResponse.blogs; setStats({
-                        totalPosts: allPosts.length,
-                        acceptedPosts: allPosts.filter(p => p.status === 1).length,
-                        pendingPosts: allPosts.filter(p => p.status === 0).length,
-                        rejectedPosts: allPosts.filter(p => p.status === 2).length,
-                        totalComments: allPosts.reduce((sum, post) => sum + post.comments, 0),
-                        totalLikes: allPosts.reduce((sum, post) => sum + post.likes, 0)
-                    });
-                }
-            } catch (error) {
-                console.error('Error fetching dashboard data:', error);
-                message.error(t('blogger.dashboard.fetchError') || 'Failed to load dashboard data');
-            } finally {
-                setLoading(false);
-            }
-        }; fetchData();
-    }, [t]);
+    useEffect(() => {
+        fetchRecentPosts();
+    }, []);
+
+    // Debug: Log when stats change
+    useEffect(() => {
+        console.log('Stats state changed:', stats);
+    }, [stats]);
 
     const handleDelete = async (id: string) => {
         try {
@@ -130,8 +185,53 @@ const BloggerDashboard = () => {
             title: t('blogger.dashboard.table.createdAt'),
             dataIndex: 'createdAt',
             key: 'createdAt',
-            render: (date: string) => new Date(date).toLocaleDateString(),
-            sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+            render: (date: any) => {
+                console.log('Date value:', date);
+                console.log('Date type:', typeof date);
+                console.log('Date constructor:', date?.constructor?.name);
+
+                let dateString = '';
+
+                // Convert different types to string
+                if (date instanceof Date) {
+                    // If it's a Date object, convert to ISO string
+                    dateString = date.toISOString();
+                    console.log('Converted Date object to:', dateString);
+                } else if (typeof date === 'string') {
+                    dateString = date;
+                } else if (date && typeof date === 'object') {
+                    // If it's an object, try to extract string value
+                    dateString = date.toString();
+                    console.log('Converted object to string:', dateString);
+                } else {
+                    console.log('Date is not a valid type, returning N/A');
+                    return 'N/A';
+                }
+
+                // Now process the string
+                if (!dateString || !dateString.includes('T')) {
+                    console.log('Invalid date string format:', dateString);
+                    return 'N/A';
+                }
+
+                // Simply extract date part, ignore timezone completely
+                const dateOnly = dateString.split('T')[0]; // Get "2025-07-30"
+                const dateParts = dateOnly.split('-'); // ["2025", "07", "30"]
+
+                // Ensure we have all parts
+                if (dateParts.length !== 3) {
+                    return dateString; // Return original if can't parse
+                }
+
+                const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // "30/07/2025"
+                return formattedDate;
+            },
+            sorter: (a, b) => {
+                // Safe check for string dates
+                const dateA = (a.createdAt && typeof a.createdAt === 'string') ? a.createdAt.split('T')[0] : '';
+                const dateB = (b.createdAt && typeof b.createdAt === 'string') ? b.createdAt.split('T')[0] : '';
+                return dateA.localeCompare(dateB);
+            },
         }, {
             title: t('blogger.dashboard.table.actions'),
             key: 'actions',
@@ -199,80 +299,104 @@ const BloggerDashboard = () => {
         <div className="blogger-dashboard">
             <div className="dashboard-header">
                 <h1>{t('blogger.dashboard.title')}</h1>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => navigate('/blogger/create-blog')}
-                >
-                    {t('blogger.dashboard.createNew')}
-                </Button>
-            </div>            <Row gutter={[24, 24]} className="stats-row">
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <Card>
-                        <Statistic
-                            title={t('blogger.dashboard.stats.totalPosts')}
-                            value={stats.totalPosts}
-                            prefix={<FileTextOutlined />}
-                            valueStyle={{ color: '#1890ff' }}
-                            loading={loading}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <Card>
-                        <Statistic
-                            title={t('blogger.dashboard.stats.acceptedPosts')}
-                            value={stats.acceptedPosts}
-                            prefix={<FileTextOutlined />}
-                            valueStyle={{ color: '#52c41a' }}
-                            loading={loading}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <Card>
-                        <Statistic
-                            title={t('blogger.dashboard.stats.pendingPosts')}
-                            value={stats.pendingPosts}
-                            prefix={<FileTextOutlined />}
-                            valueStyle={{ color: '#1890ff' }}
-                            loading={loading}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <Card>
-                        <Statistic
-                            title={t('blogger.dashboard.stats.rejectedPosts')}
-                            value={stats.rejectedPosts}
-                            prefix={<FileTextOutlined />}
-                            valueStyle={{ color: '#ff4d4f' }}
-                            loading={loading}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <Card>                        <Statistic
-                        title={t('blogger.dashboard.stats.totalComments')}
-                        value={stats.totalComments}
-                        prefix={<EyeOutlined />}
-                        valueStyle={{ color: '#722ed1' }}
-                        loading={loading}
+                <Space>
+                    <DatePicker
+                        picker="month"
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        format="MM/YYYY"
+                        placeholder="Chọn tháng/năm"
                     />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <Card>
-                        <Statistic
-                            title={t('blogger.dashboard.stats.totalLikes')}
-                            value={stats.totalLikes}
-                            prefix={<LikeOutlined />}
-                            valueStyle={{ color: '#eb2f96' }}
-                            loading={loading}
-                        />
-                    </Card>
-                </Col>
-            </Row>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => navigate('/blogger/create-blog')}
+                    >
+                        {t('blogger.dashboard.createNew')}
+                    </Button>
+                </Space>
+            </div>
+
+            {/* Show loading or error state for stats */}
+            {error && (
+                <Alert
+                    message="Lỗi"
+                    description={error}
+                    type="error"
+                    showIcon
+                    style={{ marginBottom: '24px' }}
+                />
+            )}
+
+            {statsLoading ? (
+                <div style={{ textAlign: 'center', padding: '50px' }}>
+                    <Spin size="large" />
+                    <p style={{ marginTop: '16px' }}>Đang tải thống kê...</p>
+                </div>
+            ) : (
+                <Row gutter={[24, 24]} className="stats-row" key={`stats-${selectedDate.format('YYYY-MM')}`}>
+                    <Col xs={24} sm={12} md={8} lg={4}>
+                        <Card>
+                            <Statistic
+                                title={t('blogger.dashboard.stats.totalPosts')}
+                                value={stats.totalPosts}
+                                prefix={<FileTextOutlined />}
+                                valueStyle={{ color: '#1890ff' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={4}>
+                        <Card>
+                            <Statistic
+                                title={t('blogger.dashboard.stats.acceptedPosts')}
+                                value={stats.approvedPosts}
+                                prefix={<CheckCircleOutlined />}
+                                valueStyle={{ color: '#52c41a' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={4}>
+                        <Card>
+                            <Statistic
+                                title={t('blogger.dashboard.stats.pendingPosts')}
+                                value={stats.pendingPosts}
+                                prefix={<ClockCircleOutlined />}
+                                valueStyle={{ color: '#1890ff' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={4}>
+                        <Card>
+                            <Statistic
+                                title={t('blogger.dashboard.stats.rejectedPosts')}
+                                value={stats.rejectedPosts}
+                                prefix={<CloseCircleOutlined />}
+                                valueStyle={{ color: '#ff4d4f' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={4}>
+                        <Card>
+                            <Statistic
+                                title={t('blogger.dashboard.stats.totalComments')}
+                                value={stats.totalComments}
+                                prefix={<CommentOutlined />}
+                                valueStyle={{ color: '#722ed1' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={4}>
+                        <Card>
+                            <Statistic
+                                title={t('blogger.dashboard.stats.totalLikes')}
+                                value={stats.totalLikes}
+                                prefix={<LikeOutlined />}
+                                valueStyle={{ color: '#eb2f96' }}
+                            />
+                        </Card>
+                    </Col>
+                </Row>
+            )}
 
             <Card
                 title={t('blogger.dashboard.recentPosts')}

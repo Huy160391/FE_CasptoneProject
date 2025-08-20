@@ -8,6 +8,9 @@ export interface CreatePaymentRequest {
     tourBookingId?: string;
     amount: number;
     description?: string;
+    
+    // ✅ NEW: Support flexible booking identification
+    bookingCode?: string; // Fallback ID nếu không có tourBookingId
 }
 
 export interface RetryPaymentRequest {
@@ -174,15 +177,17 @@ export class EnhancedPaymentService {
 
 // ===== ENHANCED PAYMENT HOOKS =====
 
+// ===== SINGLETON PAYMENT SERVICE =====
+const paymentService = new EnhancedPaymentService();
+
 /**
  * React Hook để sử dụng Enhanced Payment Service
  */
 export const useEnhancedPayment = () => {
-    const paymentService = new EnhancedPaymentService();
-
     const createPaymentLink = async (request: CreatePaymentRequest) => {
         try {
             const response = await paymentService.createPaymentLink(request);
+            
             if (response.success && response.data?.checkoutUrl) {
                 // Redirect to PayOS payment page
                 window.location.href = response.data.checkoutUrl;

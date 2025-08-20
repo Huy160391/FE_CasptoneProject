@@ -12,12 +12,17 @@
   
   .footer-section {
     margin-bottom: 24px;
-    
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 220px;
+    /* Đặt min-height để các phần đều cao bằng nhau, có thể điều chỉnh lại cho phù hợp giao diện */
     h4 {
       color: #fff;
       margin-bottom: 16px;
     }
-    
     p {
       color: rgba(255, 255, 255, 0.65);
     }

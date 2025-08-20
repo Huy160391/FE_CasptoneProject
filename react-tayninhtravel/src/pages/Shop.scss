@@ -1,12 +1,18 @@
 .shop-page {
   padding: 40px 0;
-
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 16px;
+.results-info-total {
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
   }
-
+      .pagination-controls {
+        display: inline-block;
+        width: auto;
+        text-align: right;
+        margin-right: 0;
+        margin-top: 0;
+        margin-bottom: 0;}
   // Shop Header - Centered
   .shop-header {
     text-align: center;
@@ -17,7 +23,7 @@
       font-weight: 700;
       margin-bottom: 12px;
       color: var(--text-color);
-      background: linear-gradient(135deg, #1677ff, #79eac0);
+      background: linear-gradient(135deg, #69c0ff, #91d5ff);
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -152,7 +158,8 @@
     }
 
     .pagination-container {
-      padding: 40px 0 20px;
+  padding: 40px 0 20px;
+  float: right;
 
       .pagination-controls {
         display: flex;
@@ -166,10 +173,6 @@
           color: rgba(0, 0, 0, 0.65);
           font-weight: 500;
           min-width: 100px;
-
-          body.dark-mode & {
-            color: rgba(255, 255, 255, 0.65);
-          }
         }
 
         .ant-pagination {
@@ -180,17 +183,21 @@
           .ant-pagination-item {
             border-radius: 8px;
             border-color: rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
 
             &:hover {
-              border-color: #1677ff;
+              border-color: #69c0ff;
+              box-shadow: 0 2px 8px rgba(105, 192, 255, 0.15);
             }
 
             &.ant-pagination-item-active {
-              background: #1677ff;
-              border-color: #1677ff;
+              background: linear-gradient(135deg, #69c0ff, #91d5ff);
+              border-color: #69c0ff;
+              box-shadow: 0 4px 12px rgba(105, 192, 255, 0.3);
 
               a {
                 color: white;
+                font-weight: 600;
               }
             }
           }
@@ -198,16 +205,24 @@
           .ant-pagination-jump-prev,
           .ant-pagination-jump-next {
             border-radius: 8px;
+            transition: all 0.3s ease;
+
+            &:hover {
+              border-color: #69c0ff;
+              color: #69c0ff;
+            }
           }
 
           .ant-pagination-prev,
           .ant-pagination-next {
             border-radius: 8px;
             border-color: rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
 
             &:hover {
-              border-color: #1677ff;
-              color: #1677ff;
+              border-color: #69c0ff;
+              color: #69c0ff;
+              box-shadow: 0 2px 6px rgba(105, 192, 255, 0.15);
             }
           }
         }
@@ -223,10 +238,6 @@
             font-size: 14px;
             color: rgba(0, 0, 0, 0.65);
             white-space: nowrap;
-
-            body.dark-mode & {
-              color: rgba(255, 255, 255, 0.65);
-            }
           }
 
           .sort-select {
@@ -291,7 +302,7 @@
     &:hover {
       transform: translateY(-8px);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-      border-color: rgba(22, 119, 255, 0.2);
+      border-color: rgba(105, 192, 255, 0.2);
     }
 
     .product-image-container {
@@ -396,7 +407,7 @@
       .current-price {
         font-weight: 700;
         font-size: 18px;
-        color: #1677ff;
+        color: #69c0ff;
       }
 
       .sale-badge {
@@ -424,7 +435,7 @@
 
       &:not(:disabled):hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(105, 192, 255, 0.3);
       }
     }
   }
@@ -436,7 +447,7 @@ body.dark-mode {
     .shop-header {
       h2 {
         color: rgba(255, 255, 255, 0.95);
-        background: linear-gradient(135deg, #79eac0, #40a9ff);
+        background: linear-gradient(135deg, #69c0ff, #91d5ff);
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -467,6 +478,62 @@ body.dark-mode {
         .price-range-display {
           color: rgba(255, 255, 255, 0.65);
         }
+
+        // Ant Design slider dark mode
+        .ant-slider {
+          .ant-slider-rail {
+            background-color: rgba(255, 255, 255, 0.12);
+          }
+
+          .ant-slider-track {
+            background-color: #69c0ff;
+          }
+
+          .ant-slider-handle {
+            border-color: #69c0ff;
+            background-color: #69c0ff;
+
+            &:hover {
+              border-color: #91d5ff;
+            }
+          }
+        }
+
+        // Checkbox dark mode
+        .ant-checkbox-wrapper {
+          color: rgba(255, 255, 255, 0.85);
+
+          .ant-checkbox {
+            .ant-checkbox-inner {
+              background-color: rgba(255, 255, 255, 0.08);
+              border-color: rgba(255, 255, 255, 0.25);
+            }
+
+            &.ant-checkbox-checked .ant-checkbox-inner {
+              background-color: #69c0ff;
+              border-color: #69c0ff;
+            }
+          }
+        }
+
+        // Category filter checkboxes
+        .category-filter {
+          .ant-checkbox-group-item {
+            color: rgba(255, 255, 255, 0.85);
+
+            .ant-checkbox {
+              .ant-checkbox-inner {
+                background-color: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.25);
+              }
+
+              &.ant-checkbox-checked .ant-checkbox-inner {
+                background-color: #69c0ff;
+                border-color: #69c0ff;
+              }
+            }
+          }
+        }
       }
     }
 
@@ -474,7 +541,101 @@ body.dark-mode {
       .empty-state {
         background: #1f1f1f;
         border-color: #303030;
+
+        .ant-empty-description {
+          color: rgba(255, 255, 255, 0.65);
+        }
       }
+
+      // Pagination dark mode styles
+      .pagination-container .pagination-controls {
+        .results-info {
+          color: rgba(255, 255, 255, 0.65);
+        }
+        .results-info-total {
+          color: rgba(255, 255, 255, 0.65);
+          font-size: 15px;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+        .sort-controls span {
+          color: rgba(255, 255, 255, 0.65);
+        }
+
+        .ant-pagination {
+          .ant-pagination-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+
+            a {
+              color: rgba(255, 255, 255, 0.85);
+            }
+
+            &:hover {
+              background: rgba(255, 255, 255, 0.12);
+              border-color: #69c0ff;
+              box-shadow: 0 2px 8px rgba(105, 192, 255, 0.2);
+
+              a {
+                color: #69c0ff;
+              }
+            }
+
+            &.ant-pagination-item-active {
+              background: linear-gradient(135deg, #40a9ff, #52c41a);
+              border-color: #69c0ff;
+              box-shadow: 0 4px 12px rgba(105, 192, 255, 0.4);
+
+              a {
+                color: white;
+                font-weight: 600;
+              }
+            }
+          }
+          
+
+            .ant-pagination-jump-prev,
+      .ant-pagination-jump-next {
+        border-radius: 8px;
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 4px;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: #69c0ff;
+          color: #69c0ff;
+        }
+      }
+
+      .ant-pagination-prev,
+      .ant-pagination-next {
+        border: none !important;
+        background: none !important;
+        box-shadow: none !important;
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 4px;
+        transition: all 0.3s ease;
+
+        .anticon {
+          color: #333;
+          font-size: 18px;
+        }
+
+        &:hover {
+          .anticon {
+            color: #69c0ff;
+          }
+        }
+      }
+    }}
     }
 
     .product-card {
@@ -482,7 +643,8 @@ body.dark-mode {
       border-color: #303030;
 
       &:hover {
-        border-color: rgba(121, 234, 192, 0.3);
+        border-color: rgba(105, 192, 255, 0.3);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
       }
 
       .ant-card-meta-title {
@@ -493,12 +655,14 @@ body.dark-mode {
         color: rgba(255, 255, 255, 0.45);
       }
 
-      .product-rating .review-count {
-        color: rgba(255, 255, 255, 0.45);
-      }
+      .product-rating {
+        .review-count {
+          color: rgba(255, 255, 255, 0.45);
+        }
 
-      .product-rating .sold-count {
-        color: rgba(255, 255, 255, 0.45);
+        .sold-count {
+          color: rgba(255, 255, 255, 0.45);
+        }
       }
 
       .product-price {
@@ -507,13 +671,13 @@ body.dark-mode {
         }
 
         .current-price {
-          color: #79eac0;
+          color: #69c0ff;
         }
       }
 
       .add-to-cart-btn {
         &:not(:disabled):hover {
-          box-shadow: 0 4px 12px rgba(121, 234, 192, 0.3);
+          box-shadow: 0 4px 12px rgba(105, 192, 255, 0.3);
         }
       }
     }

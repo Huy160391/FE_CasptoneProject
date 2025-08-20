@@ -127,88 +127,156 @@ const AdminWithdrawalManagement: React.FC = () => {
     };
 
     /**
+     * Callback cập nhật lại số liệu thống kê
+     */
+    const handleDataChanged = () => {
+        handleRefresh();
+    };
+
+    // State lưu số lượng request thực tế cho từng tab
+    const [tabCounts, setTabCounts] = useState({
+        pending: statistics.pendingRequests,
+        approved: statistics.approvedRequests,
+        rejected: statistics.rejectedRequests,
+        cancelled: statistics.cancelledRequests,
+        all: statistics.totalRequests
+    });
+
+    // Callback nhận số lượng request thực tế từ WithdrawalRequestList
+    const handleTabCountChanged = (tabKey: string, count: number) => {
+        setTabCounts(prev => ({ ...prev, [tabKey]: count }));
+    };
+
+    /**
      * Tab items configuration
      */
     const tabItems = [
         {
             key: 'pending',
             label: (
-                <Badge count={statistics.pendingRequests} size="small">
-                    <Space>
+                tabCounts.pending > 0 ? (
+                    <Badge count={tabCounts.pending} size="small">
+                        <Space>
+                            <ClockCircleOutlined />
+                            Chờ duyệt
+                        </Space>
+                    </Badge>
+                ) : (
+                    <Space className="tab-title-no-badge">
                         <ClockCircleOutlined />
                         Chờ duyệt
                     </Space>
-                </Badge>
+                )
             ),
             children: (
                 <WithdrawalRequestList
                     initialStatus={WithdrawalStatus.Pending}
                     refreshTrigger={refreshTrigger}
+                    onDataChanged={handleDataChanged}
+                    onTabCountChanged={(count) => handleTabCountChanged('pending', count)}
                 />
             )
         },
         {
             key: 'approved',
             label: (
-                <Badge count={statistics.approvedRequests} size="small" color="green">
-                    <Space>
+                tabCounts.approved > 0 ? (
+                    <Badge count={tabCounts.approved} size="small" color="green">
+                        <Space>
+                            <CheckCircleOutlined />
+                            Đã duyệt
+                        </Space>
+                    </Badge>
+                ) : (
+                    <Space className="tab-title-no-badge">
                         <CheckCircleOutlined />
                         Đã duyệt
                     </Space>
-                </Badge>
+                )
             ),
             children: (
                 <WithdrawalRequestList
                     initialStatus={WithdrawalStatus.Approved}
                     refreshTrigger={refreshTrigger}
+                    onDataChanged={handleDataChanged}
+                    onTabCountChanged={(count) => handleTabCountChanged('approved', count)}
                 />
             )
         },
         {
             key: 'rejected',
             label: (
-                <Badge count={statistics.rejectedRequests} size="small" color="red">
-                    <Space>
+                tabCounts.rejected > 0 ? (
+                    <Badge count={tabCounts.rejected} size="small" color="red">
+                        <Space>
+                            <CloseCircleOutlined />
+                            Từ chối
+                        </Space>
+                    </Badge>
+                ) : (
+                    <Space className="tab-title-no-badge">
                         <CloseCircleOutlined />
                         Từ chối
                     </Space>
-                </Badge>
+                )
             ),
             children: (
                 <WithdrawalRequestList
                     initialStatus={WithdrawalStatus.Rejected}
                     refreshTrigger={refreshTrigger}
+                    onDataChanged={handleDataChanged}
+                    onTabCountChanged={(count) => handleTabCountChanged('rejected', count)}
                 />
             )
         },
         {
             key: 'cancelled',
             label: (
-                <Badge count={statistics.cancelledRequests} size="small" color="default">
-                    <Space>
+                tabCounts.cancelled > 0 ? (
+                    <Badge count={tabCounts.cancelled} size="small" color="default">
+                        <Space>
+                            <StopOutlined />
+                            Đã hủy
+                        </Space>
+                    </Badge>
+                ) : (
+                    <Space className="tab-title-no-badge">
                         <StopOutlined />
                         Đã hủy
                     </Space>
-                </Badge>
+                )
             ),
             children: (
                 <WithdrawalRequestList
                     initialStatus={WithdrawalStatus.Cancelled}
                     refreshTrigger={refreshTrigger}
+                    onDataChanged={handleDataChanged}
+                    onTabCountChanged={(count) => handleTabCountChanged('cancelled', count)}
                 />
             )
         },
         {
             key: 'all',
             label: (
-                <Space>
-                    <BarChartOutlined />
-                    Tất cả
-                </Space>
+                tabCounts.all > 0 ? (
+                    <Badge count={tabCounts.all} size="small">
+                        <Space>
+                            <BarChartOutlined />
+                            Tất cả
+                        </Space>
+                    </Badge>
+                ) : (
+                    <Space className="tab-title-no-badge">
+                        <BarChartOutlined />
+                        Tất cả
+                    </Space>
+                )
             ),
             children: (
                 <WithdrawalRequestList
                     refreshTrigger={refreshTrigger}
+                    onDataChanged={handleDataChanged}
+                    onTabCountChanged={(count) => handleTabCountChanged('all', count)}
                 />
             )
         }

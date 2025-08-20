@@ -725,7 +725,7 @@ const ProductDetail = () => {
 
       {/* Shop Information */}
       <div className="shop-info-section">
-        <ShopInfo shopId={product.shopId} />
+        <ShopInfo shopId={product.specialtyShopId} />
       </div>
 
       {/* Related Products */}

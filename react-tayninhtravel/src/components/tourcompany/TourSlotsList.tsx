@@ -110,14 +110,16 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             const response = await tourSlotService.getUnassignedSlotsByTourTemplate(templateId, false, token);
 
             if (response.success && response.data) {
-                // Map từ TourSlotDto sang TourSlot format
+                // Map từ TourSlotDto sang TourSlot format, giữ scheduleDayName và statusName
                 const mappedSlots: TourSlot[] = response.data.map(slot => ({
                     id: slot.id,
                     tourTemplateId: slot.tourTemplateId,
                     tourDetailsId: slot.tourDetailsId,
                     tourDate: slot.tourDate,
                     scheduleDay: slot.scheduleDay,
+                    scheduleDayName: slot.scheduleDayName, // fix
                     status: slot.status,
+                    statusName: slot.statusName, // fix
                     maxGuests: slot.maxGuests || 0,
                     currentBookings: slot.currentBookings || 0,
                     availableSpots: slot.availableSpots || 0,
@@ -243,9 +245,9 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             title: 'Thứ',
             dataIndex: 'scheduleDay',
             key: 'scheduleDay',
-            render: (day: ScheduleDay) => (
-                <Tag color={day === ScheduleDay.Saturday ? 'blue' : 'green'}>
-                    {getScheduleDayLabel(day)}
+            render: (_: any, record: any) => (
+                <Tag color={record.scheduleDay === 'Saturday' ? 'blue' : 'green'}>
+                    {record.scheduleDayName || getScheduleDayLabel(record.scheduleDay)}
                 </Tag>
             ),
         },
@@ -253,9 +255,9 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status: TourSlotStatus) => (
-                <Tag color={getStatusColor(status)}>
-                    {getTourSlotStatusLabel(status)}
+            render: (_: any, record: any) => (
+                <Tag color={getStatusColor(record.status)}>
+                    {record.statusName || getTourSlotStatusLabel(record.status)}
                 </Tag>
             ),
             filters: [
@@ -438,8 +440,8 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
                             </Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label="Trạng thái">
-                            <Tag color={getStatusColor(selectedSlot.status)}>
-                                {getTourSlotStatusLabel(selectedSlot.status)}
+                            <Tag color={getStatusColor(selectedSlot.status as TourSlotStatus)}>
+                                {getTourSlotStatusLabel(selectedSlot.status as TourSlotStatus)}
                             </Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label="Hoạt động">

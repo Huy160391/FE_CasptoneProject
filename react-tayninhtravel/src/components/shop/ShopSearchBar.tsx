@@ -1,79 +1,46 @@
-import { Input, Select, Button } from 'antd';
-import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
+import { Input, Button } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import './ShopSearchBar.scss';
+import './SearchBarCommon.scss';
 
-const { Option } = Select;
 
-interface ShopSearchBarProps {
-    onSearch: (searchText: string) => void;
-    onCategoryChange: (categories: string[]) => void;
-    searchText: string;
+interface SearchBarCommonProps {
+    onSearch: (keyword: string) => void;
+    loading?: boolean;
+    placeholder?: string;
+    className?: string;
+    buttonText?: string;
 }
 
-const ShopSearchBar = ({
-    onSearch,
-    onCategoryChange,
-    searchText
-}: ShopSearchBarProps) => {
-    const { t } = useTranslation();
-    const [localSearchText, setLocalSearchText] = useState(searchText);
 
-    const categories = [
-        { value: 'all', label: t('shop.categories.all') },
-        { value: 'đồ-lưu-niệm', label: t('shop.categories.souvenirs') },
-        { value: 'quần-áo', label: t('shop.categories.clothing') },
-        { value: 'phụ-kiện', label: t('shop.categories.accessories') },
-        { value: 'đặc-sản', label: t('shop.categories.specialties') },
-        { value: 'thủ-công-mỹ-nghệ', label: t('shop.categories.handicraft') }
-    ];
+const SearchBarCommon = ({ onSearch, loading, placeholder, className, buttonText }: SearchBarCommonProps) => {
+    const [keyword, setKeyword] = useState('');
 
     const handleSearch = () => {
-        onSearch(localSearchText);
-    };
-
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
+        onSearch(keyword);
     };
 
     return (
-        <div className="shop-search-bar">
-            <div className="search-container">
-                <div className="search-item category">
-                    <Select
-                        placeholder={t('shop.categories.select')}
-                        className="category-select"
-                        suffixIcon={<FilterOutlined />}
-                        defaultValue="all"
-                        onChange={(value) => onCategoryChange(value === 'all' ? [] : [value])}
-                    >
-                        {categories.map(category => (
-                            <Option key={category.value} value={category.value}>
-                                {category.label}
-                            </Option>
-                        ))}
-                    </Select>
-                </div>
-
-                <Input
-                    placeholder={t('shop.searchPlaceholder')}
-                    prefix={<SearchOutlined />}
-                    className="keyword-input"
-                    style={{ height: '42px' }}
-                    value={localSearchText}
-                    onChange={(e) => setLocalSearchText(e.target.value)}
-                    onPressEnter={handleKeyPress}
-                />
-
-                <Button type="primary" className="search-button" onClick={handleSearch}>
-                    {t('shop.searchButton')}
-                </Button>
-            </div>
+        <div className={className || "search-bar-common"}>
+            <Input
+                className="keyword-input"
+                placeholder={placeholder || "Tìm kiếm..."}
+                value={keyword}
+                onChange={e => setKeyword(e.target.value)}
+                onPressEnter={handleSearch}
+                allowClear
+            />
+            <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+                loading={loading}
+                style={{ marginLeft: 8 }}
+            >
+                {buttonText || "Tìm kiếm"}
+            </Button>
         </div>
     );
 };
 
-export default ShopSearchBar;
+export default SearchBarCommon;

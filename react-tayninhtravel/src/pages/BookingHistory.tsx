@@ -16,25 +16,22 @@ import {
     Col,
     Descriptions,
     Modal,
-    Switch
+    Switch,
+    Table,
+    Tooltip
 } from 'antd';
 import {
-    CalendarOutlined,
-    DollarOutlined,
-    UserOutlined,
     EyeOutlined,
     ReloadOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import {
-    getMyBookings,
-    TourBooking,
-    BookingStatus,
-    getBookingStatusText,
-    getBookingStatusColor
+    getMyBookings
 } from '../services/tourBookingService';
 import { formatCurrency } from '../services/paymentService';
+import { hasIndividualQRs, TourBookingDto, BookingStatus } from '../types/individualQR';
+import IndividualQRDisplay from '../components/common/IndividualQRDisplay';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -44,11 +41,45 @@ interface BookingHistoryProps {
     data?: Array<any>; // Keep for backward compatibility
 }
 
+const getBookingStatusText = (status: BookingStatus): string => {
+    switch (status) {
+        case BookingStatus.Pending:
+            return 'Chờ thanh toán';
+        case BookingStatus.Confirmed:
+            return 'Đã xác nhận';
+        case BookingStatus.Cancelled:
+            return 'Đã hủy';
+        case BookingStatus.Completed:
+            return 'Hoàn thành';
+        case BookingStatus.Refunded:
+            return 'Đã hoàn tiền';
+        default:
+            return 'Không xác định';
+    }
+};
+
+const getBookingStatusColor = (status: BookingStatus): string => {
+    switch (status) {
+        case BookingStatus.Pending:
+            return 'orange';
+        case BookingStatus.Confirmed:
+            return 'green';
+        case BookingStatus.Cancelled:
+            return 'red';
+        case BookingStatus.Completed:
+            return 'blue';
+        case BookingStatus.Refunded:
+            return 'purple';
+        default:
+            return 'default';
+    }
+};
+
 const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
     const { t } = useTranslation();
     const { token, isAuthenticated } = useAuthStore();
 
-    const [bookings, setBookings] = useState<TourBooking[]>([]);
+    const [bookings, setBookings] = useState<TourBookingDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -63,11 +94,11 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
     const [includeInactive, setIncludeInactive] = useState(true);
 
     // Modal
-    const [selectedBooking, setSelectedBooking] = useState<TourBooking | null>(null);
+    const [selectedBooking, setSelectedBooking] = useState<TourBookingDto | null>(null);
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
 
     // Load bookings
-    const loadBookings = async (page = 1, keyword = '', status?: BookingStatus, includeInactiveBookings = includeInactive) => {
+    const loadBookings = async (page = 1, keyword = '', status?: BookingStatus) => {
         if (!token || !isAuthenticated) {
             setError('Vui lòng đăng nhập để xem lịch sử đặt tour');
             setLoading(false);
@@ -82,8 +113,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                 pageIndex: page - 1, // API uses 0-based indexing
                 pageSize,
                 searchKeyword: keyword || undefined,
-                status,
-                includeInactive: includeInactiveBookings
+                status
             });
 
             if (response.success && response.data) {
@@ -103,40 +133,40 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
 
     useEffect(() => {
         loadBookings();
-    }, [token, isAuthenticated, includeInactive]);
+    }, [token, isAuthenticated]);
 
     const handleSearch = (value: string) => {
         setSearchKeyword(value);
         setCurrentPage(1);
-        loadBookings(1, value, statusFilter, includeInactive);
+        loadBookings(1, value, statusFilter);
     };
 
     const handleStatusFilter = (status: BookingStatus | undefined) => {
         setStatusFilter(status);
         setCurrentPage(1);
-        loadBookings(1, searchKeyword, status, includeInactive);
+        loadBookings(1, searchKeyword, status);
     };
 
     const handlePageChange = (page: number, size?: number) => {
         if (size && size !== pageSize) {
             setPageSize(size);
         }
-        loadBookings(page, searchKeyword, statusFilter, includeInactive);
+        loadBookings(page, searchKeyword, statusFilter);
     };
 
     const handleIncludeInactiveChange = (checked: boolean) => {
         setIncludeInactive(checked);
         setCurrentPage(1);
-        loadBookings(1, searchKeyword, statusFilter, checked);
+        loadBookings(1, searchKeyword, statusFilter);
     };
 
-    const handleViewDetail = (booking: TourBooking) => {
+    const handleViewDetail = (booking: TourBookingDto) => {
         setSelectedBooking(booking);
         setIsDetailModalVisible(true);
     };
 
     const handleRefresh = () => {
-        loadBookings(currentPage, searchKeyword, statusFilter, includeInactive);
+        loadBookings(currentPage, searchKeyword, statusFilter);
     };
 
     // If using legacy data prop
@@ -180,10 +210,19 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
         <div>
             <Card>
                 <div style={{ marginBottom: 16 }}>
+                    <Title level={4}>
+                        📅 {t('bookingHistory.title', 'Lịch sử đặt tour')}
+                    </Title>
+                    <Text type="secondary">
+                        {t('bookingHistory.description', 'Quản lý và theo dõi các tour du lịch bạn đã đặt')}
+                    </Text>
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
                     <Row gutter={16} align="middle">
                         <Col xs={24} sm={12} md={8}>
                             <Search
-                                placeholder="Tìm kiếm theo tên tour, mã đặt tour..."
+                                placeholder={t('bookingHistory.searchPlaceholder', 'Tìm kiếm theo tên tour, mã đặt tour...')}
                                 allowClear
                                 onSearch={handleSearch}
                                 style={{ width: '100%' }}
@@ -191,23 +230,24 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                         </Col>
                         <Col xs={24} sm={12} md={6}>
                             <Select
-                                placeholder="Lọc theo trạng thái"
+                                placeholder={t('bookingHistory.filterByStatus', 'Lọc theo trạng thái')}
                                 allowClear
                                 style={{ width: '100%' }}
                                 onChange={handleStatusFilter}
                                 value={statusFilter}
                             >
-                                <Option value={BookingStatus.Pending}>Chờ thanh toán</Option>
-                                <Option value={BookingStatus.Confirmed}>Đã xác nhận</Option>
-                                <Option value={BookingStatus.Completed}>Đã hoàn thành</Option>
-                                <Option value={BookingStatus.CancelledByCustomer}>Đã hủy</Option>
-                                <Option value={BookingStatus.Refunded}>Đã hoàn tiền</Option>
+                                <Option value={BookingStatus.Pending}>{t('bookingHistory.statuses.pending', 'Chờ thanh toán')}</Option>
+                                <Option value={BookingStatus.Confirmed}>{t('bookingHistory.statuses.confirmed', 'Đã xác nhận')}</Option>
+                                <Option value={BookingStatus.Completed}>{t('bookingHistory.statuses.completed', 'Đã hoàn thành')}</Option>
+                                <Option value={BookingStatus.Cancelled}>{t('bookingHistory.statuses.cancelled', 'Đã hủy')}</Option>
+                                <Option value={BookingStatus.Refunded}>{t('bookingHistory.statuses.refunded', 'Đã hoàn tiền')}</Option>
+
                             </Select>
                         </Col>
                         <Col xs={24} sm={24} md={10} style={{ textAlign: 'right' }}>
                             <Space wrap>
                                 <Space>
-                                    <Text>Hiển thị đã hủy:</Text>
+                                    <Text>{t('bookingHistory.showCancelled', 'Hiển thị đã hủy')}:</Text>
                                     <Switch
                                         checked={includeInactive}
                                         onChange={handleIncludeInactiveChange}
@@ -215,10 +255,10 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                     />
                                 </Space>
                                 <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
-                                    Làm mới
+                                    {t('common.refresh', 'Làm mới')}
                                 </Button>
                                 <Text type="secondary">
-                                    Tổng: {totalCount} đặt tour
+                                    {t('bookingHistory.total', 'Tổng')}: {totalCount} {t('bookingHistory.bookings', 'đặt tour')}
                                 </Text>
                             </Space>
                         </Col>
@@ -241,70 +281,129 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                             </Button>
                         }
                     />
-                ) : bookings.length === 0 ? (
-                    <Empty
-                        description="Bạn chưa có đặt tour nào"
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    />
                 ) : (
                     <>
-                        <List
-                            itemLayout="vertical"
+                        <Table
                             dataSource={bookings}
-                            renderItem={(booking) => (
-                                <List.Item
-                                    key={booking.id}
-                                    actions={[
+                            rowKey="id"
+                            pagination={false}
+                            scroll={{ x: 1200 }}
+                            locale={{
+                                emptyText: bookings.length === 0 ? (
+                                    <Empty
+                                        description="Bạn chưa có đặt tour nào"
+                                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                    />
+                                ) : undefined
+                            }}
+                            columns={[
+                                {
+                                    title: t('bookingHistory.columns.bookingCode', 'Mã đặt tour'),
+                                    dataIndex: 'bookingCode',
+                                    key: 'bookingCode',
+                                    width: 150,
+                                    render: (text) => <Text strong>{text}</Text>
+                                },
+                                {
+                                    title: t('bookingHistory.columns.tourName', 'Tên tour'),
+                                    dataIndex: ['tourOperation', 'tourTitle'],
+                                    key: 'tourTitle',
+                                    width: 200,
+                                    render: (text, record) => (
+                                        <div>
+                                            <Text strong>{text || 'Tour'}</Text>
+                                            {record.tourOperation?.guideName && (
+                                                <div>
+                                                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                                                        {t('bookingHistory.guide', 'HDV')}: {record.tourOperation.guideName}
+                                                    </Text>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                },
+                                {
+                                    title: t('bookingHistory.columns.tourDate', 'Ngày tour'),
+                                    dataIndex: ['tourOperation', 'tourDate'],
+                                    key: 'tourDate',
+                                    width: 110,
+                                    render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : 'N/A'
+                                },
+                                {
+                                    title: t('bookingHistory.columns.guestCount', 'Số khách'),
+                                    dataIndex: 'numberOfGuests',
+                                    key: 'numberOfGuests',
+                                    width: 80,
+                                    align: 'center',
+                                    render: (guests) => (
+                                        <div>
+                                            <Text strong>{guests}</Text>
+                                            {/* Adult/Child count removed - not available in TourBookingDto */}
+                                        </div>
+                                    )
+                                },
+                                {
+                                    title: t('bookingHistory.columns.totalAmount', 'Tổng tiền'),
+                                    dataIndex: 'totalPrice',
+                                    key: 'totalPrice',
+                                    width: 120,
+                                    align: 'right',
+                                    render: (price) => (
+                                        <Text strong style={{ color: '#f5222d' }}>
+                                            {formatCurrency(price)}
+                                        </Text>
+                                    )
+                                },
+                                {
+                                    title: t('bookingHistory.columns.status', 'Trạng thái'),
+                                    dataIndex: 'statusName',
+                                    key: 'status',
+                                    width: 150,
+                                    render: (statusName, record) => {
+                                        const color = getBookingStatusColor(record.status);
+                                        const displayText = statusName || getBookingStatusText(record.status);
+
+                                        if (displayText && displayText.length > 15) {
+                                            return (
+                                                <Tooltip title={displayText}>
+                                                    <Tag color={color}>
+                                                        {displayText.substring(0, 15)}...
+                                                    </Tag>
+                                                </Tooltip>
+                                            );
+                                        }
+
+                                        return (
+                                            <Tag color={color}>
+                                                {displayText}
+                                            </Tag>
+                                        );
+                                    }
+                                },
+                                {
+                                    title: t('bookingHistory.columns.bookingDate', 'Ngày đặt'),
+                                    dataIndex: 'bookingDate',
+                                    key: 'bookingDate',
+                                    width: 110,
+                                    render: (date) => new Date(date).toLocaleDateString('vi-VN')
+                                },
+                                {
+                                    title: t('bookingHistory.columns.actions', 'Thao tác'),
+                                    key: 'actions',
+                                    width: 100,
+                                    fixed: 'right',
+                                    render: (_, record) => (
                                         <Button
-                                            key="view"
                                             type="link"
                                             icon={<EyeOutlined />}
-                                            onClick={() => handleViewDetail(booking)}
+                                            onClick={() => handleViewDetail(record)}
+                                            size="small"
                                         >
-                                            Xem chi tiết
+                                            {t('bookingHistory.viewDetails', 'Chi tiết')}
                                         </Button>
-                                    ]}
-                                >
-                                    <List.Item.Meta
-                                        title={
-                                            <Space>
-                                                <Text strong>{booking.tourOperation?.tourTitle || 'Tour'}</Text>
-                                                <Tag color={getBookingStatusColor(booking.status)}>
-                                                    {getBookingStatusText(booking.status)}
-                                                </Tag>
-                                            </Space>
-                                        }
-                                        description={
-                                            <Space direction="vertical" size="small">
-                                                <Text>
-                                                    <CalendarOutlined /> Ngày đặt: {new Date(booking.bookingDate).toLocaleDateString('vi-VN')}
-                                                </Text>
-                                                {booking.tourOperation?.tourDate && (
-                                                    <Text>
-                                                        <CalendarOutlined /> Ngày tour: {new Date(booking.tourOperation.tourDate).toLocaleDateString('vi-VN')}
-                                                    </Text>
-                                                )}
-                                                <Text>
-                                                    <UserOutlined /> Số khách: {booking.numberOfGuests} người
-                                                </Text>
-                                                <Text>
-                                                    <DollarOutlined /> Tổng tiền: <Text strong style={{ color: '#f5222d' }}>
-                                                        {formatCurrency(booking.totalPrice)}
-                                                    </Text>
-                                                </Text>
-                                                {booking.tourOperation?.guideName && (
-                                                    <Text type="secondary">
-                                                        Hướng dẫn viên: {booking.tourOperation.guideName}
-                                                    </Text>
-                                                )}
-                                                <Text type="secondary">
-                                                    Mã đặt tour: {booking.bookingCode}
-                                                </Text>
-                                            </Space>
-                                        }
-                                    />
-                                </List.Item>
-                            )}
+                                    )
+                                }
+                            ]}
                         />
 
                         <div style={{ textAlign: 'center', marginTop: 16 }}>
@@ -348,15 +447,15 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                 {selectedBooking.tourOperation?.tourTitle || 'N/A'}
                             </Descriptions.Item>
 
-                            {selectedBooking.tourOperation?.tourDescription && (
+                            {selectedBooking.tourOperation?.tourTitle && (
                                 <Descriptions.Item label="Mô tả tour">
-                                    {selectedBooking.tourOperation.tourDescription}
+                                    {selectedBooking.tourOperation.tourTitle}
                                 </Descriptions.Item>
                             )}
 
-                            {selectedBooking.tourOperation?.tourDate && (
+                            {selectedBooking.tourOperation?.tourSlotDate && (
                                 <Descriptions.Item label="Ngày tour">
-                                    {new Date(selectedBooking.tourOperation.tourDate).toLocaleDateString('vi-VN')}
+                                    {new Date(selectedBooking.tourOperation.tourSlotDate).toLocaleDateString('vi-VN')}
                                 </Descriptions.Item>
                             )}
 
@@ -370,14 +469,15 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                             )}
 
                             <Descriptions.Item label="Trạng thái">
+
                                 <Tag color={getBookingStatusColor(selectedBooking.status)}>
-                                    {getBookingStatusText(selectedBooking.status)}
+                                    {selectedBooking.statusName || getBookingStatusText(selectedBooking.status)}
+
                                 </Tag>
                             </Descriptions.Item>
 
                             <Descriptions.Item label="Số lượng khách">
                                 {selectedBooking.numberOfGuests} người
-                                ({selectedBooking.adultCount} người lớn, {selectedBooking.childCount} trẻ em)
                             </Descriptions.Item>
 
                             <Descriptions.Item label="Giá gốc">
@@ -453,11 +553,30 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                             </Descriptions>
                         )}
 
-                        {selectedBooking.qrCodeData && (
+                        {/* ✅ NEW: Individual QR System Display */}
+                        {hasIndividualQRs(selectedBooking) ? (
+                            <div style={{ marginTop: 24 }}>
+                                <IndividualQRDisplay
+                                    guests={selectedBooking.guests || []}
+                                    bookingCode={selectedBooking.bookingCode}
+                                    tourTitle={selectedBooking.tourOperation?.tourTitle}
+                                    totalPrice={selectedBooking.totalPrice}
+                                    tourDate={selectedBooking.tourOperation?.tourSlotDate}
+                                />
+                            </div>
+                        ) : selectedBooking.qrCodeData ? (
+                            /* 🔄 LEGACY: Old QR System (backward compatibility) */
                             <div style={{ marginTop: 16, textAlign: 'center' }}>
-                                <Title level={5}>QR Code check-in</Title>
+                                <Title level={5}>QR Code check-in (Legacy)</Title>
                                 <div style={{ padding: 16, border: '1px dashed #d9d9d9', borderRadius: 8 }}>
                                     <Text type="secondary">QR Code sẽ được hiển thị khi tour được xác nhận</Text>
+                                </div>
+                            </div>
+                        ) : (
+                            /* No QR codes available */
+                            <div style={{ marginTop: 16, textAlign: 'center' }}>
+                                <div style={{ padding: 16, border: '1px dashed #d9d9d9', borderRadius: 8 }}>
+                                    <Text type="secondary">QR Code sẽ được tạo sau khi thanh toán thành công</Text>
                                 </div>
                             </div>
                         )}

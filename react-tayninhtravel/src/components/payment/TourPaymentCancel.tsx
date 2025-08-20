@@ -102,9 +102,9 @@ const TourPaymentCancel: React.FC = () => {
 
     const handleViewBookings = () => {
         if (isAuthenticated) {
-            navigate('/my-bookings');
+            navigate('/booking-history');
         } else {
-            navigate('/login', { state: { from: '/my-bookings' } });
+            navigate('/login', { state: { from: '/booking-history' } });
         }
     };
 

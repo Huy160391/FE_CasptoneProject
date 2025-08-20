@@ -15,7 +15,7 @@ import {
     Statistic,
     Image,
     Tooltip,
-    Space
+    Input
 } from 'antd';
 import {
     ClockCircleOutlined,
@@ -34,7 +34,8 @@ import {
     getTourDetailsById,
     getTourOperationByDetailsId,
     getTourGuideInvitations,
-    handleApiError
+    handleApiError,
+    cancelTourSlot
 } from '../../services/tourcompanyService';
 import { tourSlotService, TourSlotDto } from '../../services/tourSlotService';
 import {
@@ -42,7 +43,8 @@ import {
     TourOperation,
     TimelineItem,
     TourDetailsStatus,
-    TourGuideInvitationsResponse
+    TourGuideInvitationsResponse,
+    TourSlotStatus
 } from '../../types/tour';
 import {
     getTourDetailsStatusLabel,
@@ -86,8 +88,32 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const [showUpdateForm, setShowUpdateForm] = useState(false);
     const [bookingsModalVisible, setBookingsModalVisible] = useState(false);
     const [selectedSlotForBookings, setSelectedSlotForBookings] = useState<TourSlotDto | null>(null);
-    const [cancelModalVisible, setCancelModalVisible] = useState(false);
+    const [cancelSlotModalVisible, setCancelSlotModalVisible] = useState(false);
     const [selectedSlotForCancel, setSelectedSlotForCancel] = useState<TourSlotDto | null>(null);
+    const [cancelReason, setCancelReason] = useState('');
+    const [cancelModalVisible, setCancelModalVisible] = useState(false);
+    const [cancelSlotLoading, setCancelSlotLoading] = useState(false);
+
+    // Helper function to check if slot is cancelled
+    const isSlotCancelled = (slot: TourSlotDto) => {
+        // Debug: Log values to check what we're receiving
+        console.log('Slot debug:', {
+            status: slot.status,
+            statusName: slot.statusName,
+            TourSlotStatusCancelled: TourSlotStatus.Cancelled
+        });
+
+        const statusName = slot.statusName?.toLowerCase() || '';
+        const isCancelled = slot.status === TourSlotStatus.Cancelled ||
+            statusName.includes('hủy') ||
+            statusName.includes('huỷ') ||
+            statusName.includes('cancelled') ||
+            statusName === 'đã hủy' ||
+            statusName === 'đã huỷ';
+
+        console.log('Is cancelled:', isCancelled);
+        return isCancelled;
+    };
     const [manualInviteModalVisible, setManualInviteModalVisible] = useState(false);
 
     useEffect(() => {
@@ -186,8 +212,45 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     };
 
     const handleCancelTour = (slot: TourSlotDto) => {
+        // Check if tour is public before allowing slot cancellation
+        if (!tourDetails ||
+            tourDetails.status !== 3 && String(tourDetails.status).toLowerCase() !== 'public') {
+            message.warning('Tour vẫn chưa được công khai, không thể hủy slot');
+            return;
+        }
+
         setSelectedSlotForCancel(slot);
-        setCancelModalVisible(true);
+        setCancelReason('');
+        setCancelSlotModalVisible(true);
+    };
+
+    const handleConfirmCancelSlot = async () => {
+        if (!selectedSlotForCancel || !token) return;
+
+        if (cancelReason.trim().length < 10) {
+            message.error('Lý do hủy phải có ít nhất 10 ký tự');
+            return;
+        }
+
+        setCancelSlotLoading(true);
+        try {
+            await cancelTourSlot(selectedSlotForCancel.id, cancelReason.trim(), '', token);
+            message.success('Đã hủy slot tour thành công');
+            setCancelSlotModalVisible(false);
+            setSelectedSlotForCancel(null);
+            setCancelReason('');
+            if (tourDetailsId) {
+                await loadTourSlots(tourDetailsId);
+            }
+            if (onUpdate) {
+                onUpdate();
+            }
+        } catch (error) {
+            console.error('Error canceling tour slot:', error);
+            message.error('Không thể hủy slot tour');
+        } finally {
+            setCancelSlotLoading(false);
+        }
     };
 
     const handleCancelSuccess = () => {
@@ -422,14 +485,17 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                         <Card
                                             size="small"
                                             title={
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                                <div style={{ textAlign: 'center', paddingRight: '60px' }}>
+                                                    <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
                                                         {slot.formattedDateWithDay}
                                                     </div>
                                                 </div>
                                             }
                                             extra={
-                                                <Tag color={slot.status === 1 ? 'green' : slot.status === 2 ? 'red' : 'orange'}>
+                                                <Tag
+                                                    color={slot.status === 1 ? 'green' : slot.status === 2 ? 'red' : 'orange'}
+                                                    style={{ fontSize: '10px', padding: '2px 6px' }}
+                                                >
                                                     {slot.statusName}
                                                 </Tag>
                                             }
@@ -473,37 +539,48 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                                     </div>
                                                 )}
 
-                                                {/* Action Buttons */}
-                                                <div style={{ marginTop: 12, textAlign: 'center' }}>
-                                                    <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                                                        <Button
-                                                            type="primary"
-                                                            size="small"
-                                                            icon={<EyeOutlined />}
-                                                            onClick={() => handleViewBookings(slot)}
-                                                            style={{
-                                                                backgroundColor: '#52c41a',
-                                                                borderColor: '#52c41a',
-                                                                width: '100%'
-                                                            }}
-                                                        >
-                                                            Xem booking
-                                                        </Button>
-
-                                                        {/* Cancel Tour Button - only show for Available or FullyBooked slots */}
-                                                        {(slot.status === 1 || slot.status === 2) && (
-                                                            <Button
-                                                                danger
-                                                                size="small"
-                                                                icon={<StopOutlined />}
-                                                                onClick={() => handleCancelTour(slot)}
-                                                                style={{ width: '100%' }}
-                                                            >
-                                                                Hủy tour
-                                                            </Button>
-                                                        )}
-                                                    </Space>
-                                                </div>
+                                                {/* Action Buttons - Only show for public tours */}
+                                                {tourDetails &&
+                                                    (tourDetails.status === 3 || String(tourDetails.status).toLowerCase() === 'public') && (
+                                                        <div style={{ marginTop: 12, textAlign: 'center' }}>
+                                                            <Row gutter={4}>
+                                                                <Col span={!isSlotCancelled(slot) ? 12 : 24}>
+                                                                    <Button
+                                                                        type="primary"
+                                                                        size="small"
+                                                                        icon={<EyeOutlined />}
+                                                                        onClick={() => handleViewBookings(slot)}
+                                                                        style={{
+                                                                            backgroundColor: '#52c41a',
+                                                                            borderColor: '#52c41a',
+                                                                            width: '100%',
+                                                                            fontSize: '11px',
+                                                                            padding: '2px 4px'
+                                                                        }}
+                                                                    >
+                                                                        Xem
+                                                                    </Button>
+                                                                </Col>
+                                                                {!isSlotCancelled(slot) && (
+                                                                    <Col span={12}>
+                                                                        <Button
+                                                                            danger
+                                                                            size="small"
+                                                                            icon={<StopOutlined />}
+                                                                            onClick={() => handleCancelTour(slot)}
+                                                                            style={{
+                                                                                width: '100%',
+                                                                                fontSize: '11px',
+                                                                                padding: '2px 4px'
+                                                                            }}
+                                                                        >
+                                                                            Huỷ
+                                                                        </Button>
+                                                                    </Col>
+                                                                )}
+                                                            </Row>
+                                                        </div>
+                                                    )}
                                             </div>
                                         </Card>
                                     </Col>
@@ -708,7 +785,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
     return (
         <Modal
-            title={`Chi tiết TourDetails${tourDetails ? ` - ${tourDetails.title}` : ''}`}
+            title={`Chi tiết Tour${tourDetails ? ` - ${tourDetails.title}` : ''}`}
             open={visible}
             onCancel={onClose}
             width={1000}
@@ -780,19 +857,23 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                         {renderSlotsTab()}
                     </TabPane>
 
-                    <TabPane
-                        tab={
-                            <span>
-                                <UserOutlined />
-                                Hướng dẫn viên ({invitations?.statistics.totalInvitations || 0})
-                                {(invitations?.statistics?.acceptedCount || 0) > 0 &&
-                                    <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
-                            </span>
-                        }
-                        key="invitations"
-                    >
-                        {renderInvitationsTab()}
-                    </TabPane>
+                    {/* Ẩn tab Hướng dẫn viên nếu status là pending */}
+                    {tourDetails && tourDetails.status !== 0 && String(tourDetails.status).toLowerCase() !== 'pending' && tourDetails.status !== 2 && String(tourDetails.status).toLowerCase() !== 'rejected' && (
+
+                        <TabPane
+                            tab={
+                                <span>
+                                    <UserOutlined />
+                                    Hướng dẫn viên ({invitations?.statistics.totalInvitations || 0})
+                                    {(invitations?.statistics?.acceptedCount || 0) > 0 &&
+                                        <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
+                                </span>
+                            }
+                            key="invitations"
+                        >
+                            {renderInvitationsTab()}
+                        </TabPane>
+                    )}
                 </Tabs>
             </Spin>
 
@@ -821,6 +902,49 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                     statusName: selectedSlotForBookings.statusName
                 } : undefined}
             />
+
+            {/* Cancel Slot Modal */}
+            <Modal
+                title="Hủy Slot Tour"
+                open={cancelSlotModalVisible}
+                onCancel={() => {
+                    setCancelSlotModalVisible(false);
+                    setCancelReason('');
+                }}
+                onOk={handleConfirmCancelSlot}
+                okText="Xác nhận hủy"
+                cancelText="Hủy bỏ"
+                okButtonProps={{ danger: true }}
+                confirmLoading={cancelSlotLoading}
+            >
+                <p>Bạn có chắc chắn muốn hủy slot tour này?</p>
+                {selectedSlotForCancel && (
+                    <div style={{ marginBottom: 16 }}>
+                        <strong>Thông tin slot:</strong>
+                        <br />
+                        {selectedSlotForCancel.formattedDateWithDay}
+                        <br />
+                        Trạng thái: {selectedSlotForCancel.statusName}
+                    </div>
+                )}
+                <div style={{ marginBottom: 20 }}>
+                    <label>Lý do hủy (tối thiểu 10 ký tự):</label>
+                    <Input.TextArea
+                        rows={4}
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        placeholder="Nhập lý do hủy slot tour..."
+                        showCount
+                        maxLength={500}
+                        style={{ marginTop: 8 }}
+                    />
+                    {cancelReason.trim().length > 0 && cancelReason.trim().length < 10 && (
+                        <div style={{ color: 'red', fontSize: '12px', marginTop: 4 }}>
+                            Lý do phải có ít nhất 10 ký tự
+                        </div>
+                    )}
+                </div>
+            </Modal>
 
             {/* Cancel Tour Modal */}
             <CancelTourModal

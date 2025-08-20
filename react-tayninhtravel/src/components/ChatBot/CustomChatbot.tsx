@@ -11,9 +11,24 @@ interface Message {
     text: string;
 }
 
+interface CustomChatbotProps {
+    useEnhanced?: boolean; // Prop để chọn phiên bản Enhanced
+}
 
-const CustomChatbot: React.FC = () => {
+const CustomChatbot: React.FC<CustomChatbotProps> = ({ useEnhanced = false }) => {
     const { t, i18n } = useTranslation();
+
+    // Nếu sử dụng Enhanced version, import và render component đó
+    if (useEnhanced) {
+        const EnhancedChatbot = React.lazy(() => import('./EnhancedChatbot'));
+        return (
+            <React.Suspense fallback={<div>Loading...</div>}>
+                <EnhancedChatbot />
+            </React.Suspense>
+        );
+    }
+
+    // Code của phiên bản cũ (legacy)
     const [visible, setVisible] = useState(false);
     const [messages, setMessages] = useState<Message[]>(() => [{ sender: 'bot', text: t('chatbot.greeting') }]);
     const [input, setInput] = useState('');

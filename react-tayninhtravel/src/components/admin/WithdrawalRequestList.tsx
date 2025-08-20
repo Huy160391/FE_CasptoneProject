@@ -43,10 +43,14 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 interface WithdrawalRequestListProps {
+    /** Callback truyền số lượng request thực tế cho tab */
+    onTabCountChanged?: (count: number) => void;
     /** Initial status filter */
     initialStatus?: WithdrawalStatus;
     /** Refresh trigger */
     refreshTrigger?: number;
+    /** Callback khi dữ liệu thay đổi (duyệt/từ chối) */
+    onDataChanged?: () => void;
 }
 
 /**
@@ -63,7 +67,9 @@ interface WithdrawalRequestListProps {
  */
 const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
     initialStatus,
-    refreshTrigger
+    refreshTrigger,
+    onDataChanged,
+    onTabCountChanged
 }) => {
     const { token } = useAuthStore();
     const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
@@ -82,6 +88,9 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
         search: '',
         dateRange: null as [dayjs.Dayjs, dayjs.Dayjs] | null
     });
+
+    // Xác định có hiển thị filter trạng thái hay không
+    const showStatusFilter = !initialStatus;
     const [pagination, setPagination] = useState({
         current: 1,
         pageSize: 10,
@@ -98,12 +107,17 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
     const loadWithdrawalRequests = async () => {
         setLoading(true);
         try {
-            const params = {
-                status: filters.status,
+            // Nếu có initialStatus thì chỉ truyền status khi filter status là undefined (tab tất cả), còn lại luôn lấy initialStatus
+            const params: any = {
                 pageNumber: pagination.current,
                 pageSize: pagination.pageSize,
                 searchTerm: filters.search || undefined
             };
+            if (initialStatus) {
+                params.status = initialStatus;
+            } else if (filters.status) {
+                params.status = filters.status;
+            }
 
             const response = await getAdminWithdrawalRequests(params, token || undefined);
 
@@ -133,6 +147,10 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             console.log('Processed requests data:', requestsData);
 
             setRequests(requestsData);
+
+            if (onTabCountChanged) {
+                onTabCountChanged(requestsData.length);
+            }
 
             setPagination(prev => ({
                 ...prev,
@@ -214,6 +232,7 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             setSelectedRequest(null);
             // Refresh the list
             await loadWithdrawalRequests();
+            if (onDataChanged) onDataChanged();
         } catch (error: any) {
             message.error('Không thể duyệt yêu cầu: ' + (error.response?.data?.message || error.message));
         } finally {
@@ -236,6 +255,7 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
             setSelectedRequest(null);
             // Refresh the list
             await loadWithdrawalRequests();
+            if (onDataChanged) onDataChanged();
         } catch (error: any) {
             message.error('Không thể từ chối yêu cầu: ' + (error.response?.data?.message || error.message));
         } finally {
@@ -436,22 +456,24 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                 {/* Filters */}
                 <div className="filters-section">
                     <Row gutter={16} align="middle">
-                        <Col xs={24} sm={8} md={6}>
-                            <Select
-                                placeholder="Lọc theo trạng thái"
-                                allowClear
-                                value={filters.status}
-                                onChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
-                                style={{ width: '100%' }}
-                                suffixIcon={<FilterOutlined />}
-                            >
-                                <Option value={WithdrawalStatus.Pending}>Chờ duyệt</Option>
-                                <Option value={WithdrawalStatus.Approved}>Đã duyệt</Option>
-                                <Option value={WithdrawalStatus.Rejected}>Từ chối</Option>
-                                <Option value={WithdrawalStatus.Cancelled}>Đã hủy</Option>
-                            </Select>
-                        </Col>
-                        <Col xs={24} sm={8} md={6}>
+                        {showStatusFilter && (
+                            <Col xs={24} sm={8} md={6}>
+                                <Select
+                                    placeholder="Lọc theo trạng thái"
+                                    allowClear
+                                    value={filters.status}
+                                    onChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+                                    style={{ width: '100%' }}
+                                    suffixIcon={<FilterOutlined />}
+                                >
+                                    <Option value={WithdrawalStatus.Pending}>Chờ duyệt</Option>
+                                    <Option value={WithdrawalStatus.Approved}>Đã duyệt</Option>
+                                    <Option value={WithdrawalStatus.Rejected}>Từ chối</Option>
+                                    <Option value={WithdrawalStatus.Cancelled}>Đã hủy</Option>
+                                </Select>
+                            </Col>
+                        )}
+                        <Col xs={24} sm={showStatusFilter ? 8 : 12} md={showStatusFilter ? 6 : 8}>
                             <Search
                                 placeholder="Tìm theo tên/email người dùng"
                                 value={filters.search}
@@ -460,7 +482,7 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                                 style={{ width: '100%' }}
                             />
                         </Col>
-                        <Col xs={24} sm={8} md={8}>
+                        <Col xs={24} sm={showStatusFilter ? 8 : 12} md={showStatusFilter ? 8 : 16}>
                             <RangePicker
                                 placeholder={['Từ ngày', 'Đến ngày']}
                                 value={filters.dateRange}

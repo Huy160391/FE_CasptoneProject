@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Row, Col, Card, Pagination, Empty, Button, Slider, Checkbox, Divider, Typography, Space, Spin } from 'antd'
-import { ShoppingCartOutlined, FilterOutlined, StarOutlined } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
+import { Row, Col, Pagination, Empty, Button, Slider, Checkbox, Divider, Typography, Spin } from 'antd'
+import { FilterOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
-import { useProductCart } from '@/hooks/useCart'
 import { Product } from '@/types'
 import { publicService } from '@/services/publicService'
-import ShopSearchBar from '@/components/shop/ShopSearchBar'
+import SearchBarCommon from '@/components/common/SearchBarCommon'
+import ProductCard from '@/components/shop/ProductCard'
 import { getCategoryViLabel } from '@/utils/categoryViLabels'
 import './Shop.scss'
 
-const { Meta } = Card
 const { Title } = Typography
 const CheckboxGroup = Checkbox.Group
 
@@ -31,12 +29,24 @@ const Shop = () => {
   const [showInStockOnly, setShowInStockOnly] = useState(false)
   const [products, setProducts] = useState<ShopProduct[]>([])
   const [loading, setLoading] = useState(false)
+  const [resetting, setResetting] = useState(false)
+  const [filtering, setFiltering] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [totalRecords, setTotalRecords] = useState(0)
   const { t, i18n } = useTranslation()
 
   const pageSize = 6
 
+  // Hàm đặt lại bộ lọc
+  const resetFilters = () => {
+    setResetting(true);
+    setSelectedCategories([]);
+    setPriceRange([0, 500000]);
+    setShowInStockOnly(false);
+    setSearchText('');
+    setCurrentPage(1);
+    setTimeout(() => setResetting(false), 500); // Giả lập loading khi reset
+  }
   // Fetch products from API
   useEffect(() => {
     fetchProducts()
@@ -99,18 +109,24 @@ const Shop = () => {
   }
 
   const handleCategoryChange = (checkedValues: string[]) => {
-    setSelectedCategories(checkedValues)
-    setCurrentPage(1)
+    setFiltering(true);
+    setSelectedCategories(checkedValues);
+    setCurrentPage(1);
+    setTimeout(() => setFiltering(false), 500);
   }
 
   const handlePriceRangeChange = (value: number | number[]) => {
-    setPriceRange(value as [number, number])
-    setCurrentPage(1)
+    setFiltering(true);
+    setPriceRange(value as [number, number]);
+    setCurrentPage(1);
+    setTimeout(() => setFiltering(false), 500);
   }
 
   const handleInStockChange = (e: any) => {
-    setShowInStockOnly(e.target.checked)
-    setCurrentPage(1)
+    setFiltering(true);
+    setShowInStockOnly(e.target.checked);
+    setCurrentPage(1);
+    setTimeout(() => setFiltering(false), 500);
   }
 
   const toggleFilters = () => {
@@ -140,96 +156,6 @@ const Shop = () => {
   // No sorting - just use filtered products as-is
   const sortedProducts = filteredProducts
 
-  // Enhanced Product Card with rating and stock status
-  const ProductCard = ({ product }: { product: ShopProduct }) => {
-    const productCart = useProductCart(product.id)
-
-    const handleAddToCart = (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      if (product.quantityInStock === 0) return
-
-      productCart.addToCart({
-        cartItemId: "", // Empty string for new items, will be updated after syncing
-        productId: product.id,
-        name: product.name,
-        image: product.imageUrl[0],
-        price: product.price,
-        quantity: 1
-      })
-    }
-
-    // Calculate original price if on sale
-    const originalPrice = product.isSale && product.salePercent
-      ? Math.round(product.price / (1 - product.salePercent / 100))
-      : null
-
-    return (
-      <Link to={`/shop/product/${product.id}`} className="product-link">
-        <Card
-          hoverable
-          cover={
-            <div className="product-image-container">
-              <img alt={product.name} src={product.imageUrl[0]} />
-              {product.quantityInStock === 0 && (
-                <div className="out-of-stock-overlay">
-                  <span>{t('shop.outOfStock')}</span>
-                </div>
-              )}
-            </div>
-          }
-          className="product-card"
-        >
-          <Meta
-            title={product.name}
-            description={i18n.language === 'vi' ? getCategoryViLabel(product.category.toLowerCase()) : product.category}
-          />
-
-          <div className="product-rating">
-            <Space>
-              <StarOutlined style={{ color: '#faad14' }} />
-              <span>{product.rating.toFixed(1)}</span>
-              <span className="review-count">({product.reviews})</span>
-              <span className="sold-count">• {t('shop.soldCount', { count: product.soldCount })}</span>
-            </Space>
-          </div>
-
-          <div className="product-price">
-            {product.isSale && originalPrice && (
-              <span className="original-price">
-                {originalPrice.toLocaleString('vi-VN')}₫
-              </span>
-            )}
-            <span className="current-price">
-              {product.price.toLocaleString('vi-VN')}₫
-            </span>
-            {product.isSale && product.salePercent && (
-              <span className="sale-badge">-{product.salePercent}%</span>
-            )}
-          </div>
-
-          <Button
-            type="primary"
-            icon={<ShoppingCartOutlined />}
-            onClick={handleAddToCart}
-            loading={productCart.loading}
-            disabled={product.quantityInStock === 0}
-            className="add-to-cart-btn"
-            block
-          >
-            {product.quantityInStock === 0
-              ? t('shop.outOfStock')
-              : productCart.isInCart
-                ? `${t('cart.inCart')} (${productCart.quantity})`
-                : t('cart.addToCart')
-            }
-          </Button>
-        </Card>
-      </Link>
-    )
-  }
-
   // Paginate products - using server-side pagination
   const paginatedProducts = sortedProducts
 
@@ -243,10 +169,12 @@ const Shop = () => {
         </div>
 
         {/* Search Bar */}
-        <ShopSearchBar
+        <SearchBarCommon
           onSearch={handleSearch}
-          onCategoryChange={setSelectedCategories}
-          searchText={searchText}
+          loading={loading}
+          placeholder={t('shop.searchPlaceholder')}
+          className="shop-search-bar"
+          buttonText={t('common.search')}
         />
 
         {/* Loading State */}
@@ -333,6 +261,18 @@ const Shop = () => {
                         {t('shop.inStockOnly')}
                       </Checkbox>
                     </div>
+                    {/* Nút Đặt lại bộ lọc */}
+                    <div className="filter-section">
+                      <Button
+                        type="default"
+                        icon={<FilterOutlined />}
+                        onClick={resetFilters}
+                        block
+                        loading={resetting || filtering}
+                      >
+                        {t('shopList.resetFilters')}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -355,9 +295,8 @@ const Shop = () => {
                   <div className="pagination-container">
                     <div className="pagination-controls">
                       <div className="results-info">
-                        <span>{totalRecords} sản phẩm</span>
+                        <span>{totalRecords} {t('shop.totalProducts')}</span>
                       </div>
-
                       <Pagination
                         current={currentPage}
                         total={totalRecords}
@@ -365,9 +304,11 @@ const Shop = () => {
                         onChange={handlePageChange}
                         showSizeChanger={false}
                         showQuickJumper
-                        showTotal={(total, range) =>
-                          `${range[0]}-${range[1]} của ${total} sản phẩm`
-                        }
+                        showTotal={(total, range) => (
+                          <span className="results-info-total">
+                            {range[0]}-{range[1]} {t('shop.of')} {total} {t('shop.totalProducts')}
+                          </span>
+                        )}
                       />
                     </div>
                   </div>

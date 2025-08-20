@@ -220,6 +220,24 @@
         .add-to-cart-btn {
           background-color: #1890ff;
           border-color: #1890ff;
+
+          .dark-mode & {
+            background-color: #79eac0 !important;
+            border-color: #79eac0 !important;
+            color: #000000 !important;
+
+            &:hover {
+              background-color: #66d9a8 !important;
+              border-color: #66d9a8 !important;
+              color: #000000 !important;
+            }
+
+            &:focus {
+              background-color: #79eac0 !important;
+              border-color: #79eac0 !important;
+              color: #000000 !important;
+            }
+          }
         }
         
         .buy-now-btn {

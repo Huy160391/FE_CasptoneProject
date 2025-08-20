@@ -1,5 +1,5 @@
 // Support ticket related types
-export type TicketStatus = 'Open' | 'Resolved' | 'Rejected';
+export type TicketStatus = 'Open' | 'Closed';
 
 export interface UserSupportTicket {
     id: string;

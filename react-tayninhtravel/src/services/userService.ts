@@ -20,6 +20,28 @@ export type { Comment, UserComment } from '../types';
  */
 export const userService = {
     /**
+     * Lấy danh sách shop
+     * @param pageIndex Trang hiện tại (mặc định 1)
+     * @param pageSize Số lượng mỗi trang (mặc định 10)
+     * @param searchText Tìm kiếm theo tên shop (tùy chọn)
+     * @returns Promise với danh sách shop
+     */
+    getShopList: async (
+        pageIndex: number = 1,
+        pageSize: number = 10,
+        name?: string,
+        includeInactive?: boolean
+    ): Promise<any> => {
+        const params: any = {
+            pageIndex,
+            pageSize
+        };
+        if (name) params.name = name;
+        if (typeof includeInactive === 'boolean') params.includeInactive = includeInactive;
+        const response = await axios.get('/SpecialtyShop', { params });
+        return response.data;
+    },
+    /**
      * Lấy danh sách đơn hàng của user hiện tại
      * @returns Promise với danh sách đơn hàng
      */
@@ -113,22 +135,24 @@ export const userService = {
         return userService.mapApiUserToUser(response.data);
     },
     /**
- * Lấy danh sách voucher của người dùng hiện tại
- * @param pageIndex Trang hiện tại (mặc định 1)
- * @param pageSize Số lượng mỗi trang (mặc định 10)
- * @param status Trạng thái voucher (tùy chọn: active, used, expired, ...)
- * @returns Promise với danh sách voucher và thông tin phân trang
- */
-    getMyVouchers: async (
+     * Lấy danh sách voucher khả dụng (theo guide API)
+     * @param pageIndex Trang hiện tại (mặc định 1)
+     * @param pageSize Số lượng mỗi trang (mặc định 10)
+     * @returns Promise với danh sách voucher khả dụng
+     */
+    getAvailableVouchers: async (
         pageIndex: number = 1,
-        pageSize: number = 10,
-        status?: string,
-        textSearch?: string
-    ): Promise<any> => {
-        const params: any = { pageIndex, pageSize };
-        if (status) params.status = status;
-        if (textSearch) params.textSearch = textSearch;
-        const response = await axios.get('/Product/My-vouchers', { params });
+        pageSize: number = 10
+    ): Promise<{
+        statusCode: number;
+        message: string;
+        success: boolean;
+        data: any[];
+        totalRecord: number;
+        totalPages: number;
+    }> => {
+        const params = { pageIndex, pageSize };
+        const response = await axios.get('/Product/GetAvailable-Vouchers', { params });
         return response.data;
     },
 
@@ -137,20 +161,44 @@ export const userService = {
      * @param pageIndex Trang hiện tại (mặc định 1)
      * @param pageSize Số lượng mỗi trang (mặc định 10)
      * @param payOsOrderCode Mã đơn hàng PayOS (tùy chọn)
-     * @param status Trạng thái đơn hàng (tùy chọn)
+     * @param orderStatus Trạng thái đơn hàng (tùy chọn: Pending, Paid, Cancel)
+     * @param isChecked Đã nhận hàng hay chưa (tùy chọn: true/false)
      * @returns Promise với danh sách đơn hàng
      */
     getUserOrders: async (
         pageIndex: number = 1,
         pageSize: number = 10,
         payOsOrderCode?: string,
-        status?: string
+        orderStatus?: string,
+        isChecked?: boolean
     ): Promise<any> => {
         const params: any = { pageIndex, pageSize };
         if (payOsOrderCode) params.payOsOrderCode = payOsOrderCode;
-        if (status) params.status = status;
+        if (orderStatus) params.orderStatus = orderStatus;
+        if (isChecked !== undefined) params.isChecked = isChecked;
         const response = await axios.get('/Product/GetOrder-ByUser', { params });
         return response.data;
+    },
+    /**
+     * Tìm kiếm tour theo các tham số
+     * @param params Tham số tìm kiếm
+     * @returns Promise với kết quả tìm kiếm
+     */
+    searchTours: async (params: {
+        scheduleDay?: string;
+        month?: number;
+        year?: number;
+        destination?: string;
+        textSearch?: string;
+        pageIndex?: number;
+        pageSize?: number;
+    }): Promise<any> => {
+        try {
+            const response = await axios.get('/UserTourSearch/search', { params });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     },
     /**
      * Update an existing user
@@ -682,6 +730,43 @@ export const userService = {
             }
         });
         return response.data;
+    },
+
+    /**
+     * Lấy thông tin chi tiết của một shop theo ID
+     * @param shopId ID của shop
+     * @returns Promise với thông tin chi tiết shop
+     */
+    getShopInfo: async (shopId: string): Promise<any> => {
+        try {
+            const response = await axios.get(`/SpecialtyShop/${shopId}`);
+
+            // API trả về object có structure: { data: shopInfo, isSuccess, statusCode, message, success, validationErrors }
+            if (response.data && response.data.isSuccess && response.data.data) {
+                return response.data.data;
+            }
+
+            // Nếu không có data hoặc không thành công, throw error
+            throw new Error(response.data?.message || 'Failed to fetch shop information');
+        } catch (error) {
+            console.error(`Error fetching shop info for ID ${shopId}:`, error);
+
+            // Trả về object mặc định để tránh crash
+            return {
+                id: shopId,
+                shopName: 'Unknown Shop',
+                description: '',
+                location: '',
+                representativeName: '',
+                email: '',
+                phoneNumber: '',
+                website: null,
+                businessLicense: '',
+                shopType: '',
+                rating: 0,
+                isShopActive: false
+            };
+        }
     },
 };
 

@@ -9,6 +9,7 @@ import { adminService } from '@/services/adminService'
 import type { User } from '@/types/user'
 import './UserManagement.scss'
 import UserModal from './UserModal'
+import UserDetailModal from './UserDetailModal'
 
 const UserManagement = () => {
     const navigate = useNavigate()
@@ -339,22 +340,10 @@ const UserManagement = () => {
     ]
 
     return (
-        <div className="user-management-page">            <div className="page-header">
-            <div className="title-with-filters">
-                <h1>{t('admin.users.title')}</h1>
-            </div>
-            <div className="header-actions">
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={handleAdd}
-                >
-                    {t('admin.users.actions.add')}
-                </Button>                </div>
-        </div>
-
-            <div className="table-actions">
-                <Space>
+        <div className="user-management-page">
+            <div className="header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>{t('admin.users.title')}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     <Input
                         placeholder={t('admin.users.searchPlaceholder')}
                         prefix={<SearchOutlined />}
@@ -363,7 +352,14 @@ const UserManagement = () => {
                         allowClear
                         value={searchText}
                     />
-                </Space>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={handleAdd}
+                    >
+                        {t('admin.users.actions.add')}
+                    </Button>
+                </div>
             </div>
 
             <Spin spinning={loading}>
@@ -392,30 +388,15 @@ const UserManagement = () => {
                 editingUser={editingUser}
             />
 
-            {/* Modal xem thông tin user */}
-            <Modal
-                open={isViewModalVisible}
-                title={t('admin.users.modal.view')}
-                onCancel={() => setIsViewModalVisible(false)}
-                footer={null}
-            >
-                {viewUser && (
-                    <div style={{ textAlign: 'center' }}>
-                        <img
-                            src={viewUser.avatar || 'https://static-00.iconduck.com/assets.00/avatar-default-icon-2048x2048-h6w375ur.png'}
-                            alt="avatar"
-                            style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', marginBottom: 16 }}
-                        />
-                        <div><b>{t('profile.name')}:</b> {viewUser.name}</div>
-                        <div><b>{t('profile.email')}:</b> {viewUser.email}</div>
-                        <div><b>{t('profile.phone')}:</b> {viewUser.phone}</div>
-                        <div><b>{t('admin.users.columns.status')}:</b> {viewUser.isActive ? t('admin.users.status.active') : t('admin.users.status.inactive')}</div>
-                        <div><b>{t('profile.role')}:</b> {viewUser.roleName || viewUser.role}</div>
-                        <div><b>{t('profile.createdAt')}:</b> {viewUser.createdAt}</div>
-                        <div><b>{t('profile.updatedAt')}:</b> {viewUser.updatedAt}</div>
-                    </div>
-                )}
-            </Modal>
+            <UserDetailModal
+                visible={isViewModalVisible}
+                user={viewUser}
+                onClose={() => setIsViewModalVisible(false)}
+                onEdit={(user) => {
+                    setIsViewModalVisible(false)
+                    handleEdit(user)
+                }}
+            />
         </div>
     )
 }

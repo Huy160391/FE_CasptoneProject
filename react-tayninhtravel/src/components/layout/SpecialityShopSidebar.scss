@@ -4,7 +4,7 @@
   top: 0;
   height: 100vh;
   z-index: 1000;
-  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
 
   .specialityshop-logo {
@@ -149,7 +149,7 @@
 
 // Dark mode support
 body.dark-mode .specialityshop-sidebar {
-  background: linear-gradient(135deg, #d35400 0%, #a0522d 100%);
+  background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
   
   .specialityshop-logo {
     border-bottom-color: rgba(255, 255, 255, 0.2);

@@ -38,11 +38,14 @@ import {
     getMyInvitations,
     formatTimeUntilExpiry,
     acceptInvitation,
-    canRespondToInvitation
+    canRespondToInvitation,
+    getMyActiveTours,
+    ActiveTour
 } from '@/services/tourguideService';
 import TourInvitationDetails from '@/components/tourguide/TourInvitationDetails';
 import TourDetailsViewModal from '@/components/tourguide/TourDetailsViewModal';
 import ProfileSection from '@/components/tourguide/ProfileSection';
+import TourActiveList from '@/components/tourguide/TourActiveList';
 import './TourGuideDashboard.scss';
 
 const { Title, Text } = Typography;
@@ -61,6 +64,11 @@ const TourGuideDashboard: React.FC = () => {
     const [selectedTourDetailsId, setSelectedTourDetailsId] = useState<string>('');
     const [expandedInvitations, setExpandedInvitations] = useState<Set<string>>(new Set());
     const [viewedMessages, setViewedMessages] = useState<Set<string>>(new Set());
+
+    // New states for HDV tour management
+    const [activeTours, setActiveTours] = useState<ActiveTour[]>([]);
+    const [activeToursLoading, setActiveToursLoading] = useState(false);
+    const [refreshTrigger] = useState(0);
 
     // Helper function to show schedule conflict error
     const showScheduleConflictError = (errorMessage: string) => {
@@ -234,6 +242,26 @@ const TourGuideDashboard: React.FC = () => {
         }
     };
 
+    // Load active tours for HDV
+    const loadActiveTours = async () => {
+        try {
+            setActiveToursLoading(true);
+            const response = await getMyActiveTours();
+
+            if (response.success && response.data) {
+                setActiveTours(response.data);
+            }
+        } catch (error) {
+            console.error('Error loading active tours:', error);
+            notification.error({
+                message: 'Lỗi tải tours',
+                description: 'Không thể tải danh sách tours đang hoạt động.',
+            });
+        } finally {
+            setActiveToursLoading(false);
+        }
+    };
+
     // Show confirmation before accepting invitation
     const showAcceptConfirmation = (invitation: any) => {
         const tourTitle = invitation.tourDetails?.title || 'Tour không xác định';
@@ -361,8 +389,10 @@ const TourGuideDashboard: React.FC = () => {
     // Auto refresh every 30 seconds
     useEffect(() => {
         loadDashboardData();
+        loadActiveTours();
         const interval = setInterval(() => {
             loadDashboardData(false);
+            loadActiveTours();
         }, 30000);
 
         return () => clearInterval(interval);
@@ -447,7 +477,7 @@ const TourGuideDashboard: React.FC = () => {
                 </div>
             </div>
 
-            <Spin spinning={loading}>
+            <Spin spinning={loading || activeToursLoading}>
                 {/* Profile Section */}
                 <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
                     <Col span={24}>
@@ -496,6 +526,13 @@ const TourGuideDashboard: React.FC = () => {
                 </Row>
 
                 <Row gutter={[16, 16]}>
+                    {/* Tours hôm nay */}
+                    <Col xs={24}>
+                        <TourActiveList refreshTrigger={refreshTrigger} />
+                    </Col>
+                </Row>
+
+                <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
                     {/* Enhanced Pending Invitations */}
                     <Col xs={24} lg={16}>
                         <Card
@@ -839,6 +876,28 @@ const TourGuideDashboard: React.FC = () => {
                     setSelectedTourDetailsId('');
                 }}
             />
+
+            {/* Floating Incident Report Button */}
+            {activeTours.length > 0 && (
+                <Button
+                    type="primary"
+                    danger
+                    size="large"
+                    shape="circle"
+                    icon={<FireOutlined />}
+                    style={{
+                        position: 'fixed',
+                        bottom: '24px',
+                        right: '24px',
+                        width: '56px',
+                        height: '56px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                        zIndex: 1000
+                    }}
+                    onClick={() => navigate('/tour-guide/incident-report')}
+                    title="Báo cáo sự cố"
+                />
+            )}
         </div>
     );
 };

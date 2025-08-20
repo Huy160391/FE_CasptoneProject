@@ -1,0 +1,22 @@
+.tour-price-display {
+  /* Light mode */
+  background: transparent;
+}
+.tour-price-display .ant-typography {
+  color: #222;
+}
+body.dark-mode .tour-price-display {
+  background: transparent;
+}
+body.dark-mode .tour-price-display .ant-typography {
+  color: #eee !important;
+}
+
+.tour-price-final {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #c00;
+}
+body.dark-mode .tour-price-final {
+  color: #ff7875;
+}

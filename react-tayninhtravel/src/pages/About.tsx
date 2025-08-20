@@ -1,11 +1,11 @@
 import { Row, Col, Card, Typography } from 'antd'
-// import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import './About.scss'
 
 const { Title, Paragraph } = Typography
 
 const About = () => {
-  // const { t } = useTranslation()
+  const { t } = useTranslation()
 
   const teamMembers = [
     {
@@ -38,40 +38,13 @@ const About = () => {
     },
   ]
 
-  const milestones = [
-    {
-      year: '2010',
-      title: 'Thành lập công ty',
-      description: 'Tây Ninh Travel được thành lập với sứ mệnh giới thiệu vẻ đẹp của Tây Ninh đến du khách trong và ngoài nước.',
-    },
-    {
-      year: '2015',
-      title: 'Mở rộng dịch vụ',
-      description: 'Công ty bắt đầu mở rộng dịch vụ, không chỉ tổ chức tour mà còn cung cấp dịch vụ lưu trú, ẩm thực và các hoạt động giải trí.',
-    },
-    {
-      year: '2018',
-      title: 'Giải thưởng Du lịch Việt Nam',
-      description: 'Tây Ninh Travel vinh dự nhận giải thưởng "Đơn vị lữ hành tiêu biểu" do Tổng cục Du lịch Việt Nam trao tặng.',
-    },
-    {
-      year: '2020',
-      title: 'Chuyển đổi số',
-      description: 'Công ty đầu tư mạnh mẽ vào công nghệ, ra mắt website và ứng dụng di động để nâng cao trải nghiệm khách hàng.',
-    },
-    {
-      year: '2023',
-      title: 'Mở rộng thị trường quốc tế',
-      description: 'Tây Ninh Travel bắt đầu đón khách quốc tế và mở rộng thị trường ra các nước trong khu vực Đông Nam Á.',
-    },
-  ]
 
   return (
     <div className="about-page">
       <div className="hero-section">
         <div className="hero-content">
-          <Title level={1}>Về chúng tôi</Title>
-          <Paragraph>Khám phá câu chuyện, sứ mệnh và đội ngũ đằng sau Tây Ninh Travel</Paragraph>
+          <Title level={1}>{t('about.title')}</Title>
+          <Paragraph>{t('about.subtitle')}</Paragraph>
         </div>
       </div>
 
@@ -85,42 +58,34 @@ const About = () => {
             </Col>
             <Col xs={24} md={12}>
               <div className="about-content">
-                <Title level={2}>Câu chuyện của chúng tôi</Title>
-                <Paragraph>
-                  Tây Ninh Travel được thành lập vào năm 2010 với mong muốn giới thiệu vẻ đẹp của Tây Ninh đến với du khách trong và ngoài nước. Từ một công ty nhỏ chỉ với vài nhân viên, chúng tôi đã phát triển thành một trong những đơn vị lữ hành hàng đầu tại Tây Ninh.
-                </Paragraph>
-                <Paragraph>
-                  Với đội ngũ nhân viên giàu kinh nghiệm và am hiểu về địa phương, chúng tôi tự hào mang đến cho khách hàng những trải nghiệm du lịch đáng nhớ, từ khám phá núi Bà Đen hùng vĩ, tham quan Tòa Thánh Cao Đài linh thiêng đến thưởng thức ẩm thực đặc sắc của vùng đất này.
-                </Paragraph>
+                <Title level={2}>{t('about.storyTitle')}</Title>
+                <Paragraph>{t('about.storyParagraph1')}</Paragraph>
+                <Paragraph>{t('about.storyParagraph2')}</Paragraph>
               </div>
             </Col>
           </Row>
         </section>
 
         <section className="mission-section">
-          <Title level={2} className="section-title">Sứ mệnh & Tầm nhìn</Title>
+          <Title level={2} className="section-title">{t('about.missionVisionTitle')}</Title>
           <Row gutter={[32, 32]}>
             <Col xs={24} md={12}>
               <Card className="mission-card">
-                <Title level={3}>Sứ mệnh</Title>
-                <Paragraph>
-                  Chúng tôi cam kết mang đến cho khách hàng những trải nghiệm du lịch chất lượng, an toàn và đáng nhớ tại Tây Ninh. Đồng thời, chúng tôi cũng góp phần quảng bá hình ảnh, văn hóa và con người Tây Ninh đến với bạn bè trong nước và quốc tế.
-                </Paragraph>
+                <Title level={3}>{t('about.missionTitle')}</Title>
+                <Paragraph>{t('about.missionText')}</Paragraph>
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card className="vision-card">
-                <Title level={3}>Tầm nhìn</Title>
-                <Paragraph>
-                  Trở thành đơn vị lữ hành hàng đầu tại Tây Ninh và khu vực Đông Nam Bộ, được khách hàng tin tưởng lựa chọn và đối tác đánh giá cao. Chúng tôi hướng đến việc phát triển du lịch bền vững, tôn trọng môi trường và cộng đồng địa phương.
-                </Paragraph>
+                <Title level={3}>{t('about.visionTitle')}</Title>
+                <Paragraph>{t('about.visionText')}</Paragraph>
               </Card>
             </Col>
           </Row>
         </section>
 
         <section className="team-section">
-          <Title level={2} className="section-title">Đội ngũ của chúng tôi</Title>
+          <Title level={2} className="section-title">{t('about.teamTitle')}</Title>
           <Row gutter={[32, 32]}>
             {teamMembers.map(member => (
               <Col xs={24} sm={12} md={6} key={member.id}>
@@ -139,20 +104,6 @@ const About = () => {
           </Row>
         </section>
 
-        <section className="milestone-section">
-          <Title level={2} className="section-title">Hành trình phát triển</Title>
-          <div className="timeline">
-            {milestones.map((milestone, index) => (
-              <div className="timeline-item" key={index}>
-                <div className="timeline-badge">{milestone.year}</div>
-                <div className="timeline-content">
-                  <Title level={4}>{milestone.title}</Title>
-                  <Paragraph>{milestone.description}</Paragraph>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
     </div>
   )

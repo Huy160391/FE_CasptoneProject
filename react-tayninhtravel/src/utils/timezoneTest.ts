@@ -98,8 +98,8 @@ export const testTourPricingTimezone = () => {
 
     // Test booking dates
     const bookingDates = [
-        new Date('2024-01-05T03:00:00Z'), // Early bird eligible (within 15 days, 30+ days before tour)
-        new Date('2024-01-20T03:00:00Z'), // Not early bird (after 15 days)
+        new Date('2024-01-05T03:00:00Z'), // Early bird eligible (within 14 days, 30+ days before tour)
+        new Date('2024-01-20T03:00:00Z'), // Not early bird (after 14 days)
         new Date('2024-02-10T03:00:00Z'), // Not early bird (less than 30 days before tour)
     ];
 

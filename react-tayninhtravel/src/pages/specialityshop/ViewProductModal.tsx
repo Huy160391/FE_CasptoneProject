@@ -157,7 +157,7 @@ const ViewProductModal = ({ visible, onCancel, product }: ViewProductModalProps)
                         </div>
                         <div className="info-item">
                             <span className="info-label">ID Cửa hàng:</span>
-                            <span className="info-value">{product.shopId}</span>
+                            <span className="info-value">{product.specialtyShopId || product.shopId}</span>
                         </div>
                         <div className="info-item">
                             <span className="info-label">Ngày tạo:</span>

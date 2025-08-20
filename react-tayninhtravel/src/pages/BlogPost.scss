@@ -1,3 +1,17 @@
+  .blog-card {
+    .blog-meta {
+      .blog-author {
+        color: #222 !important;
+        text-shadow: none;
+      }
+    }
+    .ant-card-body {
+      .blog-title {
+        color: #222 !important;
+        text-shadow: none;
+      }
+    }
+  }
 .blog-post-page {
   padding: 40px 0;
   
@@ -562,6 +576,20 @@
 
 /* Dark mode styles for blog post page */
 body.dark-mode {
+  .blog-card {
+    .blog-meta {
+      .blog-author {
+        color: #f8fafc !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      }
+    }
+    .ant-card-body {
+      .blog-title {
+        color: #f8fafc !important;
+        text-shadow: none;
+      }
+    }
+  }
   .blog-post-page {
     .post-header {      .breadcrumb {
         a, span {

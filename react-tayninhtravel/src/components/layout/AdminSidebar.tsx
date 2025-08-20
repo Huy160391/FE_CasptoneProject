@@ -6,15 +6,13 @@ import {
   MenuUnfoldOutlined,
   DashboardOutlined,
   UserOutlined,
-  FileTextOutlined,
   AppstoreOutlined,
-  CommentOutlined,
   ReadOutlined,
   HomeOutlined,
   LogoutOutlined,
-  ShoppingCartOutlined,
   CustomerServiceOutlined,
-  DollarOutlined
+  TeamOutlined,
+  ShopOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTranslation } from 'react-i18next'
@@ -53,14 +51,46 @@ const AdminSidebar = () => {
       label: <Link to="/admin/users">{t('admin.sidebar.users')}</Link>,
     },
     {
-      key: '/admin/CVManagement',
-      icon: <FileTextOutlined />,
-      label: <Link to="/admin/CVManagement">{t('admin.sidebar.cvManagement')}</Link>,
+      key: 'tour-guide',
+      icon: <TeamOutlined />,
+      label: 'Hướng dẫn viên',
+      children: [
+        {
+          key: '/admin/tour-guides',
+          label: <Link to="/admin/tour-guides">Quản lý hướng dẫn viên</Link>,
+        },
+        {
+          key: '/admin/CVManagement',
+          label: <Link to="/admin/CVManagement">Quản lý đơn đăng ký</Link>,
+        },
+      ],
     },
     {
-      key: '/admin/orders',
-      icon: <ShoppingCartOutlined />,
-      label: <Link to="/admin/orders">{t('admin.sidebar.orders')}</Link>,
+      key: 'shop',
+      icon: <ShopOutlined />,
+      label: 'Cửa hàng',
+      children: [
+        {
+          key: '/admin/shops',
+          label: <Link to="/admin/shops">Quản lý cửa hàng</Link>,
+        },
+        {
+          key: '/admin/shop-registrations',
+          label: <Link to="/admin/shop-registrations">Quản lý đơn đăng ký</Link>,
+        },
+        {
+          key: '/admin/withdrawal-requests',
+          label: <Link to="/admin/withdrawal-requests">Quản lý rút tiền</Link>,
+        },
+        {
+          key: '/admin/orders',
+          label: <Link to="/admin/orders">Quản lý đơn hàng</Link>,
+        },
+        {
+          key: '/admin/vouchers',
+          label: <Link to="/admin/vouchers">Quản lý voucher</Link>,
+        },
+      ],
     },
     {
       key: '/admin/tours',
@@ -68,10 +98,6 @@ const AdminSidebar = () => {
       label: <Link to="/admin/tours">{t('admin.sidebar.tours')}</Link>,
     },
     {
-      key: '/admin/reviews',
-      icon: <CommentOutlined />,
-      label: <Link to="/admin/reviews">{t('admin.sidebar.reviews')}</Link>,
-    }, {
       key: '/admin/blogs',
       icon: <ReadOutlined />,
       label: <Link to="/admin/blogs">{t('admin.sidebar.blogs')}</Link>,
@@ -80,16 +106,6 @@ const AdminSidebar = () => {
       key: '/admin/support-tickets',
       icon: <CustomerServiceOutlined />,
       label: <Link to="/admin/support-tickets">{t('admin.sidebar.supportTickets')}</Link>,
-    },
-    {
-      key: '/admin/shop-registrations',
-      icon: <AppstoreOutlined />,
-      label: <Link to="/admin/shop-registrations">{t('admin.sidebar.shopRegistrations')}</Link>,
-    },
-    {
-      key: '/admin/withdrawal-requests',
-      icon: <DollarOutlined />,
-      label: <Link to="/admin/withdrawal-requests">Quản lý rút tiền</Link>,
     },
   ]
 

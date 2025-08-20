@@ -26,6 +26,72 @@
         transition: color 0.3s ease;
     }
 
+    // Skeleton loading styles
+    .product-card-skeleton {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        .skeleton-image {
+            height: 240px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        .skeleton-content {
+            padding: 16px;
+
+            .skeleton-title {
+                height: 20px;
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: loading 1.5s infinite;
+                margin-bottom: 12px;
+                border-radius: 4px;
+            }
+
+            .skeleton-description {
+                height: 16px;
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: loading 1.5s infinite;
+                margin-bottom: 12px;
+                border-radius: 4px;
+                width: 70%;
+            }
+
+            .skeleton-rating {
+                height: 16px;
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: loading 1.5s infinite;
+                margin-bottom: 12px;
+                border-radius: 4px;
+                width: 60%;
+            }
+
+            .skeleton-price {
+                height: 18px;
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: loading 1.5s infinite;
+                border-radius: 4px;
+                width: 80%;
+            }
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+    }
+
     .product-card {
         height: 100%;
         position: relative;
@@ -67,7 +133,10 @@
                 .current-price {
                     font-size: 20px;
                     font-weight: 700;
-                    color: #ff4d4f;
+                    background: linear-gradient(135deg, #69c0ff, #91d5ff);
+                    background-clip: text;
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
                     margin-right: 8px;
                 }
 
@@ -192,7 +261,10 @@ body.dark-mode {
             .product-info {
                 .product-price {
                     .current-price {
-                        color: #79eac0;
+                        background: linear-gradient(135deg, #69c0ff, #91d5ff);
+                        background-clip: text;
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
                     }
                     
                     .original-price {

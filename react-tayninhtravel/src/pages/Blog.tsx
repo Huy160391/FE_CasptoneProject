@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Card, Input, Select, Pagination, Empty, Spin, Row, Col } from 'antd'
-import { SearchOutlined } from '@ant-design/icons'
+import { Card, Select, Pagination, Empty, Spin, Row, Col } from 'antd'
+import { Typography } from 'antd'
+import { useTranslation } from 'react-i18next'
+// ...existing code...
+import SearchBarCommon from '@/components/common/SearchBarCommon'
 import { Link } from 'react-router-dom'
 import { publicService } from '@/services/publicService'
 import { type PublicBlog } from '@/types'
@@ -8,14 +11,16 @@ import './Blog.scss'
 
 const { Option } = Select
 
-const sortOptions = [
-  { value: 'newest', label: 'Mới nhất' },
-  { value: 'oldest', label: 'Cũ nhất' },
-  { value: 'aToZ', label: 'A-Z' },
-  { value: 'zToA', label: 'Z-A' }
-]
 
 const Blog = () => {
+  const { t } = useTranslation()
+
+  const sortOptions = [
+    { value: 'newest', label: t('blog.sortNewest') },
+    { value: 'oldest', label: t('blog.sortOldest') },
+    { value: 'aToZ', label: t('blog.sortAtoZ') },
+    { value: 'zToA', label: t('blog.sortZtoA') }
+  ]
   const [searchText, setSearchText] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [currentPage, setCurrentPage] = useState(1)
@@ -84,32 +89,17 @@ const Blog = () => {
     <div className="blog-page">
       <div className="container">
         <div className="blog-header">
-          <h1>Blog Du Lịch Tây Ninh</h1>
-          <p>Khám phá những câu chuyện, kinh nghiệm và thông tin hữu ích về Tây Ninh</p>
+          <Typography.Title level={2}>{t('blog.headerTitle')}</Typography.Title>
+          <p>{t('blog.headerDesc')}</p>
         </div>
 
-        <div className="filter-bar">
-          <div className="search-box">
-            <Input
-              placeholder="Tìm kiếm bài viết..."
-              prefix={<SearchOutlined />}
-              onChange={e => handleSearch(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          <div className="sort-filter">
-            <Select
-              defaultValue="newest"
-              onChange={handleSortChange}
-              className="sort-select"
-            >
-              {sortOptions.map(option => (
-                <Option key={option.value} value={option.value}>{option.label}</Option>
-              ))}
-            </Select>
-          </div>
-        </div>
+        <SearchBarCommon
+          onSearch={handleSearch}
+          loading={loading}
+          placeholder={t('blog.searchPlaceholder')}
+          className="search-bar-common"
+          buttonText={t('blog.searchButton')}
+        />
 
         {loading ? (
           <div className="loading-container">
@@ -132,7 +122,7 @@ const Blog = () => {
                     >
                       <div className="blog-meta">
                         <span className="blog-author">
-                          Bởi {blog.authorName}
+                          {t('blog.byAuthor', { author: blog.authorName })}
                         </span>
                       </div>
 
@@ -140,9 +130,9 @@ const Blog = () => {
 
                       <div className="blog-footer">
                         <div className="blog-stats">
-                          <span>{blog.totalLikes || 0} lượt thích</span>
+                          <span>{blog.totalLikes || 0} {t('blog.likes')}</span>
                           <span> • </span>
-                          <span>{blog.totalComments || 0} bình luận</span>
+                          <span>{blog.totalComments || 0} {t('blog.comments')}</span>
                         </div>
                       </div>
                     </Card>
@@ -152,17 +142,39 @@ const Blog = () => {
             </Row>
 
             <div className="pagination-container">
-              <Pagination
-                current={currentPage}
-                total={totalBlogs}
-                pageSize={pageSize}
-                onChange={handlePageChange}
-                showSizeChanger={false}
-              />
+              <div className="sort-filter">
+                <Select
+                  defaultValue="newest"
+                  onChange={handleSortChange}
+                  className="sort-select"
+                >
+                  {sortOptions.map(option => (
+                    <Option key={option.value} value={option.value}>{option.label}</Option>
+                  ))}
+                </Select>
+              </div>
+              <div className="pagination-controls">
+                <div className="results-info">
+                  <span>{`${totalBlogs} ${t('blog.totalPosts')}`}</span>
+                </div>
+                <Pagination
+                  current={currentPage}
+                  total={totalBlogs}
+                  pageSize={pageSize}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                  showQuickJumper
+                  showTotal={(total, range) => (
+                    <span className="results-info-total">
+                      {`${range[0]}-${range[1]} ${t('blog.of')} ${total} ${t('blog.totalPosts')}`}
+                    </span>
+                  )}
+                />
+              </div>
             </div>
           </>
         ) : (
-          <Empty description="Không tìm thấy bài viết nào" />
+          <Empty description={t('blog.noPostsFound')} />
         )}
       </div>
     </div>
