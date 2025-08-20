@@ -49,7 +49,7 @@ export interface TourBookingDto {
   originalPrice: number;
   discountPercent: number;
   totalPrice: number;
-  status: BookingStatus;
+  status: string;
   statusName: string;
   bookingCode: string;
   payOsOrderCode?: string;
@@ -77,7 +77,7 @@ export interface CreateBookingResponse {
     id: string;
     bookingCode: string;
     payOsOrderCode: string;
-    status: BookingStatus;
+    status: string;
     numberOfGuests: number;
     totalPrice: number;
     checkoutUrl: string;
@@ -164,11 +164,7 @@ export interface BulkCheckInResponse {
 // ===== ENUMS =====
 
 export enum BookingStatus {
-  Pending = 0,
-  Confirmed = 1,
-  Cancelled = 2,
-  Completed = 3,
-  Refunded = 4
+  // Đã chuyển sang dùng string, enum này không còn dùng nữa
 }
 
 // ===== SUPPORTING TYPES =====
@@ -180,7 +176,7 @@ export interface TourOperationSummary {
   price: number;
   maxGuests: number;
   currentBookings: number;
-  tourStartDate?: string;
+  tourStartDate: string;
   tourSlotDate?: string;
   guideId?: string;
   guideName?: string;
@@ -239,8 +235,8 @@ export interface LegacyBookingQR {
  * Migration helper - check if booking uses new individual QR system
  */
 export const hasIndividualQRs = (booking: TourBookingDto): boolean => {
-  return booking.guests && booking.guests.length > 0 && 
-         booking.guests.some(guest => guest.qrCodeData);
+  return booking.guests && booking.guests.length > 0 &&
+    booking.guests.some(guest => guest.qrCodeData);
 };
 
 /**
@@ -248,18 +244,18 @@ export const hasIndividualQRs = (booking: TourBookingDto): boolean => {
  */
 export const getAllQRCodes = (booking: TourBookingDto): string[] => {
   const qrCodes: string[] = [];
-  
+
   // Individual QR codes (preferred)
   booking.guests?.forEach(guest => {
     if (guest.qrCodeData) {
       qrCodes.push(guest.qrCodeData);
     }
   });
-  
+
   // Legacy booking QR (fallback)
   if (qrCodes.length === 0 && booking.qrCodeData) {
     qrCodes.push(booking.qrCodeData);
   }
-  
+
   return qrCodes;
 };

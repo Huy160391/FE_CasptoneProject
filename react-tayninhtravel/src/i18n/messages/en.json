@@ -617,7 +617,8 @@
         "cartClearedDescription": "All items have been removed from cart",
         "checkoutDescription": "Checkout functionality is under development",
         "error": "Error",
-        "errorDescription": "An error occurred while processing your cart. Please try again later."
+        "errorDescription": "An error occurred while processing your cart. Please try again later.",
+        "vatIncluded": "* Price includes VAT"
     },
     "checkout": {
         "promotionTitle": "Promotion",
@@ -1654,7 +1655,8 @@
         "viewDetails": "Details",
         "guide": "Guide",
         "columns": {
-            "bookingCode": "Booking Code",
+            "bookingCode": "Payment code",
+            "tourCompanyName": "Tour Company",
             "tourName": "Tour Name",
             "tourDate": "Tour Date",
             "guestCount": "Guest Count",
