@@ -19,7 +19,7 @@ import {
 } from '@/services/specialtyShopService';
 import dayjs from 'dayjs';
 import './Dashboard.scss';
-
+import RevenueFlipCard from './RevenueFlipCard';
 const Dashboard = () => {
     const navigate = useNavigate();
     const { token } = useAuthStore();
@@ -78,6 +78,8 @@ const Dashboard = () => {
         color: string;
         prefix?: string;
         suffix?: string;
+        onClick?: () => void;
+        clickable?: boolean;
     };
 
     // Dynamic stats based on API data
@@ -98,8 +100,15 @@ const Dashboard = () => {
                 color: '#52c41a',
             },
             {
-                title: 'Tổng doanh thu',
-                value: dashboardData.totalRevenue,
+                title: 'Doanh thu trước thuế',
+                value: dashboardData.totalRevenueBeforeTax ?? 0,
+                prefix: '₫',
+                icon: <DollarOutlined />,
+                color: '#faad14',
+            },
+            {
+                title: 'Doanh thu sau thuế',
+                value: dashboardData.totalRevenueAfterTax ?? 0,
                 prefix: '₫',
                 icon: <DollarOutlined />,
                 color: '#faad14',
@@ -206,27 +215,40 @@ const Dashboard = () => {
             </div>
 
             <Row gutter={[16, 16]}>
-                {stats.map((stat, index) => (
-                    <Col xs={24} sm={12} md={6} key={index}>
-                        <Card className="stat-card">
-                            <div className="stat-icon" style={{ backgroundColor: stat.color }}>
-                                {stat.icon}
-                            </div>
-                            <Statistic
-                                title={stat.title}
-                                value={stat.value}
-                                prefix={stat.prefix}
-                                suffix={stat.suffix}
-                                formatter={value =>
-                                    typeof value === 'number' && !stat.prefix && !stat.suffix
-                                        ? value.toLocaleString()
-                                        : value
-                                }
-                            />
-                        </Card>
-                    </Col>
-                ))}
+                <Col xs={24} sm={12} md={6}>
+                    <RevenueFlipCard
+                        beforeTax={dashboardData!.totalRevenueBeforeTax}
+                        afterTax={dashboardData!.totalRevenueAfterTax}
+                    />
+                </Col>
+
+                {stats
+                    .filter(
+                        (s) => s.title !== "Doanh thu trước thuế" && s.title !== "Doanh thu sau thuế"
+                    )
+                    .map((stat, index) => (
+                        <Col xs={24} sm={12} md={6} key={index}>
+                            <Card className="stat-card">
+                                <div className="stat-icon" style={{ backgroundColor: stat.color }}>
+                                    {stat.icon}
+                                </div>
+                                <Statistic
+                                    title={stat.title}
+                                    value={stat.value}
+                                    prefix={stat.prefix}
+                                    suffix={stat.suffix}
+                                    formatter={(value) =>
+                                        typeof value === "number" && !stat.prefix && !stat.suffix
+                                            ? value.toLocaleString()
+                                            : value
+                                    }
+                                />
+                            </Card>
+                        </Col>
+                    ))}
             </Row>
+
+
 
             <Row gutter={[16, 16]} className="dashboard-row">
                 <Col xs={24} lg={16}>

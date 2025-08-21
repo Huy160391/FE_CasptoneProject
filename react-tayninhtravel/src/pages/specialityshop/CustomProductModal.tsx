@@ -164,23 +164,6 @@ const CustomProductModal = ({
         }
     };
 
-    // Xử lý thay đổi input số
-    const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
-        const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-        setFormValues({
-            ...formValues,
-            [fieldName]: value
-        });
-
-        // Clear error for this field
-        if (errors[fieldName]) {
-            setErrors({
-                ...errors,
-                [fieldName]: ''
-            });
-        }
-    };
-
     // Xử lý thay đổi switch
     const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const checked = e.target.checked;
@@ -598,12 +581,19 @@ const CustomProductModal = ({
                                 Số lượng tồn kho
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 className={`form-control ${errors.quantityInStock ? 'error' : ''}`}
                                 name="quantityInStock"
-                                value={formValues.quantityInStock || 0}
-                                onChange={(e) => handleNumberChange(e, 'quantityInStock')}
-                                min="0"
+                                value={formValues.quantityInStock ? formValues.quantityInStock.toString() : ''}
+                                onChange={e => {
+                                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                                    let num = raw === '' ? 0 : parseInt(raw, 10);
+                                    if (num > 10000) num = 10000;
+                                    setFormValues({ ...formValues, quantityInStock: num });
+                                    if (errors.quantityInStock) setErrors({ ...errors, quantityInStock: '' });
+                                }}
+                                maxLength={5}
+                                placeholder="1-10.000"
                             />
                             {errors.quantityInStock && <div className="error-message">{errors.quantityInStock}</div>}
                         </div>
@@ -655,13 +645,19 @@ const CustomProductModal = ({
                                     Phần trăm giảm giá (%)
                                 </label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     className={`form-control ${errors.salePercent ? 'error' : ''}`}
                                     name="salePercent"
-                                    value={formValues.salePercent || 0}
-                                    onChange={(e) => handleNumberChange(e, 'salePercent')}
-                                    min="1"
-                                    max="99"
+                                    value={formValues.salePercent ? formValues.salePercent.toString() : ''}
+                                    onChange={e => {
+                                        const raw = e.target.value.replace(/[^0-9]/g, '');
+                                        let num = raw === '' ? 0 : parseInt(raw, 10);
+                                        if (num > 99) num = 99;
+                                        setFormValues({ ...formValues, salePercent: num });
+                                        if (errors.salePercent) setErrors({ ...errors, salePercent: '' });
+                                    }}
+                                    maxLength={2}
+                                    placeholder="1-99"
                                 />
                                 {errors.salePercent && <div className="error-message">{errors.salePercent}</div>}
                             </div>

@@ -15,7 +15,8 @@ import {
     Col,
     Descriptions,
     Modal,
-    Switch
+    Switch,
+    Tooltip
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -24,8 +25,11 @@ import {
     ShoppingCartOutlined,
     EyeOutlined,
     ReloadOutlined,
-    ShopOutlined
+    ShopOutlined,
+    StarOutlined
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+// ...existing code...
 import { useTranslation } from 'react-i18next';
 import { userService } from '../services/userService';
 
@@ -89,7 +93,7 @@ export interface Order {
     shopName: string;
     items: OrderItem[];
     totalAmount: number;
-    status: 'paid' | 'cancelled' | 'delivered' | 'not-delivered';
+    status: 'unpaid' | 'paid' | 'cancelled' | 'delivered' | 'not-delivered';
     paymentStatus: 'unpaid' | 'paid' | 'refunded';
     paymentMethod: string;
     orderDate: string;
@@ -105,7 +109,7 @@ interface OrderHistoryProps {
 // Helper function to map API status to component status
 const mapApiStatusToComponentStatus = (apiStatus: string, isChecked: boolean): Order['status'] => {
     switch (apiStatus.toLowerCase()) {
-        case 'pending': return 'not-delivered';    // Pending -> Chưa nhận hàng (chưa thanh toán)
+        case 'pending': return 'unpaid';    // Pending -> Chưa thanh toán
         case 'paid': return isChecked ? 'delivered' : 'paid';  // Paid - nếu đã check thì delivered, chưa check thì paid
         case 'cancel':
         case 'cancelled': return 'cancelled';  // Cancel/Cancelled -> Bị hủy
@@ -165,6 +169,15 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
     // Modal
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const navigate = useNavigate();
+
+    // Chuyển hướng sang trang chi tiết sản phẩm khi nhấn nút đánh giá
+    const handleReview = (order: Order) => {
+        if (order.items && order.items.length > 0) {
+            const productId = order.items[0].id;
+            navigate(`/shop/product/${productId}`);
+        }
+    };
 
     useEffect(() => {
         loadOrders();
@@ -257,6 +270,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
 
     const getStatusColor = (status: Order['status']) => {
         const colors = {
+            unpaid: 'gray',
             paid: 'blue',
             'not-delivered': 'orange',
             delivered: 'green',
@@ -267,6 +281,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
 
     const getStatusText = (status: Order['status']) => {
         const texts = {
+            unpaid: t('orderHistory.statuses.unpaid'),
             paid: t('orderHistory.statuses.paid'),
             'not-delivered': t('orderHistory.statuses.notDelivered'),
             delivered: t('orderHistory.statuses.delivered'),
@@ -386,13 +401,25 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
             width: 100,
             fixed: 'right',
             render: (_, order: Order) => (
-                <Button
-                    type="link"
-                    icon={<EyeOutlined />}
-                    onClick={() => showOrderDetail(order)}
-                >
-                    {t('orderHistory.viewDetail')}
-                </Button>
+                <>
+                    <Tooltip title={t('orderHistory.viewDetail')}>
+                        <Button
+                            type="link"
+                            icon={<EyeOutlined />}
+                            onClick={() => showOrderDetail(order)}
+                            style={{ marginRight: 8 }}
+                        />
+                    </Tooltip>
+                    <Tooltip title={t('orderHistory.review')}>
+                        <Button
+                            type="primary"
+                            icon={<StarOutlined style={{ fontSize: 16 }} />}
+                            disabled={order.status !== 'delivered'}
+                            onClick={() => handleReview(order)}
+                            style={{ padding: 0, width: 32, height: 32 }}
+                        />
+                    </Tooltip>
+                </>
             ),
         },
     ];
@@ -578,6 +605,14 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                                 <Descriptions.Item key={item.id} label={`${t('orderHistory.productName')} ${index + 1}`}>
                                     <div>
                                         <Text strong>{item.productName}</Text>
+                                        <Tooltip title={t('orderHistory.review')}>
+                                            <Button
+                                                type="text"
+                                                icon={<StarOutlined style={{ fontSize: 16 }} />}
+                                                style={{ padding: 0, marginLeft: 8, width: 24, height: 24 }}
+                                                disabled
+                                            />
+                                        </Tooltip>
                                         <br />
                                         <Text>{t('orderHistory.quantity')}: {item.quantity}</Text>
                                         <br />

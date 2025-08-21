@@ -191,7 +191,8 @@ export const deleteProduct = async (id: string, token?: string) => {
 export interface DashboardData {
     totalProducts: number;
     totalOrders: number;
-    totalRevenue: number;
+    totalRevenueBeforeTax: number;
+    totalRevenueAfterTax: number;
     wallet: number;
     averageProductRating: number;
     totalProductRatings: number;
@@ -230,7 +231,8 @@ export const getDashboardData = async (year: number, month: number, token?: stri
         return {
             totalProducts: actualData?.totalProducts || 0,
             totalOrders: actualData?.totalOrders || 0,
-            totalRevenue: actualData?.totalRevenue || 0,
+            totalRevenueBeforeTax: actualData?.totalRevenueBeforeTax || 0,
+            totalRevenueAfterTax: actualData?.totalRevenueAfterTax || 0,
             wallet: actualData?.wallet || 0,
             averageProductRating: actualData?.averageProductRating || 0,
             totalProductRatings: actualData?.totalProductRatings || 0,
@@ -250,7 +252,8 @@ export const getDashboardData = async (year: number, month: number, token?: stri
         return {
             totalProducts: 0,
             totalOrders: 0,
-            totalRevenue: 0,
+            totalRevenueBeforeTax: 0,
+            totalRevenueAfterTax: 0,
             wallet: 0,
             averageProductRating: 0,
             totalProductRatings: 0,
