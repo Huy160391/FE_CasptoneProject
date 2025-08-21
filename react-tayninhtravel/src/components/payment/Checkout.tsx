@@ -320,7 +320,7 @@ const Checkout = () => {
 
             if (res.orderId) {
                 // Then create enhanced payment link
-                if (res.promotionMessages) {
+                if (Array.isArray(res.promotionMessages) && res.promotionMessages.length > 0) {
                     await new Promise<void>(resolve => {
                         const modal = Modal.info({
                             title: t('checkout.promotionTitle', 'Khuyến mãi'),
@@ -639,8 +639,8 @@ const Checkout = () => {
                                             )}
                                         </>
                                     ) : (
-                                        <div className="info-row">
-                                            <Text>{t('checkout.pickupNote')}</Text>
+                                        <div style={{ marginTop: 8 }}>
+                                            <Text style={{ display: 'block', marginLeft: 0 }}>{t('checkout.pickupNote')}</Text>
                                         </div>
                                     )}
                                 </div>
@@ -718,7 +718,7 @@ const Checkout = () => {
                             {/* Voucher Section */}
                             <div className="voucher-section" style={{ marginBottom: 16 }}>
                                 <Title level={5} style={{ color: isDarkMode ? '#fff' : undefined }}>
-                                    Mã giảm giá
+                                    {t('cart.voucher')}
                                 </Title>
                                 {selectedVoucher ? (
                                     <div className="applied-voucher" style={{
@@ -739,7 +739,7 @@ const Checkout = () => {
                                                 fontSize: 12,
                                                 color: isDarkMode ? '#bfbfbf' : undefined
                                             }}>
-                                                {selectedVoucher.voucherName} - Giảm {formatPrice(voucherDiscount)}
+                                                {selectedVoucher.voucherName} - {t('cart.discount')} {formatPrice(voucherDiscount)}
                                             </Text>
                                         </div>
                                         <Button
@@ -765,8 +765,7 @@ const Checkout = () => {
                                             backgroundColor: isDarkMode ? '#141414' : undefined
                                         }}
                                         onClick={() => setVoucherModalVisible(true)}
-                                    >
-                                        Chọn voucher
+                                    >{t('cart.chooseVoucher')}
                                     </Button>
                                 )}
                             </div>

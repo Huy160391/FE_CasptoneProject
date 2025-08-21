@@ -11,6 +11,7 @@ import {
     Space,
     Divider
 } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
     CloseCircleOutlined,
     HomeOutlined,
@@ -31,6 +32,7 @@ import {
 const { Text } = Typography;
 
 const ProductPaymentCancel: React.FC = () => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -125,10 +127,10 @@ const ProductPaymentCancel: React.FC = () => {
                 gap: '16px'
             }}>
                 <Spin size="large" />
-                <Text>Đang xử lý hủy thanh toán...</Text>
+                <Text>{t('paymentCancel.processing')}</Text>
                 {processing && (
                     <Text type="secondary">
-                        Đang cập nhật trạng thái đơn hàng...
+                        {t('paymentCancel.updatingOrderStatus')}
                     </Text>
                 )}
             </div>
@@ -140,14 +142,14 @@ const ProductPaymentCancel: React.FC = () => {
             <div style={{ padding: '40px 20px', maxWidth: 800, margin: '0 auto' }}>
                 <Result
                     status="error"
-                    title="Có lỗi xảy ra"
+                    title={t('paymentCancel.errorTitle')}
                     subTitle={error}
                     extra={[
                         <Button type="primary" key="home" onClick={handleGoHome}>
-                            <HomeOutlined /> Về trang chủ
+                            <HomeOutlined /> {t('paymentCancel.goHome')}
                         </Button>,
                         <Button key="shop" onClick={handleContinueShopping}>
-                            <ShoppingCartOutlined /> Tiếp tục mua sắm
+                            <ShoppingCartOutlined /> {t('paymentCancel.continueShopping')}
                         </Button>
                     ]}
                 />
@@ -159,41 +161,41 @@ const ProductPaymentCancel: React.FC = () => {
         <div style={{ padding: '40px 20px', maxWidth: 800, margin: '0 auto' }}>
             <Result
                 status="error"
-                title="Thanh toán đã bị hủy"
-                subTitle="Bạn đã hủy quá trình thanh toán. Đơn hàng của bạn chưa được xác nhận."
+                title={t('paymentCancel.cancelTitle')}
+                subTitle={t('paymentCancel.cancelSubTitle')}
                 icon={<CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
             />
 
             {orderInfo && (
-                <Card title="Thông tin đơn hàng" style={{ marginTop: 24 }}>
+                <Card title={t('paymentCancel.orderInfoTitle')} style={{ marginTop: 24 }}>
                     <Descriptions column={1} bordered>
-                        <Descriptions.Item label="Mã đơn hàng">
+                        <Descriptions.Item label={t('paymentCancel.payosOrderCode')}>
                             <Text strong>{orderInfo.payOsOrderCode}</Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Tổng tiền gốc">
+                        <Descriptions.Item label={t('paymentCancel.totalAmount')}>
                             <Text>{formatCurrency(orderInfo.totalAmount)}</Text>
                         </Descriptions.Item>
 
                         {orderInfo.discountAmount > 0 && (
-                            <Descriptions.Item label="Giảm giá">
+                            <Descriptions.Item label={t('paymentCancel.discount')}>
                                 <Text type="success">
                                     -{formatCurrency(orderInfo.discountAmount)}
                                 </Text>
                             </Descriptions.Item>
                         )}
 
-                        <Descriptions.Item label="Tổng cần thanh toán">
+                        <Descriptions.Item label={t('paymentCancel.totalAfterDiscount')}>
                             <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
                                 {formatCurrency(orderInfo.totalAfterDiscount)}
                             </Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Trạng thái">
-                            <Text type="danger">Đã hủy thanh toán</Text>
+                        <Descriptions.Item label={t('paymentCancel.status')}>
+                            <Text type="danger">{t('paymentCancel.cancelled')}</Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Thời gian tạo đơn">
+                        <Descriptions.Item label={t('paymentCancel.createdAt')}>
                             <Text>{new Date(orderInfo.createdAt).toLocaleString('vi-VN')}</Text>
                         </Descriptions.Item>
                     </Descriptions>
@@ -201,13 +203,13 @@ const ProductPaymentCancel: React.FC = () => {
                     <Divider />
 
                     <Alert
-                        message="Thông tin quan trọng"
+                        message={t('paymentCancel.importantInfoTitle')}
                         description={
                             <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                <li>Đơn hàng vẫn được lưu trong hệ thống với trạng thái "Đã hủy"</li>
-                                <li>Sản phẩm vẫn còn trong giỏ hàng của bạn</li>
-                                <li>Bạn có thể thử thanh toán lại bất cứ lúc nào</li>
-                                <li>Liên hệ hotline nếu cần hỗ trợ: 1900-xxxx</li>
+                                <li>{t('paymentCancel.importantInfoOrderCancelled')}</li>
+                                <li>{t('paymentCancel.importantInfoProductInCart')}</li>
+                                <li>{t('paymentCancel.importantInfoCanRetry')}</li>
+                                <li>{t('paymentCancel.importantInfoHotline')}</li>
                             </ul>
                         }
                         type="warning"
@@ -225,7 +227,7 @@ const ProductPaymentCancel: React.FC = () => {
                         onClick={handleRetryPayment}
                         icon={<ReloadOutlined />}
                     >
-                        Thử thanh toán lại
+                        {t('paymentCancel.retryPayment')}
                     </Button>
 
                     <Button
@@ -233,26 +235,26 @@ const ProductPaymentCancel: React.FC = () => {
                         onClick={handleViewCart}
                         icon={<ShoppingCartOutlined />}
                     >
-                        Xem giỏ hàng
+                        {t('paymentCancel.viewCart')}
                     </Button>
 
                     <Button size="large" onClick={handleContinueShopping}>
-                        <ShoppingCartOutlined /> Tiếp tục mua sắm
+                        <ShoppingCartOutlined /> {t('paymentCancel.continueShopping')}
                     </Button>
 
                     <Button size="large" onClick={handleViewOrders}>
-                        <HistoryOutlined /> Xem đơn hàng
+                        <HistoryOutlined /> {t('paymentCancel.viewOrders')}
                     </Button>
 
                     <Button size="large" onClick={handleGoHome}>
-                        <HomeOutlined /> Về trang chủ
+                        <HomeOutlined /> {t('paymentCancel.goHome')}
                     </Button>
                 </Space>
             </div>
 
             <div style={{ textAlign: 'center', marginTop: 24 }}>
                 <Text type="secondary">
-                    Cần hỗ trợ? <Link to="/contact">Liên hệ với chúng tôi</Link>
+                    {t('paymentCancel.needHelp')} <Link to="/contact">{t('paymentCancel.contactUs')}</Link>
                 </Text>
             </div>
         </div>

@@ -94,7 +94,7 @@ const ProductDetail = () => {
     try {
       const userService = await import('@/services/userService').then(mod => mod.default);
       await userService.createProductReview(product.id, finalRating, comment);
-      notification.success({ message: t('review.success'), description: t('review.thankYou') });
+      notification.success({ message: t('navigation.review.success'), description: t('navigation.review.thankYou') });
       setReviewModalVisible(false);
       // Reload lại danh sách review sau khi gửi thành công
       setReviewsLoading(true);
@@ -120,7 +120,7 @@ const ProductDetail = () => {
       }
       setReviewsLoading(false);
     } catch {
-      notification.error({ message: t('review.error'), description: t('review.submitFailed') });
+      notification.error({ message: t('navigation.review.error'), description: t('navigation.review.submitFailed') });
     }
   }
 
