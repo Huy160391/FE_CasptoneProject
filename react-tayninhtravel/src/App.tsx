@@ -6,6 +6,7 @@ import AIChatWrapper from './components/ChatBot';
 import { useThemeStore } from './store/useThemeStore';
 import appInitService from './services/appInitService';
 import './styles/global.scss';
+import ScrollToTop from './components/ScrollToTop';
 
 const AppRoutes = () => {
   const element = useRoutes(routes);
@@ -68,6 +69,8 @@ const App = () => {
   return (
     <ConfigProvider theme={theme}>
       <Router>
+        {/* Tự động scroll lên đầu trang khi chuyển route */}
+        <ScrollToTop />
         <AppRoutes />
         <AIChatWrapper version="enhanced" />
       </Router>
