@@ -1703,7 +1703,7 @@
     "bookingHistory": {
         "title": "Booking History",
         "description": "Manage and track your tour bookings",
-        "searchPlaceholder": "Search by tour name, booking code...",
+        "searchPlaceholder": "Search by tour name, tour company...",
         "filterByStatus": "Filter by status",
         "showCancelled": "Show cancelled",
         "total": "Total",

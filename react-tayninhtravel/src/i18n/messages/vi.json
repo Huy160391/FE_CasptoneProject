@@ -1737,7 +1737,7 @@
     "bookingHistory": {
         "title": "Lịch sử đặt tour",
         "description": "Quản lý và theo dõi các tour bạn đã đặt",
-        "searchPlaceholder": "Tìm kiếm theo tên tour, mã đặt tour...",
+        "searchPlaceholder": "Tìm kiếm theo tên tour, đơn vị tổ chức...",
         "filterByStatus": "Lọc theo trạng thái",
         "showCancelled": "Hiển thị đã hủy",
         "total": "Tổng",
