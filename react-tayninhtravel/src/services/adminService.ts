@@ -897,6 +897,67 @@ class AdminService {
       throw error;
     }
   }
+
+  // Testing Endpoints
+  async getTourSlotInfoForTesting(tourSlotId: string): Promise<any> {
+    try {
+      const response = await axios.get(`/Testing/tour-info/${tourSlotId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Error fetching tour slot info for testing:", error);
+      const err = error as any;
+      return {
+        success: false,
+        message: err.response?.data?.message || "An error occurred",
+      };
+    }
+  }
+
+  async skipToTourStart(tourSlotId: string): Promise<any> {
+    try {
+      const response = await axios.post(
+        `/Testing/skip-to-tour-start/${tourSlotId}`
+      );
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Error skipping to tour start:", error);
+      const err = error as any;
+      return {
+        success: false,
+        message: err.response?.data?.message || "An error occurred",
+      };
+    }
+  }
+
+  async completeTour(tourSlotId: string): Promise<any> {
+    try {
+      const response = await axios.post(`/Testing/complete-tour/${tourSlotId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Error completing tour:", error);
+      const err = error as any;
+      return {
+        success: false,
+        message: err.response?.data?.message || "An error occurred",
+      };
+    }
+  }
+
+  async triggerAutoCancel(tourSlotId: string): Promise<any> {
+    try {
+      const response = await axios.post(
+        `/Testing/trigger-auto-cancel/${tourSlotId}`
+      );
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Error triggering auto-cancel:", error);
+      const err = error as any;
+      return {
+        success: false,
+        message: err.response?.data?.message || "An error occurred",
+      };
+    }
+  }
 }
 
 export const adminService = new AdminService();
