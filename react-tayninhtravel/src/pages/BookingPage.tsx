@@ -230,7 +230,7 @@ const BookingPage: React.FC = () => {
       setCalculating(true);
       const response = await calculateBookingPrice(
         {
-          tourDetailsId: tourDetails.id,
+          tourOperationId: tourDetails.tourOperation.id, // ✅ FIXED: Pass correct ID to the service
           numberOfGuests: values.numberOfGuests,
         },
         token ?? undefined
