@@ -10,6 +10,7 @@ import {
   Alert,
   Button,
   Card,
+  Checkbox,
   Col,
   Descriptions,
   Divider,
@@ -93,6 +94,9 @@ const BookingPage: React.FC = () => {
     guests: [{ guestName: "", guestEmail: "", guestPhone: "" }], // ✅ NEW
   });
 
+  // Confirmation checkbox state
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+
   // Tour slots state
   const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TourSlotDto | null>(null);
@@ -142,6 +146,15 @@ const BookingPage: React.FC = () => {
             ...initialValues,
             guests: [],
           });
+
+          // Trigger initial price calculation after form is set
+          setTimeout(() => {
+            if (initialValues.numberOfGuests > 0) {
+              handleGuestCountChange({
+                numberOfGuests: initialValues.numberOfGuests,
+              });
+            }
+          }, 100);
         } else {
           setError(response.message || "Không thể tải thông tin tour");
         }
@@ -155,6 +168,26 @@ const BookingPage: React.FC = () => {
 
     loadTourDetails();
   }, [tourId, user, form, bookingData]);
+
+  // Auto-calculate price when both tourDetails and selectedSlot are available
+  useEffect(() => {
+    if (
+      tourDetails &&
+      selectedSlot &&
+      formValues.numberOfGuests > 0 &&
+      !calculating &&
+      !priceCalculation
+    ) {
+      console.log("Auto-triggering price calculation on component ready");
+      handleGuestCountChange({ numberOfGuests: formValues.numberOfGuests });
+    }
+  }, [
+    tourDetails,
+    selectedSlot,
+    formValues.numberOfGuests,
+    calculating,
+    priceCalculation,
+  ]);
 
   // Load tour slots
   const loadTourSlots = async (tourDetailsId: string) => {
@@ -205,6 +238,13 @@ const BookingPage: React.FC = () => {
         // Auto-select first available slot if only one
         if (availableSlots.length === 1) {
           setSelectedSlot(availableSlots[0]);
+          // Trigger price calculation for auto-selected slot
+          const currentValues = form.getFieldsValue();
+          if (currentValues.numberOfGuests > 0) {
+            handleGuestCountChange({
+              numberOfGuests: currentValues.numberOfGuests,
+            });
+          }
         }
 
         // Clear selected slot if it's no longer available
@@ -373,7 +413,13 @@ const BookingPage: React.FC = () => {
     form
       .validateFields()
       .then(() => {
-        setCurrentStep(currentStep + 1);
+        const nextStep = currentStep + 1;
+        setCurrentStep(nextStep);
+
+        // Trigger price calculation when moving to confirmation step (step 2)
+        if (nextStep === 2 && selectedSlot && formValues.numberOfGuests > 0) {
+          handleGuestCountChange({ numberOfGuests: formValues.numberOfGuests });
+        }
       })
       .catch(() => {
         message.error("Vui lòng điền đầy đủ thông tin");
@@ -394,11 +440,33 @@ const BookingPage: React.FC = () => {
 
     if (!isAuthenticated) {
       setIsLoginModalVisible(true);
+      setSubmitting(false);
       return;
     }
 
     if (!tourDetails || !token) {
       message.error("Thông tin không đầy đủ để đặt tour");
+      setSubmitting(false);
+      return;
+    }
+
+    // Validate price calculation is available
+    if (
+      !priceCalculation ||
+      !priceCalculation.finalPrice ||
+      priceCalculation.finalPrice <= 0
+    ) {
+      message.error(
+        "Chưa có thông tin giá tour. Vui lòng thử lại sau ít phút."
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    // Validate selected slot
+    if (!selectedSlot) {
+      message.error("Vui lòng chọn ngày tour");
+      setSubmitting(false);
       return;
     }
 
@@ -787,7 +855,14 @@ const BookingPage: React.FC = () => {
                                   setSelectedSlot(slot);
                                   // Recalculate pricing when slot changes
                                   const currentValues = form.getFieldsValue();
-                                  handleGuestCountChange(currentValues);
+                                  if (currentValues.numberOfGuests > 0) {
+                                    handleGuestCountChange(currentValues);
+                                  } else {
+                                    // If no guests specified yet, use default of 1
+                                    handleGuestCountChange({
+                                      numberOfGuests: 1,
+                                    });
+                                  }
                                 }}>
                                 <div style={{ textAlign: "center" }}>
                                   <div
@@ -1242,6 +1317,33 @@ const BookingPage: React.FC = () => {
                 {/* Payment System Selection - Hidden, always use Enhanced */}
                 {/* Enhanced Payment System is now the only option */}
 
+                {/* Confirmation checkbox */}
+                <div style={{ marginTop: 24, marginBottom: 16 }}>
+                  <Card
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      border: "1px solid #d9d9d9",
+                    }}>
+                    <Checkbox
+                      checked={isTermsAccepted}
+                      onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                      style={{
+                        fontSize: "14px",
+                        lineHeight: "1.6",
+                        alignItems: "flex-start",
+                      }}>
+                      <span style={{ marginLeft: "8px" }}>
+                        <strong>Anh/chị xác nhận đã đọc và đồng ý:</strong>{" "}
+                        Khách hàng tự chịu trách nhiệm sắp xếp phương tiện di
+                        chuyển và có mặt đúng giờ tại điểm check-in theo quy
+                        định của tour. Hệ thống/tour không chịu trách nhiệm về
+                        vấn đề địa lý, khoảng cách hay việc đưa đón khách từ nơi
+                        ở đến điểm tập trung.
+                      </span>
+                    </Checkbox>
+                  </Card>
+                </div>
+
                 <div style={{ textAlign: "right", marginTop: 24 }}>
                   <Space>
                     <Button onClick={handlePrev}>Quay lại</Button>
@@ -1251,6 +1353,11 @@ const BookingPage: React.FC = () => {
                       loading={submitting}
                       disabled={
                         submitting ||
+                        !isTermsAccepted ||
+                        !priceCalculation ||
+                        !priceCalculation.finalPrice ||
+                        priceCalculation.finalPrice <= 0 ||
+                        !selectedSlot ||
                         (availability && !availability.isAvailable)
                       }
                       onClick={handleSubmit}
