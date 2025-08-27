@@ -3,6 +3,7 @@ import axios from "@/config/axios";
 import type { TourGuideApplication } from "@/types";
 import type { CreateUserPayload, UpdateUserPayload } from "@/types/user";
 import { AdminBlogPost, AdminSupportTicket, TicketStatus } from "../types";
+import type { ApiResponse } from '@/types/index';
 
 // Re-export types for convenience
 export type {
@@ -10,6 +11,14 @@ export type {
   AdminSupportTicket,
   SupportTicket,
 } from "../types";
+
+// Đặt interface GetTourCompanyParams gần các interface khác ở đầu file
+export interface GetTourCompanyParams {
+  pageIndex?: number;
+  pageSize?: number;
+  textSearch?: string;
+  isActive?: boolean;
+}
 
 class AdminService {
   /**
@@ -22,7 +31,8 @@ class AdminService {
       pageIndex?: number;
       pageSize?: number;
       payOsOrderCode?: string;
-      status?: string;
+      orderStatus?: string;
+      isFinite?: boolean;
     } = {}
   ): Promise<{
     orders: any[];
@@ -62,13 +72,13 @@ class AdminService {
   }
   // Lấy danh sách tour chờ duyệt
   async getAllTours({
-    page = 0,
+    pageIndex = 0,
     pageSize = 10,
     searchTerm = "",
     status = "",
     includeInactive = false,
   } = {}): Promise<any> {
-    const params: any = { page, pageSize };
+    const params: any = { pageIndex, pageSize };
     if (searchTerm) params.searchTerm = searchTerm;
     if (status) params.status = status;
     params.includeInactive = includeInactive;
@@ -271,8 +281,8 @@ class AdminService {
       imageUrl: Array.isArray(apiBlog.imageUrl)
         ? apiBlog.imageUrl
         : apiBlog.imageUrl
-        ? [apiBlog.imageUrl]
-        : undefined,
+          ? [apiBlog.imageUrl]
+          : undefined,
       status: apiBlog.status !== undefined ? apiBlog.status : 0,
       views: apiBlog.views || 0,
       likes: apiBlog.likes || 0,
@@ -493,24 +503,30 @@ class AdminService {
     pageSize: number = 10,
     searchText?: string,
     status?: boolean
-  ) {
+  ): Promise<ApiResponse<any[]>> {
     const params: any = {
       pageIndex: page,
       pageSize,
     };
     if (searchText) params.textSearch = searchText;
     if (status !== undefined) params.status = status;
-    const response = await axios.get("/Cms/user", { params });
+    const response = await axios.get('/Cms/user', { params });
     // Map phoneNumber -> phone cho từng user
     const users = Array.isArray(response.data.data)
       ? response.data.data.map((u: any) => ({
-          ...u,
-          phone: u.phoneNumber || "",
-        }))
+        ...u,
+        phone: u.phoneNumber || '',
+      }))
       : [];
+    // Trả về đúng kiểu ApiResponse, bổ sung các trường phân trang
     return {
-      ...response.data,
+      success: response.data.success,
       data: users,
+      message: response.data.message,
+      totalCount: response.data.totalRecord,
+      totalPages: response.data.totalPages,
+      pageIndex: response.data.pageIndex,
+      pageSize: response.data.pageSize,
     };
   }
 
@@ -524,7 +540,7 @@ class AdminService {
   }
 
   async createUser(payload: CreateUserPayload) {
-    const response = await axios.post("/Cms/user", payload);
+    const response = await axios.post("/Cms/user/create", payload);
     return response.data;
   }
 
@@ -896,6 +912,20 @@ class AdminService {
       console.error("Error updating tour slot status:", error);
       throw error;
     }
+  }
+
+  async getTourCompanies(params: GetTourCompanyParams): Promise<ApiResponse<any[]>> {
+    const response = await axios.get('/Cms/TourCompany', { params });
+    return response.data;
+  }
+
+  /**
+   * Lấy chi tiết tour theo ID
+   */
+  async getTourDetail(tourId: string): Promise<any> {
+    if (!tourId) throw new Error("Tour ID is required");
+    const response = await axios.get(`/TourDetails/${tourId}`);
+    return response.data;
   }
 }
 

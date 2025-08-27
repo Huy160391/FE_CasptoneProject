@@ -29,11 +29,11 @@ import {
     ArrowLeftOutlined,
     CheckCircleOutlined,
     InfoCircleOutlined,
-    HeartOutlined,
     ShareAltOutlined,
     StarOutlined,
     UserOutlined
 } from '@ant-design/icons';
+import SharePopup from '../components/common/SharePopup';
 import './TourDetailsPage.scss';
 
 import { useAuthStore } from '../store/useAuthStore';
@@ -46,6 +46,7 @@ import { getDefaultTourImage } from '../utils/imageUtils';
 const { Title, Text, Paragraph } = Typography;
 
 const TourDetailsPage: React.FC = () => {
+    const [sharePopupVisible, setSharePopupVisible] = useState(false);
     const { t } = useTranslation();
     const { tourId } = useParams<{ tourId: string }>();
     const navigate = useNavigate();
@@ -570,12 +571,10 @@ const TourDetailsPage: React.FC = () => {
 
                             {/* Action Buttons */}
                             <div className="action-buttons">
-                                <Button icon={<HeartOutlined />} className="action-button">
-                                    {t('common.favorite')}
-                                </Button>
-                                <Button icon={<ShareAltOutlined />} className="action-button">
+                                <Button icon={<ShareAltOutlined />} className="action-button" onClick={() => setSharePopupVisible(true)}>
                                     {t('common.share')}
                                 </Button>
+                                <SharePopup visible={sharePopupVisible} onClose={() => setSharePopupVisible(false)} url={window.location.href} />
                             </div>
                         </Card>
                     </Col>

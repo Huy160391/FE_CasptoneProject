@@ -17,44 +17,29 @@ import {
   Spin,
   Typography,
 } from "antd";
-import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LoginModal from "../components/auth/LoginModal";
 import RegisterModal from "../components/auth/RegisterModal";
 import TourCard from "../components/tours/TourCard";
 import { TourDetail, tourDetailsService } from "../services/tourDetailsService";
 import { useAuthStore } from "../store/useAuthStore";
-import { TourDetailsStatus } from "../types/tour";
-import { mapStringToStatusEnum } from "../utils/statusMapper";
 import "./ThingsToDo.scss";
 import TourSearchBar from "./TourSearchBar";
 
 const { Title } = Typography;
 
 const ThingsToDo = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const locationParam = searchParams.get("location");
-  const dateParam = searchParams.get("date");
-  const keywordParam = searchParams.get("keyword");
   const { t } = useTranslation();
   const { isAuthenticated } = useAuthStore();
-
-  // State for search filters
-  const [selectedDestination, setSelectedDestination] = useState(
-    locationParam ? locationParam : "all"
-  );
-  const [searchKeyword, setSearchKeyword] = useState(keywordParam || "");
-  const [selectedDate, setSelectedDate] = useState(
-    dateParam ? dayjs(dateParam) : null
-  );
 
   // State for tours data
   const [tours, setTours] = useState<TourDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const pageSize = 6; // Số items trên mỗi trang
 
   // State for modals
@@ -65,7 +50,6 @@ const ThingsToDo = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [showFilters, setShowFilters] = useState(true);
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
-  // const [minRating, setMinRating] = useState<number>(0) // Tạm ẩn vì API chưa có rating
   const [maxGuests, setMaxGuests] = useState<number | null>(null);
 
   // Load tours from database
@@ -79,48 +63,28 @@ const ThingsToDo = () => {
       });
 
       if (response.success && response.data) {
-        // Filter only public tours (status 8) - tours available for customer booking
-        const publicTours = response.data.filter((tour: TourDetail) => {
-          const mappedStatus = mapStringToStatusEnum(tour.status);
-          return mappedStatus === TourDetailsStatus.Public;
-        });
-
         // Convert string status to number enum for TourCard compatibility
-        const toursWithStatus = publicTours.map((tour: TourDetail) => ({
+        const toursWithStatus = response.data.map((tour: TourDetail) => ({
           ...tour,
-          status: mapStringToStatusEnum(tour.status),
-          tourTemplateName: tour.title, // Use title as template name fallback
-          description: tour.description || "", // Ensure description is not undefined
-          timeline: tour.timeline || [], // Ensure timeline is not undefined
+          status: tour.status,
+          tourTemplateName: tour.title,
+          description: tour.description || "",
+          timeline: tour.timeline || [],
         }));
 
         setTours(toursWithStatus);
+        setTotalCount(response.totalCount || toursWithStatus.length);
       }
     } catch (error) {
       console.error("Error loading tours:", error);
       message.error("Không thể tải danh sách tour. Vui lòng thử lại sau.");
       setTours([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
   };
 
-  // Update search fields when URL params change
-  useEffect(() => {
-    if (locationParam) {
-      setSelectedDestination(locationParam);
-    }
-
-    if (keywordParam) {
-      setSearchKeyword(keywordParam);
-    }
-
-    if (dateParam) {
-      setSelectedDate(dayjs(dateParam));
-    }
-  }, [locationParam, dateParam, keywordParam]);
-
-  // Load tours on component mount
   useEffect(() => {
     loadTours(currentPage);
   }, [currentPage]);
@@ -131,21 +95,10 @@ const ThingsToDo = () => {
       setIsLoginModalVisible(true);
       return;
     }
-
-    // // Check if tour has active operation and available slots
-    // const hasAvailableSlot = Array.isArray(tour.availableSlots) && tour.availableSlots.some(
-    //   slot => String(slot.status).toLowerCase() === 'available' && Number(slot.availableSpots) > 0
-    // );
-    // if (!tour.tourOperation || !tour.tourOperation.isActive || !hasAvailableSlot) {
-    //   message.error('Tour này hiện không khả dụng để đặt')
-    //   return
-    // }
-
     message.info({
       content: "Đang chuyển đến trang đặt tour...",
       duration: 1,
     });
-
     navigate(`/booking/${tour.id}`, {
       state: {
         tourData: tour,
@@ -177,11 +130,6 @@ const ThingsToDo = () => {
     setCurrentPage(1);
   };
 
-  // const handleRatingChange = (value: number) => {
-  //   setMinRating(value)
-  //   setCurrentPage(1)
-  // }
-
   const handleMaxGuestsChange = (value: number | null) => {
     setMaxGuests(value);
     setCurrentPage(1);
@@ -192,73 +140,14 @@ const ThingsToDo = () => {
   };
 
   const resetFilters = () => {
-    setSearchKeyword("");
-    setSelectedDate(null);
     setPriceRange([0, 10000000]);
     setShowAvailableOnly(false);
     setMaxGuests(null);
     setCurrentPage(1);
   };
 
-  // Filter tours based on search criteria
-  const filteredTours = tours.filter((tour) => {
-    // Match destination - simplified to always true for now
-    const matchDestination = true;
-
-    // Match keyword - search in title and description
-    const matchKeyword =
-      searchKeyword === "" ||
-      tour.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      (tour.description &&
-        tour.description.toLowerCase().includes(searchKeyword.toLowerCase()));
-
-    // Filter by date if selected - simplified to always true for now
-    const matchDate = true;
-
-    // Filter by price range
-    const tourPrice = tour.tourOperation?.price || 0;
-    const matchPrice = tourPrice >= priceRange[0] && tourPrice <= priceRange[1];
-
-    // Filter by availability
-    const isAvailable = tour.tourOperation?.isActive;
-    const matchAvailable = !showAvailableOnly || isAvailable;
-
-    // Filter by rating - Tạm comment vì API chưa có rating
-    const matchRating = true;
-
-    // Filter by max guests
-    const tourMaxGuests = tour.tourOperation?.maxGuests || 0;
-    const matchGuests = !maxGuests || tourMaxGuests >= maxGuests;
-
-    return (
-      matchDestination &&
-      matchKeyword &&
-      matchDate &&
-      matchPrice &&
-      matchAvailable &&
-      matchRating &&
-      matchGuests
-    );
-  });
-
-  console.log("Filter debug:", {
-    totalTours: tours.length,
-    filteredTours: filteredTours.length,
-    filters: {
-      selectedDestination,
-      searchKeyword,
-      selectedDate: selectedDate?.format("YYYY-MM-DD"),
-      priceRange,
-      showAvailableOnly,
-      maxGuests,
-    },
-  });
-
-  // Calculate current page items
-  const currentItems = filteredTours.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // Không filter lại trên FE, tours đã là danh sách đúng cho trang hiện tại từ API
+  const currentItems = tours;
 
   if (loading) {
     return (
@@ -294,8 +183,7 @@ const ThingsToDo = () => {
         <Row gutter={[24, 24]} className="main-content">
           {/* Filter Sidebar */}
           <Col xs={24} md={6} className="filter-sidebar">
-            <div
-              className={`filters-container ${showFilters ? "show" : "hide"}`}>
+            <div className={`filters-container ${showFilters ? "show" : "hide"}`}>
               <div className="filter-header">
                 <Title level={4}>
                   <FilterOutlined /> {t("tours.filters")}
@@ -321,8 +209,7 @@ const ThingsToDo = () => {
                       value={priceRange}
                       onChange={handlePriceRangeChange}
                       tooltip={{
-                        formatter: (value) =>
-                          `${value?.toLocaleString("vi-VN")}₫`,
+                        formatter: (value) => `${value?.toLocaleString("vi-VN")}₫`,
                       }}
                     />
                     <div className="price-range-display">
@@ -333,26 +220,6 @@ const ThingsToDo = () => {
                   </div>
 
                   <Divider />
-
-                  {/* Rating Filter - Tạm comment vì API chưa có rating */}
-                  {/* <div className="filter-section">
-                    <Title level={5}>
-                      <StarOutlined /> {t('tours.minRating')}
-                    </Title>
-                    <Rate
-                      value={minRating}
-                      onChange={handleRatingChange}
-                      allowClear
-                      allowHalf
-                    />
-                    <div className="rating-text">
-                      {minRating > 0 && (
-                        <span>{minRating} sao trở lên</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <Divider /> */}
 
                   {/* Max Guests Filter */}
                   <div className="filter-section">
@@ -431,22 +298,20 @@ const ThingsToDo = () => {
                   <div className="pagination-controls">
                     <div className="results-info">
                       <span>
-                        {filteredTours.length} {t("tour.found")}
+                        {totalCount} {t("tour.found")}
                       </span>
                     </div>
 
-                    {filteredTours.length > 0 && (
+                    {totalCount > 0 && (
                       <Pagination
                         current={currentPage}
-                        total={filteredTours.length}
+                        total={totalCount}
                         pageSize={pageSize}
                         onChange={handlePageChange}
                         showSizeChanger={false}
-                        showQuickJumper={filteredTours.length > pageSize}
                         showTotal={(total, range) => (
                           <span className="results-info-total">
-                            {range[0]}-{range[1]} {t("shop.of")} {total}{" "}
-                            {t("tour.total")}
+                            {range[0]}-{range[1]} {t("shop.of")} {totalCount} {t("tour.total")}
                           </span>
                         )}
                       />

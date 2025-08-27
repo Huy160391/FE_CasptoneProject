@@ -84,7 +84,7 @@
             "confirmations": {
                 "delete": {
                     "title": "Xác nhận xóa",
-                    "content": "Bạn có chắc chắn muốn xóa người dùng \"{name}\" không?"
+                    "content": "Bạn có chắc chắn muốn xóa người dùng này không?"
                 },
                 "activate": {
                     "title": "Xác nhận kích hoạt",

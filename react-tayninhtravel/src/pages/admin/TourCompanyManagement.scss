@@ -1,0 +1,14 @@
+@import './ShopManagement.scss';
+
+.tour-company-management-page {
+  // Có thể override hoặc bổ sung style riêng cho trang quản lý công ty du lịch ở đây
+}
+
+.tour-company-management {
+  &.light-mode {
+    @extend .shop-management.light-mode;
+  }
+  &.dark-mode {
+    @extend .shop-management.dark-mode;
+  }
+}

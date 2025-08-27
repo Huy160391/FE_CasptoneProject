@@ -179,7 +179,7 @@ const Shop = () => {
 
         {/* Loading State */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '300px', width: '100%' }}>
             <Spin size="large" />
             <p style={{ marginTop: '16px' }}>{t('shop.loading')}</p>
           </div>

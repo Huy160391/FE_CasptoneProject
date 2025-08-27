@@ -4,9 +4,6 @@ import { Row, Col, Breadcrumb, Divider, Avatar, Card, Typography, Button, Skelet
 import {
   UserOutlined,
   ShareAltOutlined,
-  FacebookOutlined,
-  TwitterOutlined,
-  LinkedinOutlined,
   ArrowLeftOutlined,
   CommentOutlined,
   SendOutlined,
@@ -15,6 +12,7 @@ import {
   HeartOutlined,
   HeartFilled
 } from '@ant-design/icons'
+import SharePopup from '../components/common/SharePopup';
 import { publicService } from '@/services/publicService'
 import { userService, type UserComment } from '@/services/userService'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -28,6 +26,7 @@ const { Title, Text } = Typography
 const { TextArea } = Input
 
 const BlogPost = () => {
+  const [sharePopupVisible, setSharePopupVisible] = useState(false);
   const { id } = useParams()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuthStore()
@@ -366,10 +365,8 @@ const BlogPost = () => {
               <div className="post-share">
                 <Text strong>Chia sẻ bài viết:</Text>
                 <div className="share-buttons">
-                  <Button type="text" icon={<FacebookOutlined />} />
-                  <Button type="text" icon={<TwitterOutlined />} />
-                  <Button type="text" icon={<LinkedinOutlined />} />
-                  <Button type="text" icon={<ShareAltOutlined />} />
+                  <Button type="text" icon={<ShareAltOutlined />} onClick={() => setSharePopupVisible(true)} />
+                  <SharePopup visible={sharePopupVisible} onClose={() => setSharePopupVisible(false)} url={window.location.href} />
                 </div>
               </div>
 

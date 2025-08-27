@@ -12,9 +12,11 @@ import {
 } from 'antd'
 import {
   SearchOutlined,
-  EyeOutlined,
   LeftOutlined,
-  RightOutlined
+  RightOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  EyeOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import './Blogs.scss'
@@ -256,9 +258,9 @@ const Blogs = () => {
       key: 'authorName',
     },
     {
-      title: 'Lượt xem',
-      dataIndex: 'views',
-      key: 'views',
+      title: 'Lượt thích',
+      dataIndex: 'likes',
+      key: 'likes',
       sorter: true,
     },
     {
@@ -282,25 +284,23 @@ const Blogs = () => {
       render: (_: any, record: AdminBlogPost) => (
         <Space size="middle">
           <Button
-            type="text"
+            type="primary"
             icon={<EyeOutlined />}
+            size="small"
             onClick={() => showViewModal(record)}
           />
           <Button
             type="primary"
+            icon={<CheckCircleOutlined />}
             size="small"
             onClick={() => handleApprove(record.id)}
-          >
-            Duyệt
-          </Button>
+          />
           <Button
-            type="primary"
             danger
+            icon={<CloseCircleOutlined />}
             size="small"
             onClick={() => handleReject(record.id)}
-          >
-            Từ chối
-          </Button>
+          />
         </Space>
       ),
     },
@@ -390,6 +390,7 @@ const Blogs = () => {
         <Button
           key="approve"
           type="primary"
+          icon={<CheckCircleOutlined />}
           onClick={() => {
             if (currentBlog) {
               handleApprove(currentBlog.id)
@@ -402,6 +403,7 @@ const Blogs = () => {
           key="reject"
           type="primary"
           danger
+          icon={<CloseCircleOutlined />}
           onClick={() => {
             if (currentBlog) {
               handleReject(currentBlog.id)
@@ -419,7 +421,7 @@ const Blogs = () => {
             <div className="blog-meta modal-meta">
               <Text type="secondary" className="meta-item">Tác giả: {currentBlog.authorName}</Text>
               <Text type="secondary" className="meta-item"> Ngày đăng: {dayjs(currentBlog.createdAt).format('DD/MM/YYYY')}</Text>
-              <Text type="secondary" className="meta-item"> Lượt xem: {currentBlog.views} </Text>
+              <Text type="secondary" className="meta-item"> Lượt thích: {currentBlog.likes} </Text>
               <Tag color={statuses.find(s => s.value === mapStatusToUI(currentBlog.status))?.color}>
                 {statuses.find(s => s.value === mapStatusToUI(currentBlog.status))?.label}
               </Tag>
