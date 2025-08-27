@@ -1,5 +1,5 @@
 import axios from "../config/axios";
-import { ApiResponse } from "../types/api";
+import type { ApiResponse } from '@/types/index';
 import {
   BookingStatus,
   GuestInfoRequest,
@@ -266,13 +266,43 @@ export const calculateBookingPrice = async (request: CalculatePriceRequest, toke
 
     return {
       success: false,
-      message: 'Không tìm thấy thông tin tour'
+      message: 'Không tìm thấy thông tin tour',
+      data: {
+        tourDetailsId: '',
+        tourTitle: '',
+        numberOfGuests: 0,
+        originalPricePerGuest: 0,
+        totalOriginalPrice: 0,
+        discountPercent: 0,
+        discountAmount: 0,
+        finalPrice: 0,
+        isEarlyBird: false,
+        pricingType: '',
+        daysSinceCreated: 0,
+        daysUntilTour: 0,
+        bookingDate: ''
+      }
     };
   } catch (error: any) {
     console.error('Error calculating booking price:', error);
     return {
       success: false,
-      message: error.response?.data?.message || 'Không thể tính giá tour'
+      message: error.response?.data?.message || 'Không thể tính giá tour',
+      data: {
+        tourDetailsId: '',
+        tourTitle: '',
+        numberOfGuests: 0,
+        originalPricePerGuest: 0,
+        totalOriginalPrice: 0,
+        discountPercent: 0,
+        discountAmount: 0,
+        finalPrice: 0,
+        isEarlyBird: false,
+        pricingType: '',
+        daysSinceCreated: 0,
+        daysUntilTour: 0,
+        bookingDate: ''
+      }
     };
   }
 };
@@ -292,6 +322,19 @@ export const createTourBooking = async (
     return {
       success: false,
       message: validation.errors.join(", "),
+      data: {
+        success: false,
+        message: validation.errors.join(", "),
+        bookingId: '',
+        bookingCode: '',
+        paymentUrl: '',
+        originalPrice: 0,
+        discountPercent: 0,
+        finalPrice: 0,
+        pricingType: '',
+        bookingDate: '',
+        tourStartDate: ''
+      }
     };
   }
 
@@ -523,7 +566,14 @@ export const checkTourSlotCapacity = async (
     console.error('Error checking slot capacity:', error);
     return {
       success: false,
-      message: error.response?.data?.message || 'Không thể kiểm tra capacity slot'
+      message: error.response?.data?.message || 'Không thể kiểm tra capacity slot',
+      data: {
+        isAvailable: false,
+        maxGuests: 0,
+        currentBookings: 0,
+        availableSlots: 0,
+        message: error.response?.data?.message || 'Không thể kiểm tra capacity slot'
+      }
     };
   }
 };

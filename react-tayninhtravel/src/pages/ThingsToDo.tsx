@@ -309,10 +309,10 @@ const ThingsToDo = () => {
                         pageSize={pageSize}
                         onChange={handlePageChange}
                         showSizeChanger={false}
-                        showTotal={(total, range) => (
-                          <span className="results-info-total">
-                            {range[0]}-{range[1]} {t("shop.of")} {totalCount} {t("tour.total")}
-                          </span>
+                          showTotal={(_, range) => (
+                            <span className="results-info-total">
+                              {range[0]}-{range[1]} {t("shop.of")} {totalCount} {t("tour.total")}
+                            </span>
                         )}
                       />
                     )}
