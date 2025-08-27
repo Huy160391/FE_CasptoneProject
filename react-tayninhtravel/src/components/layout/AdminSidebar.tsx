@@ -96,7 +96,6 @@ const AdminSidebar = () => {
       ],
     },
     {
-<<<<<<< HEAD
       key: 'tour',
       icon: <AppstoreOutlined />,
       label: 'Tour',
@@ -110,11 +109,6 @@ const AdminSidebar = () => {
           label: <Link to="/admin/tour-companies">Quản lý công ty du lịch</Link>,
         },
       ],
-=======
-      key: "/admin/tours",
-      icon: <AppstoreOutlined />,
-      label: <Link to="/admin/tours">{t("admin.sidebar.tours")}</Link>,
->>>>>>> e10eab49b4c468bd58ae583da1a57577e7304863
     },
     {
       key: "/admin/blogs",
