@@ -207,7 +207,7 @@ const UnifiedPaymentSuccess: React.FC = () => {
 
     const handleContinueShopping = () => {
         if (paymentData?.type === 'tour') {
-            navigate('/things-to-do');
+            navigate('/tours');
         } else {
             navigate('/shop');
         }

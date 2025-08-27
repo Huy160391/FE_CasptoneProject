@@ -1885,7 +1885,12 @@
             "allLocations": "Tất cả địa điểm",
             "datePlaceholder": "Chọn ngày khởi hành",
             "keywordPlaceholder": "Tìm kiếm tour...",
-            "searchButton": "Tìm kiếm"
+            "searchButton": "Tìm kiếm",
+            "scheduleDaySunday": "Chủ nhật",
+            "scheduleDaySaturday": "Thứ bảy",
+            "scheduleDayAll": "Tất cả các ngày",
+            "loadingSuggestion": "Đang tải gợi ý...",
+            "noSuggestion": "Không có gợi ý nào"
         },
         "found": "Tour",
         "total": "Tổng số tour"

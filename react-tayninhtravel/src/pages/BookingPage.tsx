@@ -224,8 +224,8 @@ const BookingPage: React.FC = () => {
             hideReason: !slot.isActive
               ? "not active"
               : !isNotPast
-              ? "in past"
-              : null,
+                ? "in past"
+                : null,
           });
 
           // ✅ SIMPLIFIED: Only filter out inactive and past slots
@@ -563,9 +563,8 @@ const BookingPage: React.FC = () => {
             // Amount: Try multiple sources
             amount: priceCalculation?.finalPrice || 0,
 
-            description: `Tour Booking - ${
-              response.data?.bookingCode || "Individual QR System"
-            }`,
+            description: `Tour Booking - ${response.data?.bookingCode || "Individual QR System"
+              }`,
           };
 
           // Validate required fields
@@ -582,8 +581,7 @@ const BookingPage: React.FC = () => {
         } catch (enhancedError: any) {
           console.error("Enhanced payment failed:", enhancedError);
           message.error(
-            `Không thể tạo thanh toán: ${
-              enhancedError.message || "Lỗi không xác định"
+            `Không thể tạo thanh toán: ${enhancedError.message || "Lỗi không xác định"
             }`
           );
         } finally {
@@ -596,8 +594,8 @@ const BookingPage: React.FC = () => {
       console.error("Booking error:", error);
       message.error(
         error.response?.data?.message ||
-          error.message ||
-          "Có lỗi xảy ra khi đặt tour"
+        error.message ||
+        "Có lỗi xảy ra khi đặt tour"
       );
     } finally {
       setSubmitting(false);
@@ -628,7 +626,7 @@ const BookingPage: React.FC = () => {
           type="error"
           showIcon
           action={
-            <Button type="primary" onClick={() => navigate("/things-to-do")}>
+            <Button type="primary" onClick={() => navigate("/tours")}>
               Xem tour khác
             </Button>
           }
@@ -811,11 +809,9 @@ const BookingPage: React.FC = () => {
                             return (
                               <div
                                 key={slot.id}
-                                className={`tour-slot ${
-                                  selectedSlot?.id === slot.id ? "selected" : ""
-                                } ${
-                                  isLowAvailability ? "low-availability" : ""
-                                } ${isSoldOut ? "sold-out" : ""}`}
+                                className={`tour-slot ${selectedSlot?.id === slot.id ? "selected" : ""
+                                  } ${isLowAvailability ? "low-availability" : ""
+                                  } ${isSoldOut ? "sold-out" : ""}`}
                                 onClick={(e) => {
                                   // ✅ FIXED: Check for disabled statuses
                                   if (slot.status === 2) {
@@ -888,8 +884,8 @@ const BookingPage: React.FC = () => {
                                         availableSpots > 5
                                           ? "#52c41a"
                                           : availableSpots > 0
-                                          ? "#faad14"
-                                          : "#ff4d4f",
+                                            ? "#faad14"
+                                            : "#ff4d4f",
                                       fontWeight: "bold",
                                     }}>
                                     {availableSpots > 0
@@ -1474,7 +1470,7 @@ const BookingPage: React.FC = () => {
       <LoginModal
         isVisible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
-        onRegisterClick={() => {}}
+        onRegisterClick={() => { }}
         onLoginSuccess={() => {
           setIsLoginModalVisible(false);
           // Retry booking after login
