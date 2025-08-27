@@ -1,5 +1,4 @@
 import { Row, Col, Spin, Empty, message } from "antd";
-import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getHolidayTours } from "../../services/tourcompanyService";
@@ -15,7 +14,6 @@ import "./HolidayTours.scss";
 import "@/styles/custom-buttons.scss";
 
 const HolidayTours = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
