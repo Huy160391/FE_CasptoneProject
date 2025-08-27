@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import SearchBar from '../../pages/TourSearchBar'
 import './HeroSection.scss'
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation()
 
   // Chỉ sử dụng một ảnh cố định làm background
@@ -19,7 +21,9 @@ const HeroSection = () => {
       <div className="hero-content">
         <h1 data-text={heroTitle}>{heroTitle}</h1>
         <p>{t('home.hero.subtitle')}</p>
-        <SearchBar />
+        <SearchBar onSearchTermChange={(term, scheduleDay) => {
+          navigate('/tours', { state: { searchTerm: term, scheduleDay } });
+        }} />
       </div>
     </div>
   )

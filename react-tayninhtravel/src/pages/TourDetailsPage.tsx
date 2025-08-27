@@ -234,7 +234,7 @@ const TourDetailsPage: React.FC = () => {
                         className="breadcrumb"
                         items={[
                             { title: <Link to="/">{t('navigation.home')}</Link> },
-                            { title: <Link to="/things-to-do">{t('navigation.activities')}</Link> },
+                            { title: <Link to="/tours">{t('navigation.activities')}</Link> },
                             { title: tour.title }
                         ]}
                     />

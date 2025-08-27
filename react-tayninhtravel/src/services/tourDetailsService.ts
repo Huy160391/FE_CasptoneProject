@@ -98,12 +98,26 @@ export class TourDetailsService {
         pageIndex?: number;
         pageSize?: number;
         includeInactive?: boolean;
+        searchTerm?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        scheduleDay?: string;
+        hasEarlyBird?: boolean;
+        startLocation?: string;
+        endLocation?: string;
     } = {}): Promise<ApiResponse<TourDetail[]>> {
-        const queryParams = {
+        const queryParams: Record<string, any> = {
             pageIndex: params.pageIndex || 0,
             pageSize: params.pageSize || 10,
             includeInactive: params.includeInactive || false
         };
+        if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+        if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice;
+        if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice;
+        if (params.scheduleDay) queryParams.scheduleDay = params.scheduleDay;
+        if (params.hasEarlyBird !== undefined) queryParams.hasEarlyBird = params.hasEarlyBird;
+        if (params.startLocation) queryParams.startLocation = params.startLocation;
+        if (params.endLocation) queryParams.endLocation = params.endLocation;
 
         const response = await axios.get(`${this.baseUrl}/paginated`, { params: queryParams });
         return response.data;

@@ -106,9 +106,9 @@ const Navbar = () => {
       icon: <HomeOutlined />,
       label: <Link to="/">{t('navigation.home')}</Link>
     }, {
-      key: '/things-to-do',
+      key: '/tours',
       icon: <AppstoreOutlined />,
-      label: <Link to="/things-to-do">{t('navigation.tours')}</Link>
+      label: <Link to="/tours">{t('navigation.tours')}</Link>
     },
     {
       key: '/shop',
