@@ -8,15 +8,16 @@ import './TourSearchBar.scss';
 interface TourSearchBarProps {
     onSearchTermChange?: (term: string, fromDate?: string, toDate?: string) => void;
     searchTerm?: string;
+    scheduleDay?: string;
 }
 
 const { Option } = Select;
 
-const TourSearchBar = ({ onSearchTermChange, searchTerm }: TourSearchBarProps) => {
+const TourSearchBar = ({ onSearchTermChange, searchTerm, scheduleDay }: TourSearchBarProps) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const [keyword, setKeyword] = useState<string>(searchTerm || '');
-    const [scheduleDay, setScheduleDay] = useState<string>('');
+    const [scheduleDayState, setScheduleDayState] = useState<string>(scheduleDay || '');
     const [options, setOptions] = useState<{ value: string }[]>([]);
     const [suggestionTours, setSuggestionTours] = useState<TourDetail[]>([]);
     const [fetching, setFetching] = useState(false);
@@ -26,14 +27,18 @@ const TourSearchBar = ({ onSearchTermChange, searchTerm }: TourSearchBarProps) =
     }, [searchTerm]);
 
     useEffect(() => {
-        if (!keyword && !scheduleDay) {
+        setScheduleDayState(scheduleDay || '');
+    }, [scheduleDay]);
+
+    useEffect(() => {
+        if (!keyword && !scheduleDayState) {
             setOptions([]);
             return;
         }
         setFetching(true);
         tourDetailsService.getPublicTourDetailsList({
             searchTerm: keyword,
-            scheduleDay,
+            scheduleDay: scheduleDayState,
             pageSize: 5
         }).then(res => {
             if (res.success && res.data) {
@@ -44,11 +49,14 @@ const TourSearchBar = ({ onSearchTermChange, searchTerm }: TourSearchBarProps) =
                 setSuggestionTours([]);
             }
         }).finally(() => setFetching(false));
-    }, [keyword, scheduleDay]);
+    }, [keyword, scheduleDayState]);
 
     const handleSearch = () => {
         if (onSearchTermChange) {
-            onSearchTermChange(keyword, scheduleDay);
+            onSearchTermChange(keyword, scheduleDayState);
+        }
+        if (window.location.pathname === '/' || window.location.pathname === '/home') {
+            navigate('/tours', { state: { searchTerm: keyword, scheduleDay: scheduleDayState } });
         }
     };
 
@@ -57,8 +65,8 @@ const TourSearchBar = ({ onSearchTermChange, searchTerm }: TourSearchBarProps) =
             <div className="search-container">
                 <div className="search-item date-range" style={{ display: 'flex', alignItems: 'center', gap: 16, width: '100%' }}>
                     <Select
-                        value={scheduleDay}
-                        onChange={setScheduleDay}
+                        value={scheduleDayState}
+                        onChange={setScheduleDayState}
                         style={{ width: 140 }}
                         placeholder={t('tour.search.scheduleDayPlaceholder')}
                     >
@@ -71,12 +79,11 @@ const TourSearchBar = ({ onSearchTermChange, searchTerm }: TourSearchBarProps) =
                         value={keyword}
                         onSelect={value => {
                             setKeyword(value);
-                            // Tìm tour trong suggestionTours
                             const found = suggestionTours.find(tour => tour.title === value);
                             if (found) {
                                 navigate(`/tour-details/${found.id}`);
                             } else {
-                                if (onSearchTermChange) onSearchTermChange(value, scheduleDay);
+                                if (onSearchTermChange) onSearchTermChange(value, scheduleDayState);
                             }
                         }}
                         onSearch={setKeyword}

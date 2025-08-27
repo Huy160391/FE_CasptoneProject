@@ -96,12 +96,16 @@ const ThingsToDo = () => {
     }
   };
 
+  // Chỉ lấy state từ location khi mount
   useEffect(() => {
-    // Khi mount, nếu có state từ location thì set filter
     if (location.state) {
       if (location.state.searchTerm) setSearchTerm(location.state.searchTerm);
       if (location.state.scheduleDay) setScheduleDay(location.state.scheduleDay);
     }
+  }, []);
+
+  // Load tours khi filter thay đổi
+  useEffect(() => {
     loadTours(currentPage);
   }, [currentPage, searchTerm, scheduleDay, startLocation, endLocation, hasEarlyBird]);
 
@@ -176,7 +180,7 @@ const ThingsToDo = () => {
         </div>
         {/* Search Section */}
         <div className="search-filter-section">
-          <TourSearchBar onSearchTermChange={handleSearchBarChange} searchTerm={searchTerm} />
+          <TourSearchBar onSearchTermChange={handleSearchBarChange} searchTerm={searchTerm} scheduleDay={scheduleDay} />
         </div>
         {/* Main Content */}
         {loading ? (
