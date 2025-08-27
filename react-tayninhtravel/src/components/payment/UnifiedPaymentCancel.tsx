@@ -198,7 +198,7 @@ const UnifiedPaymentCancel: React.FC = () => {
 
     const handleContinueShopping = () => {
         if (paymentData?.type === 'tour') {
-            navigate('/things-to-do');
+            navigate('/tours');
         } else {
             navigate('/shop');
         }
@@ -207,7 +207,7 @@ const UnifiedPaymentCancel: React.FC = () => {
     const handleRetryPayment = () => {
         if (paymentData?.type === 'tour') {
             // Navigate back to booking page or tour details
-            navigate('/things-to-do');
+            navigate('/tours');
         } else {
             // Navigate back to cart
             navigate('/cart');

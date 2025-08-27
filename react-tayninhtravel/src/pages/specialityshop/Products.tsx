@@ -151,7 +151,7 @@ const SpecialityShopProducts = () => {
     };
 
     const columns: ColumnsType<Product> = [
-        // ...existing code...
+
         {
             title: 'Tên sản phẩm',
             dataIndex: 'name',
@@ -170,11 +170,22 @@ const SpecialityShopProducts = () => {
             render: (category: string) => <Tag color="blue">{getCategoryViLabel(category.toLowerCase())}</Tag>,
         },
         {
-            title: 'Giá',
+            title: 'Giá bán hiện tại',
             dataIndex: 'price',
             key: 'price',
             render: (price: number) => `${price.toLocaleString()} ₫`,
             sorter: (a, b) => a.price - b.price,
+        },
+        {
+            title: 'Giá gốc',
+            key: 'originalPrice',
+            render: (_: any, record: Product) => {
+                if (record.isSale && record.salePercent) {
+                    const original = Math.round(record.price / (1 - record.salePercent / 100));
+                    return <span style={{ textDecoration: 'line-through', color: '#888' }}>{original.toLocaleString()} ₫</span>;
+                }
+                return '';
+            },
         },
         {
             title: 'Tồn kho',

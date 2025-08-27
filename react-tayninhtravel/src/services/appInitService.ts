@@ -21,7 +21,7 @@ export const appInitService = {
     validateStoredToken: (): boolean => {
         try {
             const token = localStorage.getItem('token');
-            
+
             if (!token) {
                 console.log('No token found in localStorage');
                 return false;
@@ -29,7 +29,7 @@ export const appInitService = {
 
             // Decode token để kiểm tra expiration
             const decoded = jwtDecode<JWTPayload>(token);
-            
+
             if (!decoded.exp) {
                 console.warn('Token does not contain expiration claim');
                 return false;
@@ -38,7 +38,7 @@ export const appInitService = {
             // Check if token is expired (exp is in seconds, Date.now() is in milliseconds)
             const currentTime = Date.now() / 1000;
             const isExpired = decoded.exp < currentTime;
-            
+
             if (isExpired) {
                 console.warn('Token has expired:', {
                     expiredAt: new Date(decoded.exp * 1000).toISOString(),
@@ -50,7 +50,7 @@ export const appInitService = {
             // Token is valid
             console.log('Token is valid, expires at:', new Date(decoded.exp * 1000).toISOString());
             return true;
-            
+
         } catch (error) {
             console.error('Error validating token:', error);
             return false;
@@ -61,24 +61,32 @@ export const appInitService = {
      * Clear all auth data and redirect to login
      */
     clearAuthAndRedirect: (): void => {
-        console.log('Clearing auth data and redirecting to login...');
-        
+        console.log('Clearing auth data...');
         // Clear localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('tokenExpirationTime');
         localStorage.removeItem('auth-storage'); // Clear zustand persist storage
-        
         // Clear auth store
         const authStore = useAuthStore.getState();
         authStore.logout();
-        
         // Clear token expiration timer
         tokenExpirationService.clearExpirationTimer();
-        
-        // Redirect to login if not already there
-        if (window.location.pathname !== '/login' && 
+        // Chỉ redirect nếu không có token hoặc token hết hạn
+        const token = localStorage.getItem('token');
+        const tokenExpirationTime = localStorage.getItem('tokenExpirationTime');
+        let isExpired = true;
+        if (token && tokenExpirationTime) {
+            try {
+                const expirationDate = new Date(tokenExpirationTime);
+                const currentTime = new Date();
+                isExpired = currentTime.getTime() >= expirationDate.getTime();
+            } catch (error) {
+                isExpired = true;
+            }
+        }
+        if ((!token || isExpired) && window.location.pathname !== '/login' &&
             window.location.pathname !== '/' &&
             !window.location.pathname.includes('/404')) {
             window.location.href = '/login';
@@ -88,12 +96,21 @@ export const appInitService = {
     /**
      * Khởi tạo app - validate token và setup services
      */
-    initialize: (): void => {
+    /**
+     * Khởi tạo app - validate token và setup services
+     * @param isPublicPage: boolean - true nếu là trang public, false nếu là trang private
+     */
+    initialize: (isPublicPage: boolean = false): void => {
         console.log('Initializing app services...');
 
-        // Check if token exists and is valid
+        if (isPublicPage) {
+            // Trang public, không kiểm tra token, không redirect
+            console.log('Public page detected, skip token validation and redirect');
+            return;
+        }
+
+        // Trang private, kiểm tra token
         const isTokenValid = appInitService.validateStoredToken();
-        
         if (!isTokenValid) {
             // Token không hợp lệ hoặc đã hết hạn
             console.warn('Invalid or expired token detected on app initialization');

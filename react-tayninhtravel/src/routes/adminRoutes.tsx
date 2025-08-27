@@ -12,6 +12,7 @@ import TourStatusManagement from "@/pages/admin/TourStatusManagement";
 import Tours from "@/pages/admin/Tours";
 import UserManagement from "@/pages/admin/UserManagement";
 import VoucherManagement from "@/pages/admin/VoucherManagement";
+import TourCompanyManagement from '@/pages/admin/TourCompanyManagement';
 import { RouteObject } from "react-router-dom";
 
 export const adminRoutes: RouteObject[] = [
@@ -57,6 +58,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: "tours",
         element: <Tours />,
+      },
+      {
+        path: "tour-companies",
+        element: <TourCompanyManagement />,
       },
       {
         path: "blogs",

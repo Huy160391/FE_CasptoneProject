@@ -37,16 +37,18 @@ const UserManagement = () => {
         try {
             setLoading(true)
             const response = await adminService.getUsers(
-                pagination.current,
+                pagination.current, // API dùng 0-based index
                 pagination.pageSize,
                 searchText || undefined,
-                statusFilter
+                statusFilter !== undefined ? statusFilter : undefined // Truyền đúng kiểu boolean cho param status
             )
 
             setUsers(response.data)
             setPagination({
                 ...pagination,
-                total: response.totalRecords
+                total: response.totalRecord ?? response.totalCount ?? 0,
+                pageSize: pagination.pageSize,
+                current: pagination.current,
             })
         } catch (error) {
             console.error('Error fetching users:', error)
@@ -84,8 +86,10 @@ const UserManagement = () => {
 
         if (filters.status && filters.status.length > 0) {
             setStatusFilter(filters.status[0])
+            fetchUsers() // Gọi lại fetchUsers khi filter status thay đổi
         } else {
             setStatusFilter(undefined)
+            fetchUsers() // Gọi lại fetchUsers khi filter status bị xóa
         }
     }
 
@@ -122,14 +126,14 @@ const UserManagement = () => {
             cancelText: t('common.cancel'),
             onOk: async () => {
                 try {
-                    await adminService.toggleUserStatus(user.id, newStatus)
+                    await adminService.updateUser(user.id, { isActive: newStatus })
                     message.success(newStatus
                         ? t('admin.users.messages.success.activated')
                         : t('admin.users.messages.success.deactivated')
                     )
                     fetchUsers()
                 } catch (error) {
-                    console.error('Error toggling user status:', error)
+                    console.error('Error updating user status:', error)
                     message.error(newStatus
                         ? t('admin.users.messages.error.activate')
                         : t('admin.users.messages.error.deactivate')
@@ -171,17 +175,17 @@ const UserManagement = () => {
                     // Cập nhật người dùng hiện có
                     await adminService.updateUser(editingUser.id, {
                         name: values.name,
-                        email: values.email,
-                        phone: values.phone,
-                        isActive: values.isActive,
+                        phoneNumber: values.phone,
+                        avatar: editingUser?.avatar,
+                        isActive: values.status, // Đúng với kiểu UpdateUserPayload, userService sẽ map sang status
                     })
                     message.success(t('admin.users.messages.success.updated'))
                 } else {
                     // Thêm người dùng mới
                     await adminService.createUser({
                         name: values.name,
-                        email: values.email,
-                        phone: values.phone,
+                        phoneNumber: values.phone,
+                        avatar: undefined,
                         isActive: values.isActive,
                         password: values.password,
                     })
@@ -190,12 +194,17 @@ const UserManagement = () => {
 
                 setIsModalVisible(false)
                 fetchUsers()
-            } catch (error) {
-                console.error('Error saving user:', error)
-                message.error(editingUser
-                    ? t('admin.users.messages.error.update')
-                    : t('admin.users.messages.error.create')
-                )
+            } catch (error: any) {
+                // Hiển thị message trả về từ API nếu có
+                const apiMsg = error?.response?.data?.message
+                if (apiMsg) {
+                    message.error(apiMsg)
+                } else {
+                    message.error(editingUser
+                        ? t('admin.users.messages.error.update')
+                        : t('admin.users.messages.error.create')
+                    )
+                }
             }
         })
     }

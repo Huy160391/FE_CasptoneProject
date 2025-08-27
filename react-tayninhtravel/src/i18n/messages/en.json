@@ -1851,7 +1851,12 @@
             "allLocations": "All locations",
             "datePlaceholder": "Select departure date",
             "keywordPlaceholder": "Search tours...",
-            "searchButton": "Search"
+            "searchButton": "Search",
+            "scheduleDaySunday": "Sunday",
+            "scheduleDaySaturday": "Saturday",
+            "scheduleDayAll": "All days",
+            "loadingSuggestion": "Loading suggestions...",
+            "noSuggestion": "No suggestions available"
         },
         "found": "Tours found",
         "toal": "Total tours"

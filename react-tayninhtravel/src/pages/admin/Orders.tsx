@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Input, Space, Tag, Modal, Spin, theme } from 'antd'
+import type { TablePaginationConfig, ColumnsType, SorterResult, FilterValue } from 'antd/es/table/interface'
 import { SearchOutlined, EyeOutlined, DeleteOutlined, ShopOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
+import { ReloadOutlined } from '@ant-design/icons'
 import type { Key } from 'react'
 import './Orders.scss'
 import adminService from '@/services/adminService'
@@ -21,7 +22,7 @@ interface Order {
   totalAmount: number
   discountAmount: number
   totalAfterDiscount: number
-  status: string
+  orderStatus: string
   voucherCode?: string | null
   payOsOrderCode: string
   isChecked: boolean
@@ -60,6 +61,18 @@ interface ShopInfo {
 const Orders = () => {
   const { token } = theme.useToken()
   const [searchText, setSearchText] = useState('')
+  const [tableKey, setTableKey] = useState(0)
+  const [statusFilter, setStatusFilter] = useState<null | string[]>(null)
+  const [isCheckedFilter, setIsCheckedFilter] = useState<null | boolean[]>(null)
+
+  // Hàm làm mới bộ lọc và reload danh sách
+  const handleResetFilters = () => {
+    setSearchText('')
+    setStatusFilter(null)
+    setIsCheckedFilter(null)
+    setTableKey(prev => prev + 1)
+    fetchOrders({})
+  }
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [isShopModalVisible, setIsShopModalVisible] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
@@ -69,46 +82,72 @@ const Orders = () => {
   const [shopInfoMap, setShopInfoMap] = useState<Record<string, ShopInfo>>({})
   const [shopFilterOptions, setShopFilterOptions] = useState<Array<{ text: string, value: string }>>([])
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true)
-      try {
-        const res = await adminService.getAllProductOrders({})
-        const orderList: Order[] = res.orders || []
-        setOrders(orderList)
+  const fetchOrders = async (params = {}) => {
+    setLoading(true)
+    try {
+      const res = await adminService.getAllProductOrders(params)
+      const orderList: Order[] = res.orders || []
+      setOrders(orderList)
 
-        // Lấy danh sách shopId duy nhất từ tất cả orderDetails
-        const shopIds = Array.from(new Set(orderList.flatMap(order => order.orderDetails.map(item => item.shopId))))
-        // Lấy thông tin shop cho từng shopId
-        const shopInfoPromises = shopIds.map(async shopId => {
-          try {
-            const shopRes = await adminService.getSpecialtyShopById(shopId)
-            return { shopId, shop: shopRes }
-          } catch {
-            return { shopId, shop: null }
-          }
-        })
-        const shopInfos = await Promise.all(shopInfoPromises)
-        const shopMap: Record<string, ShopInfo> = {}
-        const filterOptions: Array<{ text: string, value: string }> = []
+      // Lấy danh sách shopId duy nhất từ tất cả orderDetails
+      const shopIds = Array.from(new Set(orderList.flatMap(order => order.orderDetails.map(item => item.shopId))))
+      // Lấy thông tin shop cho từng shopId
+      const shopInfoPromises = shopIds.map(async shopId => {
+        try {
+          const shopRes = await adminService.getSpecialtyShopById(shopId)
+          return { shopId, shop: shopRes }
+        } catch {
+          return { shopId, shop: null }
+        }
+      })
+      const shopInfos = await Promise.all(shopInfoPromises)
+      const shopMap: Record<string, ShopInfo> = {}
+      const filterOptions: Array<{ text: string, value: string }> = []
 
-        shopInfos.forEach(({ shopId, shop }) => {
-          if (shop) {
-            shopMap[shopId] = shop
-            filterOptions.push({ text: shop.shopName, value: shopId })
-          }
-        })
+      shopInfos.forEach(({ shopId, shop }) => {
+        if (shop) {
+          shopMap[shopId] = shop
+          filterOptions.push({ text: shop.shopName, value: shopId })
+        }
+      })
 
-        setShopInfoMap(shopMap)
-        setShopFilterOptions(filterOptions)
-      } catch (err) {
-        setOrders([])
-      } finally {
-        setLoading(false)
-      }
+      setShopInfoMap(shopMap)
+      setShopFilterOptions(filterOptions)
+    } catch (err) {
+      setOrders([])
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchOrders()
   }, [])
+
+  const handleTableChange = (
+    _pagination: TablePaginationConfig,
+    filters: Record<string, FilterValue | null>,
+    _sorter: SorterResult<Order> | SorterResult<Order>[],
+  ) => {
+    // Luôn gọi lại fetchOrders mỗi lần filter thay đổi
+    const orderStatusArr = filters.status as (string[] | undefined);
+    const isCheckedArr = filters.isChecked as (boolean[] | undefined);
+    setStatusFilter(orderStatusArr ?? null)
+    setIsCheckedFilter(isCheckedArr ?? null)
+    const orderStatus = orderStatusArr && orderStatusArr.length > 0 ? orderStatusArr[0] : undefined;
+    const isChecked = isCheckedArr && isCheckedArr.length > 0 ? isCheckedArr[0] : undefined;
+
+    // Nếu không chọn option nào, reset filter UI và lấy toàn bộ đơn hàng
+    if ((!orderStatusArr || orderStatusArr.length === 0) && (!isCheckedArr || isCheckedArr.length === 0)) {
+      fetchOrders({});
+      return;
+    }
+
+    const params: any = {};
+    if (orderStatus) params.orderStatus = orderStatus;
+    if (typeof isChecked !== 'undefined') params.isChecked = isChecked;
+    fetchOrders(params);
+  }
 
   const handleShopClick = (shopId: string) => {
     const shop = shopInfoMap[shopId]
@@ -163,7 +202,10 @@ const Orders = () => {
       title: 'Ngày đặt',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (date: string) => new Date(date).toLocaleString('vi-VN'),
+      render: (date: string) => {
+        const d = new Date(date);
+        return d.toLocaleDateString('vi-VN');
+      },
       sorter: (a: Order, b: Order) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     },
     {
@@ -204,7 +246,28 @@ const Orders = () => {
         { text: 'Đang xử lý', value: 'Pending' },
         { text: 'Đã hủy', value: 'Cancelled' },
       ],
-      onFilter: (value: boolean | Key, record: Order) => record.status === value,
+      filterMultiple: false,
+      filteredValue: statusFilter,
+      onFilter: (value: boolean | Key, record: Order) => record.orderStatus === String(value),
+    },
+    {
+      title: 'Nhận hàng',
+      dataIndex: 'isChecked',
+      key: 'isChecked',
+      render: (isChecked: boolean) => {
+        return isChecked ? (
+          <Tag color="green">Đã nhận hàng</Tag>
+        ) : (
+          <Tag color="orange">Chưa nhận hàng</Tag>
+        )
+      },
+      filters: [
+        { text: 'Đã nhận hàng', value: true },
+        { text: 'Chưa nhận hàng', value: false },
+      ],
+      filterMultiple: false,
+      filteredValue: isCheckedFilter,
+      onFilter: (value: boolean | Key, record: Order) => record.isChecked === value,
     },
     {
       title: 'Thao tác',
@@ -216,17 +279,13 @@ const Orders = () => {
             icon={<EyeOutlined />}
             size="small"
             onClick={() => handleView(record)}
-          >
-            Xem
-          </Button>
+          />
           <Button
             danger
             icon={<DeleteOutlined />}
             size="small"
             onClick={() => handleDelete(record)}
-          >
-            Xóa
-          </Button>
+          />
         </Space>
       ),
     },
@@ -268,7 +327,7 @@ const Orders = () => {
     <div className="orders-page">
       <div className="page-header">
         <h1>Quản lý đơn hàng</h1>
-        <div className="header-actions">
+        <div className="header-actions" style={{ display: 'flex', gap: 12 }}>
           <Input
             placeholder="Tìm kiếm theo mã đơn hàng"
             prefix={<SearchOutlined />}
@@ -276,16 +335,19 @@ const Orders = () => {
             className="search-input"
             allowClear
           />
+          <Button onClick={handleResetFilters} type="default" icon={<ReloadOutlined />}>Làm mới</Button>
         </div>
       </div>
 
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
         <Table
+          key={tableKey}
           dataSource={orders}
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 10 }}
           className="orders-table"
+          onChange={handleTableChange}
         />
       </Spin>
 
@@ -398,15 +460,15 @@ const Orders = () => {
                 <div style={{ textAlign: 'right' }}>
                   <Tag
                     color={
-                      selectedOrder.status === 'Paid' ? 'success' :
-                        selectedOrder.status === 'Pending' ? 'processing' :
-                          selectedOrder.status === 'Cancelled' ? 'error' : 'default'
+                      selectedOrder.orderStatus === 'Paid' ? 'success' :
+                        selectedOrder.orderStatus === 'Pending' ? 'processing' :
+                          selectedOrder.orderStatus === 'Cancelled' ? 'error' : 'default'
                     }
                     style={{ fontSize: '14px', padding: '4px 12px' }}
                   >
-                    {selectedOrder.status === 'Paid' ? 'Hoàn thành' :
-                      selectedOrder.status === 'Pending' ? 'Đang xử lý' :
-                        selectedOrder.status === 'Cancelled' ? 'Đã hủy' : selectedOrder.status}
+                    {selectedOrder.orderStatus === 'Paid' ? 'Hoàn thành' :
+                      selectedOrder.orderStatus === 'Pending' ? 'Đang xử lý' :
+                        selectedOrder.orderStatus === 'Cancelled' ? 'Đã hủy' : selectedOrder.orderStatus}
                   </Tag>
                 </div>
               </div>

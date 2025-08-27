@@ -51,7 +51,7 @@ const Footer = () => {
               <ul className="footer-links">
               </ul>
               <ul className="footer-links">
-                <li><Link to="/things-to-do">Tour Tây Ninh</Link></li>
+                <li><Link to="/tours">Tour Tây Ninh</Link></li>
               </ul>
             </div>
           </Col>
@@ -61,7 +61,7 @@ const Footer = () => {
               <ul className="footer-links">
               </ul>
               <ul className="footer-links">
-                <li><Link to="/things-to-do">Tour du lịch</Link></li>
+                <li><Link to="/tours">Tour du lịch</Link></li>
               </ul>
             </div>
           </Col>

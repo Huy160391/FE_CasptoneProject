@@ -1,3 +1,8 @@
+/* Căn trái placeholder cho AutoComplete */
+.tour-search-bar .ant-select-selection-placeholder,
+.tour-search-bar .ant-input::placeholder {
+    text-align: left !important;
+}
 .tour-search-bar {
     // Chỉ giữ lại các quy tắc bố cục
     width: 100%;

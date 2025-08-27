@@ -99,10 +99,15 @@ const CustomProductModal = ({
                     categoryKey = ENUM_TO_CATEGORY[Number(initialValues.category)] || 'souvenir';
                 }
 
+                // Tính giá gốc nếu có khuyến mãi
+                let originalPrice = initialValues.price;
+                if (initialValues.isSale && initialValues.salePercent && initialValues.salePercent > 0) {
+                    originalPrice = Math.round(initialValues.price / (1 - initialValues.salePercent / 100));
+                }
                 setFormValues({
                     name: initialValues.name,
                     description: initialValues.description || '',
-                    price: initialValues.price,
+                    price: originalPrice,
                     quantityInStock: initialValues.quantityInStock,
                     category: categoryKey.toLowerCase(),
                     isSale: initialValues.isSale || false,

@@ -81,7 +81,7 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shopId }) => {
                     className="shop-info-card"
                     style={{ boxShadow: 'none', border: 'none' }}
                 >
-                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '200px', width: '100%' }}>
                         <Spin size="large" />
                         <div style={{ marginTop: '10px' }}>Đang tải thông tin cửa hàng...</div>
                     </div>

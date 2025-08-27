@@ -77,12 +77,9 @@ export const userService = {
         return {
             id: apiUser.id,
             name: apiUser.name,
-            email: apiUser.email,
-            phone: apiUser.phoneNumber || '',
-            role: apiUser.role || '',
-            status: apiUser.isActive,
+            phoneNumber: apiUser.phoneNumber || '',
             avatar: apiUser.avatar,
-            isVerified: apiUser.isVerified,
+            isActive: apiUser.isActive,
             createdAt: apiUser.createdAt,
             updatedAt: apiUser.updatedAt
         };
@@ -210,10 +207,9 @@ export const userService = {
         // Map application format to API format
         const apiPayload: ApiUpdateUserPayload = {
             name: userData.name,
-            email: userData.email,
-            phoneNumber: userData.phone,
-            role: userData.role,
-            status: userData.isActive // Sửa ở đây
+            phoneNumber: userData.phoneNumber,
+            avatar: userData.avatar,
+            status: userData.isActive
         };
 
         const response = await axios.put<ApiUser>(`/Cms/user/${id}`, apiPayload);
@@ -246,10 +242,9 @@ export const userService = {
         // Map application format to API format
         const apiPayload = {
             name: userData.name,
-            email: userData.email,
-            phoneNumber: userData.phone,
-            role: userData.role,
-            status: userData.isActive, // Sửa ở đây
+            phoneNumber: userData.phoneNumber,
+            avatar: userData.avatar,
+            status: userData.isActive,
             password: userData.password
         };
 
@@ -777,12 +772,9 @@ export default userService;
 export type User = {
     id: string;
     name: string;
-    email: string;
-    phone: string;
-    role: string;
-    status: boolean;
+    phoneNumber: string;
     avatar?: string;
-    isVerified: boolean;
+    isActive: boolean;
     createdAt: string;
     updatedAt: string;
 };
@@ -796,9 +788,8 @@ export type GetUsersResponse = {
 
 type ApiUpdateUserPayload = {
     name?: string;
-    email?: string;
     phoneNumber?: string;
-    role?: string;
+    avatar?: string;
     status?: boolean;
 };
 

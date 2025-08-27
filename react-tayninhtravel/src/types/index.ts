@@ -199,11 +199,20 @@ export interface CV {
 
 // API Response Types - Unified to use 'success' property only
 export interface ApiResponse<T = any> {
-  success: boolean;
-  data: T;
-  message?: string;
-  error?: string;
-  pagination?: PaginationInfo;
+    success: boolean;
+    data: T;
+    message?: string;
+    error?: string;
+    pagination?: PaginationInfo;
+    totalRecord?: number;
+    totalCount?: number;
+    totalPages?: number;
+    pageIndex?: number;
+    pageSize?: number;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
+    validationErrors?: string[];
+    fieldErrors?: Record<string, any>;
 }
 
 export interface PaginationInfo {

@@ -17,13 +17,11 @@ import {
 } from 'antd'
 import {
   ShoppingCartOutlined,
-  HeartOutlined,
   ShareAltOutlined,
   StarOutlined,
   InfoCircleOutlined,
   EnvironmentOutlined,
   TagOutlined,
-  HeartFilled,
   LeftOutlined,
   RightOutlined,
   PlusOutlined,
@@ -39,6 +37,8 @@ import ShopInfo from './ShopInfo'
 import CreateReviewModal from './CreateReviewModal'
 import { publicService } from '@/services/publicService'
 import { getCategoryViLabel } from '@/utils/categoryViLabels'
+// ...existing code...
+import SharePopup from '../common/SharePopup';
 
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
@@ -65,13 +65,13 @@ interface EnhancedProduct extends Product {
 }
 
 const ProductDetail = () => {
+  const [sharePopupVisible, setSharePopupVisible] = useState(false);
   const { id } = useParams()
   const productId = id || '1'
 
   const [product, setProduct] = useState<EnhancedProduct | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [quantity, setQuantity] = useState<number>(1)
-  const [isFavorite, setIsFavorite] = useState<boolean>(false)
   // const [activeTab, setActiveTab] = useState<string>('description')
   const [reviewsData, setReviewsData] = useState<Review[]>([])
   const [reviewsLoading, setReviewsLoading] = useState<boolean>(true)
@@ -230,14 +230,6 @@ const ProductDetail = () => {
     handleAddToCart()
     // Navigate to checkout page
     // navigate('/checkout')
-  }
-
-  const handleToggleFavorite = () => {
-    setIsFavorite(!isFavorite)
-    notification.info({
-      message: isFavorite ? t('common.removeFromFavorites') : t('common.addToFavorites'),
-      icon: isFavorite ? <HeartOutlined /> : <HeartFilled style={{ color: '#ff4d4f' }} />,
-    })
   }
 
   const ProductImages = React.memo(({ product }: { product: EnhancedProduct }) => {
@@ -601,13 +593,7 @@ const ProductDetail = () => {
                 >
                   Mua ngay
                 </Button>
-                <Button
-                  type="text"
-                  icon={isFavorite ? <HeartFilled className="favorite-icon" /> : <HeartOutlined />}
-                  onClick={handleToggleFavorite}
-                  className="favorite-btn"
-                />
-                <Button type="text" icon={<ShareAltOutlined />} className="share-btn" />
+                <Button type="text" icon={<ShareAltOutlined />} className="share-btn" onClick={() => setSharePopupVisible(true)} />
               </div>
             </div>
 
@@ -637,6 +623,8 @@ const ProductDetail = () => {
                 <Text>Tây Ninh, Việt Nam</Text>
               </Space>
             </div>
+            {/* Social Share Section */}
+            <SharePopup visible={sharePopupVisible} onClose={() => setSharePopupVisible(false)} url={window.location.href} />
           </div>
         </Col>
       </Row>
@@ -757,7 +745,11 @@ const ProductDetail = () => {
           onRegisterClick={() => { }}
         />
       )}
+
+      {/* Thêm khu vực chia sẻ vào UI chi tiết sản phẩm */}
+
+      {/* Kết thúc nội dung chi tiết sản phẩm */}
     </div>
-  )
-}
-export default ProductDetail
+  );
+};
+export default ProductDetail;
