@@ -634,3 +634,64 @@ export const manualInviteGuide = async (
   );
   return response.data;
 };
+
+// ===== DASHBOARD APIs =====
+
+// Lấy thống kê dashboard tổng quan cho TourCompany
+export const getDashboardStatistics = async (
+  params: {
+    year?: number;
+    month?: number;
+    compareWithPrevious?: boolean;
+  } = {},
+  token?: string
+): Promise<ApiResponse<any>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const queryParams = new URLSearchParams();
+
+  if (params.year !== undefined)
+    queryParams.append("year", params.year.toString());
+  if (params.month !== undefined)
+    queryParams.append("month", params.month.toString());
+  if (params.compareWithPrevious !== undefined)
+    queryParams.append(
+      "compareWithPrevious",
+      params.compareWithPrevious.toString()
+    );
+
+  const response = await axios.get(
+    `/TourCompany/dashboard/statistics?${queryParams.toString()}`,
+    { headers }
+  );
+  return response.data;
+};
+
+// Lấy phân tích chi tiết cho TourCompany dashboard
+export const getDetailedAnalytics = async (
+  params: {
+    year?: number;
+    month?: number;
+    tourId?: string;
+    analyticsType?: string;
+    granularity?: string;
+  } = {},
+  token?: string
+): Promise<ApiResponse<any>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const queryParams = new URLSearchParams();
+
+  if (params.year !== undefined)
+    queryParams.append("year", params.year.toString());
+  if (params.month !== undefined)
+    queryParams.append("month", params.month.toString());
+  if (params.tourId) queryParams.append("tourId", params.tourId);
+  if (params.analyticsType)
+    queryParams.append("analyticsType", params.analyticsType);
+  if (params.granularity) queryParams.append("granularity", params.granularity);
+
+  const response = await axios.get(
+    `/TourCompany/dashboard/detailed-analytics?${queryParams.toString()}`,
+    { headers }
+  );
+  return response.data;
+};

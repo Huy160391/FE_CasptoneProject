@@ -7,6 +7,7 @@ import TourDetailsManagement from "@/pages/tourcompany/TourDetailsManagement";
 import TourManagement from "@/pages/tourcompany/TourManagement";
 import TourTemplateManagement from "@/pages/tourcompany/TourTemplateManagement";
 import TransactionHistory from "@/pages/tourcompany/TransactionHistory";
+import DetailedAnalytics from "@/pages/tourcompany/DetailedAnalytics";
 import { RouteObject } from "react-router-dom";
 
 export const tourCompanyRoutes: RouteObject[] = [
@@ -40,6 +41,10 @@ export const tourCompanyRoutes: RouteObject[] = [
       {
         path: "revenue",
         element: <RevenueDashboard />,
+      },
+      {
+        path: "analytics",
+        element: <DetailedAnalytics />,
       },
       {
         path: "wallet",
