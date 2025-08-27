@@ -111,7 +111,7 @@ export interface LegacyCreateTourBookingRequest {
 }
 
 export interface CalculatePriceRequest {
-  tourDetailsId: string;
+  tourOperationId: string; // ✅ FIXED: Align with backend DTO
   numberOfGuests: number;
   bookingDate?: string;
 }
@@ -197,12 +197,19 @@ export const getTourDetailsForBooking = async (
  * 2. Nếu đặt trong 14 ngày đầu sau khi tour được tạo: Early Bird (giảm 25%)
  * 3. Các trường hợp khác: Giá gốc (100%)
  */
-export const calculateBookingPrice = async (request: CalculatePriceRequest, token?: string): Promise<ApiResponse<PriceCalculation>> => {
+export const calculateBookingPrice = async (
+  request: CalculatePriceRequest,
+  token?: string
+): Promise<ApiResponse<PriceCalculation>> => {
   try {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    // Lấy thông tin tour để tính giá
-    const response = await axios.get(`/TourDetails/${request.tourDetailsId}`, { headers });
+    // ✅ FIXED: Call the dedicated backend endpoint for price calculation
+    const response = await axios.post(
+      `/UserTourBooking/calculate-price`,
+      request,
+      { headers }
+    );
 
     if (response.data.success && response.data.data) {
       const tourDetails = response.data.data;
@@ -247,7 +254,7 @@ export const calculateBookingPrice = async (request: CalculatePriceRequest, toke
       return {
         success: true,
         data: {
-          tourDetailsId: request.tourDetailsId,
+          tourDetailsId: tourDetails.id,
           tourTitle: tourDetails.title || '',
           numberOfGuests: request.numberOfGuests,
           originalPricePerGuest: pricePerGuest,
@@ -283,8 +290,10 @@ export const calculateBookingPrice = async (request: CalculatePriceRequest, toke
         bookingDate: ''
       }
     };
+    // The backend now returns the correct PriceCalculationDto, which matches the frontend's PriceCalculation interface.
+    return response.data;
   } catch (error: any) {
-    console.error('Error calculating booking price:', error);
+    console.error("Error calculating booking price:", error);
     return {
       success: false,
       message: error.response?.data?.message || 'Không thể tính giá tour',
@@ -437,7 +446,7 @@ export const getMyBookings = async (
     ...(params?.startDate && { startDate: params.startDate }),
     ...(params?.endDate && { endDate: params.endDate }),
     ...(params?.searchTerm && { searchTerm: params.searchTerm }),
-    ...(params?.bookingCode && { bookingCode: params.bookingCode })
+    ...(params?.bookingCode && { bookingCode: params.bookingCode }),
   };
 
   const response = await axios.get("/UserTourBooking/my-bookings", {
@@ -459,7 +468,7 @@ export const getMyBookings = async (
             guests: booking.guests || [], // ✅ NEW: Individual guests with QR codes
             tourOperation: booking.tourOperation
               ? {
-                ...booking.tourOperation // Map all fields, including tourStartDate
+                ...booking.tourOperation, // Map all fields, including tourStartDate
               }
               : undefined,
           })) || [],
@@ -538,13 +547,10 @@ export const checkTourSlotCapacity = async (
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-    const response = await axios.get(
-      `/TourBooking/slot/${slotId}/capacity`,
-      {
-        headers,
-        params: { requestedGuests: numberOfGuests },
-      }
-    );
+    const response = await axios.get(`/TourBooking/slot/${slotId}/capacity`, {
+      headers,
+      params: { requestedGuests: numberOfGuests },
+    });
 
     // Transform response to match expected format
     if (response.data.success && response.data.capacityInfo) {
@@ -563,7 +569,7 @@ export const checkTourSlotCapacity = async (
 
     return response.data;
   } catch (error: any) {
-    console.error('Error checking slot capacity:', error);
+    console.error("Error checking slot capacity:", error);
     return {
       success: false,
       message: error.response?.data?.message || 'Không thể kiểm tra capacity slot',

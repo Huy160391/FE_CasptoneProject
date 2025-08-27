@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Layout, Menu, Button, Divider, Avatar } from 'antd'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useState } from "react";
+import { Layout, Menu, Button, Divider, Avatar } from "antd";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -12,87 +12,91 @@ import {
   LogoutOutlined,
   CustomerServiceOutlined,
   TeamOutlined,
-  ShopOutlined
-} from '@ant-design/icons'
-import { useAuthStore } from '@/store/useAuthStore'
-import { useTranslation } from 'react-i18next'
-import './AdminSidebar.scss'
+  ShopOutlined,
+  ToolOutlined,
+} from "@ant-design/icons";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useTranslation } from "react-i18next";
+import "./AdminSidebar.scss";
 
-const { Sider } = Layout
+const { Sider } = Layout;
 
 const AdminSidebar = () => {
-  const [collapsed, setCollapsed] = useState(false)
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { user, logout } = useAuthStore()
-  const { t } = useTranslation()
+  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const toggleCollapsed = () => {
-    setCollapsed(!collapsed)
-  }
+    setCollapsed(!collapsed);
+  };
 
   const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
+    logout();
+    navigate("/");
+  };
 
   const handleBackToSite = () => {
-    navigate('/')
-  }
+    navigate("/");
+  };
   const menuItems = [
     {
-      key: '/admin/dashboard',
+      key: "/admin/dashboard",
       icon: <DashboardOutlined />,
-      label: <Link to="/admin/dashboard">{t('admin.sidebar.dashboard')}</Link>,
+      label: <Link to="/admin/dashboard">{t("admin.sidebar.dashboard")}</Link>,
     },
     {
-      key: '/admin/users',
+      key: "/admin/users",
       icon: <UserOutlined />,
-      label: <Link to="/admin/users">{t('admin.sidebar.users')}</Link>,
+      label: <Link to="/admin/users">{t("admin.sidebar.users")}</Link>,
     },
     {
-      key: 'tour-guide',
+      key: "tour-guide",
       icon: <TeamOutlined />,
-      label: 'Hướng dẫn viên',
+      label: "Hướng dẫn viên",
       children: [
         {
-          key: '/admin/tour-guides',
+          key: "/admin/tour-guides",
           label: <Link to="/admin/tour-guides">Quản lý hướng dẫn viên</Link>,
         },
         {
-          key: '/admin/CVManagement',
+          key: "/admin/CVManagement",
           label: <Link to="/admin/CVManagement">Quản lý đơn đăng ký</Link>,
         },
       ],
     },
     {
-      key: 'shop',
+      key: "shop",
       icon: <ShopOutlined />,
-      label: 'Cửa hàng',
+      label: "Cửa hàng",
       children: [
         {
-          key: '/admin/shops',
+          key: "/admin/shops",
           label: <Link to="/admin/shops">Quản lý cửa hàng</Link>,
         },
         {
-          key: '/admin/shop-registrations',
-          label: <Link to="/admin/shop-registrations">Quản lý đơn đăng ký</Link>,
+          key: "/admin/shop-registrations",
+          label: (
+            <Link to="/admin/shop-registrations">Quản lý đơn đăng ký</Link>
+          ),
         },
         {
-          key: '/admin/withdrawal-requests',
+          key: "/admin/withdrawal-requests",
           label: <Link to="/admin/withdrawal-requests">Quản lý rút tiền</Link>,
         },
         {
-          key: '/admin/orders',
+          key: "/admin/orders",
           label: <Link to="/admin/orders">Quản lý đơn hàng</Link>,
         },
         {
-          key: '/admin/vouchers',
+          key: "/admin/vouchers",
           label: <Link to="/admin/vouchers">Quản lý voucher</Link>,
         },
       ],
     },
     {
+<<<<<<< HEAD
       key: 'tour',
       icon: <AppstoreOutlined />,
       label: 'Tour',
@@ -106,18 +110,32 @@ const AdminSidebar = () => {
           label: <Link to="/admin/tour-companies">Quản lý công ty du lịch</Link>,
         },
       ],
+=======
+      key: "/admin/tours",
+      icon: <AppstoreOutlined />,
+      label: <Link to="/admin/tours">{t("admin.sidebar.tours")}</Link>,
+>>>>>>> e10eab49b4c468bd58ae583da1a57577e7304863
     },
     {
-      key: '/admin/blogs',
+      key: "/admin/blogs",
       icon: <ReadOutlined />,
-      label: <Link to="/admin/blogs">{t('admin.sidebar.blogs')}</Link>,
+      label: <Link to="/admin/blogs">{t("admin.sidebar.blogs")}</Link>,
     },
     {
-      key: '/admin/support-tickets',
+      key: "/admin/support-tickets",
       icon: <CustomerServiceOutlined />,
-      label: <Link to="/admin/support-tickets">{t('admin.sidebar.supportTickets')}</Link>,
+      label: (
+        <Link to="/admin/support-tickets">
+          {t("admin.sidebar.supportTickets")}
+        </Link>
+      ),
     },
-  ]
+    {
+      key: "/admin/tour-status-management",
+      icon: <ToolOutlined />,
+      label: <Link to="/admin/tour-status-management">Công cụ demo</Link>,
+    },
+  ];
 
   return (
     <Sider
@@ -126,10 +144,9 @@ const AdminSidebar = () => {
       onCollapse={toggleCollapsed}
       className="admin-sidebar"
       trigger={null}
-      width={250}
-    >
+      width={250}>
       <div className="logo-container">
-        {collapsed ? 'TNT' : 'Tay Ninh Tour'}
+        {collapsed ? "TNT" : "Tay Ninh Tour"}
       </div>
 
       <div className="collapse-button" onClick={toggleCollapsed}>
@@ -145,13 +162,15 @@ const AdminSidebar = () => {
         />
         {!collapsed && (
           <div className="admin-details">
-            <div className="admin-name">{user?.name || 'Admin'}</div>
+            <div className="admin-name">{user?.name || "Admin"}</div>
             <div className="admin-role">Quản trị viên</div>
           </div>
         )}
       </div>
 
-      <Divider style={{ margin: '8px 0', borderColor: 'rgba(255, 255, 255, 0.2)' }} />
+      <Divider
+        style={{ margin: "8px 0", borderColor: "rgba(255, 255, 255, 0.2)" }}
+      />
 
       {/* Main menu */}
       <Menu
@@ -168,8 +187,7 @@ const AdminSidebar = () => {
           icon={<HomeOutlined />}
           onClick={handleBackToSite}
           className="back-to-site-btn"
-          block
-        >
+          block>
           {!collapsed && "Về trang chủ"}
         </Button>
 
@@ -179,13 +197,12 @@ const AdminSidebar = () => {
           icon={<LogoutOutlined />}
           onClick={handleLogout}
           className="logout-btn"
-          block
-        >
+          block>
           {!collapsed && "Đăng xuất"}
         </Button>
       </div>
     </Sider>
-  )
-}
+  );
+};
 
-export default AdminSidebar
+export default AdminSidebar;

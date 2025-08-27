@@ -1,0 +1,227 @@
+.holiday-tours {
+  padding: 80px 0;
+  background-color: #f5f5f5;
+  transition: background-color 0.3s ease;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 48px;
+
+    h2 {
+      font-size: 36px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 16px;
+      transition: color 0.3s ease;
+    }
+
+    .section-subtitle {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 48px;
+      transition: color 0.3s ease;
+    }
+  }
+
+  .tour-card {
+    height: 100%;
+    position: relative;
+    transition: transform 0.3s ease;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    .ant-card-cover {
+      height: 250px;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+      }
+    }
+
+    .tour-status-overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1;
+    }
+
+    .ant-card-actions {
+      background: #fafafa;
+      border-top: 1px solid #f0f0f0;
+      padding: 0;
+      border-bottom-left-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+
+      .ant-btn,
+      .css-dev-only-do-not-override-1uweeqc.ant-btn {
+        height: 40px;
+        font-size: 16px;
+        width: 100%;
+        margin: 0;
+        border-radius: 0 !important; // Vuông hoàn toàn
+        box-shadow: none !important;
+      }
+
+      li {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      // Ẩn nút xem chi tiết nếu có nhiều nút
+      li:not(:first-child) {
+        display: none;
+      }
+    }
+  }
+
+  .view-more {
+    text-align: center;
+    margin-top: 40px;
+
+    .ant-btn,
+    .custom-view-more-btn {
+      background: #faf9f6;
+      color: #181828;
+      border: none;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 500;
+      padding: 12px 32px;
+      box-shadow: none;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+
+      &:hover,
+      &:focus {
+        background: #f0efeb;
+        color: #181828;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+    }
+  }
+}
+
+/* Dark mode styles for HolidayTours section */
+body.dark-mode {
+  .holiday-tours {
+    background-color: inherit;
+
+    .section-header {
+      h2 {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .section-subtitle {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+
+    .ant-card-actions {
+      background-color: #1f1f1f;
+      border-top-color: #303030;
+
+      .ant-btn-primary {
+        background-color: #79eac0;
+        border-color: #79eac0;
+        color: #000000;
+
+        &:hover, &:focus {
+          background-color: #5dc9a0;
+          border-color: #5dc9a0;
+          color: #000000;
+        }
+      }
+    }
+
+    .tour-card {
+      .ant-card-meta-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .tour-content {
+        .tour-header {
+          .tour-title {
+            color: rgba(255, 255, 255, 0.9);
+          }
+        }
+        .tour-description {
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+
+    .view-more {
+      .custom-view-more-btn {
+        background: #fff;
+        color: #181828;
+
+        &:hover,
+        &:focus {
+          background: #f0f0f0;
+          color: #181828;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .holiday-tours {
+    padding: 60px 0;
+
+    .section-header {
+      margin-bottom: 40px;
+
+      h2 {
+        font-size: 32px;
+      }
+
+      .section-subtitle {
+        font-size: 16px;
+      }
+    }
+
+    .tour-card {
+      .ant-card-cover {
+        height: 220px;
+      }
+
+      .ant-card-body {
+        padding: 20px;
+      }
+
+      .ant-card-actions {
+        .ant-btn {
+          height: 44px;
+          font-size: 15px;
+        }
+      }
+    }
+
+    .view-more {
+      margin-top: 40px;
+
+      .custom-view-more-btn {
+        font-size: 16px;
+        padding: 14px 32px;
+      }
+    }
+  }
+}

@@ -3,7 +3,6 @@ import {
   Card,
   Input,
   Button,
-  Select,
   Modal,
   message,
   Typography,
@@ -11,42 +10,62 @@ import {
   Descriptions,
   Tag,
   Alert,
+  Row,
+  Col,
+  Divider,
 } from "antd";
 import {
   SearchOutlined,
-  EditOutlined,
   ExclamationCircleOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   SyncOutlined,
+  RocketOutlined,
+  FlagOutlined,
+  StopOutlined,
+  InfoCircleOutlined,
+  ToolOutlined,
 } from "@ant-design/icons";
 import { adminService } from "../../services/adminService";
 import dayjs from "dayjs";
 
-const { Title, Text } = Typography;
-const { Option } = Select;
+const { Title, Paragraph } = Typography;
 const { confirm } = Modal;
 
-interface TourSlot {
-  id: string;
-  tourName: string;
-  startDate: string;
-  endDate: string;
-  status: string;
-  currentBookings: number;
-  maxGuests: number;
-  createdAt: string;
-  updatedAt: string;
-  hasOperations: boolean;
+// Updated interface to match the new API response
+interface TourSlotInfo {
+  tourSlot: {
+    id: string;
+    tourTitle: string;
+    tourDate: string;
+    status: string;
+    maxGuests: number;
+    currentBookings: number;
+  };
+  timeInfo: {
+    daysUntilTour: number;
+    isTourStarted: boolean;
+  };
+  bookings: {
+    total: number;
+    confirmed: number;
+    pending: number;
+    cancelled: number;
+    totalGuests: number;
+    totalRevenue: number;
+  };
+  testingActions: {
+    canSkipToTourStart: boolean;
+    canCompleteTour: boolean;
+    canTriggerRevenueTransfer: boolean;
+  };
 }
 
 const TourStatusManagement: React.FC = () => {
-  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [tourSlotId, setTourSlotId] = useState("");
-  const [tourSlot, setTourSlot] = useState<TourSlot | null>(null);
-  const [updateModalVisible, setUpdateModalVisible] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [tourSlotInfo, setTourSlotInfo] = useState<TourSlotInfo | null>(null);
 
   const handleSearch = async () => {
     if (!tourSlotId.trim()) {
@@ -56,13 +75,13 @@ const TourStatusManagement: React.FC = () => {
 
     try {
       setSearchLoading(true);
-      const response = await adminService.getTourSlotById(tourSlotId);
+      const response = await adminService.getTourSlotInfoForTesting(tourSlotId);
 
       if (response.success && response.data) {
-        setTourSlot(response.data);
-        message.success("Tìm thấy tour slot");
+        setTourSlotInfo(response.data);
+        message.success("Tải thông tin tour slot thành công");
       } else {
-        setTourSlot(null);
+        setTourSlotInfo(null);
         message.error(
           response.message || "Không tìm thấy tour slot với ID này"
         );
@@ -70,88 +89,69 @@ const TourStatusManagement: React.FC = () => {
     } catch (error) {
       console.error("Error searching tour slot:", error);
       message.error("Có lỗi xảy ra khi tìm kiếm tour slot");
-      setTourSlot(null);
+      setTourSlotInfo(null);
     } finally {
       setSearchLoading(false);
     }
   };
 
-  const handleUpdateStatus = () => {
-    if (!tourSlot) return;
-    setSelectedStatus(tourSlot.status);
-    setUpdateModalVisible(true);
-  };
-
-  const handleConfirmUpdate = async () => {
-    if (!tourSlot || !selectedStatus) return;
-
-    if (selectedStatus === tourSlot.status) {
-      message.warning("Trạng thái mới phải khác trạng thái hiện tại");
-      return;
-    }
-
+  const executeTestAction = (
+    title: string,
+    action: () => Promise<any>,
+    successMessage: string
+  ) => {
     confirm({
-      title: "Xác nhận thay đổi trạng thái",
+      title: `Xác nhận: ${title}`,
       icon: <ExclamationCircleOutlined />,
-      content: (
-        <div>
-          <p>Bạn có chắc chắn muốn thay đổi trạng thái tour slot này?</p>
-          <p>
-            <strong>Từ:</strong>{" "}
-            <Tag color={getStatusColor(tourSlot.status)}>
-              {getStatusText(tourSlot.status)}
-            </Tag>
-          </p>
-          <p>
-            <strong>Thành:</strong>{" "}
-            <Tag color={getStatusColor(selectedStatus)}>
-              {getStatusText(selectedStatus)}
-            </Tag>
-          </p>
-          <Alert
-            message="Lưu ý"
-            description="Thay đổi trạng thái có thể ảnh hưởng đến các booking và operations hiện có."
-            type="warning"
-            showIcon
-            style={{ marginTop: 16 }}
-          />
-        </div>
-      ),
+      content: `Bạn có chắc chắn muốn thực hiện hành động này không? Hành động này được thiết kế cho mục đích kiểm thử.`,
       okText: "Xác nhận",
       cancelText: "Hủy",
       onOk: async () => {
         try {
-          setLoading(true);
-          const response = await adminService.updateTourSlotStatus(
-            tourSlot.id,
-            selectedStatus
-          );
-
+          setActionLoading(true);
+          const response = await action();
           if (response.success) {
-            // Update local state
-            setTourSlot({
-              ...tourSlot,
-              status: selectedStatus,
-              updatedAt: new Date().toISOString(),
-            });
-
-            message.success(
-              response.message || "Cập nhật trạng thái thành công"
-            );
-            setUpdateModalVisible(false);
+            message.success(response.data?.message || successMessage);
+            // Refresh data after action
+            handleSearch();
           } else {
-            message.error(
-              response.message || "Có lỗi xảy ra khi cập nhật trạng thái"
-            );
+            message.error(response.message || "Hành động thất bại");
           }
         } catch (error) {
-          console.error("Error updating tour slot status:", error);
-          message.error("Có lỗi xảy ra khi cập nhật trạng thái");
+          console.error(`Error during '${title}':`, error);
+          message.error("Có lỗi xảy ra");
         } finally {
-          setLoading(false);
+          setActionLoading(false);
         }
       },
     });
+  };
+
+  const handleSkipToStart = () => {
+    if (!tourSlotInfo) return;
+    executeTestAction(
+      "Bắt đầu Tour (Skip Time)",
+      () => adminService.skipToTourStart(tourSlotInfo.tourSlot.id),
+      "Tour đã được chuyển sang trạng thái 'Đang diễn ra'"
+    );
+  };
+
+  const handleCompleteTour = () => {
+    if (!tourSlotInfo) return;
+    executeTestAction(
+      "Hoàn thành Tour",
+      () => adminService.completeTour(tourSlotInfo.tourSlot.id),
+      "Tour đã được hoàn thành thành công"
+    );
+  };
+
+  const handleAutoCancel = () => {
+    if (!tourSlotInfo) return;
+    executeTestAction(
+      "Hủy Tour (Auto-Cancel)",
+      () => adminService.triggerAutoCancel(tourSlotInfo.tourSlot.id),
+      "Tour đã được hủy thành công"
+    );
   };
 
   const getStatusColor = (status: string) => {
@@ -207,154 +207,131 @@ const TourStatusManagement: React.FC = () => {
 
   return (
     <div style={{ padding: "24px" }}>
-      <div style={{ marginBottom: "24px" }}>
+      <Card style={{ marginBottom: "24px" }}>
         <Title level={2}>
-          <EditOutlined style={{ marginRight: "8px" }} />
-          Quản Lý Trạng Thái Tour
+          <ToolOutlined style={{ marginRight: "8px" }} />
+          Công Cụ Kiểm Thử Trạng Thái Tour
         </Title>
-        <Text type="secondary">
-          Tìm kiếm và thay đổi trạng thái của tour slots để phục vụ kiểm thử
-        </Text>
-      </div>
-
-      {/* Search Section */}
-      <Card title="Tìm Kiếm Tour Slot" style={{ marginBottom: "24px" }}>
+        <Paragraph type="secondary">
+          Sử dụng công cụ này để mô phỏng các giai đoạn của một tour, giúp cho
+          việc kiểm thử và demo trên UI dễ dàng hơn.
+        </Paragraph>
         <Space.Compact style={{ width: "100%", maxWidth: "600px" }}>
           <Input
             placeholder="Nhập Tour Slot ID (GUID)"
             value={tourSlotId}
             onChange={(e) => setTourSlotId(e.target.value)}
             onPressEnter={handleSearch}
-            style={{ flex: 1 }}
           />
           <Button
             type="primary"
             icon={<SearchOutlined />}
             onClick={handleSearch}
             loading={searchLoading}>
-            Tìm kiếm
+            Kiểm Tra
           </Button>
         </Space.Compact>
-        <div style={{ marginTop: "8px" }}>
-          <Text type="secondary" style={{ fontSize: "12px" }}>
-            Ví dụ: 123e4567-e89b-12d3-a456-426614174000
-          </Text>
-        </div>
       </Card>
 
-      {/* Tour Slot Details */}
-      {tourSlot && (
-        <Card
-          title="Thông Tin Tour Slot"
-          extra={
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={handleUpdateStatus}
-              disabled={loading}>
-              Thay Đổi Trạng Thái
-            </Button>
-          }
-          style={{ marginBottom: "24px" }}>
-          <Descriptions column={2} bordered>
-            <Descriptions.Item label="Tour Slot ID">
-              <Text code>{tourSlot.id}</Text>
-            </Descriptions.Item>
-            <Descriptions.Item label="Tên Tour">
-              {tourSlot.tourName}
-            </Descriptions.Item>
-            <Descriptions.Item label="Ngày Bắt Đầu">
-              {dayjs(tourSlot.startDate).format("DD/MM/YYYY HH:mm")}
-            </Descriptions.Item>
-            <Descriptions.Item label="Ngày Kết Thúc">
-              {dayjs(tourSlot.endDate).format("DD/MM/YYYY HH:mm")}
-            </Descriptions.Item>
-            <Descriptions.Item label="Trạng Thái">
-              <Tag
-                color={getStatusColor(tourSlot.status)}
-                icon={getStatusIcon(tourSlot.status)}>
-                {getStatusText(tourSlot.status)}
-              </Tag>
-            </Descriptions.Item>
-            <Descriptions.Item label="Booking">
-              <Text>
-                {tourSlot.currentBookings} / {tourSlot.maxGuests} khách
-              </Text>
-            </Descriptions.Item>
-            <Descriptions.Item label="Ngày Tạo">
-              {dayjs(tourSlot.createdAt).format("DD/MM/YYYY HH:mm")}
-            </Descriptions.Item>
-            <Descriptions.Item label="Cập Nhật Cuối">
-              {dayjs(tourSlot.updatedAt).format("DD/MM/YYYY HH:mm")}
-            </Descriptions.Item>
-            <Descriptions.Item label="Có Operations" span={2}>
-              <Tag color={tourSlot.hasOperations ? "green" : "red"}>
-                {tourSlot.hasOperations ? "Có" : "Không"}
-              </Tag>
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
+      {tourSlotInfo && (
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={12}>
+            <Card title="Thông Tin Tour Slot">
+              <Descriptions column={1} bordered>
+                <Descriptions.Item label="Tên Tour">
+                  {tourSlotInfo.tourSlot.tourTitle}
+                </Descriptions.Item>
+                <Descriptions.Item label="Ngày Tour">
+                  {dayjs(tourSlotInfo.tourSlot.tourDate).format("DD/MM/YYYY")}
+                </Descriptions.Item>
+                <Descriptions.Item label="Trạng Thái">
+                  <Tag
+                    color={getStatusColor(tourSlotInfo.tourSlot.status)}
+                    icon={getStatusIcon(tourSlotInfo.tourSlot.status)}>
+                    {getStatusText(tourSlotInfo.tourSlot.status)}
+                  </Tag>
+                </Descriptions.Item>
+                <Descriptions.Item label="Số khách">
+                  {`${tourSlotInfo.bookings.totalGuests} / ${tourSlotInfo.tourSlot.maxGuests}`}
+                </Descriptions.Item>
+                <Descriptions.Item label="Bookings">
+                  {`Confirmed: ${tourSlotInfo.bookings.confirmed}, Pending: ${tourSlotInfo.bookings.pending}`}
+                </Descriptions.Item>
+                <Descriptions.Item label="Doanh thu (Confirmed)">
+                  {`${tourSlotInfo.bookings.totalRevenue.toLocaleString()} VNĐ`}
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="Hành Động Kiểm Thử (Testing Actions)">
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Button
+                  icon={<RocketOutlined />}
+                  type="primary"
+                  onClick={handleSkipToStart}
+                  disabled={
+                    !tourSlotInfo.testingActions.canSkipToTourStart ||
+                    actionLoading
+                  }
+                  loading={actionLoading}
+                  block>
+                  Bắt đầu Tour (Skip Time)
+                </Button>
+                <Paragraph type="secondary" style={{ textAlign: "center" }}>
+                  Chuyển trạng thái tour thành "Đang diễn ra".
+                </Paragraph>
+
+                <Divider />
+
+                <Button
+                  icon={<FlagOutlined />}
+                  type="primary"
+                  onClick={handleCompleteTour}
+                  disabled={
+                    !tourSlotInfo.testingActions.canCompleteTour ||
+                    actionLoading
+                  }
+                  loading={actionLoading}
+                  block>
+                  Hoàn thành Tour
+                </Button>
+                <Paragraph type="secondary" style={{ textAlign: "center" }}>
+                  Chuyển trạng thái tour thành "Hoàn thành".
+                </Paragraph>
+
+                <Divider />
+
+                <Button
+                  icon={<StopOutlined />}
+                  danger
+                  type="primary"
+                  onClick={handleAutoCancel}
+                  disabled={actionLoading}
+                  loading={actionLoading}
+                  block>
+                  Hủy Tour (Auto-Cancel)
+                </Button>
+                <Paragraph type="secondary" style={{ textAlign: "center" }}>
+                  Mô phỏng việc tour bị hủy do không đủ khách.
+                </Paragraph>
+              </Space>
+            </Card>
+          </Col>
+        </Row>
       )}
 
-      {/* Update Status Modal */}
-      <Modal
-        title="Thay Đổi Trạng Thái Tour Slot"
-        open={updateModalVisible}
-        onCancel={() => setUpdateModalVisible(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setUpdateModalVisible(false)}>
-            Hủy
-          </Button>,
-          <Button
-            key="update"
-            type="primary"
-            onClick={handleConfirmUpdate}
-            loading={loading}
-            disabled={!selectedStatus || selectedStatus === tourSlot?.status}>
-            Cập Nhật
-          </Button>,
-        ]}>
-        <div style={{ marginBottom: "16px" }}>
-          <Text strong>Tour hiện tại: </Text>
-          <Text>{tourSlot?.tourName}</Text>
-        </div>
-        <div style={{ marginBottom: "16px" }}>
-          <Text strong>Trạng thái hiện tại: </Text>
-          <Tag color={getStatusColor(tourSlot?.status || "")}>
-            {getStatusText(tourSlot?.status || "")}
-          </Tag>
-        </div>
-        <div style={{ marginBottom: "16px" }}>
-          <Text strong>Trạng thái mới:</Text>
-          <Select
-            value={selectedStatus}
-            onChange={setSelectedStatus}
-            style={{ width: "100%", marginTop: "8px" }}
-            placeholder="Chọn trạng thái mới">
-            <Option value="Available">
-              <Tag color="green">Có sẵn</Tag>
-            </Option>
-            <Option value="FullyBooked">
-              <Tag color="blue">Đã đầy</Tag>
-            </Option>
-            <Option value="InProgress">
-              <Tag color="orange">Đang diễn ra</Tag>
-            </Option>
-            <Option value="Completed">
-              <Tag color="purple">Hoàn thành</Tag>
-            </Option>
-            <Option value="Cancelled">
-              <Tag color="red">Đã hủy</Tag>
-            </Option>
-          </Select>
-        </div>
-        <Alert
-          message="Lưu ý quan trọng"
-          description="Việc thay đổi trạng thái tour slot có thể ảnh hưởng đến các booking hiện có và quy trình kinh doanh. Vui lòng cân nhắc kỹ trước khi thực hiện."
-          type="warning"
-          showIcon
-        />
-      </Modal>
+      {!tourSlotInfo && !searchLoading && (
+        <Card>
+          <Alert
+            message="Chưa có dữ liệu"
+            description="Vui lòng nhập một Tour Slot ID và nhấn 'Kiểm Tra' để xem thông tin và các hành động kiểm thử có sẵn."
+            type="info"
+            showIcon
+            icon={<InfoCircleOutlined />}
+          />
+        </Card>
+      )}
     </div>
   );
 };
