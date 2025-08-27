@@ -204,6 +204,15 @@ export interface ApiResponse<T = any> {
     message?: string;
     error?: string;
     pagination?: PaginationInfo;
+    totalRecord?: number;
+    totalCount?: number;
+    totalPages?: number;
+    pageIndex?: number;
+    pageSize?: number;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
+    validationErrors?: string[];
+    fieldErrors?: Record<string, any>;
 }
 
 export interface PaginationInfo {

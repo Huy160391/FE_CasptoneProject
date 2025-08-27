@@ -288,7 +288,7 @@ const SpecialityShopOrders = () => {
                 <h1>Quản lý đơn hàng</h1>
                 <div className="header-actions">
                     <Search
-                        placeholder="Tìm kiếm mã PayOS, tên, email, số điện thoại..."
+                        placeholder="Tìm kiếm mã PayOS"
                         allowClear
                         style={{ width: 400 }}
                         value={searchText}

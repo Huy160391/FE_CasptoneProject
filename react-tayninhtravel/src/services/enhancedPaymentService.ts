@@ -1,5 +1,5 @@
 import axios from '../config/axios';
-import { ApiResponse } from '../types/api';
+import type { ApiResponse } from '@/types/index';
 
 // ===== ENHANCED PAYMENT TYPES =====
 
@@ -8,7 +8,7 @@ export interface CreatePaymentRequest {
     tourBookingId?: string;
     amount: number;
     description?: string;
-    
+
     // ✅ NEW: Support flexible booking identification
     bookingCode?: string; // Fallback ID nếu không có tourBookingId
 }
@@ -187,7 +187,7 @@ export const useEnhancedPayment = () => {
     const createPaymentLink = async (request: CreatePaymentRequest) => {
         try {
             const response = await paymentService.createPaymentLink(request);
-            
+
             if (response.success && response.data?.checkoutUrl) {
                 // Redirect to PayOS payment page
                 window.location.href = response.data.checkoutUrl;

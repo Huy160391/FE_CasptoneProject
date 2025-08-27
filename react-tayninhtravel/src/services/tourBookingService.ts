@@ -1,5 +1,5 @@
 import axios from "../config/axios";
-import { ApiResponse } from "../types/api";
+import type { ApiResponse } from '@/types/index';
 import {
   BookingStatus,
   GuestInfoRequest,
@@ -211,13 +211,107 @@ export const calculateBookingPrice = async (
       { headers }
     );
 
+    if (response.data.success && response.data.data) {
+      const tourDetails = response.data.data;
+      const pricePerGuest = tourDetails.tourOperation?.price || 0;
+
+      // Tính số ngày từ khi tour được tạo đến hiện tại
+      const tourCreatedDate = new Date(tourDetails.createdAt);
+      const currentDate = new Date();
+      const daysSinceCreated = Math.floor((currentDate.getTime() - tourCreatedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Tính số ngày từ hiện tại đến ngày tour (nếu có tourDate)
+      let daysUntilTour = 0;
+      let isEarlyBird = false;
+
+      // Kiểm tra nếu có tourDate từ tourOperation hoặc tourDates
+      const tourDate = tourDetails.tourOperation?.tourDate ||
+        tourDetails.tourDates?.[0]?.tourDate ||
+        request.bookingDate;
+
+      if (tourDate) {
+        const tourStartDate = new Date(tourDate);
+        daysUntilTour = Math.floor((tourStartDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Condition 1: Tour còn > 30 ngày nữa
+        if (daysUntilTour > 30) {
+          isEarlyBird = true;
+        }
+      }
+
+      // Condition 2: Đặt trong 14 ngày đầu sau khi tour được tạo (khớp với backend)
+      if (!isEarlyBird && daysSinceCreated <= 14) {
+        isEarlyBird = true;
+      }
+
+      const discountPercent = isEarlyBird ? 25 : 0;
+
+      // Tính giá
+      const totalOriginalPrice = pricePerGuest * request.numberOfGuests;
+      const discountAmount = (totalOriginalPrice * discountPercent) / 100;
+      const finalPrice = totalOriginalPrice - discountAmount;
+
+      return {
+        success: true,
+        data: {
+          tourDetailsId: tourDetails.id,
+          tourTitle: tourDetails.title || '',
+          numberOfGuests: request.numberOfGuests,
+          originalPricePerGuest: pricePerGuest,
+          totalOriginalPrice,
+          discountPercent,
+          discountAmount,
+          finalPrice,
+          isEarlyBird,
+          pricingType: isEarlyBird ? 'Early Bird' : 'Standard',
+          daysSinceCreated,
+          daysUntilTour,
+          bookingDate: new Date().toISOString()
+        }
+      };
+    }
+
+    return {
+      success: false,
+      message: 'Không tìm thấy thông tin tour',
+      data: {
+        tourDetailsId: '',
+        tourTitle: '',
+        numberOfGuests: 0,
+        originalPricePerGuest: 0,
+        totalOriginalPrice: 0,
+        discountPercent: 0,
+        discountAmount: 0,
+        finalPrice: 0,
+        isEarlyBird: false,
+        pricingType: '',
+        daysSinceCreated: 0,
+        daysUntilTour: 0,
+        bookingDate: ''
+      }
+    };
     // The backend now returns the correct PriceCalculationDto, which matches the frontend's PriceCalculation interface.
     return response.data;
   } catch (error: any) {
     console.error("Error calculating booking price:", error);
     return {
       success: false,
-      message: error.response?.data?.message || "Không thể tính giá tour",
+      message: error.response?.data?.message || 'Không thể tính giá tour',
+      data: {
+        tourDetailsId: '',
+        tourTitle: '',
+        numberOfGuests: 0,
+        originalPricePerGuest: 0,
+        totalOriginalPrice: 0,
+        discountPercent: 0,
+        discountAmount: 0,
+        finalPrice: 0,
+        isEarlyBird: false,
+        pricingType: '',
+        daysSinceCreated: 0,
+        daysUntilTour: 0,
+        bookingDate: ''
+      }
     };
   }
 };
@@ -237,6 +331,19 @@ export const createTourBooking = async (
     return {
       success: false,
       message: validation.errors.join(", "),
+      data: {
+        success: false,
+        message: validation.errors.join(", "),
+        bookingId: '',
+        bookingCode: '',
+        paymentUrl: '',
+        originalPrice: 0,
+        discountPercent: 0,
+        finalPrice: 0,
+        pricingType: '',
+        bookingDate: '',
+        tourStartDate: ''
+      }
     };
   }
 
@@ -361,8 +468,8 @@ export const getMyBookings = async (
             guests: booking.guests || [], // ✅ NEW: Individual guests with QR codes
             tourOperation: booking.tourOperation
               ? {
-                  ...booking.tourOperation, // Map all fields, including tourStartDate
-                }
+                ...booking.tourOperation, // Map all fields, including tourStartDate
+              }
               : undefined,
           })) || [],
         totalCount: response.data.data.totalCount || 0,
@@ -465,8 +572,14 @@ export const checkTourSlotCapacity = async (
     console.error("Error checking slot capacity:", error);
     return {
       success: false,
-      message:
-        error.response?.data?.message || "Không thể kiểm tra capacity slot",
+      message: error.response?.data?.message || 'Không thể kiểm tra capacity slot',
+      data: {
+        isAvailable: false,
+        maxGuests: 0,
+        currentBookings: 0,
+        availableSlots: 0,
+        message: error.response?.data?.message || 'Không thể kiểm tra capacity slot'
+      }
     };
   }
 };
@@ -529,16 +642,16 @@ export const getAvailableTours = async (params?: {
           endLocation: "Tây Ninh", // Default value
           tourOperation: tour.tourOperation
             ? {
-                id: tour.tourOperation.id,
-                tourDetailsId: tour.id,
-                tourTitle: tour.title,
-                price: tour.tourOperation.price,
-                maxGuests: tour.tourOperation.maxGuests,
-                currentBookings: tour.tourOperation.currentBookings || 0,
-                tourStartDate: tour.tourOperation.tourStartDate,
-                tourEndDate: tour.tourOperation.tourEndDate,
-                isActive: tour.tourOperation.isActive,
-              }
+              id: tour.tourOperation.id,
+              tourDetailsId: tour.id,
+              tourTitle: tour.title,
+              price: tour.tourOperation.price,
+              maxGuests: tour.tourOperation.maxGuests,
+              currentBookings: tour.tourOperation.currentBookings || 0,
+              tourStartDate: tour.tourOperation.tourStartDate,
+              tourEndDate: tour.tourOperation.tourEndDate,
+              isActive: tour.tourOperation.isActive,
+            }
             : undefined,
           timeline:
             tour.timeline?.map((item: any, index: number) => ({

@@ -96,9 +96,19 @@ const AdminSidebar = () => {
       ],
     },
     {
-      key: "/admin/tours",
+      key: 'tour',
       icon: <AppstoreOutlined />,
-      label: <Link to="/admin/tours">{t("admin.sidebar.tours")}</Link>,
+      label: 'Tour',
+      children: [
+        {
+          key: '/admin/tours',
+          label: <Link to="/admin/tours">Quản lý tour</Link>,
+        },
+        {
+          key: '/admin/tour-companies',
+          label: <Link to="/admin/tour-companies">Quản lý công ty du lịch</Link>,
+        },
+      ],
     },
     {
       key: "/admin/blogs",
@@ -114,6 +124,7 @@ const AdminSidebar = () => {
         </Link>
       ),
     },
+    //fix side bả
     {
       key: "/admin/tour-status-management",
       icon: <ToolOutlined />,

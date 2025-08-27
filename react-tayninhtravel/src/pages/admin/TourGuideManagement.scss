@@ -1,3 +1,134 @@
+  // Removed custom .status-tag styles to use Ant Design default/global styles
+      // Đưa vào trong .tourguides-table .ant-tag phía dưới
+// TourGuideManagement styles similar to ShopManagement/UserManagement
+.tourguide-management-page {
+  background: #fff;
+  min-height: 100vh;
+  padding: 24px;
+
+  .header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: #222;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+  }
+
+  .tourguides-table {
+    .ant-table-tbody > tr {
+      cursor: pointer;
+      transition: background-color 0.2s;
+      &:hover {
+        background-color: #f5f5f5;
+      }
+    }
+    // Tag dark mode (copied from ShopManagement.scss for consistency)
+    .ant-tag {
+      &.ant-tag-blue {
+        background-color: rgba(24, 144, 255, 0.2);
+        border-color: #1890ff;
+        color: #69c0ff;
+      }
+      &.ant-tag-green {
+        background-color: rgba(82, 196, 26, 0.2);
+        border-color: #52c41a;
+        color: #95de64;
+      }
+      &.ant-tag-red {
+        background-color: rgba(255, 77, 79, 0.2);
+        border-color: #ff4d4f;
+        color: #ff7875;
+      }
+      &.ant-tag-orange {
+        background-color: rgba(250, 173, 20, 0.2);
+        border-color: #faad14;
+        color: #ffc53d;
+      }
+      &.ant-tag-purple {
+        background-color: rgba(114, 46, 209, 0.2);
+        border-color: #722ed1;
+        color: #b37feb;
+      }
+      &.ant-tag-cyan {
+        background-color: rgba(19, 194, 194, 0.2);
+        border-color: #13c2c2;
+        color: #5cdbd3;
+      }
+    }
+    .ant-table-tbody > tr > td {
+      font-size: 15px;
+      color: #222;
+    }
+  }
+}
+
+body.dark-mode {
+  .tourguide-management-page {
+    background: #181818;
+    .header-bar {
+      h1 {
+        color: #fff;
+      }
+    }
+    .tourguides-table {
+      .ant-table-tbody > tr {
+        &:hover {
+          background-color: #232323;
+        }
+      }
+      .ant-tag {
+        border-radius: 4px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 2px 10px;
+        &.ant-tag-blue {
+          background: #e6f7ff;
+          color: #1677ff;
+          border: 1px solid #91d5ff;
+        }
+        &.ant-tag-green {
+          background: #f6ffed;
+          color: #52c41a;
+          border: 1px solid #b7eb8f;
+        }
+        &.ant-tag-red {
+          background: #fff2f0;
+          color: #f5222d;
+          border: 1px solid #ffccc7;
+        }
+        &.ant-tag-orange {
+          background: #fff7e6;
+          color: #fa8c16;
+          border: 1px solid #ffd591;
+        }
+        &.ant-tag-purple {
+          background: #f9f0ff;
+          color: #722ed1;
+          border: 1px solid #d3adf7;
+        }
+        &.ant-tag-cyan {
+          background: #e6fffb;
+          color: #13c2c2;
+          border: 1px solid #87e8de;
+        }
+      }
+      .ant-table-tbody > tr > td {
+        color: #eee;
+      }
+    }
+  }
+}
 .tour-guide-management {
   &.light-mode {
     .page-header {

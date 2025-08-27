@@ -1,0 +1,55 @@
+.company-modal {
+  .ant-modal-content {
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #e0e0e0;
+  }
+  .company-desc {
+    .ant-descriptions-item-label {
+      font-weight: 500;
+      color: #1890ff;
+      font-size: 15px;
+      background: #f6f8fa;
+      border-radius: 6px 0 0 6px;
+    }
+    .ant-descriptions-item-content {
+      font-size: 15px;
+      color: #222;
+      background: #fafcff;
+      border-radius: 0 6px 6px 0;
+    }
+  }
+  .ant-btn {
+    border-radius: 6px;
+  }
+}
+
+.dark-mode {
+  .company-modal {
+    .ant-modal-content {
+      background: #23272f;
+      color: #e6e6e6;
+      box-shadow: 0 2px 12px #181a1b;
+    }
+    .company-desc {
+      .ant-descriptions-item-label {
+        color: #52c41a;
+        background: #181a1b;
+      }
+      .ant-descriptions-item-content {
+        color: #e6e6e6;
+        background: #23272f;
+      }
+    }
+    .ant-btn {
+      background: #23272f;
+      color: #e6e6e6;
+      border: 1px solid #333;
+      &:hover {
+        background: #333;
+        color: #fff;
+      }
+    }
+  }
+}

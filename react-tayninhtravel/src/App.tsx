@@ -18,7 +18,10 @@ const App = () => {
 
   // Initialize app services and validate token on mount
   useEffect(() => {
-    appInitService.initialize();
+    // Nếu là trang public, truyền true. Có thể xác định bằng window.location.pathname
+    const publicPaths = ['/', '/about', '/blog', '/shop', '/tour', '/404'];
+    const isPublicPage = publicPaths.some(path => window.location.pathname.startsWith(path));
+    appInitService.initialize(isPublicPage);
 
     // Cleanup on unmount
     return () => {

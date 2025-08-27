@@ -325,9 +325,7 @@ const TourGuideDashboard: React.FC = () => {
                     errorMessage.includes('đồng ý tham gia tour khác') ||
                     errorMessage.includes('Tour bị trùng') ||
                     errorMessage.includes('conflict') ||
-                    errorMessage.includes('thời gian') ||
-                    response.statusCode === 400 ||
-                    response.statusCode === 409) {
+                    errorMessage.includes('thời gian')) {
 
                     showScheduleConflictError(errorMessage);
                 } else {

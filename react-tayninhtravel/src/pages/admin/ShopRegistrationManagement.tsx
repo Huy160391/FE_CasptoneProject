@@ -341,17 +341,15 @@ const ShopRegistrationManagement = () => {
 
     return (
         <div className={`shop-management-page${isDark ? ' dark' : ''}`}>
-            <div className="page-header">
-                <h1>{t('admin.shopManagement.title')}</h1>
-                <div className="header-actions">
-                    <Input
-                        placeholder={t('admin.shopManagement.searchPlaceholder')}
-                        prefix={<SearchOutlined />}
-                        onChange={e => handleSearch(e.target.value)}
-                        className="search-input"
-                        allowClear
-                    />
-                </div>
+            <div className="header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>{t('admin.shopManagement.title')}</h1>
+                <Input
+                    placeholder={t('admin.shopManagement.searchPlaceholder')}
+                    prefix={<SearchOutlined />}
+                    onChange={e => handleSearch(e.target.value)}
+                    style={{ width: 250, marginLeft: 'auto' }}
+                    allowClear
+                />
             </div>
             <Table
                 dataSource={registrations}

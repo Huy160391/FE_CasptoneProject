@@ -12,4 +12,31 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
   }
+  .tour-overview-box {
+    background: #f6f8fa;
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    color: #222;
+    .overview-title {
+      color: #222;
+    }
+    .overview-label {
+      color: #888;
+    }
+  }
+  .dark & {
+    .tour-overview-box {
+      background: #23272f;
+      color: #f3f3f3;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.32);
+      .overview-title {
+        color: #90caf9;
+      }
+      .overview-label {
+        color: #b0b0b0;
+      }
+    }
+  }
 }

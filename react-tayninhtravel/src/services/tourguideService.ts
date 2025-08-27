@@ -1,5 +1,5 @@
 import axiosInstance from "@/config/axios";
-import { ApiResponse } from "@/types/api";
+import type { ApiResponse } from '@/types/index';
 import { InvitationStatistics, TourGuideInvitation } from "@/types/tour";
 import { getVietnamNow, toVietnamTime } from "../utils/vietnamTimezone";
 

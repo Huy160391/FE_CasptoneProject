@@ -1,6 +1,5 @@
-import { Modal, Form, Input, Select } from 'antd';
+import { Modal, Form, Input, Select, Row, Col } from 'antd';
 import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import type { User } from '@/types/user';
 
 const { Option } = Select;
@@ -14,7 +13,6 @@ interface UserModalProps {
 }
 
 const UserModal = ({ visible, onOk, onCancel, form, editingUser }: UserModalProps) => {
-    const { t } = useTranslation();
 
     useEffect(() => {
         if (!visible) form.resetFields();
@@ -22,90 +20,103 @@ const UserModal = ({ visible, onOk, onCancel, form, editingUser }: UserModalProp
 
     return (
         <Modal
-            title={editingUser ? t('admin.users.modal.edit') : t('admin.users.modal.add')}
+            title={editingUser ? "Chỉnh sửa" : "Thêm mới"}
             open={visible}
             onOk={onOk}
             onCancel={onCancel}
-            okText={editingUser ? t('common.save') : t('common.add')}
-            cancelText={t('common.cancel')}
+            okText={editingUser ? "Lưu" : "Thêm"}
+            cancelText="Hủy"
         >
             <Form
                 form={form}
                 layout="vertical"
             >
-                <Form.Item
-                    name="name"
-                    label={t('profile.name')}
-                    rules={[{ required: true, message: t('profile.nameRequired') }]}
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.Item
-                    name="email"
-                    label={t('profile.email')}
-                    rules={[
-                        { required: true, message: t('profile.emailRequired') },
-                        { type: 'email', message: t('profile.emailInvalid') },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.Item
-                    name="phone"
-                    label={t('profile.phone')}
-                    rules={[
-                        { required: true, message: t('profile.phoneRequired') },
-                        { pattern: /^[0-9]{10}$/, message: t('auth.phoneInvalid') },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.Item
-                    name="status"
-                    label={t('admin.users.columns.status')}
-                    rules={[{ required: true, message: t('admin.users.validation.statusRequired') }]}
-                >
-                    <Select>
-                        <Option value={true}>{t('admin.users.status.active')}</Option>
-                        <Option value={false}>{t('admin.users.status.inactive')}</Option>
-                    </Select>
-                </Form.Item>
-
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item
+                            name="name"
+                            label="Họ tên"
+                            rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                        >
+                            <Input placeholder="Nhập họ tên" />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item
+                            name="email"
+                            label="Email"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập email' },
+                                { type: 'email', message: 'Email không hợp lệ' },
+                            ]}
+                        >
+                            <Input placeholder="Nhập địa chỉ email" />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item
+                            name="phone"
+                            label="Số điện thoại"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập số điện thoại' },
+                                { pattern: /^[0-9]{10}$/, message: 'Số điện thoại không hợp lệ' },
+                            ]}
+                        >
+                            <Input placeholder="Nhập số điện thoại" />
+                        </Form.Item>
+                    </Col>
+                    {editingUser ? (
+                        null
+                    ) : (
+                        <Col span={12}>
+                            <Form.Item
+                                name="role"
+                                label="Vai trò"
+                                rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}
+                            >
+                                <Select placeholder="Chọn vai trò">
+                                    <Option value="user">User</Option>
+                                    <Option value="blogger">Blogger</Option>
+                                    <Option value="tour company">Tour Company</Option>
+                                    <Option value="specialty shop">Specialty Shop</Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    )}
+                </Row>
+                {editingUser && (
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="status"
+                                label="Trạng thái"
+                                rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+                            >
+                                <Select>
+                                    <Option value={true}>Hoạt động</Option>
+                                    <Option value={false}>Không hoạt động</Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                )}
                 {!editingUser && (
-                    <>
-                        <Form.Item
-                            name="password"
-                            label={t('auth.password')}
-                            rules={[
-                                { required: true, message: t('auth.passwordRequired') },
-                                { min: 6, message: t('auth.passwordInvalid') },
-                            ]}
-                        >
-                            <Input.Password />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="confirmPassword"
-                            label={t('auth.confirmPassword')}
-                            dependencies={['password']}
-                            rules={[
-                                { required: true, message: t('auth.confirmPasswordRequired') },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        if (!value || getFieldValue('password') === value) {
-                                            return Promise.resolve();
-                                        }
-                                        return Promise.reject(new Error(t('auth.passwordMismatch')));
-                                    },
-                                }),
-                            ]}
-                        >
-                            <Input.Password />
-                        </Form.Item>
-                    </>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="password"
+                                label="Mật khẩu"
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập mật khẩu' },
+                                    { min: 6, message: 'Mật khẩu phải từ 6 ký tự trở lên' },
+                                ]}
+                            >
+                                <Input.Password placeholder="Nhập mật khẩu" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 )}
             </Form>
         </Modal>

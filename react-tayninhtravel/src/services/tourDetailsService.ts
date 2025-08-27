@@ -60,6 +60,8 @@ export interface TourDetail {
     };
 }
 
+
+
 /**
  * Service for public TourDetails operations (no authentication required)
  */
