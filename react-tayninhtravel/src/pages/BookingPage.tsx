@@ -268,16 +268,19 @@ const BookingPage: React.FC = () => {
 
     try {
       setCalculating(true);
-      const response = await calculateBookingPrice(
+        console.log(" - TourOperation ID:", tourDetails.tourOperation.id);
+      const response1 = await calculateBookingPrice(
         {
           tourOperationId: tourDetails.tourOperation.id, // ✅ FIXED: Pass correct ID to the service
           numberOfGuests: values.numberOfGuests,
         },
         token ?? undefined
       );
+    console.log("API response:", response1);
 
-      if (response.success && response.data) {
-        setPriceCalculation(response.data);
+      if (response1.success && response1.data) {
+        setPriceCalculation(response1.data);
+      console.log("Set priceCalculation:", response1.data);
 
         // ✅ FIXED: Check slot-specific availability instead of TourOperation
         const availabilityResponse = await checkTourSlotCapacity(
@@ -649,7 +652,7 @@ const BookingPage: React.FC = () => {
       icon: <CreditCardOutlined />,
     },
   ];
-
+console.log("DEBUG priceCalculation:", priceCalculation);
   return (
     <div style={{ padding: "20px", maxWidth: 1200, margin: "0 auto" }}>
       <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
