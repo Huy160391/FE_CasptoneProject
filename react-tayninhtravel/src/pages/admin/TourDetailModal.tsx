@@ -23,6 +23,8 @@ const TourDetailModal: React.FC<TourDetailModalProps> = ({ open, onClose, tour, 
     <Modal
       open={open}
       onCancel={onClose}
+        closable={false}
+
       title={
         <Row align="middle" justify="space-between">
           <Col>

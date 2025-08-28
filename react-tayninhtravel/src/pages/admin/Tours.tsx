@@ -226,7 +226,7 @@ const Tours = () => {
           <Tooltip title="Xem chi tiết">
             <Button type="primary" icon={<EyeOutlined />} size="small" onClick={e => { e.stopPropagation(); handleRowClick(record); }} />
           </Tooltip>
-          {record.status === 'AwaitingAdminApproval' && (
+          {record.status === 'Pending' && (
             <>
               <Tooltip title="Duyệt">
                 <Button type="primary" icon={<CheckOutlined />} size="small" onClick={e => { e.stopPropagation(); handleApprove(record); }} />
@@ -293,10 +293,12 @@ const Tours = () => {
 
 
       <TourDetailModal
-        open={detailModalOpen}
-        onClose={() => setDetailModalOpen(false)}
-        tour={selectedTour}
-      />
+  open={detailModalOpen}
+  onClose={() => setDetailModalOpen(false)}
+  tour={selectedTour}
+  onApprove={handleApprove}
+  onReject={handleReject}
+/>
     </div>
   );
 };
