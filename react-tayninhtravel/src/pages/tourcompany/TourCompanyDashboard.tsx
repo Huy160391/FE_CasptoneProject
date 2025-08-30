@@ -26,7 +26,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { getDashboardStatistics } from "@/services/tourcompanyService";
+import { getDashboardStatistics, getRecentBookings } from "@/services/tourcompanyService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { TourCompanyDashboardStatistics } from "@/types/dashboard";
 import "./TourCompanyDashboard.scss";
@@ -47,39 +47,52 @@ const TourCompanyDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [dashboardData, setDashboardData] =
     useState<TourCompanyDashboardStatistics | null>(null);
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(dayjs().year());
   const [selectedMonth, setSelectedMonth] = useState<number | undefined>(
     undefined
   );
 
-  // Remove mock data - will use real data from API
+  // Columns for recent bookings table
   const bookingColumns = [
     {
       title: "Mã booking",
       dataIndex: "id",
       key: "id",
+      width: 120,
     },
     {
-      title: t("tourCompany.transactions.columns.tourName"),
+      title: "Tên tour",
       dataIndex: "tourName",
       key: "tourName",
+      width: 200,
     },
     {
-      title: t("tourCompany.transactions.columns.customerName"),
+      title: "Tên khách hàng",
       dataIndex: "customerName",
       key: "customerName",
+      width: 150,
     },
     {
-      title: t("tourCompany.transactions.columns.date"),
+      title: "Ngày đặt",
       dataIndex: "bookingDate",
       key: "bookingDate",
+      width: 120,
       render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
     },
     {
-      title: t("tourCompany.transactions.columns.amount"),
+      title: "Ngày tour",
+      dataIndex: "tourDate",
+      key: "tourDate",
+      width: 120,
+      render: (date: string) => date ? dayjs(date).format("DD/MM/YYYY") : "N/A",
+    },
+    {
+      title: "Số tiền",
       dataIndex: "amount",
       key: "amount",
-      render: (amount: number) => `${amount.toLocaleString("vi-VN")} ₫`,
+      width: 120,
+      render: (amount: number) => `${amount?.toLocaleString("vi-VN") || 0} ₫`,
     },
     {
       title: t("tourCompany.transactions.columns.status"),
@@ -112,10 +125,17 @@ const TourCompanyDashboard: React.FC = () => {
 
     setLoading(true);
     try {
+      // Sử dụng current date nếu không có selectedYear/selectedMonth
+      const currentDate = dayjs();
+      const year = selectedYear || currentDate.year();
+      const month = selectedMonth || currentDate.month() + 1; // dayjs month is 0-based
+
+      console.log("Fetching dashboard data with params:", { year, month }); // Debug log
+
       const response = await getDashboardStatistics(
         {
-          year: selectedYear,
-          month: selectedMonth,
+          year: year,
+          month: month,
           compareWithPrevious: true,
         },
         token
@@ -123,8 +143,10 @@ const TourCompanyDashboard: React.FC = () => {
 
       if (response.success && response.data) {
         setDashboardData(response.data);
+        console.log("Dashboard data loaded successfully:", response.data); // Debug log
       } else {
         message.error(response.message || "Không thể tải dữ liệu dashboard");
+        console.error("API response error:", response); // Debug log
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -134,9 +156,25 @@ const TourCompanyDashboard: React.FC = () => {
     }
   };
 
+  // Fetch recent bookings
+  const fetchRecentBookings = async () => {
+    if (!token) return;
+
+    try {
+      const response = await getRecentBookings(10, token);
+      if (response.success && response.data) {
+        setRecentBookings(response.data);
+        console.log("Recent bookings loaded:", response.data); // Debug log
+      }
+    } catch (error) {
+      console.error("Error fetching recent bookings:", error);
+    }
+  };
+
   // Load data on component mount and when filters change
   useEffect(() => {
     fetchDashboardData();
+    fetchRecentBookings();
   }, [selectedYear, selectedMonth, token]);
 
   const handleDateRangeChange = (dates: any) => {
@@ -149,6 +187,7 @@ const TourCompanyDashboard: React.FC = () => {
 
   const handleRefresh = () => {
     fetchDashboardData();
+    fetchRecentBookings();
   };
   // Show loading spinner while fetching data
   if (loading && !dashboardData) {
@@ -179,65 +218,102 @@ const TourCompanyDashboard: React.FC = () => {
             loading={loading}>
             {t("tourCompany.common.actions.search")}
           </Button>
-          <Button
-            type="default"
-            icon={<BarChartOutlined />}
-            onClick={() => navigate("/tour-company/analytics")}>
-            Phân tích chi tiết
-          </Button>
+          {/* Hidden analytics button for now */}
+          {false && (
+            <Button
+              type="default"
+              icon={<BarChartOutlined />}
+              onClick={() => navigate("/tour-company/analytics")}>
+              Phân tích chi tiết
+            </Button>
+          )}
         </Space>
       </div>
       <Row gutter={[16, 16]} className="stats-cards">
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title={t("tourCompany.dashboard.stats.totalRevenue")}
+              title="Doanh thu tháng này"
               value={dashboardData?.revenueMetrics?.totalRevenue || 0}
               prefix={<DollarOutlined />}
               suffix="₫"
-              formatter={(value) => `${(Number(value) / 1000000).toFixed(1)}M`}
+              formatter={(value) => {
+                const num = Number(value);
+                if (num >= 1000000) {
+                  return `${(num / 1000000).toFixed(1)}M`;
+                } else if (num >= 1000) {
+                  return `${(num / 1000).toFixed(1)}K`;
+                }
+                return num.toLocaleString();
+              }}
+              valueStyle={{ color: '#1890ff' }}
             />
-            <div className="growth-indicator">
-              <RiseOutlined style={{ color: "#52c41a" }} />
-              <span style={{ color: "#52c41a" }}>
-                +{dashboardData?.revenueMetrics?.revenueGrowth?.toFixed(1) || 0}
-                %
-              </span>
-            </div>
+            {dashboardData?.revenueMetrics?.revenueGrowth !== undefined && (
+              <div className="growth-indicator">
+                <RiseOutlined
+                  style={{
+                    color: dashboardData.revenueMetrics.revenueGrowth >= 0 ? "#52c41a" : "#ff4d4f"
+                  }}
+                />
+                <span style={{
+                  color: dashboardData.revenueMetrics.revenueGrowth >= 0 ? "#52c41a" : "#ff4d4f"
+                }}>
+                  {dashboardData.revenueMetrics.revenueGrowth >= 0 ? '+' : ''}
+                  {dashboardData.revenueMetrics.revenueGrowth.toFixed(1)}%
+                </span>
+              </div>
+            )}
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title={t("tourCompany.dashboard.stats.totalTours")}
+              title="Tours đang hoạt động"
               value={dashboardData?.tourMetrics?.activeTours || 0}
               prefix={<ShoppingOutlined />}
+              valueStyle={{ color: '#52c41a' }}
             />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title={t("tourCompany.dashboard.stats.totalBookings")}
-              value={dashboardData?.bookingMetrics?.totalBookings || 0}
-              prefix={<UserOutlined />}
-            />
-            <div className="growth-indicator">
-              <RiseOutlined style={{ color: "#52c41a" }} />
-              <span style={{ color: "#52c41a" }}>
-                +{dashboardData?.bookingMetrics?.bookingGrowth?.toFixed(1) || 0}
-                %
-              </span>
+            <div className="additional-info">
+              Tổng: {dashboardData?.tourMetrics?.totalToursCreated || 0} tours
             </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title={t("tourCompany.dashboard.stats.avgRating")}
+              title="Tổng bookings"
+              value={dashboardData?.bookingMetrics?.totalBookings || 0}
+              prefix={<UserOutlined />}
+              valueStyle={{ color: '#722ed1' }}
+            />
+            {dashboardData?.bookingMetrics?.bookingGrowth !== undefined && (
+              <div className="growth-indicator">
+                <RiseOutlined
+                  style={{
+                    color: dashboardData.bookingMetrics.bookingGrowth >= 0 ? "#52c41a" : "#ff4d4f"
+                  }}
+                />
+                <span style={{
+                  color: dashboardData.bookingMetrics.bookingGrowth >= 0 ? "#52c41a" : "#ff4d4f"
+                }}>
+                  {dashboardData.bookingMetrics.bookingGrowth >= 0 ? '+' : ''}
+                  {dashboardData.bookingMetrics.bookingGrowth.toFixed(1)}%
+                </span>
+              </div>
+            )}
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Đánh giá trung bình"
               value={dashboardData?.tourMetrics?.averageRating || 0}
               prefix={<StarOutlined />}
               precision={1}
+              suffix="/5"
+              valueStyle={{
+                color: (dashboardData?.tourMetrics?.averageRating ?? 0) > 0 ? '#faad14' : '#999'
+              }}
             />
             <Progress
               percent={
@@ -246,53 +322,91 @@ const TourCompanyDashboard: React.FC = () => {
               showInfo={false}
               strokeColor="#faad14"
             />
+            <div className="additional-info">
+              {(dashboardData?.tourMetrics?.averageRating ?? 0) > 0
+                ? 'Có đánh giá từ khách hàng'
+                : 'Chưa có đánh giá'
+              }
+            </div>
           </Card>
         </Col>
       </Row>
-      {/* Additional Tour Statistics */}
+      {/* Additional Statistics */}
+      <div style={{ marginTop: 32, marginBottom: 16 }}>
+        <h3 style={{
+          margin: 0,
+          fontSize: '16px',
+          fontWeight: 600,
+          color: '#262626',
+          borderBottom: '1px solid #f0f0f0',
+          paddingBottom: '8px'
+        }}>
+          Thống kê chi tiết
+        </h3>
+      </div>
       <Row
         gutter={[16, 16]}
-        className="tour-stats"
-        style={{ marginBottom: 16 }}>
+        className="additional-stats"
+        style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Tổng Tour Details"
-              value={dashboardData?.tourMetrics?.totalToursCreated || 0}
-              prefix={<ShoppingOutlined />}
-              valueStyle={{ color: "#1890ff" }}
+              title="Booking thành công"
+              value={dashboardData?.bookingMetrics?.successfulBookings || 0}
+              prefix={<UserOutlined />}
+              valueStyle={{ color: "#52c41a" }}
             />
+            <div className="additional-info">
+              Tỷ lệ thành công: {(dashboardData?.bookingMetrics?.totalBookings ?? 0) > 0
+                ? (((dashboardData?.bookingMetrics?.successfulBookings ?? 0) / (dashboardData?.bookingMetrics?.totalBookings ?? 1)) * 100).toFixed(1)
+                : 0}%
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Tours Bị Hủy"
-              value={dashboardData?.tourMetrics?.cancelledTours || 0}
-              prefix={<ShoppingOutlined />}
+              title="Booking bị hủy"
+              value={dashboardData?.bookingMetrics?.cancelledBookings || 0}
+              prefix={<UserOutlined />}
               valueStyle={{ color: "#ff4d4f" }}
             />
+            <div className="additional-info">
+              Tỷ lệ hủy: {dashboardData?.bookingMetrics?.cancellationRate?.toFixed(1) || 0}%
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Tours Đang Chờ"
-              value={dashboardData?.tourMetrics?.pendingTours || 0}
-              prefix={<ShoppingOutlined />}
-              valueStyle={{ color: "#faad14" }}
+              title="Khách hàng"
+              value={dashboardData?.customerMetrics?.totalCustomers || 0}
+              prefix={<UserOutlined />}
+              valueStyle={{ color: "#722ed1" }}
             />
+            <div className="additional-info">
+              Mới: {dashboardData?.customerMetrics?.newCustomers || 0} |
+              Quay lại: {dashboardData?.customerMetrics?.returningCustomers || 0}
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Tỷ Lệ Lấp Đầy"
-              value={dashboardData?.tourMetrics?.averageOccupancyRate || 0}
-              prefix={<BarChartOutlined />}
-              suffix="%"
-              precision={1}
-              valueStyle={{ color: "#52c41a" }}
+              title="Doanh thu trung bình/booking"
+              value={dashboardData?.revenueMetrics?.averageRevenuePerBooking || 0}
+              prefix={<DollarOutlined />}
+              suffix="₫"
+              formatter={(value) => {
+                const num = Number(value);
+                if (num >= 1000000) {
+                  return `${(num / 1000000).toFixed(1)}M`;
+                } else if (num >= 1000) {
+                  return `${(num / 1000).toFixed(1)}K`;
+                }
+                return num.toLocaleString();
+              }}
+              valueStyle={{ color: "#13c2c2" }}
             />
           </Card>
         </Col>
@@ -301,41 +415,37 @@ const TourCompanyDashboard: React.FC = () => {
         {" "}
         <Col xs={24} lg={14}>
           <Card
-            title={t("tourCompany.dashboard.charts.revenueTitle")}
-            className="revenue-chart">
-            <div className="revenue-chart-placeholder">
-              {dashboardData?.trends?.weeklyRevenue &&
-              dashboardData.trends.weeklyRevenue.length > 0 ? (
-                dashboardData.trends.weeklyRevenue.map((item, index) => (
-                  <div key={index} className="revenue-bar">
-                    <span>{item.week}</span>
-                    <Progress
-                      percent={
-                        item.revenue > 0
-                          ? Math.min(
-                              (item.revenue /
-                                Math.max(
-                                  ...dashboardData.trends.weeklyRevenue.map(
-                                    (w) => w.revenue
-                                  )
-                                )) *
-                                100,
-                              100
-                            )
-                          : 0
-                      }
-                      format={() => `${(item.revenue / 1000000).toFixed(1)}M ₫`}
-                    />
-                  </div>
-                ))
+            title="Biểu đồ Bookings theo ngày"
+            className="bookings-chart">
+            <div className="bookings-chart-placeholder">
+              {dashboardData?.trends?.dailyBookings &&
+              dashboardData.trends.dailyBookings.length > 0 ? (
+                dashboardData.trends.dailyBookings.map((item, index) => {
+                  const maxBookings = Math.max(
+                    ...dashboardData.trends.dailyBookings.map(d => d.bookings)
+                  );
+                  return (
+                    <div key={index} className="booking-bar">
+                      <span style={{ minWidth: '80px', fontSize: '12px' }}>
+                        {dayjs(item.date).format("DD/MM")}
+                      </span>
+                      <Progress
+                        percent={maxBookings > 0 ? (item.bookings / maxBookings) * 100 : 0}
+                        format={() => `${item.bookings} bookings`}
+                        strokeColor="#1890ff"
+                      />
+                    </div>
+                  );
+                })
               ) : (
                 <div
                   style={{
                     textAlign: "center",
-                    padding: "20px",
+                    padding: "40px",
                     color: "#999",
                   }}>
-                  <p>Chưa có dữ liệu doanh thu</p>
+                  <p>Chưa có dữ liệu bookings theo ngày</p>
+                  <p style={{ fontSize: '12px' }}>Dữ liệu sẽ hiển thị khi có bookings mới</p>
                 </div>
               )}
             </div>
@@ -343,28 +453,60 @@ const TourCompanyDashboard: React.FC = () => {
         </Col>
         <Col xs={24} lg={10}>
           <Card
-            title={t("tourCompany.dashboard.charts.popularToursTitle")}
-            className="popular-tours">
-            {dashboardData?.tourMetrics ? (
-              <div className="tour-item">
-                <div className="tour-info">
-                  <span className="tour-name">
-                    {dashboardData.tourMetrics.mostPopularTourName ||
-                      "Chưa có tour phổ biến"}
-                  </span>
-                  <span className="booking-count">
-                    {dashboardData.bookingMetrics?.totalBookings || 0} bookings
-                  </span>
+            title="Thông tin Tour & Khách hàng"
+            className="tour-customer-info">
+            {dashboardData?.tourMetrics && dashboardData?.customerMetrics ? (
+              <div>
+                {/* Most Popular Tour */}
+                <div className="info-section" style={{ marginBottom: 20 }}>
+                  <h4 style={{ marginBottom: 12, color: '#1890ff' }}>Tour phổ biến nhất</h4>
+                  <div className="tour-item">
+                    <div className="tour-info">
+                      <span className="tour-name" style={{ fontWeight: 500 }}>
+                        {dashboardData.tourMetrics.mostPopularTourName ||
+                          "Chưa có tour phổ biến"}
+                      </span>
+                      <span className="booking-count" style={{ color: '#666', fontSize: '12px' }}>
+                        {dashboardData.bookingMetrics?.successfulBookings || 0} bookings thành công
+                      </span>
+                    </div>
+                    <Progress
+                      percent={dashboardData.tourMetrics.averageOccupancyRate || 0}
+                      showInfo={true}
+                      format={(percent) => `${percent}% lấp đầy`}
+                      strokeColor="#52c41a"
+                    />
+                  </div>
                 </div>
-                <Progress
-                  percent={dashboardData.tourMetrics.averageOccupancyRate || 0}
-                  showInfo={false}
-                />
+
+                {/* Customer Stats */}
+                <div className="info-section">
+                  <h4 style={{ marginBottom: 12, color: '#722ed1' }}>Thống kê khách hàng</h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span>Tổng khách hàng:</span>
+                    <strong>{dashboardData.customerMetrics.totalCustomers}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span>Khách hàng mới:</span>
+                    <strong style={{ color: '#52c41a' }}>{dashboardData.customerMetrics.newCustomers}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span>Khách hàng quay lại:</span>
+                    <strong style={{ color: '#1890ff' }}>{dashboardData.customerMetrics.returningCustomers}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Tỷ lệ giữ chân:</span>
+                    <strong style={{ color: '#faad14' }}>
+                      {dashboardData.customerMetrics.customerRetentionRate?.toFixed(1) || 0}%
+                    </strong>
+                  </div>
+                </div>
               </div>
             ) : (
               <div
-                style={{ textAlign: "center", padding: "20px", color: "#999" }}>
-                <p>Chưa có dữ liệu tours</p>
+                style={{ textAlign: "center", padding: "40px", color: "#999" }}>
+                <p>Chưa có dữ liệu tours và khách hàng</p>
+                <p style={{ fontSize: '12px' }}>Dữ liệu sẽ hiển thị khi có tours và bookings</p>
               </div>
             )}
           </Card>
@@ -373,21 +515,20 @@ const TourCompanyDashboard: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
         <Col span={24}>
           <Card
-            title={t("tourCompany.dashboard.recentActivities.title")}
+            title="Hoạt động gần đây"
             className="recent-bookings">
-            {dashboardData?.trends?.dailyBookings &&
-            dashboardData.trends.dailyBookings.length > 0 ? (
+            {recentBookings && recentBookings.length > 0 ? (
               <Table
-                dataSource={dashboardData.trends.dailyBookings.map(
-                  (booking, index) => ({
-                    id: `DB${index + 1}`,
-                    tourName: "Tour booking",
-                    customerName: "Khách hàng",
-                    bookingDate: booking.date,
-                    amount: booking.revenue,
-                    status: "confirmed",
-                  })
-                )}
+                dataSource={recentBookings.map((booking) => ({
+                  id: booking.bookingCode || booking.id,
+                  tourName: booking.tourName,
+                  customerName: booking.customerName,
+                  bookingDate: booking.bookingDate,
+                  tourDate: booking.tourDate,
+                  amount: booking.amount,
+                  status: booking.status.toLowerCase(),
+                  numberOfGuests: booking.numberOfGuests,
+                }))}
                 columns={bookingColumns}
                 rowKey="id"
                 pagination={{ pageSize: 5 }}

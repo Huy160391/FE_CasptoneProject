@@ -695,3 +695,16 @@ export const getDetailedAnalytics = async (
   );
   return response.data;
 };
+
+// Lấy danh sách booking gần đây cho TourCompany dashboard
+export const getRecentBookings = async (
+  pageSize: number = 10,
+  token?: string
+): Promise<ApiResponse<any[]>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await axios.get(
+    `/TourCompany/dashboard/recent-bookings?pageSize=${pageSize}`,
+    { headers }
+  );
+  return response.data;
+};
