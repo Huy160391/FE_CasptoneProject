@@ -1,5 +1,6 @@
 import axios from "../config/axios";
 import type { ApiResponse } from '@/types/index';
+import { getErrorMessage } from '@/utils/errorHandler';
 import {
   BookingStatus,
   GuestInfoRequest,
