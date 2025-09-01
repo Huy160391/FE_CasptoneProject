@@ -109,7 +109,7 @@ const ProductDetail = () => {
         }
         const fetchedReviews = reviewsArr.map((r: any, idx: number) => ({
           id: idx + 1,
-          userName: r.userName || r.user || 'Ẩn danh',
+          userName: r.userName || r.user || t('product.detail.anonymous'),
           rating: r.rating || 0,
           date: formatReviewDate(r.createdAt || r.date || ''),
           comment: r.content || r.comment || '',
@@ -148,7 +148,7 @@ const ProductDetail = () => {
             }
             fetchedReviews = reviewsArr.map((r: any, idx: number) => ({
               id: idx + 1,
-              userName: r.userName || r.user || 'Ẩn danh',
+              userName: r.userName || r.user || t('product.detail.anonymous'),
               rating: r.rating || 0,
               date: formatReviewDate(r.createdAt || r.date || ''),
               comment: r.content || r.comment || '',
@@ -171,11 +171,11 @@ const ProductDetail = () => {
             category: productData.category,
             rating: 4.5,
             reviews: 28,
-            tags: ['đặc sản', 'quà tặng', 'truyền thống'],
+            tags: [t('product.detail.tags.specialty'), t('product.detail.tags.gift'), t('product.detail.tags.traditional')],
             isNew: false,
             discountPrice: productData.isSale && productData.salePercent ?
               productData.price * (1 - productData.salePercent / 100) : undefined,
-            shortDescription: productData.description || 'Sản phẩm đặc trưng từ Tây Ninh, chất lượng cao',
+            shortDescription: productData.description || t('product.detail.defaultDescription'),
             stock: productData.quantityInStock,
             sku: `TN-${productData.id.toString().padStart(5, '0')}`,
             additionalImages,
@@ -212,7 +212,7 @@ const ProductDetail = () => {
     if (productCart.quantity + quantity > product.stock) {
       notification.error({
         message: t('cart.error'),
-        description: t('Số lượng vượt quá tồn kho hiện có!'),
+        description: t('product.detail.stockExceeded'),
       })
       return
     }
@@ -222,7 +222,8 @@ const ProductDetail = () => {
       name: product.name,
       image: product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : 'https://placehold.co/400x400?text=No+Image',
       price: product.discountPrice || product.price,
-      quantity: quantity
+      quantity: quantity,
+      quantityInStock: product.stock
     })
   }
 
@@ -288,13 +289,15 @@ const ProductDetail = () => {
                 className={`product-badge ${product.isNew ? 'new-badge' : 'sale-badge'}`}
               >
                 {product.isNew
-                  ? 'Mới'
-                  : `Giảm ${typeof product.discountPrice === 'number' ? Math.round(
-                    ((product.price - product.discountPrice) / product.price) * 100
-                  ) : 0}%`}
+                  ? t('product.detail.newBadge')
+                  : t('product.detail.discountBadge', {
+                    percent: typeof product.discountPrice === 'number' ? Math.round(
+                      ((product.price - product.discountPrice) / product.price) * 100
+                    ) : 0
+                  })}
               </div>
             )}
-            <div className="image-hint">Nhấp để xem ảnh lớn</div>
+            <div className="image-hint">{t('product.detail.imageHint')}</div>
           </div>
           <div className="thumbnail-container">{renderThumbnails()}</div>
         </div>
@@ -471,11 +474,11 @@ const ProductDetail = () => {
     return (
       <div className="product-detail-container">
         <div className="not-found">
-          <Title level={3}>Không tìm thấy sản phẩm</Title>
-          <Text>Sản phẩm này không tồn tại hoặc đã bị xóa.</Text>
+          <Title level={3}>{t('product.detail.notFoundTitle')}</Title>
+          <Text>{t('product.detail.notFoundMessage')}</Text>
           <Link to="/shop">
             <Button type="primary" size="large" className="back-button">
-              Quay lại cửa hàng
+              {t('product.detail.backToShop')}
             </Button>
           </Link>
         </div>
@@ -489,8 +492,8 @@ const ProductDetail = () => {
       <Breadcrumb
         className="breadcrumb"
         items={[
-          { title: <Link to="/">Trang Chủ</Link> },
-          { title: <Link to="/shop">Cửa Hàng</Link> },
+          { title: <Link to="/">{t('product.detail.breadcrumbHome')}</Link> },
+          { title: <Link to="/shop">{t('product.detail.breadcrumbShop')}</Link> },
           { title: <Link to={`/shop?category=${product.category}`}>{i18n.language === 'vi' ? getCategoryViLabel(product.category.toLowerCase()) : product.category}</Link> },
           { title: product.name },
         ]}
@@ -633,7 +636,7 @@ const ProductDetail = () => {
       {/* onChange={key => setActiveTab(key)} */}
       <div className="product-details-tabs">
         <Tabs defaultActiveKey="description">
-          <TabPane tab="Mô tả sản phẩm" key="description">
+          <TabPane tab={t('product.detail.descriptionTab')} key="description">
             <div className="tab-content">
               <Paragraph>{product.description}</Paragraph>
             </div>
@@ -719,7 +722,7 @@ const ProductDetail = () => {
       {/* Related Products */}
       <div className="related-products">
         <Title level={3} className="section-title">
-          Sản phẩm liên quan
+          {t('product.detail.relatedProducts')}
         </Title>
         <RelatedProductsSection
           currentProductId={product.id}

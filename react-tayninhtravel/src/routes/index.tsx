@@ -12,6 +12,8 @@ import TourGuideLayout from '@/components/layout/TourGuideLayout';
 import { tourguideRoutes } from './tourguideRoutes';
 import ProtectedRoute from './ProtectedRoute';
 import { specialityShopRoutes } from './specialityShopRoutes';
+import ShopProfile from '../pages/specialityshop/ShopProfile';
+import TourCompanyProfile from '@/pages/tourcompany/TourCompanyProfile';
 
 const routes: RouteObject[] = [
   {
@@ -20,6 +22,22 @@ const routes: RouteObject[] = [
     children: [
       ...publicRoutes,
       ...privateRoutes,
+      {
+        path: '/speciality-shop/profile',
+        element: (
+          <ProtectedRoute requiredRole="Specialty Shop">
+            <ShopProfile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/tour-company/profile',
+        element: (
+          <ProtectedRoute requiredRole="Tour Company">
+            <TourCompanyProfile />
+          </ProtectedRoute>
+        ),
+      },
     ],
   }, {
     path: '/admin',

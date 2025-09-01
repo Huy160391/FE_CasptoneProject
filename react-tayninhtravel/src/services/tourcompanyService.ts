@@ -695,3 +695,37 @@ export const getDetailedAnalytics = async (
   );
   return response.data;
 };
+
+// ===== TOUR COMPANY INFO API =====
+
+// Tour Company Info interface based on API response
+export interface TourCompanyInfo {
+  id: string;
+  userId: string;
+  companyName: string;
+  wallet: number;
+  revenueHold: number;
+  description?: string;
+  address?: string;
+  website?: string;
+  businessLicense?: string;
+  isActive: boolean;
+  email: string;
+  fullName: string;
+  phoneNumber: string;
+  publicTour: number;
+}
+
+/**
+ * Get tour company details by ID
+ * @param tourCompanyId - The tour company ID
+ * @param token - JWT token (optional)
+ */
+export const getTourCompanyById = async (
+  tourCompanyId: string,
+  token?: string
+): Promise<ApiResponse<TourCompanyInfo>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await axios.get(`/Cms/TourCompany/${tourCompanyId}`, { headers });
+  return response.data;
+};

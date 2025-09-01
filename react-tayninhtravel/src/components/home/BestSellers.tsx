@@ -25,7 +25,7 @@ const BestSellers: React.FC = () => {
                     image: p.imageUrl && p.imageUrl.length > 0 ? p.imageUrl[0] : 'https://placehold.co/400x400?text=No+Image',
                     price: p.price,
                     rating: p.rating || 4.5,
-                    reviews: p.reviews || Math.floor(Math.random() * 50) + 1,
+                    // reviews: p.reviews || Math.floor(Math.random() * 50) + 1,
                     soldCount: p.soldCount || 0,
                     category: p.category || 'product',
                     quantityInStock: p.quantityInStock ?? 999,
@@ -58,7 +58,8 @@ const BestSellers: React.FC = () => {
             image: product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : product.image || '',
             price: product.price,
             quantity: 1,
-            type: 'product'
+            type: 'product',
+            quantityInStock: product.quantityInStock ?? 999
         });
         notification.success({
             message: t('cart.addToCart'),

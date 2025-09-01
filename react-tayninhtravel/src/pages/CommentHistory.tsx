@@ -15,7 +15,7 @@ const CommentHistory = ({ data }: CommentHistoryProps) => {
             <Card>
                 <div style={{ marginBottom: 16 }}>
                     <Title level={4}>
-                        ⭐ {t('commentHistory.title', 'Lịch sử đánh giá')}
+                        {t('commentHistory.title', 'Lịch sử đánh giá')}
                     </Title>
                     <Text type="secondary">
                         {t('commentHistory.description', 'Quản lý và xem lại các đánh giá bạn đã để lại cho các tour')}

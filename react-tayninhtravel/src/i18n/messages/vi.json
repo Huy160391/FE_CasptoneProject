@@ -309,7 +309,63 @@
         "maxParticipants": "Số người tối đa",
         "startDate": "Ngày khởi hành",
         "person": "người",
-        "unavailable": "Không khả dụng"
+        "unavailable": "Không khả dụng",
+        "detail": {
+            "notFoundTitle": "Không tìm thấy tour",
+            "mockReviews": {
+                "review1": {
+                    "name": "Nguyễn Văn A",
+                    "comment": "Tour rất tuyệt vời! Hướng dẫn viên nhiệt tình và chuyên nghiệp. Cảnh đẹp, thời gian hợp lý. Sẽ giới thiệu cho bạn bè!"
+                },
+                "review2": {
+                    "name": "Trần Thị B",
+                    "comment": "Tour khá tốt, tuy nhiên thời gian ở một số điểm hơi ngắn. Nhìn chung rất hài lòng với trải nghiệm."
+                },
+                "review3": {
+                    "name": "Lê Văn C",
+                    "comment": "Đây là lần thứ hai tôi tham gia tour này và vẫn rất hài lòng. Cảnh đẹp, dịch vụ tốt, đáng đồng tiền bát gạo."
+                }
+            },
+            "noTourId": "Không tìm thấy ID tour",
+            "mockCompany": {
+                "name": "Công ty Du lịch Tay Ninh Travel",
+                "description": "Chuyên tổ chức các tour du lịch chất lượng cao tại vùng Đông Nam Bộ với hơn 10 năm kinh nghiệm.",
+                "address": "123 Đường ABC, Thành phố Tây Ninh"
+            },
+            "mockGuide": {
+                "name": "Nguyễn Văn Hướng Dẫn",
+                "experience": "5 năm kinh nghiệm hướng dẫn tour",
+                "skills": {
+                    "professional": "Hướng dẫn viên chuyên nghiệp",
+                    "local": "Kinh nghiệm địa phương",
+                    "multilingual": "Đa ngôn ngữ",
+                    "safety": "An toàn tour"
+                },
+                "languages": {
+                    "vietnamese": "Tiếng Việt",
+                    "english": "Tiếng Anh",
+                    "chinese": "Tiếng Trung"
+                }
+            },
+            "loadError": "Không thể tải thông tin tour",
+            "generalError": "Có lỗi xảy ra khi tải thông tin tour",
+            "bookingUnavailable": "Tour này hiện không khả dụng để đặt",
+            "loginSuccess": "Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.",
+            "companyTitle": "Công ty tổ chức",
+            "guideTitle": "Hướng dẫn viên",
+            "companyStatus": "Trạng thái",
+            "companyActive": "Hoạt động",
+            "companyInactive": "Không hoạt động",
+            "publicTours": "Số tour công khai",
+            "guideExperience": "Kinh nghiệm",
+            "guideSkills": "Kỹ năng",
+            "guideTotalTours": "Số tour đã dẫn",
+            "guideStatus": "Trạng thái",
+            "guideAvailable": "Có sẵn",
+            "guideUnavailable": "Không có sẵn",
+            "approvedDate": "Được duyệt",
+            "approvedBy": "Được duyệt bởi"
+        }
     },
     "thingsToDo": {
         "pageTitle": "Khám phá Tây Ninh",
@@ -640,7 +696,9 @@
         "vatIncluded": "* Giá thành đã bao gồm VAT",
         "chooseVoucher": "Chọn voucher",
         "voucher": "Mã giảm giá",
-        "discount": "Giảm giá"
+        "discount": "Giảm giá",
+        "outOfStockRemoved": "{{name}} đã hết hàng và được xóa khỏi giỏ hàng",
+        "quantityReduced": "Số lượng {{name}} đã được giảm xuống {{newQuantity}} do tồn kho không đủ"
     },
     "paymentCancel": {
         "processing": "Đang xử lý hủy thanh toán...",
@@ -1371,6 +1429,36 @@
                 "tourCreated": "Tạo tour mới"
             }
         },
+        "profile": {
+            "title": "Thông Tin Công Ty Du Lịch",
+            "description": "Cập nhật thông tin chi tiết về công ty du lịch của bạn",
+            "avatar": {
+                "title": "Ảnh đại diện Công ty",
+                "changeButton": "Thay đổi ảnh đại diện",
+                "note": "Chỉ chấp nhận ảnh JPG, JPEG, PNG (dưới 2MB)",
+                "updateSuccess": "Cập nhật avatar thành công!",
+                "updateError": "Cập nhật avatar thất bại!",
+                "fileTypeError": "Chỉ chấp nhận ảnh JPG, JPEG, PNG!",
+                "fileSizeError": "Ảnh phải nhỏ hơn 2MB!"
+            },
+            "form": {
+                "companyName": "Tên Công Ty",
+                "companyNamePlaceholder": "Nhập tên công ty",
+                "companyNameRequired": "Vui lòng nhập tên công ty",
+                "phone": "Số Điện Thoại",
+                "phonePlaceholder": "Nhập số điện thoại",
+                "phoneRequired": "Vui lòng nhập số điện thoại",
+                "address": "Địa Chỉ",
+                "addressPlaceholder": "Nhập địa chỉ",
+                "addressRequired": "Vui lòng nhập địa chỉ",
+                "description": "Mô Tả",
+                "descriptionPlaceholder": "Mô tả về công ty du lịch...",
+                "saveButton": "Lưu Thay Đổi",
+                "cancelButton": "Hủy Bỏ",
+                "updateSuccess": "Cập nhật thông tin công ty du lịch thành công!",
+                "updateError": "Cập nhật thất bại!"
+            }
+        },
         "tourTemplates": {
             "title": "Quản lý Tour Template",
             "searchPlaceholder": "Tìm kiếm theo tên, loại tour",
@@ -1851,7 +1939,7 @@
         "infoTitle": "Thông tin tour",
         "included": "Bao gồm",
         "guide": "Hướng dẫn viên chuyên nghiệp",
-        "insurance": "Bảo hiểm du lịch",
+        "insurance": "Nhanh chóng, an toàn",
         "transport": "Vận chuyển theo chương trình",
         "notIncluded": "Không bao gồm",
         "personalCost": "Chi phí cá nhân",
@@ -1894,5 +1982,124 @@
         },
         "found": "Tour",
         "total": "Tổng số tour"
+    },
+    "specialtyShop": {
+        "profile": {
+            "title": "Thông Tin Shop",
+            "description": "Cập nhật thông tin chi tiết về shop của bạn",
+            "avatar": {
+                "title": "Ảnh đại diện Shop",
+                "changeButton": "Thay đổi ảnh đại diện",
+                "note": "Chỉ chấp nhận ảnh JPG, JPEG, PNG (dưới 2MB)",
+                "updateSuccess": "Cập nhật logo thành công!",
+                "updateError": "Cập nhật logo thất bại!",
+                "fileTypeError": "Chỉ chấp nhận ảnh JPG, JPEG, PNG!",
+                "fileSizeError": "Ảnh phải nhỏ hơn 2MB!"
+            },
+            "form": {
+                "shopName": "Tên Shop",
+                "shopNamePlaceholder": "Nhập tên shop",
+                "shopNameRequired": "Vui lòng nhập tên shop",
+                "businessType": "Loại Hình Kinh Doanh",
+                "businessTypePlaceholder": "Chọn loại hình",
+                "businessTypeRequired": "Chọn loại hình",
+                "description": "Mô Tả Shop",
+                "descriptionPlaceholder": "Mô tả về shop của bạn...",
+                "address": "Địa Chỉ",
+                "addressPlaceholder": "Nhập địa chỉ shop",
+                "addressRequired": "Nhập địa chỉ shop",
+                "phone": "Số Điện Thoại",
+                "phonePlaceholder": "Nhập số điện thoại",
+                "phoneRequired": "Nhập số điện thoại",
+                "representativeName": "Tên Người Đại Diện",
+                "representativeNamePlaceholder": "Nhập tên người đại diện",
+                "representativeNameRequired": "Vui lòng nhập tên người đại diện",
+                "email": "Email",
+                "emailPlaceholder": "Nhập email",
+                "emailRequired": "Vui lòng nhập email",
+                "emailInvalid": "Email không hợp lệ",
+                "businessLicense": "Giấy Phép Kinh Doanh",
+                "businessLicensePlaceholder": "Số giấy phép kinh doanh",
+                "website": "Website",
+                "websitePlaceholder": "https://example.com",
+                "openTime": "Giờ Mở Cửa",
+                "openTimePlaceholder": "--:--",
+                "closeTime": "Giờ Đóng Cửa",
+                "closeTimePlaceholder": "--:--",
+                "saveButton": "Lưu Thay Đổi",
+                "cancelButton": "Hủy Bỏ",
+                "updateSuccess": "Cập nhật thông tin shop thành công!",
+                "updateError": "Cập nhật thất bại!"
+            },
+            "businessTypes": {
+                "specialty": "Đặc sản",
+                "food": "Ẩm thực",
+                "souvenir": "Quà lưu niệm",
+                "handicrafts": "Thủ công mỹ nghệ"
+            }
+        },
+        "info": {
+            "title": "Thông tin cửa hàng",
+            "loading": "Đang tải thông tin cửa hàng...",
+            "error": "Không thể tải thông tin cửa hàng",
+            "notFound": "Không tìm thấy thông tin cửa hàng",
+            "rating": "{{rating}} điểm",
+            "openHours": "Mở cửa: {{open}} - {{close}}",
+            "viewShop": "Xem cửa hàng"
+        },
+        "detail": {
+            "loading": "Đang tải thông tin cửa hàng...",
+            "error": "Không thể tải thông tin cửa hàng",
+            "notFoundTitle": "Không thể tải thông tin cửa hàng",
+            "notFoundMessage": "Cửa hàng không tồn tại hoặc đã bị xóa",
+            "backButton": "Quay lại",
+            "breadcrumbHome": "Trang Chủ",
+            "breadcrumbShop": "Cửa Hàng",
+            "ratingText": "{{rating}} / 5",
+            "openHours": "Mở cửa: {{open}} - {{close}}",
+            "productCount": "{{count}} sản phẩm",
+            "joinedDate": "Tham gia từ {{date}}",
+            "infoTitle": "Thông tin cửa hàng",
+            "address": "Địa chỉ",
+            "phone": "Số điện thoại",
+            "email": "Email",
+            "representative": "Người đại diện",
+            "businessLicense": "Giấy phép kinh doanh",
+            "website": "Website",
+            "productsTitle": "Sản phẩm của cửa hàng ({{count}})",
+            "noProducts": "Cửa hàng chưa có sản phẩm nào"
+        }
+    },
+    "product": {
+        "detail": {
+            "breadcrumbHome": "Trang Chủ",
+            "breadcrumbShop": "Cửa Hàng",
+            "tags": {
+                "specialty": "đặc sản",
+                "gift": "quà tặng",
+                "traditional": "truyền thống"
+            },
+            "defaultDescription": "Sản phẩm đặc trưng từ Tây Ninh, chất lượng cao",
+            "anonymous": "Ẩn danh",
+            "stockExceeded": "Số lượng vượt quá tồn kho hiện có!",
+            "newBadge": "Mới",
+            "discountBadge": "Giảm {{percent}}%",
+            "imageHint": "Nhấp để xem ảnh lớn",
+            "reviewCount": "{{count}} đánh giá",
+            "sku": "SKU: {{sku}}",
+            "soldCount": "Đã bán {{count}}",
+            "quantityLabel": "Số lượng",
+            "addToCartButton": "Thêm vào giỏ",
+            "buyNowButton": "Mua ngay",
+            "category": "Danh mục: {{category}}",
+            "location": "Xuất xứ: Tây Ninh",
+            "descriptionTab": "Mô tả sản phẩm",
+            "reviewsTab": "Đánh giá ({{count}})",
+            "relatedProducts": "Sản phẩm liên quan",
+            "notFoundTitle": "Không tìm thấy sản phẩm",
+            "notFoundMessage": "Sản phẩm này không tồn tại hoặc đã bị xóa.",
+            "backToShop": "Quay lại cửa hàng",
+            "imagePagination": "{{current}}/{{total}}"
+        }
     }
 }

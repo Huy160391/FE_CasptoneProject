@@ -11,18 +11,22 @@ const { Meta } = Card
 // Extended Product interface with UI specific fields
 export interface ProductCardData {
     id: string
+    specialtyShopId?: string
     name: string
+    description?: string
     imageUrl?: string[]
     image?: string
     price: number
     category: string
     rating?: number
-    reviews?: number
+    averageRating?: number | null
     soldCount?: number
     quantityInStock?: number
     isSale?: boolean
-    salePercent?: number
+    salePercent?: number | null
     isActive?: boolean
+    createdAt?: string
+    updatedAt?: string
 }
 
 interface ProductCardProps {
@@ -45,8 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         : product.image || 'https://placehold.co/400x400?text=No+Image'
 
     // Default values for optional fields
-    const rating = product.rating || 4.5
-    const reviews = product.reviews || 0
+    const rating = product.averageRating || 0
     const soldCount = product.soldCount || 0
     const quantityInStock = product.quantityInStock ?? 999
     const isOutOfStock = quantityInStock === 0
@@ -74,7 +77,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 name: product.name,
                 image: imageUrl,
                 price: currentPrice,
-                quantity: 1
+                quantity: 1,
+                quantityInStock: quantityInStock
             })
         }
     }
@@ -107,7 +111,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     <Space>
                         <StarOutlined style={{ color: '#faad14' }} />
                         <span>{rating.toFixed(1)}</span>
-                        <span className="review-count">({reviews})</span>
                         <span className="sold-count">• {t('shop.soldCount', { count: soldCount })}</span>
                     </Space>
                 </div>

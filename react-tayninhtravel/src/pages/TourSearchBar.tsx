@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import './TourSearchBar.scss';
 
 interface TourSearchBarProps {
-    onSearchTermChange?: (term: string, fromDate?: string, toDate?: string) => void;
+    onSearchTermChange?: (term: string, schedule?: string, startLoc?: string, endLoc?: string) => void;
     searchTerm?: string;
     scheduleDay?: string;
 }
@@ -31,16 +31,24 @@ const TourSearchBar = ({ onSearchTermChange, searchTerm, scheduleDay }: TourSear
     }, [scheduleDay]);
 
     useEffect(() => {
-        if (!keyword && !scheduleDayState) {
+        // Chỉ gọi API khi có keyword để search
+        if (!keyword || keyword.trim() === '') {
             setOptions([]);
             return;
         }
         setFetching(true);
-        tourDetailsService.getPublicTourDetailsList({
+
+        const params: any = {
             searchTerm: keyword,
-            scheduleDay: scheduleDayState,
             pageSize: 5
-        }).then(res => {
+        };
+
+        // Chỉ thêm scheduleDay vào params nếu nó không phải là empty string
+        if (scheduleDayState && scheduleDayState !== '') {
+            params.scheduleDay = scheduleDayState;
+        }
+
+        tourDetailsService.getPublicTourDetailsList(params).then(res => {
             if (res.success && res.data) {
                 setOptions(res.data.map(tour => ({ value: tour.title })));
                 setSuggestionTours(res.data);
@@ -53,10 +61,10 @@ const TourSearchBar = ({ onSearchTermChange, searchTerm, scheduleDay }: TourSear
 
     const handleSearch = () => {
         if (onSearchTermChange) {
-            onSearchTermChange(keyword, scheduleDayState);
+            onSearchTermChange(keyword, scheduleDayState || undefined, undefined, undefined);
         }
         if (window.location.pathname === '/' || window.location.pathname === '/home') {
-            navigate('/tours', { state: { searchTerm: keyword, scheduleDay: scheduleDayState } });
+            navigate('/tours', { state: { searchTerm: keyword, scheduleDay: scheduleDayState || undefined } });
         }
     };
 
@@ -83,7 +91,7 @@ const TourSearchBar = ({ onSearchTermChange, searchTerm, scheduleDay }: TourSear
                             if (found) {
                                 navigate(`/tour-details/${found.id}`);
                             } else {
-                                if (onSearchTermChange) onSearchTermChange(value, scheduleDayState);
+                                if (onSearchTermChange) onSearchTermChange(value, scheduleDayState || undefined, undefined, undefined);
                             }
                         }}
                         onSearch={setKeyword}

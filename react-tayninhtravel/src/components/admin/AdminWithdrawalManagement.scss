@@ -1,12 +1,26 @@
-// Đảm bảo màu chữ tab dễ đọc ở dark mode
+// Tab title colors for better readability
 .tab-title-no-badge {
   font-weight: 500;
-  color: #222 !important;
+  color: #333 !important;
   background: none !important;
 }
 
-.dark-mode .tab-title-no-badge {
-  color: #f5f5f5 !important;
+// Light mode specific styles
+.admin-withdrawal-management {
+  .tab-title-no-badge {
+    color: #333 !important;
+  }
+
+  // Fix search input text color in light mode
+  .date-range-picker {
+    .ant-picker-input > input {
+      color: #333 !important;
+
+      &::placeholder {
+        color: #999 !important;
+      }
+    }
+  }
 }
 .admin-withdrawal-management {
   padding: 24px;
@@ -107,11 +121,11 @@
         background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
         
         .ant-statistic-title {
-          color: #389e0d;
+          color: #fcfcfc;
         }
 
         .ant-statistic-content {
-          color: #52c41a;
+          color: #fafafa;
         }
       }
 
@@ -177,11 +191,11 @@
         background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
         
         .ant-statistic-title {
-          color: #389e0d;
+          color: #ffffff;
         }
 
         .ant-statistic-content {
-          color: #52c41a;
+          color: #ffffff;
         }
       }
 
@@ -251,119 +265,236 @@
   }
 }
 
-// Dark mode support
-.dark-mode {
-  .admin-withdrawal-management {
-    background: var(--dark-bg-primary, #141414);
+// Updated Dark Mode Support with proper color contrast
+.admin-withdrawal-management.dark {
+  background: #1f1f1f;
+  color: #e4e4e4;
 
-    .page-header {
-      .header-content {
-        .page-title {
-          color: var(--dark-text-primary, #ffffff);
-        }
+  .page-header.dark {
+    .header-content {
+      .page-title.dark {
+        color: #81c784;
       }
     }
 
-    .statistics-section {
-      .stat-card {
-        background-color: var(--dark-bg-secondary, #1f1f1f);
-        border-color: var(--dark-border, #434343);
+    .date-range-picker.dark {
+      background: #2a2a2a !important;
+      border-color: #555 !important;
+      color: #e4e4e4 !important;
 
-        &.total {
-          background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+      .ant-picker-input > input {
+        background: transparent !important;
+        color: #e4e4e4 !important;
+
+        &::placeholder {
+          color: #999 !important;
         }
+      }
 
-        &.pending {
-          background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-          border: 1px solid #fa8c16;
+      .ant-picker-suffix {
+        color: #e4e4e4 !important;
+      }
 
-          .ant-statistic-title,
-          .ant-statistic-content {
-            color: #fa8c16;
+      .ant-picker-separator {
+        color: #e4e4e4 !important;
+      }
+
+      &:hover {
+        border-color: #81c784 !important;
+      }
+
+      &.ant-picker-focused {
+        border-color: #81c784 !important;
+        box-shadow: 0 0 0 2px rgba(129, 199, 132, 0.2) !important;
+      }
+
+      // Fix for range picker specific styling
+      &.ant-picker-range {
+        .ant-picker-input {
+          > input {
+            background: transparent !important;
+            color: #e4e4e4 !important;
           }
         }
 
-        &.approved {
-          background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-          border: 1px solid #52c41a;
-
-          .ant-statistic-title,
-          .ant-statistic-content {
-            color: #52c41a;
-          }
-        }
-
-        &.rejected {
-          background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-          border: 1px solid #ff4d4f;
-
-          .ant-statistic-title,
-          .ant-statistic-content {
-            color: #ff4d4f;
-          }
+        .ant-picker-range-separator {
+          color: #e4e4e4 !important;
         }
       }
     }
+  }
 
-    .amount-statistics {
-      .amount-card {
-        background-color: var(--dark-bg-secondary, #1f1f1f);
-        border-color: var(--dark-border, #434343);
+  .statistics-section.dark {
+    .stat-card.dark {
+      background: #2a2a2a;
+      border-color: #404040;
+      color: #e4e4e4;
 
-        &.total-amount {
-          background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+      .ant-statistic-title {
+        color: #999;
+      }
+
+      .ant-statistic-content-value {
+        color: #e4e4e4;
+      }
+
+      .ant-statistic-content-prefix {
+        color: #81c784;
+      }
+
+      &.total.dark {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        border-color: #81c784;
+
+        .ant-statistic-title,
+        .ant-statistic-content-value {
+          color: #e4e4e4;
+        }
+      }
+
+      &.pending.dark {
+        border-color: #fa8c16;
+
+        .ant-statistic-title,
+        .ant-statistic-content-value {
+          color: #fa8c16;
         }
 
-        &.approved-amount {
-          background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-          border: 1px solid #52c41a;
+        .ant-statistic-content-prefix {
+          color: #fa8c16;
+        }
+      }
 
-          .ant-statistic-title,
-          .ant-statistic-content {
-            color: #52c41a;
-          }
+      &.approved.dark {
+        border-color: #52c41a;
+
+        .ant-statistic-title,
+        .ant-statistic-content-value {
+          color: #52c41a;
         }
 
-        &.pending-amount {
-          background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-          border: 1px solid var(--primary-color, #79eac0);
+        .ant-statistic-content-prefix {
+          color: #52c41a;
+        }
+      }
 
-          .ant-statistic-title,
-          .ant-statistic-content {
-            color: var(--primary-color, #79eac0);
-          }
+      &.rejected.dark {
+        border-color: #ff4d4f;
+
+        .ant-statistic-title,
+        .ant-statistic-content-value {
+          color: #ff4d4f;
+        }
+
+        .ant-statistic-content-prefix {
+          color: #ff4d4f;
         }
       }
     }
+  }
 
-    .main-content {
-      background-color: var(--dark-bg-secondary, #1f1f1f);
-      border-color: var(--dark-border, #434343);
+  .amount-statistics.dark {
+    .amount-card.dark {
+      background: #2a2a2a;
+      border-color: #404040;
+      color: #e4e4e4;
 
-      .withdrawal-tabs {
-        .ant-tabs-nav {
-          .ant-tabs-tab {
-            color: var(--dark-text-primary, #ffffff);
+      .ant-statistic-title {
+        color: #999;
+      }
 
-            &:hover {
-              color: var(--primary-color, #79eac0);
-            }
+      .ant-statistic-content-value {
+        color: #e4e4e4;
+      }
 
-            &.ant-tabs-tab-active {
-              background: var(--primary-color, #79eac0);
-              color: #000000;
+      .ant-statistic-content-prefix {
+        color: #81c784;
+      }
 
-              .ant-badge {
-                .ant-badge-count {
-                  background: #000000;
-                  color: var(--primary-color, #79eac0);
-                }
-              }
-            }
-          }
+      &.total-amount.dark {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        border-color: #81c784;
+
+        .ant-statistic-title,
+        .ant-statistic-content-value {
+          color: #e4e4e4;
+        }
+      }
+
+      &.approved-amount.dark {
+        border-color: #52c41a;
+
+        .ant-statistic-title,
+        .ant-statistic-content-value {
+          color: #52c41a;
+        }
+
+        .ant-statistic-content-prefix {
+          color: #52c41a;
+        }
+      }
+
+      &.pending-amount.dark {
+        border-color: #81c784;
+
+        .ant-statistic-title,
+        .ant-statistic-content-value {
+          color: #81c784;
+        }
+
+        .ant-statistic-content-prefix {
+          color: #81c784;
         }
       }
     }
+  }
+
+  .main-content.dark {
+    background: #2a2a2a;
+    border-color: #404040;
+
+    .withdrawal-tabs.dark {
+      .ant-tabs-nav::before {
+        border-bottom-color: #404040;
+      }
+
+      .ant-tabs-tab {
+        color: #e4e4e4;
+
+        &:hover {
+          color: #81c784;
+        }
+
+        &.ant-tabs-tab-active {
+          color: #81c784;
+
+          .ant-tabs-tab-btn {
+            color: #81c784;
+          }
+        }
+      }
+
+      .ant-tabs-ink-bar {
+        background: #81c784;
+      }
+
+      .ant-tabs-content-holder {
+        .ant-tabs-content {
+          background: transparent;
+        }
+      }
+    }
+  }
+}
+
+// Fix for tab title colors in dark mode
+.admin-withdrawal-management.dark {
+  .tab-title-no-badge {
+    color: #e4e4e4 !important;
+  }
+
+  .ant-tabs-tab-active .tab-title-no-badge {
+    color: #81c784 !important;
   }
 }
 

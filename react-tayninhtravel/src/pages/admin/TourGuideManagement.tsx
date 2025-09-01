@@ -9,7 +9,14 @@ import {
 } from 'antd';
 import {
     SearchOutlined,
-    EyeOutlined
+    EyeOutlined,
+    UserOutlined,
+    PhoneOutlined,
+    MailOutlined,
+    CalendarOutlined,
+    TrophyOutlined,
+    FileTextOutlined,
+    IdcardOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { adminService } from '@/services/adminService';
@@ -150,22 +157,22 @@ const TourGuideManagement = () => {
             ),
             sorter: (a, b) => (a.totalToursGuided || 0) - (b.totalToursGuided || 0),
         },
-        {
-            title: 'Trạng thái',
-            key: 'status',
-            width: 120,
-            align: 'center',
-            render: (_, record) => (
-                <Tag color={record.isAvailable ? 'green' : 'red'}>
-                    {record.isAvailable ? 'Hoạt động' : 'Tạm dừng'}
-                </Tag>
-            ),
-            filters: [
-                { text: 'Hoạt động', value: true },
-                { text: 'Tạm dừng', value: false },
-            ],
-            onFilter: (value, record) => record.isAvailable === value,
-        },
+        // {
+        //     title: 'Trạng thái',
+        //     key: 'status',
+        //     width: 120,
+        //     align: 'center',
+        //     render: (_, record) => (
+        //         <Tag color={record.isAvailable ? 'green' : 'red'}>
+        //             {record.isAvailable ? 'Hoạt động' : 'Tạm dừng'}
+        //         </Tag>
+        //     ),
+        //     filters: [
+        //         { text: 'Hoạt động', value: true },
+        //         { text: 'Tạm dừng', value: false },
+        //     ],
+        //     onFilter: (value, record) => record.isAvailable === value,
+        // },
         {
             title: 'Ngày duyệt',
             dataIndex: 'approvedAt',
@@ -224,51 +231,117 @@ const TourGuideManagement = () => {
                 className="cv-table"
             />
             <Modal
-                title={selectedGuide ? selectedGuide.fullName : null}
                 open={detailModalVisible}
                 onCancel={() => setDetailModalVisible(false)}
+                closable={false}
+                title={null}
+                width={800}
                 footer={null}
-                width={700}
-                centered
-                className="cv-detail-modal"
+                className={`tour-guide-detail-modal${isDarkMode ? ' dark' : ''}`}
             >
                 {selectedGuide && (
-                    <div className="guide-detail-content">
-                        <div className="guide-detail-header">
-                            <div className="guide-avatar">{selectedGuide.fullName.charAt(0)}</div>
-                            <div className="guide-info">
-                                <div className="guide-title">
-                                    <h2>{selectedGuide.fullName}</h2>
-                                    <Tag color={selectedGuide.isAvailable ? 'green' : 'red'}>{selectedGuide.isAvailable ? 'Hoạt động' : 'Tạm dừng'}</Tag>
+                    <div className={`guide-detail-modal${isDarkMode ? ' dark' : ''}`}>
+                        {/* Header với gradient */}
+                        <div className={`modal-header${isDarkMode ? ' dark' : ''}`}>
+                            <div className="header-content">
+                                <div className="guide-avatar-section">
+                                    <div className="guide-avatar-large">
+                                        {selectedGuide.profileImageUrl ? (
+                                            <img src={selectedGuide.profileImageUrl} alt={selectedGuide.fullName} />
+                                        ) : (
+                                            <UserOutlined />
+                                        )}
+                                    </div>
+                                    <div className="guide-basic-info">
+                                        <h1 className="guide-name">{selectedGuide.fullName}</h1>
+                                        <div className="guide-username">@{selectedGuide.userName}</div>
+                                        <div className="guide-status-badge">
+                                            <Tag color={selectedGuide.isAvailable ? 'green' : 'red'}>
+                                                {selectedGuide.isAvailable ? 'Hoạt động' : 'Tạm dừng'}
+                                            </Tag>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="guide-username">@{selectedGuide.userName}</div>
-                                <div className="guide-meta">
-                                    <Tag color="purple">{selectedGuide.skills}</Tag>
-                                    <span className="guide-rating">Đánh giá: {selectedGuide.rating?.toFixed(1) || 'N/A'}</span>
-                                    <span className="guide-tours">Tour đã dẫn: {selectedGuide.totalToursGuided}</span>
+                                <div className="guide-stats">
+                                    <div className="stat-item">
+                                        <div className="stat-number">{selectedGuide.rating?.toFixed(1) || 'N/A'}</div>
+                                        <div className="stat-label">Đánh giá</div>
+                                    </div>
+                                    <div className="stat-item">
+                                        <div className="stat-number">{selectedGuide.totalToursGuided}</div>
+                                        <div className="stat-label">Tour đã dẫn</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="guide-detail-body">
-                            <div>
-                                <h3>Thông tin cá nhân</h3>
-                                <div><b>Số điện thoại:</b> {selectedGuide.phoneNumber}</div>
-                                <div><b>Email:</b> {selectedGuide.email}</div>
-                                <div><b>Ngày duyệt:</b> {formatDate(selectedGuide.approvedAt)}</div>
-                                <div><b>ID:</b> <span className="guide-id">{selectedGuide.id}</span></div>
+
+                        {/* Skills Overview */}
+                        <div className={`skills-overview${isDarkMode ? ' dark' : ''}`}>
+                            <div className="section-title">
+                                <TrophyOutlined />
+                                Kỹ năng chuyên môn
                             </div>
-                            <div>
-                                <h3>Kinh nghiệm & Kỹ năng</h3>
-                                <div>{selectedGuide.experience}</div>
+                            <div className="skills-content">
+                                <Tag color="purple" className="skill-tag">{selectedGuide.skills}</Tag>
                             </div>
                         </div>
+
+                        {/* Contact Information */}
+                        <div className={`info-section${isDarkMode ? ' dark' : ''}`}>
+                            <div className="section-title">
+                                <IdcardOutlined />
+                                Thông tin liên hệ
+                            </div>
+                            <div className="info-grid">
+                                <div className="info-item">
+                                    <PhoneOutlined className="info-icon" />
+                                    <span className="info-label">Số điện thoại:</span>
+                                    <span className="info-value">{selectedGuide.phoneNumber}</span>
+                                </div>
+                                <div className="info-item">
+                                    <MailOutlined className="info-icon" />
+                                    <span className="info-label">Email:</span>
+                                    <span className="info-value">{selectedGuide.email}</span>
+                                </div>
+                                <div className="info-item">
+                                    <CalendarOutlined className="info-icon" />
+                                    <span className="info-label">Ngày duyệt:</span>
+                                    <span className="info-value">{formatDate(selectedGuide.approvedAt)}</span>
+                                </div>
+                                <div className="info-item">
+                                    <IdcardOutlined className="info-icon" />
+                                    <span className="info-label">ID hướng dẫn viên:</span>
+                                    <span className="info-value guide-id">{selectedGuide.id}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Experience Section */}
+                        <div className={`experience-section${isDarkMode ? ' dark' : ''}`}>
+                            <div className="section-title">
+                                <FileTextOutlined />
+                                Kinh nghiệm làm việc
+                            </div>
+                            <div className="experience-content">
+                                {selectedGuide.experience}
+                            </div>
+                        </div>
+
+                        {/* Notes Section */}
                         {selectedGuide.notes && (
-                            <div className="guide-notes">
-                                <h3>Ghi chú</h3>
-                                <div>{selectedGuide.notes}</div>
+                            <div className={`notes-section${isDarkMode ? ' dark' : ''}`}>
+                                <div className="section-title">
+                                    <FileTextOutlined />
+                                    Ghi chú
+                                </div>
+                                <div className="notes-content">
+                                    {selectedGuide.notes}
+                                </div>
                             </div>
                         )}
-                        <div className="guide-detail-footer">
+
+                        {/* Footer */}
+                        <div className="modal-footer">
                             <Button size="large" onClick={() => setDetailModalVisible(false)}>
                                 Đóng
                             </Button>

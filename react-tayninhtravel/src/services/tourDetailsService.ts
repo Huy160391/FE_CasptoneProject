@@ -1,6 +1,13 @@
 import axios from '../config/axios';
 import { ApiResponse } from '../types';
 
+// LocationOption interface for start/end location options
+export interface LocationOption {
+    location: string;
+    usageCount: number;
+    isPopular: boolean;
+}
+
 // TourDetail interface matching TourDetailsPage requirements
 export interface TourDetail {
     id: string;
@@ -13,6 +20,9 @@ export interface TourDetail {
     status: string | number; // API trả về string, nhưng components có thể convert thành number
     startLocation?: string;
     endLocation?: string;
+    // IDs for fetching related data
+    tourCompanyId?: string;
+    tourGuideId?: string;
     tourOperation?: {
         id: string;
         price: number;
@@ -57,6 +67,33 @@ export interface TourDetail {
             name: string;
             email: string;
         };
+    };
+    // Thông tin công ty tổ chức
+    tourCompany?: {
+        id: string;
+        name: string;
+        description?: string;
+        address?: string;
+        phoneNumber?: string;
+        email?: string;
+        website?: string;
+        logoUrl?: string;
+        businessLicense?: string;
+        rating?: number;
+        isActive: boolean;
+    };
+    // Thông tin hướng dẫn viên
+    tourGuide?: {
+        id: string;
+        name: string;
+        avatar?: string;
+        phoneNumber?: string;
+        email?: string;
+        experience?: string;
+        skills?: string[];
+        rating?: number;
+        languages?: string[];
+        isActive: boolean;
     };
 }
 
@@ -136,6 +173,24 @@ export class TourDetailsService {
                 includeInactive: false
             }
         });
+        return response.data;
+    }
+
+    /**
+     * Get start location options
+     * @returns Promise with start location options
+     */
+    async getStartLocationOptions(): Promise<ApiResponse<LocationOption[]>> {
+        const response = await axios.get(`${this.baseUrl}/location-options/start`);
+        return response.data;
+    }
+
+    /**
+     * Get end location options
+     * @returns Promise with end location options
+     */
+    async getEndLocationOptions(): Promise<ApiResponse<LocationOption[]>> {
+        const response = await axios.get(`${this.baseUrl}/location-options/end`);
         return response.data;
     }
 }

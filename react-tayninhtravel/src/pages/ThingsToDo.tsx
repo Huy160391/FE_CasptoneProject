@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 import LoginModal from "../components/auth/LoginModal";
 import RegisterModal from "../components/auth/RegisterModal";
 import TourCard from "../components/tours/TourCard";
-import { TourDetail, tourDetailsService } from "../services/tourDetailsService";
+import { TourDetail, tourDetailsService, LocationOption } from "../services/tourDetailsService";
 import { useAuthStore } from "../store/useAuthStore";
 import "./ThingsToDo.scss";
 import TourSearchBar from "./TourSearchBar";
@@ -57,6 +57,11 @@ const ThingsToDo = () => {
   const [hasEarlyBird, setHasEarlyBird] = useState<boolean>(true);
   const [startLocation, setStartLocation] = useState<string>('');
   const [endLocation, setEndLocation] = useState<string>('');
+
+  // State for location options
+  const [startLocationOptions, setStartLocationOptions] = useState<LocationOption[]>([]);
+  const [endLocationOptions, setEndLocationOptions] = useState<LocationOption[]>([]);
+  const [loadingLocationOptions, setLoadingLocationOptions] = useState(false);
 
   // Load tours from database
   const loadTours = async (page = 1) => {
@@ -96,12 +101,42 @@ const ThingsToDo = () => {
     }
   };
 
+  // Load location options from API
+  const loadLocationOptions = async () => {
+    try {
+      setLoadingLocationOptions(true);
+
+      const [startResponse, endResponse] = await Promise.all([
+        tourDetailsService.getStartLocationOptions(),
+        tourDetailsService.getEndLocationOptions()
+      ]);
+
+      if (startResponse.success && startResponse.data) {
+        setStartLocationOptions(startResponse.data);
+      }
+
+      if (endResponse.success && endResponse.data) {
+        setEndLocationOptions(endResponse.data);
+      }
+    } catch (error) {
+      console.error("Error loading location options:", error);
+      message.error("Không thể tải danh sách địa điểm. Sử dụng danh sách mặc định.");
+    } finally {
+      setLoadingLocationOptions(false);
+    }
+  };
+
   // Chỉ lấy state từ location khi mount
   useEffect(() => {
     if (location.state) {
       if (location.state.searchTerm) setSearchTerm(location.state.searchTerm);
       if (location.state.scheduleDay) setScheduleDay(location.state.scheduleDay);
     }
+  }, []);
+
+  // Load location options when component mounts
+  useEffect(() => {
+    loadLocationOptions();
   }, []);
 
   // Load tours khi filter thay đổi
@@ -238,11 +273,14 @@ const ThingsToDo = () => {
                         style={{ width: '100%' }}
                         placeholder="Chọn điểm bắt đầu"
                         allowClear
+                        loading={loadingLocationOptions}
                       >
                         <Select.Option value="">Tất cả</Select.Option>
-                        <Select.Option value="TayNinh">Tây Ninh</Select.Option>
-                        <Select.Option value="HoChiMinh">Hồ Chí Minh</Select.Option>
-                        {/* Thêm các địa điểm khác nếu cần */}
+                        {startLocationOptions.map((option, index) => (
+                          <Select.Option key={index} value={option.location}>
+                            {option.location} {option.isPopular}
+                          </Select.Option>
+                        ))}
                       </Select>
                     </div>
                     {/* End Location Filter */}
@@ -254,11 +292,14 @@ const ThingsToDo = () => {
                         style={{ width: '100%' }}
                         placeholder="Chọn điểm kết thúc"
                         allowClear
+                        loading={loadingLocationOptions}
                       >
                         <Select.Option value="">Tất cả</Select.Option>
-                        <Select.Option value="TayNinh">Tây Ninh</Select.Option>
-                        <Select.Option value="HoChiMinh">Hồ Chí Minh</Select.Option>
-                        {/* Thêm các địa điểm khác nếu cần */}
+                        {endLocationOptions.map((option, index) => (
+                          <Select.Option key={index} value={option.location}>
+                            {option.location} {option.isPopular}
+                          </Select.Option>
+                        ))}
                       </Select>
                     </div>
 
