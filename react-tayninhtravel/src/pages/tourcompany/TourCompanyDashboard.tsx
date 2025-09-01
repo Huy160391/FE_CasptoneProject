@@ -47,6 +47,8 @@ const TourCompanyDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [dashboardData, setDashboardData] =
     useState<TourCompanyDashboardStatistics | null>(null);
+  const [overallData, setOverallData] = 
+    useState<TourCompanyDashboardStatistics | null>(null);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(dayjs().year());
   const [selectedMonth, setSelectedMonth] = useState<number | undefined>(
@@ -132,14 +134,15 @@ const TourCompanyDashboard: React.FC = () => {
 
     setLoading(true);
     try {
-      // Sử dụng current date nếu không có selectedYear/selectedMonth
+      // Fetch monthly data for current selection
       const currentDate = dayjs();
       const year = selectedYear || currentDate.year();
       const month = selectedMonth || currentDate.month() + 1; // dayjs month is 0-based
 
       console.log("Fetching dashboard data with params:", { year, month }); // Debug log
 
-      const response = await getDashboardStatistics(
+      // Fetch monthly data
+      const monthlyResponse = await getDashboardStatistics(
         {
           year: year,
           month: month,
@@ -148,12 +151,28 @@ const TourCompanyDashboard: React.FC = () => {
         token
       );
 
-      if (response.success && response.data) {
-        setDashboardData(response.data);
-        console.log("Dashboard data loaded successfully:", response.data); // Debug log
-      } else {
-        message.error(response.message || "Không thể tải dữ liệu dashboard");
-        console.error("API response error:", response); // Debug log
+      if (monthlyResponse.success && monthlyResponse.data) {
+        setDashboardData(monthlyResponse.data);
+        console.log("Monthly dashboard data loaded successfully:", monthlyResponse.data); // Debug log
+      }
+
+      // Fetch overall data (without month parameter to get all-time data)
+      const overallResponse = await getDashboardStatistics(
+        {
+          year: null, // No year filter for overall stats
+          month: null, // No month filter for overall stats
+          compareWithPrevious: false,
+        },
+        token
+      );
+
+      if (overallResponse.success && overallResponse.data) {
+        setOverallData(overallResponse.data);
+        console.log("Overall dashboard data loaded successfully:", overallResponse.data); // Debug log
+      }
+
+      if (!monthlyResponse.success || !overallResponse.success) {
+        message.error("Không thể tải đầy đủ dữ liệu dashboard");
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -358,14 +377,15 @@ const TourCompanyDashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Booking thành công"
-              value={dashboardData?.bookingMetrics?.successfulBookings || 0}
+              title="Booking thành công (tổng)"
+              value={overallData?.bookingMetrics?.successfulBookings || dashboardData?.bookingMetrics?.successfulBookings || 0}
               prefix={<UserOutlined />}
               valueStyle={{ color: "#52c41a" }}
             />
             <div className="additional-info">
-              Tỷ lệ thành công: {(dashboardData?.bookingMetrics?.totalBookings ?? 0) > 0
-                ? (((dashboardData?.bookingMetrics?.successfulBookings ?? 0) / (dashboardData?.bookingMetrics?.totalBookings ?? 1)) * 100).toFixed(1)
+              Tháng này: {dashboardData?.bookingMetrics?.successfulBookings || 0} | 
+              Tỷ lệ: {(overallData?.bookingMetrics?.totalBookings ?? 0) > 0
+                ? (((overallData?.bookingMetrics?.successfulBookings ?? 0) / (overallData?.bookingMetrics?.totalBookings ?? 1)) * 100).toFixed(1)
                 : 0}%
             </div>
           </Card>
@@ -373,13 +393,14 @@ const TourCompanyDashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Booking bị hủy"
-              value={dashboardData?.bookingMetrics?.cancelledBookings || 0}
+              title="Booking bị hủy (tổng)"
+              value={overallData?.bookingMetrics?.cancelledBookings || dashboardData?.bookingMetrics?.cancelledBookings || 0}
               prefix={<UserOutlined />}
               valueStyle={{ color: "#ff4d4f" }}
             />
             <div className="additional-info">
-              Tỷ lệ hủy: {dashboardData?.bookingMetrics?.cancellationRate?.toFixed(1) || 0}%
+              Tháng này: {dashboardData?.bookingMetrics?.cancelledBookings || 0} | 
+              Tỷ lệ: {overallData?.bookingMetrics?.cancellationRate?.toFixed(1) || dashboardData?.bookingMetrics?.cancellationRate?.toFixed(1) || 0}%
             </div>
           </Card>
         </Col>
