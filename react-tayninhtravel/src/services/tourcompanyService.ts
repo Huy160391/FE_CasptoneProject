@@ -729,3 +729,14 @@ export const getTourCompanyById = async (
   const response = await axios.get(`/Cms/TourCompany/${tourCompanyId}`, { headers });
   return response.data;
 };
+export const getRecentBookings = async (
+  pageSize: number = 10,
+  token?: string
+): Promise<ApiResponse<any[]>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await axios.get(
+    `/TourCompany/dashboard/recent-bookings?pageSize=${pageSize}`,
+    { headers }
+  );
+  return response.data;
+};
