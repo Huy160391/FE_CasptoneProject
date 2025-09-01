@@ -553,3 +553,37 @@ export default {
   reportIncident,
   notifyGuests,
 };
+
+// ===== TOUR GUIDE INFO API =====
+
+// Tour Guide Info interface based on API response
+export interface TourGuideInfo {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+  experience: string;
+  skills: string;
+  rating: number;
+  totalToursGuided: number;
+  isAvailable: boolean;
+  notes?: string;
+  profileImageUrl?: string;
+  approvedAt: string;
+  userName: string;
+  approvedByName: string;
+}
+
+/**
+ * Get tour guide details by ID
+ * @param tourGuideId - The tour guide ID
+ * @param token - JWT token (optional)
+ */
+export const getTourGuideById = async (
+  tourGuideId: string,
+  token?: string
+): Promise<ApiResponse<TourGuideInfo>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await api.get(`/Cms/TourGuide/${tourGuideId}`, { headers });
+  return response.data;
+};

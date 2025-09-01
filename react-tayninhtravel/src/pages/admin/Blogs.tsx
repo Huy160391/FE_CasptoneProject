@@ -26,9 +26,9 @@ const { Title, Text } = Typography
 const { TextArea } = Input
 
 const statuses = [
-  { value: '1', label: 'Đã xuất bản', color: 'green' },
-  { value: '0', label: 'Bản nháp', color: 'orange' },
-  { value: '2', label: 'Đã lưu trữ', color: 'gray' }
+  { value: '1', label: 'Đã duyệt', color: 'green' },
+  { value: '0', label: 'Chờ duyệt', color: 'orange' },
+  { value: '2', label: 'Đã từ chối', color: 'gray' }
 ]
 
 // Mapping API status to UI status
@@ -289,18 +289,23 @@ const Blogs = () => {
             size="small"
             onClick={() => showViewModal(record)}
           />
-          <Button
-            type="primary"
-            icon={<CheckCircleOutlined />}
-            size="small"
-            onClick={() => handleApprove(record.id)}
-          />
-          <Button
-            danger
-            icon={<CloseCircleOutlined />}
-            size="small"
-            onClick={() => handleReject(record.id)}
-          />
+          {/* Chỉ hiển thị nút duyệt và từ chối nếu blog chưa được duyệt */}
+          {record.status !== 1 && (
+            <>
+              <Button
+                type="primary"
+                icon={<CheckCircleOutlined />}
+                size="small"
+                onClick={() => handleApprove(record.id)}
+              />
+              <Button
+                danger
+                icon={<CloseCircleOutlined />}
+                size="small"
+                onClick={() => handleReject(record.id)}
+              />
+            </>
+          )}
         </Space>
       ),
     },

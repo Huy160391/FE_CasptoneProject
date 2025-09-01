@@ -47,7 +47,7 @@ const TourCompanyDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [dashboardData, setDashboardData] =
     useState<TourCompanyDashboardStatistics | null>(null);
-  const [overallData, setOverallData] = 
+  const [overallData, setOverallData] =
     useState<TourCompanyDashboardStatistics | null>(null);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(dayjs().year());
@@ -159,8 +159,8 @@ const TourCompanyDashboard: React.FC = () => {
       // Fetch overall data (without month parameter to get all-time data)
       const overallResponse = await getDashboardStatistics(
         {
-          year: null, // No year filter for overall stats
-          month: null, // No month filter for overall stats
+          year: undefined, // No year filter for overall stats
+          month: undefined, // No month filter for overall stats
           compareWithPrevious: false,
         },
         token
@@ -383,7 +383,7 @@ const TourCompanyDashboard: React.FC = () => {
               valueStyle={{ color: "#52c41a" }}
             />
             <div className="additional-info">
-              Tháng này: {dashboardData?.bookingMetrics?.successfulBookings || 0} | 
+              Tháng này: {dashboardData?.bookingMetrics?.successfulBookings || 0} |
               Tỷ lệ: {(overallData?.bookingMetrics?.totalBookings ?? 0) > 0
                 ? (((overallData?.bookingMetrics?.successfulBookings ?? 0) / (overallData?.bookingMetrics?.totalBookings ?? 1)) * 100).toFixed(1)
                 : 0}%
@@ -399,7 +399,7 @@ const TourCompanyDashboard: React.FC = () => {
               valueStyle={{ color: "#ff4d4f" }}
             />
             <div className="additional-info">
-              Tháng này: {dashboardData?.bookingMetrics?.cancelledBookings || 0} | 
+              Tháng này: {dashboardData?.bookingMetrics?.cancelledBookings || 0} |
               Tỷ lệ: {overallData?.bookingMetrics?.cancellationRate?.toFixed(1) || dashboardData?.bookingMetrics?.cancellationRate?.toFixed(1) || 0}%
             </div>
           </Card>
@@ -447,7 +447,7 @@ const TourCompanyDashboard: React.FC = () => {
             className="bookings-chart">
             <div className="bookings-chart-placeholder">
               {dashboardData?.trends?.dailyBookings &&
-              dashboardData.trends.dailyBookings.length > 0 ? (
+                dashboardData.trends.dailyBookings.length > 0 ? (
                 dashboardData.trends.dailyBookings.map((item, index) => {
                   const maxBookings = Math.max(
                     ...dashboardData.trends.dailyBookings.map(d => d.bookings)

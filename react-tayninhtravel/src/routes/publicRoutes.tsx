@@ -32,6 +32,7 @@ import TourDetailsPage from '@/pages/TourDetailsPage';
 import DebugAuth from '@/pages/DebugAuth';
 import BookingHistoryTest from '@/components/debug/BookingHistoryTest';
 import ImageUploadTest from '@/components/debug/ImageUploadTest';
+import TourCompanyDetail from '@/pages/tourcompany/TourCompanyDetail';
 
 export const publicRoutes: RouteObject[] = [
     {
@@ -78,6 +79,10 @@ export const publicRoutes: RouteObject[] = [
     {
         path: '/tour-details/:tourId',
         element: <TourDetailsPage />,
+    },
+    {
+        path: '/tour-company/:companyId',
+        element: <TourCompanyDetail />,
     },
     {
         path: '/blog',

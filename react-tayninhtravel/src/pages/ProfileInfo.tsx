@@ -112,8 +112,9 @@ const ProfileInfo = ({ user, updateUser }: ProfileInfoProps) => {
                         className="avatar-upload"
                     >
                         <Button icon={<UploadOutlined />}>{t('profile.changeAvatar')}</Button>
-                        <span className="upload-hint">{t('profile.imageFormatHint')}</span>
                     </Upload>
+                    <span className="upload-hint">{t('profile.imageFormatHint')}</span>
+
                     {fileList.length > 0 && (
                         <Button
                             type="primary"

@@ -11,9 +11,11 @@ interface CartState {
   addItem: (item: CartItem) => void
   removeItem: (id: string | number, type: 'product' | 'tour') => void
   updateQuantity: (id: string | number, type: 'product' | 'tour', quantity: number) => void
+  updateItemStock: (id: string | number, type: 'product' | 'tour', quantityInStock: number) => void
   clearCart: () => void
   getTotalItems: () => number
   getTotalPrice: () => number
+  getItem: (id: string | number, type: 'product' | 'tour') => CartItem | undefined
 }
 
 export const useCartStore = create<CartState>()(
@@ -56,6 +58,18 @@ export const useCartStore = create<CartState>()(
           )
         }
       }),
+
+      updateItemStock: (productId, type, quantityInStock) => set((state) => ({
+        items: state.items.map((item) =>
+          item.productId === productId && item.type === type
+            ? { ...item, quantityInStock }
+            : item
+        )
+      })),
+
+      getItem: (productId, type) => {
+        return get().items.find((item) => item.productId === productId && item.type === type)
+      },
 
       clearCart: () => set({ items: [] }),
 
