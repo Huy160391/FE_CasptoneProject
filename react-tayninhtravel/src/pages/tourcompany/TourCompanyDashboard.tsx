@@ -112,8 +112,15 @@ const TourCompanyDashboard: React.FC = () => {
             color: "error",
             text: t("tourCompany.transactions.status.cancelled"),
           },
+          completed: {
+            color: "success",
+            text: t("tourCompany.transactions.status.completed"),
+          },
         };
-        const config = statusConfig[status as keyof typeof statusConfig];
+        const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || {
+          color: "default",
+          text: status || "Unknown",
+        };
         return <Tag color={config.color}>{config.text}</Tag>;
       },
     },
@@ -526,7 +533,7 @@ const TourCompanyDashboard: React.FC = () => {
                   bookingDate: booking.bookingDate,
                   tourDate: booking.tourDate,
                   amount: booking.amount,
-                  status: booking.status.toLowerCase(),
+                  status: booking.status?.toLowerCase() || 'pending',
                   numberOfGuests: booking.numberOfGuests,
                 }))}
                 columns={bookingColumns}
