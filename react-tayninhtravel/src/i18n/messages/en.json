@@ -250,7 +250,63 @@
         "maxParticipants": "Max participants",
         "startDate": "Start date",
         "person": "person",
-        "unavailable": "Unavailable"
+        "unavailable": "Unavailable",
+        "detail": {
+            "notFoundTitle": "Tour not found",
+            "mockReviews": {
+                "review1": {
+                    "name": "Nguyen Van A",
+                    "comment": "Excellent tour! The guide was enthusiastic and professional. Beautiful scenery, reasonable timing. Will recommend to friends!"
+                },
+                "review2": {
+                    "name": "Tran Thi B",
+                    "comment": "Good tour, however the time at some locations was a bit short. Overall very satisfied with the experience."
+                },
+                "review3": {
+                    "name": "Le Van C",
+                    "comment": "This is my second time joining this tour and still very satisfied. Beautiful scenery, good service, worth the money."
+                }
+            },
+            "noTourId": "Tour ID not found",
+            "mockCompany": {
+                "name": "Tay Ninh Travel Company",
+                "description": "Specializing in organizing high-quality tours in the Southeast region with over 10 years of experience.",
+                "address": "123 ABC Street, Tay Ninh City"
+            },
+            "mockGuide": {
+                "name": "Nguyen Van Guide",
+                "experience": "5 years of tour guide experience",
+                "skills": {
+                    "professional": "Professional tour guide",
+                    "local": "Local knowledge",
+                    "multilingual": "Multilingual",
+                    "safety": "Tour safety"
+                },
+                "languages": {
+                    "vietnamese": "Vietnamese",
+                    "english": "English",
+                    "chinese": "Chinese"
+                }
+            },
+            "loadError": "Unable to load tour information",
+            "generalError": "An error occurred while loading tour information",
+            "bookingUnavailable": "This tour is currently unavailable for booking",
+            "loginSuccess": "Login successful! You can book the tour now.",
+            "companyTitle": "Organizer Company",
+            "guideTitle": "Tour Guide",
+            "companyStatus": "Status",
+            "companyActive": "Active",
+            "companyInactive": "Inactive",
+            "publicTours": "Public Tours",
+            "guideExperience": "Experience",
+            "guideSkills": "Skills",
+            "guideTotalTours": "Total Tours Guided",
+            "guideStatus": "Status",
+            "guideAvailable": "Available",
+            "guideUnavailable": "Unavailable",
+            "approvedDate": "Approved",
+            "approvedBy": "Approved By"
+        }
     },
     "thingsToDo": {
         "pageTitle": "Explore Tay Ninh",
@@ -621,7 +677,9 @@
         "vatIncluded": "* Price includes VAT",
         "chooseVoucher": "Select Voucher",
         "voucher": "Voucher",
-        "discount": "Discount"
+        "discount": "Discount",
+        "outOfStockRemoved": "{{name}} is out of stock and has been removed from cart",
+        "quantityReduced": "{{name}} quantity has been reduced to {{newQuantity}} due to insufficient stock"
     },
     "paymentCancel": {
         "processing": "Processing payment cancellation...",
@@ -1335,6 +1393,36 @@
                 "tourCreated": "Tour Created"
             }
         },
+        "profile": {
+            "title": "Tour Company Information",
+            "description": "Update detailed information about your tour company",
+            "avatar": {
+                "title": "Company Avatar",
+                "changeButton": "Change Avatar",
+                "note": "Only accept JPG, JPEG, PNG images (under 2MB)",
+                "updateSuccess": "Avatar updated successfully!",
+                "updateError": "Avatar update failed!",
+                "fileTypeError": "Only accept JPG, JPEG, PNG images!",
+                "fileSizeError": "Image must be smaller than 2MB!"
+            },
+            "form": {
+                "companyName": "Company Name",
+                "companyNamePlaceholder": "Enter company name",
+                "companyNameRequired": "Please enter company name",
+                "phone": "Phone Number",
+                "phonePlaceholder": "Enter phone number",
+                "phoneRequired": "Please enter phone number",
+                "address": "Address",
+                "addressPlaceholder": "Enter address",
+                "addressRequired": "Please enter address",
+                "description": "Description",
+                "descriptionPlaceholder": "Describe your tour company...",
+                "saveButton": "Save Changes",
+                "cancelButton": "Cancel",
+                "updateSuccess": "Tour company information updated successfully!",
+                "updateError": "Update failed!"
+            }
+        },
         "tourTemplates": {
             "title": "Tour Templates Management",
             "searchPlaceholder": "Search by name, tour type",
@@ -1817,7 +1905,7 @@
         "infoTitle": "Tour Information",
         "included": "Included",
         "guide": "Professional guide",
-        "insurance": "Travel insurance",
+        "insurance": "Fast, safe, professional",
         "transport": "Transportation as per program",
         "notIncluded": "Not included",
         "personalCost": "Personal expenses",
@@ -1860,5 +1948,114 @@
         },
         "found": "Tours found",
         "toal": "Total tours"
+    },
+    "specialtyShop": {
+        "profile": {
+            "title": "Shop Information",
+            "description": "Update detailed information about your shop",
+            "avatar": {
+                "title": "Shop Avatar",
+                "changeButton": "Change Avatar",
+                "note": "Only accept JPG, JPEG, PNG images (under 2MB)",
+                "updateSuccess": "Logo updated successfully!",
+                "updateError": "Logo update failed!",
+                "fileTypeError": "Only accept JPG, JPEG, PNG images!",
+                "fileSizeError": "Image must be smaller than 2MB!"
+            },
+            "form": {
+                "shopName": "Shop Name",
+                "shopNamePlaceholder": "Enter shop name",
+                "shopNameRequired": "Please enter shop name",
+                "businessType": "Business Type",
+                "businessTypePlaceholder": "Select business type",
+                "businessTypeRequired": "Select business type",
+                "description": "Shop Description",
+                "descriptionPlaceholder": "Describe your shop...",
+                "address": "Address",
+                "addressPlaceholder": "Enter shop address",
+                "addressRequired": "Enter shop address",
+                "phone": "Phone Number",
+                "phonePlaceholder": "Enter phone number",
+                "phoneRequired": "Enter phone number",
+                "website": "Website",
+                "websitePlaceholder": "https://example.com",
+                "openTime": "Opening Time",
+                "openTimePlaceholder": "--:--",
+                "closeTime": "Closing Time",
+                "closeTimePlaceholder": "--:--",
+                "saveButton": "Save Changes",
+                "cancelButton": "Cancel",
+                "updateSuccess": "Shop information updated successfully!",
+                "updateError": "Update failed!"
+            },
+            "businessTypes": {
+                "specialty": "Specialty",
+                "food": "Food",
+                "souvenir": "Souvenir"
+            }
+        },
+        "info": {
+            "title": "Shop Information",
+            "loading": "Loading shop information...",
+            "error": "Unable to load shop information",
+            "notFound": "Shop information not found",
+            "rating": "{{rating}} points",
+            "openHours": "Open: {{open}} - {{close}}",
+            "viewShop": "View Shop"
+        },
+        "detail": {
+            "loading": "Loading shop information...",
+            "error": "Unable to load shop information",
+            "notFoundTitle": "Unable to load shop information",
+            "notFoundMessage": "Shop does not exist or has been deleted",
+            "backButton": "Go Back",
+            "breadcrumbHome": "Home",
+            "breadcrumbShop": "Shop",
+            "ratingText": "{{rating}} / 5",
+            "openHours": "Open: {{open}} - {{close}}",
+            "productCount": "{{count}} products",
+            "joinedDate": "Joined since {{date}}",
+            "infoTitle": "Shop Information",
+            "address": "Address",
+            "phone": "Phone Number",
+            "email": "Email",
+            "representative": "Representative",
+            "businessLicense": "Business License",
+            "website": "Website",
+            "productsTitle": "Shop Products ({{count}})",
+            "noProducts": "Shop has no products yet"
+        }
+    },
+    "product": {
+        "detail": {
+            "breadcrumbHome": "Home",
+            "breadcrumbShop": "Shop",
+            "tags": {
+                "specialty": "specialty",
+                "gift": "gift",
+                "traditional": "traditional"
+            },
+            "defaultDescription": "Distinctive product from Tay Ninh, high quality",
+            "anonymous": "Anonymous",
+            "stockExceeded": "Quantity exceeds available stock!",
+            "newBadge": "New",
+            "discountBadge": "{{percent}}% Off",
+            "imageHint": "Click to view large image",
+            "reviewCount": "{{count}} reviews",
+            "sku": "SKU: {{sku}}",
+            "soldCount": "{{count}} sold",
+            "quantityLabel": "Quantity",
+            "addToCartButton": "Add to Cart",
+            "buyNowButton": "Buy Now",
+            "category": "Category: {{category}}",
+            "location": "Origin: Tay Ninh",
+            "descriptionTab": "Product Description",
+            "reviewsTab": "Reviews ({{count}})",
+            "relatedProducts": "Related Products",
+            "notFoundTitle": "Product not found",
+            "notFoundMessage": "This product does not exist or has been deleted.",
+            "backToShop": "Back to shop",
+            "imagePagination": "{{current}}/{{total}}"
+        }
     }
 }

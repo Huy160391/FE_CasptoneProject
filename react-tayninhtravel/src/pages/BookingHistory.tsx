@@ -246,7 +246,7 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
             <Card>
                 <div style={{ marginBottom: 16 }}>
                     <Title level={4}>
-                        📅 {t('bookingHistory.title', 'Lịch sử đặt tour')}
+                        {t('bookingHistory.title', 'Lịch sử đặt tour')}
                     </Title>
                     <Text type="secondary">
                         {t('bookingHistory.description', 'Quản lý và theo dõi các tour du lịch bạn đã đặt')}

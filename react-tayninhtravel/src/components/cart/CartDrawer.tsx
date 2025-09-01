@@ -1,6 +1,7 @@
 import { Drawer, List, Button, Empty, Typography, Divider } from 'antd'
 import { DeleteOutlined, ShoppingCartOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons'
 import { useCartStore } from '@/store/useCartStore'
+import { useStockValidation } from '@/hooks/useStockValidation'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import './CartDrawer.scss'
@@ -18,7 +19,13 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore()
-  const handleQuantityChange = (productId: string | number, type: 'product' | 'tour', quantity: number) => {
+  const { canIncreaseQuantity, validateItemStock } = useStockValidation()
+
+  const handleQuantityChange = async (productId: string | number, type: 'product' | 'tour', quantity: number) => {
+    // Validate stock before updating quantity
+    if (type === 'product' && quantity > 0) {
+      await validateItemStock(productId.toString(), type)
+    }
     updateQuantity(productId, type, quantity)
   }
 
@@ -108,7 +115,7 @@ const CartDrawer = ({ visible, onClose }: CartDrawerProps) => {
                       type="text"
                       icon={<PlusOutlined />}
                       onClick={() => handleQuantityChange(item.productId, item.type, item.quantity + 1)}
-                      disabled={item.quantity >= 99}
+                      disabled={item.type === 'product' && !canIncreaseQuantity(item.productId, item.type)}
                       className="quantity-btn plus-btn"
                       size="small"
                     />

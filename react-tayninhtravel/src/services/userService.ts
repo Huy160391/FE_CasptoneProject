@@ -585,18 +585,14 @@ export const userService = {
      * Create a new comment on a blog post
      * @param blogId Blog post ID
      * @param content Comment content
-     * @param parentCommentId Optional parent comment ID for replies
      * @returns Promise with created comment
      */
-    createComment: async (blogId: string, content: string, parentCommentId?: string): Promise<Comment | null> => {
+    createComment: async (blogId: string, content: string): Promise<Comment | null> => {
         try {
             // Get the token from localStorage
             const token = localStorage.getItem('token');
 
-            const payload: any = { content };
-            if (parentCommentId) {
-                payload.parentCommentId = parentCommentId;
-            }
+            const payload = { content };
 
             const response = await axios.post(`/Blogger/${blogId}/comments`, payload, {
                 headers: token ? {
@@ -607,6 +603,33 @@ export const userService = {
             return response.data;
         } catch (error) {
             console.error('Error creating comment:', error);
+            return null;
+        }
+    },
+
+    /**
+     * Create a reply to a comment
+     * @param blogId Blog post ID
+     * @param content Reply content
+     * @param parentCommentId Parent comment ID
+     * @returns Promise with created reply
+     */
+    createReplyComment: async (blogId: string, content: string, parentCommentId: string): Promise<Comment | null> => {
+        try {
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            const payload = { content };
+
+            const response = await axios.post(`/Blogger/${blogId}/comments/${parentCommentId}/reply`, payload, {
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`
+                } : undefined
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error creating reply comment:', error);
             return null;
         }
     },    /**

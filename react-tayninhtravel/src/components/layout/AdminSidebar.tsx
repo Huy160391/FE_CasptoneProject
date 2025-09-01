@@ -82,10 +82,6 @@ const AdminSidebar = () => {
           ),
         },
         {
-          key: "/admin/withdrawal-requests",
-          label: <Link to="/admin/withdrawal-requests">Quản lý rút tiền</Link>,
-        },
-        {
           key: "/admin/orders",
           label: <Link to="/admin/orders">Quản lý đơn hàng</Link>,
         },
@@ -109,6 +105,11 @@ const AdminSidebar = () => {
           label: <Link to="/admin/tour-companies">Quản lý công ty du lịch</Link>,
         },
       ],
+    },
+    {
+      key: "/admin/withdrawal-requests",
+      icon: <ToolOutlined />,
+      label: <Link to="/admin/withdrawal-requests">Quản lý rút tiền</Link>,
     },
     {
       key: "/admin/blogs",

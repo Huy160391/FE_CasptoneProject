@@ -1,42 +1,377 @@
 .tour-detail-modal {
-  .ant-descriptions {
+  .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 24px;
+    margin: -24px -24px 24px -24px;
+    border-radius: 8px 8px 0 0;
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .title-section {
+        flex: 1;
+
+        .main-title {
+          font-size: 24px;
+          font-weight: 700;
+          margin: 0 0 8px 0;
+          color: white;
+        }
+
+        .company-name {
+          font-size: 14px;
+          opacity: 0.9;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+      }
+
+      .status-section {
+        text-align: right;
+
+        .status-tag {
+          font-size: 12px;
+          padding: 4px 12px;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          margin-bottom: 12px;
+          display: inline-block;
+        }
+
+        .action-buttons {
+          .ant-btn {
+            border-radius: 6px;
+            font-weight: 500;
+            height: 36px;
+            padding: 0 20px;
+          }
+        }
+      }
+    }
+  }
+
+  .overview-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    border: 1px solid #e9ecef;
+
+    &.dark {
+      background: #2a2a2a;
+      border-color: #404040;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+
+        .info-icon {
+          color: #1890ff;
+          font-size: 16px;
+          width: 20px;
+          text-align: center;
+        }
+
+        .info-label {
+          font-weight: 500;
+          margin-right: 4px;
+        }
+
+        .info-value {
+          color: #666;
+        }
+      }
+    }
+
+    .dates-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      gap: 32px;
+
+      .date-item {
+        text-align: center;
+
+        .date-label {
+          font-size: 12px;
+          color: #666;
+          margin-bottom: 4px;
+        }
+
+        .date-value {
+          font-weight: 600;
+          color: #1890ff;
+        }
+      }
+    }
+  }
+
+  .description-section {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
     margin-bottom: 16px;
+    border: 1px solid #f0f0f0;
+
+    &.dark {
+      background: #1f1f1f;
+      border-color: #404040;
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1890ff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-content {
+      line-height: 1.6;
+      color: #555;
+    }
   }
-  .tour-detail-image {
-    text-align: center;
-    margin-top: 16px;
-    img {
-      max-width: 100%;
-      max-height: 300px;
+
+  .custom-tabs {
+    .ant-tabs-nav {
+      margin-bottom: 20px;
+    }
+
+    .ant-tabs-tab {
+      font-weight: 500;
+    }
+
+    .ant-tabs-content-holder {
+      background: white;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border: 1px solid #f0f0f0;
+
+      &.dark {
+        background: #1f1f1f;
+        border-color: #404040;
+      }
+    }
+
+    .ant-tabs-tabpane {
+      padding: 20px;
     }
   }
-  .tour-overview-box {
-    background: #f6f8fa;
-    border-radius: 10px;
-    padding: 18px 24px;
-    margin-bottom: 18px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    color: #222;
-    .overview-title {
-      color: #222;
-    }
-    .overview-label {
-      color: #888;
+
+  .timeline-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    .timeline-item {
+      display: flex;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .timeline-time {
+        min-width: 100px;
+        font-weight: 600;
+        color: #1890ff;
+      }
+
+      .timeline-activity {
+        flex: 1;
+        padding-left: 16px;
+        line-height: 1.5;
+      }
     }
   }
-  .dark & {
-    .tour-overview-box {
-      background: #23272f;
-      color: #f3f3f3;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.32);
-      .overview-title {
-        color: #90caf9;
+
+  .image-gallery {
+    .main-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .thumbnail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+
+      .thumbnail {
+        width: 100%;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+
+        &:hover {
+          transform: scale(1.05);
+        }
       }
-      .overview-label {
-        color: #b0b0b0;
+    }
+  }
+
+  .shops-list {
+    .shop-item {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .shop-icon {
+        color: #52c41a;
       }
+
+      .shop-name {
+        font-weight: 500;
+      }
+
+      .owner-name {
+        color: #666;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+// Dark mode styles
+.tour-detail-modal.dark {
+  background: #1f1f1f;
+  color: #e4e4e4;
+
+  .modal-header.dark {
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  }
+
+  .overview-card.dark {
+    background: #2a2a2a;
+    border-color: #404040;
+
+    .info-item {
+      .info-label {
+        color: #999;
+      }
+
+      .info-value {
+        color: #e4e4e4;
+      }
+
+      .info-icon {
+        color: #81c784;
+      }
+    }
+
+    .dates-section.dark {
+      border-top-color: #404040;
+
+      .date-item {
+        .date-label {
+          color: #999;
+        }
+
+        .date-value {
+          color: #81c784;
+        }
+      }
+    }
+  }
+
+  .description-section.dark {
+    background: #2a2a2a;
+    border-color: #404040;
+
+    .section-title {
+      color: #81c784;
+    }
+
+    .section-content {
+      color: #e4e4e4;
+    }
+  }
+
+  .custom-tabs.dark {
+    .ant-tabs-content-holder {
+      background: #2a2a2a;
+      border-color: #404040;
+    }
+
+    .ant-tabs-nav::before {
+      border-bottom-color: #404040;
+    }
+
+    .ant-tabs-tab {
+      color: #e4e4e4;
+
+      &.ant-tabs-tab-active {
+        color: #81c784;
+      }
+    }
+
+    .ant-tabs-ink-bar {
+      background: #81c784;
+    }
+  }
+
+  .timeline-list.dark {
+    .timeline-item {
+      border-bottom-color: #404040;
+
+      .timeline-time {
+        color: #81c784;
+      }
+
+      .timeline-activity {
+        color: #e4e4e4;
+      }
+    }
+  }
+
+  .shops-list.dark {
+    .shop-item {
+      background: #383838;
+      color: #e4e4e4;
+
+      .shop-icon {
+        color: #81c784;
+      }
+
+      .owner-name {
+        color: #999;
+      }
+    }
+  }
+
+  .image-gallery.dark {
+    .main-image {
+      border: 1px solid #404040;
+    }
+
+    .thumbnail {
+      border: 1px solid #404040;
     }
   }
 }

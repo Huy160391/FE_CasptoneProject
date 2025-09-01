@@ -351,7 +351,7 @@ const UserManagement = () => {
     return (
         <div className="user-management-page">
             <div className="header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>{t('admin.users.title')}</h1>
+                <h1>{t('admin.users.title')}</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     <Input
                         placeholder={t('admin.users.searchPlaceholder')}

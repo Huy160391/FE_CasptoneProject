@@ -25,6 +25,7 @@ import {
 import { WithdrawalStatus } from '@/types';
 import { getWithdrawalStatistics } from '@/services/adminWithdrawalService';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useThemeStore } from '@/store/useThemeStore';
 import WithdrawalRequestList from './WithdrawalRequestList';
 import dayjs from 'dayjs';
 import './AdminWithdrawalManagement.scss';
@@ -56,6 +57,7 @@ interface StatisticsData {
  */
 const AdminWithdrawalManagement: React.FC = () => {
     const { token } = useAuthStore();
+    const { isDarkMode } = useThemeStore();
     const [activeTab, setActiveTab] = useState('pending');
     const [statistics, setStatistics] = useState<StatisticsData>({
         totalRequests: 0,
@@ -174,6 +176,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     refreshTrigger={refreshTrigger}
                     onDataChanged={handleDataChanged}
                     onTabCountChanged={(count) => handleTabCountChanged('pending', count)}
+                    isDarkMode={isDarkMode}
                 />
             )
         },
@@ -200,6 +203,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     refreshTrigger={refreshTrigger}
                     onDataChanged={handleDataChanged}
                     onTabCountChanged={(count) => handleTabCountChanged('approved', count)}
+                    isDarkMode={isDarkMode}
                 />
             )
         },
@@ -226,6 +230,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     refreshTrigger={refreshTrigger}
                     onDataChanged={handleDataChanged}
                     onTabCountChanged={(count) => handleTabCountChanged('rejected', count)}
+                    isDarkMode={isDarkMode}
                 />
             )
         },
@@ -252,6 +257,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     refreshTrigger={refreshTrigger}
                     onDataChanged={handleDataChanged}
                     onTabCountChanged={(count) => handleTabCountChanged('cancelled', count)}
+                    isDarkMode={isDarkMode}
                 />
             )
         },
@@ -277,17 +283,18 @@ const AdminWithdrawalManagement: React.FC = () => {
                     refreshTrigger={refreshTrigger}
                     onDataChanged={handleDataChanged}
                     onTabCountChanged={(count) => handleTabCountChanged('all', count)}
+                    isDarkMode={isDarkMode}
                 />
             )
         }
     ];
 
     return (
-        <div className="admin-withdrawal-management">
+        <div className={`admin-withdrawal-management${isDarkMode ? ' dark' : ''}`}>
             {/* Header */}
-            <div className="page-header">
+            <div className={`page-header${isDarkMode ? ' dark' : ''}`}>
                 <div className="header-content">
-                    <Title level={2} className="page-title">
+                    <Title level={2} className={`page-title${isDarkMode ? ' dark' : ''}`}>
                         <DollarOutlined /> Quản lý yêu cầu rút tiền
                     </Title>
                     <Space>
@@ -296,7 +303,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                             onChange={(dates) => setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)}
                             placeholder={['Từ ngày', 'Đến ngày']}
                             suffixIcon={<CalendarOutlined />}
-                            className="date-range-picker"
+                            className={`date-range-picker${isDarkMode ? ' dark' : ''}`}
                         />
                         <Button
                             icon={<ReloadOutlined />}
@@ -310,9 +317,9 @@ const AdminWithdrawalManagement: React.FC = () => {
             </div>
 
             {/* Statistics Cards */}
-            <Row gutter={[16, 16]} className="statistics-section">
+            <Row gutter={[16, 16]} className={`statistics-section${isDarkMode ? ' dark' : ''}`}>
                 <Col xs={24} sm={12} lg={6}>
-                    <Card className="stat-card total">
+                    <Card className={`stat-card total${isDarkMode ? ' dark' : ''}`}>
                         <Statistic
                             title="Tổng yêu cầu"
                             value={statistics.totalRequests}
@@ -322,7 +329,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     </Card>
                 </Col>
                 <Col xs={24} sm={12} lg={6}>
-                    <Card className="stat-card pending">
+                    <Card className={`stat-card pending${isDarkMode ? ' dark' : ''}`}>
                         <Statistic
                             title="Chờ duyệt"
                             value={statistics.pendingRequests}
@@ -332,7 +339,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     </Card>
                 </Col>
                 <Col xs={24} sm={12} lg={6}>
-                    <Card className="stat-card approved">
+                    <Card className={`stat-card approved${isDarkMode ? ' dark' : ''}`}>
                         <Statistic
                             title="Đã duyệt"
                             value={statistics.approvedRequests}
@@ -342,7 +349,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     </Card>
                 </Col>
                 <Col xs={24} sm={12} lg={6}>
-                    <Card className="stat-card rejected">
+                    <Card className={`stat-card rejected${isDarkMode ? ' dark' : ''}`}>
                         <Statistic
                             title="Từ chối"
                             value={statistics.rejectedRequests}
@@ -354,9 +361,9 @@ const AdminWithdrawalManagement: React.FC = () => {
             </Row>
 
             {/* Amount Statistics */}
-            <Row gutter={[16, 16]} className="amount-statistics">
+            <Row gutter={[16, 16]} className={`amount-statistics${isDarkMode ? ' dark' : ''}`}>
                 <Col xs={24} md={8}>
-                    <Card className="amount-card total-amount">
+                    <Card className={`amount-card total-amount${isDarkMode ? ' dark' : ''}`}>
                         <Statistic
                             title="Tổng số tiền yêu cầu"
                             value={statistics.totalAmount}
@@ -367,7 +374,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     </Card>
                 </Col>
                 <Col xs={24} md={8}>
-                    <Card className="amount-card approved-amount">
+                    <Card className={`amount-card approved-amount${isDarkMode ? ' dark' : ''}`}>
                         <Statistic
                             title="Số tiền đã duyệt"
                             value={statistics.approvedAmount}
@@ -378,7 +385,7 @@ const AdminWithdrawalManagement: React.FC = () => {
                     </Card>
                 </Col>
                 <Col xs={24} md={8}>
-                    <Card className="amount-card pending-amount">
+                    <Card className={`amount-card pending-amount${isDarkMode ? ' dark' : ''}`}>
                         <Statistic
                             title="Số tiền chờ duyệt"
                             value={statistics.pendingAmount}
@@ -391,13 +398,13 @@ const AdminWithdrawalManagement: React.FC = () => {
             </Row>
 
             {/* Main Content Tabs */}
-            <Card className="main-content">
+            <Card className={`main-content${isDarkMode ? ' dark' : ''}`}>
                 <Tabs
                     activeKey={activeTab}
                     onChange={setActiveTab}
                     items={tabItems}
                     size="large"
-                    className="withdrawal-tabs"
+                    className={`withdrawal-tabs${isDarkMode ? ' dark' : ''}`}
                 />
             </Card>
         </div>

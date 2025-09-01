@@ -259,7 +259,7 @@ const RegisterHistory = () => {
             <Card>
                 <div style={{ marginBottom: 16 }}>
                     <Title level={4}>
-                        📝 {t('registerHistory.title', 'Lịch sử đăng ký')}
+                        {t('registerHistory.title', 'Lịch sử đăng ký')}
                     </Title>
                     <Text type="secondary">
                         {t('registerHistory.description', 'Theo dõi trạng thái đăng ký shop và hướng dẫn viên của bạn')}

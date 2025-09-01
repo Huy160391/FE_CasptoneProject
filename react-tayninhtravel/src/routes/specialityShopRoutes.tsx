@@ -7,6 +7,7 @@ import Reviews from '../pages/specialityshop/Reviews';
 import WalletManagement from '../pages/specialityshop/WalletManagement';
 import CustomerList from '../pages/specialityshop/CustomerList';
 
+
 export const specialityShopRoutes = [
     {
         path: '/speciality-shop',

@@ -25,6 +25,124 @@ import './BlogPost.scss'
 const { Title, Text } = Typography
 const { TextArea } = Input
 
+// Recursive component for rendering nested replies
+const ReplyItem: React.FC<{
+  reply: UserComment
+  onReplyClick: (replyId: string) => void
+  replyingToReply: string | null
+  replyToReplyContent: string
+  onReplyContentChange: (content: string) => void
+  onReplySubmit: (parentCommentId: string) => void
+  onCancelReply: () => void
+  commentsLoading: boolean
+  level: number
+  parentUserName?: string
+}> = ({
+  reply,
+  onReplyClick,
+  replyingToReply,
+  replyToReplyContent,
+  onReplyContentChange,
+  onReplySubmit,
+  onCancelReply,
+  commentsLoading,
+  level,
+  parentUserName
+}) => {
+    // Only indent for level 1, other levels don't indent
+    const indentStyle = level === 1 ? { marginLeft: '40px' } : {}
+
+    return (
+      <div className="reply-item-container" style={indentStyle}>
+        <List.Item className="reply-item">
+          <List.Item.Meta
+            avatar={<Avatar src={reply.userAvatar} size="small" icon={<UserOutlined />} />}
+            title={
+              <div className="reply-title-container">
+                <span className="reply-user-name">{reply.userName}</span>
+                {parentUserName && (
+                  <span className="reply-to-indicator">reply @{parentUserName}</span>
+                )}
+              </div>
+            }
+            description={
+              <div className="reply-meta">
+                <div className="reply-date">
+                  {new Date(reply.createdAt).toLocaleString()}
+                </div>
+                <div className="reply-content">
+                  <div className="reply-text">
+                    {reply.content}
+                  </div>
+                </div>
+              </div>
+            }
+          />
+          <Button
+            type="link"
+            onClick={() => onReplyClick(reply.id)}
+            icon={<RollbackOutlined />}
+            className="reply-button"
+            title="Trả lời"
+            size="small"
+          />
+        </List.Item>
+
+        {/* Reply form for this reply */}
+        {replyingToReply === reply.id && (
+          <div className="reply-form reply-to-reply-form" style={{ marginTop: '8px' }}>
+            <TextArea
+              rows={2}
+              value={replyToReplyContent}
+              onChange={(e) => onReplyContentChange(e.target.value)}
+              placeholder={`Trả lời ${reply.userName}...`}
+              className="reply-textarea"
+            />
+            <div className="reply-form-actions">
+              <Button
+                type="primary"
+                onClick={() => onReplySubmit(reply.id)}
+                loading={commentsLoading}
+                size="small"
+              >
+                Gửi
+              </Button>
+              <Button
+                type="default"
+                onClick={onCancelReply}
+                icon={<CloseOutlined />}
+                size="small"
+              >
+                Hủy
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Render nested replies */}
+        {reply.replies && reply.replies.length > 0 && (
+          <div className="nested-replies">
+            {reply.replies.map((nestedReply: UserComment) => (
+              <ReplyItem
+                key={nestedReply.id}
+                reply={nestedReply}
+                onReplyClick={onReplyClick}
+                replyingToReply={replyingToReply}
+                replyToReplyContent={replyToReplyContent}
+                onReplyContentChange={onReplyContentChange}
+                onReplySubmit={onReplySubmit}
+                onCancelReply={onCancelReply}
+                commentsLoading={commentsLoading}
+                level={level + 1}
+                parentUserName={reply.userName}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
 const BlogPost = () => {
   const [sharePopupVisible, setSharePopupVisible] = useState(false);
   const { id } = useParams()
@@ -45,8 +163,13 @@ const BlogPost = () => {
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false)
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
+  const [replyingToReply, setReplyingToReply] = useState<string | null>(null)
+  const [replyToReplyContent, setReplyToReplyContent] = useState('')
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set())
+  const [visibleCommentsCount, setVisibleCommentsCount] = useState(5)
+  const [isShowingAllComments, setIsShowingAllComments] = useState(false)
   const commentListRef = useRef<HTMLDivElement>(null)
   // Hàm xử lý chuyển ảnh trước đó
   const handlePrevImage = () => {
@@ -107,8 +230,16 @@ const BlogPost = () => {
         setComments(commentsResponse.data)
         console.log('Comments state after setting:', commentsResponse.data)
 
-        // If there are more than 10 comments, show "View more" button
-        setHasMoreComments(commentsResponse.data.length >= 10)
+        // Set initial visible comments count and show more button logic
+        const totalComments = commentsResponse.data.length
+        if (totalComments <= 5) {
+          setVisibleCommentsCount(totalComments)
+          setHasMoreComments(false)
+        } else {
+          setVisibleCommentsCount(5)
+          setHasMoreComments(true)
+        }
+        setIsShowingAllComments(false)
       } catch (error) {
         console.error('Error fetching comments:', error)
       } finally {
@@ -132,10 +263,9 @@ const BlogPost = () => {
     if (!id) return
 
     try {
-      // If already favorite, send dislike (0), otherwise send like (1)
-      const reaction = isFavorite ? 0 : 1
 
-      await userService.toggleBlogReaction(id, reaction)
+
+      await userService.toggleBlogReaction(id, 1)
 
       setIsFavorite(!isFavorite)
       message.success(isFavorite ? 'Đã bỏ yêu thích bài viết' : 'Đã yêu thích bài viết')
@@ -172,6 +302,28 @@ const BlogPost = () => {
     setReplyContent('')
   }
 
+  const handleReplyToReplyClick = (replyId: string) => {
+    setReplyingToReply(replyId)
+    setReplyToReplyContent('')
+  }
+
+  const handleCancelReplyToReply = () => {
+    setReplyingToReply(null)
+    setReplyToReplyContent('')
+  }
+
+  const handleToggleReplies = (commentId: string) => {
+    setExpandedReplies(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId)
+      } else {
+        newSet.add(commentId)
+      }
+      return newSet
+    })
+  }
+
   const handleCommentSubmit = async () => {
     if (!commentContent.trim()) return
     if (!isAuthenticated) {
@@ -189,7 +341,17 @@ const BlogPost = () => {
         // Refresh comments to show the new one
         const commentsResponse = await userService.getBlogComments(id)
         setComments(commentsResponse.data)
-        setHasMoreComments(commentsResponse.data.length >= 10)
+
+        // Update pagination state based on new comments count
+        const totalComments = commentsResponse.data.length
+        if (totalComments <= 5) {
+          setVisibleCommentsCount(totalComments)
+          setHasMoreComments(false)
+        } else {
+          setVisibleCommentsCount(5)
+          setHasMoreComments(true)
+        }
+        setIsShowingAllComments(false)
         setCommentContent('') // Clear the input
         message.success('Bình luận đã được gửi thành công')
       }
@@ -206,14 +368,25 @@ const BlogPost = () => {
 
     setLoadingMoreComments(true)
     try {
-      // We'll simulate loading more comments for now
-      // In a real implementation, you might send the last comment ID to the server
-      setTimeout(() => {
-        setHasMoreComments(false)
-        setLoadingMoreComments(false)
-      }, 1000)
+      if (isShowingAllComments) {
+        // Reset to show only 5 comments
+        setVisibleCommentsCount(5)
+        setIsShowingAllComments(false)
+        setHasMoreComments(true)
+      } else {
+        // Show 5 more comments
+        const newCount = Math.min(visibleCommentsCount + 5, comments.length)
+        setVisibleCommentsCount(newCount)
+
+        // Check if we're showing all comments now
+        if (newCount >= comments.length) {
+          setIsShowingAllComments(true)
+          setHasMoreComments(false)
+        }
+      }
     } catch (error) {
       console.error('Error loading more comments:', error)
+    } finally {
       setLoadingMoreComments(false)
     }
   }
@@ -229,18 +402,67 @@ const BlogPost = () => {
     try {
       if (!id) return
 
-      const newReply = await userService.createComment(id, replyContent, commentId)
+      const newReply = await userService.createReplyComment(id, replyContent, commentId)
       if (newReply) {
         // Refresh comments to show the new reply
         const commentsResponse = await userService.getBlogComments(id)
         setComments(commentsResponse.data)
-        setHasMoreComments(commentsResponse.data.length >= 10)
+
+        // Update pagination state based on new comments count
+        const totalComments = commentsResponse.data.length
+        if (totalComments <= 5) {
+          setVisibleCommentsCount(totalComments)
+          setHasMoreComments(false)
+        } else {
+          setVisibleCommentsCount(5)
+          setHasMoreComments(true)
+        }
+        setIsShowingAllComments(false)
         setReplyContent('') // Clear the input
         setReplyingTo(null) // Close the reply form
         message.success('Phản hồi đã được gửi thành công')
       }
     } catch (error) {
       console.error('Error submitting reply:', error)
+      message.error('Có lỗi xảy ra khi gửi phản hồi')
+    } finally {
+      setCommentsLoading(false)
+    }
+  }
+
+  const handleReplyToReplySubmit = async (parentCommentId: string) => {
+    if (!replyToReplyContent.trim()) return
+    if (!isAuthenticated) {
+      handleLoginModalOpen()
+      return
+    }
+
+    setCommentsLoading(true)
+    try {
+      if (!id) return
+
+      const newReply = await userService.createReplyComment(id, replyToReplyContent, parentCommentId)
+      if (newReply) {
+        // Refresh comments to show the new reply
+        const commentsResponse = await userService.getBlogComments(id)
+        setComments(commentsResponse.data)
+
+        // Update pagination state based on new comments count
+        const totalComments = commentsResponse.data.length
+        if (totalComments <= 5) {
+          setVisibleCommentsCount(totalComments)
+          setHasMoreComments(false)
+        } else {
+          setVisibleCommentsCount(5)
+          setHasMoreComments(true)
+        }
+        setIsShowingAllComments(false)
+        setReplyToReplyContent('') // Clear the input
+        setReplyingToReply(null) // Close the reply form
+        message.success('Phản hồi đã được gửi thành công')
+      }
+    } catch (error) {
+      console.error('Error submitting reply to reply:', error)
       message.error('Có lỗi xảy ra khi gửi phản hồi')
     } finally {
       setCommentsLoading(false)
@@ -390,7 +612,7 @@ const BlogPost = () => {
                   ) : (
                     <List
                       itemLayout="horizontal"
-                      dataSource={comments}
+                      dataSource={comments.slice(0, visibleCommentsCount)}
                       locale={{ emptyText: 'Chưa có bình luận nào cho bài viết này' }}
                       renderItem={comment => (
                         <List.Item>
@@ -409,29 +631,31 @@ const BlogPost = () => {
 
                           {/* Display reply count if there are replies */}
                           {comment.replies && comment.replies.length > 0 && (
-                            <div className="reply-count">
-                              Có {comment.replies.length} phản hồi
+                            <div
+                              className="reply-count clickable"
+                              onClick={() => handleToggleReplies(comment.id)}
+                            >
+                              {expandedReplies.has(comment.id) ? 'Ẩn' : 'Hiện'} {comment.replies.length} phản hồi
                             </div>
                           )}
 
-                          {/* Render replies if any */}
-                          {comment.replies && comment.replies.length > 0 && (
+                          {/* Render replies if any and expanded */}
+                          {comment.replies && comment.replies.length > 0 && expandedReplies.has(comment.id) && (
                             <div className="comment-replies">
                               {comment.replies.map((reply: UserComment) => (
-                                <List.Item key={reply.id} className="reply-item">
-                                  <List.Item.Meta
-                                    avatar={<Avatar src={reply.userAvatar} size="small" icon={<UserOutlined />} />}
-                                    title={reply.userName}
-                                    description={
-                                      <div className="comment-meta">
-                                        <span>{new Date(reply.createdAt).toLocaleString()}</span>
-                                      </div>
-                                    }
-                                  />
-                                  <div className="comment-content reply-content">
-                                    {reply.content}
-                                  </div>
-                                </List.Item>
+                                <ReplyItem
+                                  key={reply.id}
+                                  reply={reply}
+                                  onReplyClick={handleReplyToReplyClick}
+                                  replyingToReply={replyingToReply}
+                                  replyToReplyContent={replyToReplyContent}
+                                  onReplyContentChange={setReplyToReplyContent}
+                                  onReplySubmit={handleReplyToReplySubmit}
+                                  onCancelReply={handleCancelReplyToReply}
+                                  commentsLoading={commentsLoading}
+                                  level={1}
+                                  parentUserName={comment.userName}
+                                />
                               ))}
                             </div>
                           )}                          <Button
@@ -481,7 +705,7 @@ const BlogPost = () => {
                         onClick={handleLoadMoreComments}
                         loading={loadingMoreComments}
                       >
-                        Xem thêm bình luận
+                        {isShowingAllComments ? 'Hiển thị ít hơn' : 'Xem thêm bình luận'}
                       </Button>
                     </div>
                   )}

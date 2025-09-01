@@ -14,12 +14,10 @@ import {
   UserOutlined,
   ReadOutlined,
   LogoutOutlined,
-  SettingOutlined,
   DashboardOutlined
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from '../common/ThemeToggle'
-// ...existing code...
 import NotificationBell from '../common/NotificationBell'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
@@ -176,18 +174,25 @@ const Navbar = () => {
     ...(user?.role && ['Tour Guide', 'Admin', 'Blogger', 'Tour Company', 'Specialty Shop'].includes(user.role) ? [{
       type: 'divider' as const,
     }] : []),
-    {
-      key: 'profile',
-      label: t('common.profile'),
-      icon: <UserOutlined />,
-      onClick: () => navigate('/profile'),
-    },
-    {
-      key: 'settings',
-      label: t('common.settings'),
-      icon: <SettingOutlined />,
-      onClick: () => navigate('/settings'),
-    },
+    // Tab profile cho user
+    ...((user?.role === 'Admin') ? [] : [
+      (user?.role === 'Specialty Shop') ? {
+        key: 'profile',
+        label: t('common.profile'),
+        icon: <UserOutlined />,
+        onClick: () => navigate('/speciality-shop/profile'),
+      } : (user?.role === 'Tour Company') ? {
+        key: 'profile',
+        label: t('common.profile'),
+        icon: <UserOutlined />,
+        onClick: () => navigate('/tour-company/profile'),
+      } : {
+        key: 'profile',
+        label: t('common.profile'),
+        icon: <UserOutlined />,
+        onClick: () => navigate('/profile'),
+      }
+    ]),
     {
       type: 'divider',
     },

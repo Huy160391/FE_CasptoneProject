@@ -442,7 +442,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
             <Card>
                 <div style={{ marginBottom: 16 }}>
                     <Title level={4}>
-                        <ShoppingCartOutlined /> {t('orderHistory.title')}
+                        {t('orderHistory.title')}
                     </Title>
                     <Text type="secondary">
                         {t('orderHistory.description')}

@@ -286,7 +286,10 @@ const Shop = () => {
                   <Row gutter={[16, 24]} className="products-grid">
                     {paginatedProducts.map(product => (
                       <Col xs={24} sm={12} lg={8} key={product.id}>
-                        <ProductCard product={product} />
+                        <ProductCard product={{
+                          ...product,
+                          description: product.description || undefined
+                        }} />
                       </Col>
                     ))}
                   </Row>
