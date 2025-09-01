@@ -47,7 +47,7 @@ const { TabPane } = Tabs;
 
 const TourDetailsManagement: React.FC = () => {
     const { token } = useAuthStore();
-    const { handleError } = useErrorHandler();
+    const { handleError, showSuccess } = useErrorHandler();
 
     // Preload wizard data when component mounts
     const { isPreloaded, templatesCount, shopsCount, guidesCount } = usePreloadWizardData();
@@ -87,7 +87,7 @@ const TourDetailsManagement: React.FC = () => {
             await loadTourDetailsList();
             await loadTemplates();
         } catch (error) {
-            handleError(handleApiError(error));
+            message.error(handleApiError(error));
         }
     };
 
@@ -121,11 +121,11 @@ const TourDetailsManagement: React.FC = () => {
                 setTotalCount(response.totalCount || 0);
             } else {
                 console.error('❌ API Error:', response.message);
-                handleError(response.message || 'Không thể tải danh sách tour details');
+                message.error(response.message || 'Không thể tải danh sách tour details');
             }
         } catch (error) {
             console.error('❌ Load TourDetails Error:', error);
-            handleError(handleApiError(error));
+            message.error(handleApiError(error));
         } finally {
             setLoading(false);
         }
@@ -165,7 +165,7 @@ const TourDetailsManagement: React.FC = () => {
             }
         } catch (error) {
             console.error('❌ Error loading templates:', error);
-            handleError(`Lỗi tải templates: ${handleApiError(error)}`);
+            message.error(`Lỗi tải templates: ${handleApiError(error)}`);
         }
     };
 
@@ -206,7 +206,7 @@ const TourDetailsManagement: React.FC = () => {
                 loadTourDetailsList();
             }
         } catch (error) {
-            handleError(handleApiError(error));
+            message.error(handleApiError(error));
         }
     };
 
@@ -234,10 +234,10 @@ const TourDetailsManagement: React.FC = () => {
                 message.success('Đã kích hoạt public cho TourDetails thành công! Khách hàng có thể booking tour này.');
                 loadTourDetailsList(); // Reload để cập nhật status
             } else {
-                handleError(response.message || 'Không thể kích hoạt public');
+                message.error(response.message || 'Không thể kích hoạt public');
             }
         } catch (error) {
-            handleError(handleApiError(error));
+            message.error(handleApiError(error));
         } finally {
             setLoading(false);
         }
@@ -472,4 +472,3 @@ const TourDetailsManagement: React.FC = () => {
 };
 
 export default TourDetailsManagement;
-

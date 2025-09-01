@@ -114,19 +114,49 @@ axiosInstance.interceptors.response.use(
         // Apply timezone transformation to response data
         const timezoneInterceptor = createTimezoneResponseInterceptor();
         response = timezoneInterceptor(response);
+
+        // Log successful responses in development
+        if (isDevelopment) {
+            console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url}:`, {
+                status: response.status,
+                data: response.data
+            });
+        }
+
         return response;
     },
     (error) => {
-        // Use centralized error handler
-        const errorResponse = handleApiError(error, true);
-        
         // Log error details in development
         logError(error, `API ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
 
-        // Return standardized error format
+        // Use centralized error handler with notification
+        const errorResponse = handleApiError(error, true);
+
+        // Handle specific error cases that need immediate action
+        if (error.response?.status === 401) {
+            // Token expired or invalid - already handled in handleApiError
+            console.warn('Authentication error detected, user will be redirected to login');
+        } else if (error.response?.status === 403) {
+            // Forbidden - user lacks permissions
+            console.warn('Access forbidden - insufficient permissions');
+        } else if (error.response?.status === 429) {
+            // Rate limiting
+            console.warn('Rate limit exceeded');
+        }
+
+        // Return standardized error format with enhanced information
         return Promise.reject({
             ...error,
-            standardizedError: errorResponse
+            standardizedError: errorResponse,
+            // Add helper flags for easier error handling in components
+            isAuthError: error.response?.status === 401,
+            isForbidden: error.response?.status === 403,
+            isNotFound: error.response?.status === 404,
+            isValidationError: error.response?.status === 400,
+            isConflict: error.response?.status === 409,
+            isServerError: error.response?.status >= 500,
+            isNetworkError: !error.response,
+            isTimeout: error.code === 'ECONNABORTED'
         });
     }
 );

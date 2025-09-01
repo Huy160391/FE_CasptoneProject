@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { getErrorMessage } from './errorHandler';
 
 /**
@@ -18,7 +17,7 @@ export class ServiceWrapper {
     }
   ): Promise<T> {
     const { 
-      showError = false, // Error already shown by axios interceptor
+      // showError = false, // Error already shown by axios interceptor
       customErrorMessage,
       retryOnError = false,
       maxRetries = 3
@@ -163,8 +162,8 @@ export function withErrorHandling(options?: {
   customErrorMessage?: string;
 }) {
   return function (
-    target: any,
-    propertyKey: string,
+    _target: any,
+    _propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
@@ -178,6 +177,105 @@ export function withErrorHandling(options?: {
 
     return descriptor;
   };
+}
+
+/**
+ * Specialized service wrappers for different modules
+ */
+
+/**
+ * Tour Booking Service Wrapper
+ */
+export class TourBookingServiceWrapper {
+  static async handleBookingRequest<T>(
+    requestFn: () => Promise<T>,
+    options?: {
+      customErrorMessage?: string;
+      showError?: boolean;
+    }
+  ): Promise<T> {
+    return ServiceWrapper.handleRequest(requestFn, {
+      ...options,
+      retryOnError: false, // Don't retry booking operations
+      maxRetries: 1
+    });
+  }
+
+  static async handleBookingCancellation<T>(
+    requestFn: () => Promise<T>,
+    options?: {
+      customErrorMessage?: string;
+    }
+  ): Promise<T> {
+    return ServiceWrapper.handleRequest(requestFn, {
+      ...options,
+      customErrorMessage: options?.customErrorMessage || 'Không thể hủy booking',
+      retryOnError: false
+    });
+  }
+}
+
+/**
+ * Authentication Service Wrapper
+ */
+export class AuthServiceWrapper {
+  static async handleAuthRequest<T>(
+    requestFn: () => Promise<T>,
+    options?: {
+      customErrorMessage?: string;
+    }
+  ): Promise<T> {
+    return ServiceWrapper.handleRequest(requestFn, {
+      ...options,
+      retryOnError: false, // Never retry auth operations
+      maxRetries: 1
+    });
+  }
+
+  static async handleOTPRequest<T>(
+    requestFn: () => Promise<T>,
+    options?: {
+      customErrorMessage?: string;
+    }
+  ): Promise<T> {
+    return ServiceWrapper.handleRequest(requestFn, {
+      ...options,
+      customErrorMessage: options?.customErrorMessage || 'Lỗi xác thực OTP',
+      retryOnError: false
+    });
+  }
+}
+
+/**
+ * Payment Service Wrapper
+ */
+export class PaymentServiceWrapper {
+  static async handlePaymentRequest<T>(
+    requestFn: () => Promise<T>,
+    options?: {
+      customErrorMessage?: string;
+    }
+  ): Promise<T> {
+    return ServiceWrapper.handleRequest(requestFn, {
+      ...options,
+      customErrorMessage: options?.customErrorMessage || 'Lỗi xử lý thanh toán',
+      retryOnError: true, // Retry payment operations
+      maxRetries: 2
+    });
+  }
+
+  static async handleWithdrawalRequest<T>(
+    requestFn: () => Promise<T>,
+    options?: {
+      customErrorMessage?: string;
+    }
+  ): Promise<T> {
+    return ServiceWrapper.handleRequest(requestFn, {
+      ...options,
+      customErrorMessage: options?.customErrorMessage || 'Lỗi rút tiền',
+      retryOnError: false
+    });
+  }
 }
 
 export default ServiceWrapper;

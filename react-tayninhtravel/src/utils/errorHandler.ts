@@ -60,7 +60,25 @@ const CONTEXT_ERROR_HANDLERS: Record<string, (error: BackendErrorResponse) => vo
     if (error.statusCode === 409) {
       notification.warning({
         message: 'Lỗi đặt tour',
-        description: 'Tour đã được người khác đặt. Vui lòng chọn slot khác.',
+        description: 'Tour slot đã được booking bởi người khác, vui lòng thử lại',
+        duration: 5
+      });
+    } else if (error.message.includes('Tour slot không khả dụng')) {
+      notification.warning({
+        message: 'Tour không khả dụng',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Tour đã khởi hành')) {
+      notification.error({
+        message: 'Tour đã khởi hành',
+        description: 'Không thể đặt tour đã khởi hành',
+        duration: 5
+      });
+    } else if (error.message.includes('chỗ trống')) {
+      notification.warning({
+        message: 'Không đủ chỗ trống',
+        description: error.message,
         duration: 5
       });
     }
@@ -69,7 +87,19 @@ const CONTEXT_ERROR_HANDLERS: Record<string, (error: BackendErrorResponse) => vo
     if (error.statusCode === 500) {
       notification.error({
         message: 'Lỗi thanh toán',
-        description: 'Hệ thống thanh toán đang gặp sự cố. Vui lòng thử lại sau.',
+        description: 'PayOS service không khả dụng. Vui lòng thử lại sau.',
+        duration: 5
+      });
+    } else if (error.message.includes('Phiên thanh toán đã hết hạn')) {
+      notification.warning({
+        message: 'Phiên thanh toán hết hạn',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Số tiền thanh toán không hợp lệ')) {
+      notification.error({
+        message: 'Lỗi thanh toán',
+        description: error.message,
         duration: 5
       });
     }
@@ -78,6 +108,84 @@ const CONTEXT_ERROR_HANDLERS: Record<string, (error: BackendErrorResponse) => vo
     if (error.message.includes('Số dư không đủ')) {
       notification.warning({
         message: 'Không thể rút tiền',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Số tiền rút tối thiểu')) {
+      notification.warning({
+        message: 'Số tiền không hợp lệ',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('yêu cầu rút tiền đang chờ')) {
+      notification.info({
+        message: 'Yêu cầu đang xử lý',
+        description: error.message,
+        duration: 5
+      });
+    }
+  },
+  '/authentication': (error) => {
+    if (error.message.includes('Email hoặc mật khẩu không đúng')) {
+      notification.error({
+        message: 'Đăng nhập thất bại',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Email đã được sử dụng')) {
+      notification.warning({
+        message: 'Email đã tồn tại',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Tài khoản chưa được xác thực')) {
+      notification.warning({
+        message: 'Tài khoản chưa xác thực',
+        description: error.message,
+        duration: 5
+      });
+    }
+  },
+  '/otp': (error) => {
+    if (error.message.includes('Mã OTP không đúng')) {
+      notification.error({
+        message: 'OTP không đúng',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Mã OTP đã hết hạn')) {
+      notification.warning({
+        message: 'OTP hết hạn',
+        description: error.message,
+        duration: 5
+      });
+    }
+  },
+  '/tour': (error) => {
+    if (error.message.includes('Tour không tồn tại')) {
+      notification.error({
+        message: 'Tour không tìm thấy',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Tour không còn hoạt động')) {
+      notification.warning({
+        message: 'Tour không khả dụng',
+        description: error.message,
+        duration: 5
+      });
+    }
+  },
+  '/upload': (error) => {
+    if (error.message.includes('File vượt quá dung lượng')) {
+      notification.error({
+        message: 'File quá lớn',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Chỉ chấp nhận file ảnh')) {
+      notification.error({
+        message: 'Định dạng file không hỗ trợ',
         description: error.message,
         duration: 5
       });
@@ -93,7 +201,7 @@ export const handleApiError = (error: AxiosError, showNotification = true): Back
   const status = error.response?.status || 0;
   const errorData = error.response?.data as BackendErrorResponse;
   const requestUrl = error.config?.url || '';
-  
+
   // Build error response
   const errorResponse: BackendErrorResponse = {
     success: false,
@@ -111,7 +219,7 @@ export const handleApiError = (error: AxiosError, showNotification = true): Back
     return errorResponse;
   }
 
-  // Use backend message if available
+  // Use backend message if available (prioritize backend messages)
   if (errorData?.message) {
     errorResponse.message = errorData.message;
   } else {
@@ -119,10 +227,19 @@ export const handleApiError = (error: AxiosError, showNotification = true): Back
     errorResponse.message = DEFAULT_ERROR_MESSAGES[status] || 'Có lỗi xảy ra. Vui lòng thử lại.';
   }
 
-  // Show notification based on severity
-  if (showNotification) {
+  // Apply context-specific handlers first (they may override default notifications)
+  let contextHandled = false;
+  Object.keys(CONTEXT_ERROR_HANDLERS).forEach(context => {
+    if (requestUrl.includes(context)) {
+      CONTEXT_ERROR_HANDLERS[context](errorResponse);
+      contextHandled = true;
+    }
+  });
+
+  // Show notification based on severity only if not handled by context handlers
+  if (showNotification && !contextHandled) {
     const severity = ERROR_TYPE_MAP[status] || ErrorSeverity.ERROR;
-    
+
     switch (severity) {
       case ErrorSeverity.INFO:
         message.info(errorResponse.message);
@@ -143,7 +260,7 @@ export const handleApiError = (error: AxiosError, showNotification = true): Back
             localStorage.removeItem('user');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('auth-storage');
-            
+
             // Redirect to login
             if (window.location.pathname !== '/login') {
               window.location.href = '/login';
@@ -154,12 +271,20 @@ export const handleApiError = (error: AxiosError, showNotification = true): Back
     }
   }
 
-  // Apply context-specific handlers
-  Object.keys(CONTEXT_ERROR_HANDLERS).forEach(context => {
-    if (requestUrl.includes(context)) {
-      CONTEXT_ERROR_HANDLERS[context](errorResponse);
-    }
-  });
+  // Handle special status codes
+  if (status === 401 && showNotification) {
+    // Always handle 401 regardless of context
+    setTimeout(() => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('auth-storage');
+
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }, 1500);
+  }
 
   return errorResponse;
 };
@@ -250,63 +375,17 @@ export const logError = (error: any, context?: string): void => {
 };
 
 /**
- * Error boundary fallback component
+ * Error fallback component props interface
  */
-export const ErrorFallback = ({ error, resetError }: { error: Error; resetError: () => void }) => {
-  return (
-    <div style={{ 
-      padding: '50px', 
-      textAlign: 'center',
-      minHeight: '400px',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }}>
-      <h2 style={{ color: '#ff4d4f', marginBottom: '20px' }}>
-        Đã xảy ra lỗi không mong muốn
-      </h2>
-      <p style={{ marginBottom: '20px', color: '#666' }}>
-        {getErrorMessage(error)}
-      </p>
-      <button
-        onClick={resetError}
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#1890ff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}
-      >
-        Thử lại
-      </button>
-      {import.meta.env.DEV && (
-        <details style={{ marginTop: '20px', textAlign: 'left', maxWidth: '600px' }}>
-          <summary style={{ cursor: 'pointer', color: '#999' }}>
-            Chi tiết lỗi (Development only)
-          </summary>
-          <pre style={{ 
-            backgroundColor: '#f5f5f5', 
-            padding: '10px', 
-            borderRadius: '4px',
-            overflow: 'auto',
-            marginTop: '10px'
-          }}>
-            {error.stack}
-          </pre>
-        </details>
-      )}
-    </div>
-  );
-};
+export interface ErrorFallbackProps {
+  error: Error;
+  resetError: () => void;
+}
 
 export default {
   handleApiError,
   handleValidationErrors,
   retryRequest,
   getErrorMessage,
-  logError,
-  ErrorFallback
+  logError
 };

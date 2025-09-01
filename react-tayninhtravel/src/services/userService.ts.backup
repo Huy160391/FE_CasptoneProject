@@ -1,5 +1,6 @@
 import axios from '@/config/axios';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { AuthServiceWrapper } from '@/utils/serviceWrapper';
 import {
     UpdateUserPayload,
     CreateUserPayload,
@@ -596,11 +597,10 @@ export const userService = {
             });
 
             return response.data;
-        } catch (error: any) {
-        // Error already shown by axios interceptor
-        console.error('Service error:', error);
-        return null;
-    }
+        } catch (error) {
+            console.error('Error creating comment:', error);
+            return null;
+        }
     },
 
     /**
@@ -624,11 +624,10 @@ export const userService = {
             });
 
             return response.data;
-        } catch (error: any) {
-        // Error already shown by axios interceptor
-        console.error('Service error:', error);
-        return null;
-    }
+        } catch (error) {
+            console.error('Error creating reply comment:', error);
+            return null;
+        }
     },    /**
      * Like a comment
      * @param commentId Comment ID
@@ -644,11 +643,10 @@ export const userService = {
                 } : undefined
             });
             return response.data;
-        } catch (error: any) {
-        // Error already shown by axios interceptor
-        console.error('Service error:', error);
-        return null;
-    }
+        } catch (error) {
+            console.error('Error liking comment:', error);
+            return null;
+        }
     },
 
     /**
@@ -677,13 +675,10 @@ export const userService = {
             });
 
             return response.data;
-        } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+        } catch (error) {
+            console.error('Error toggling blog reaction:', error);
+            throw error;
+        }
     },
 
     /**
@@ -832,4 +827,3 @@ export type ApiGetUsersResponse = {
     page: number;
     pageSize: number;
 };
-

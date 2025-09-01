@@ -219,8 +219,4 @@ export const getCurrentUserRole = (): string | null => {
 export default axiosInstance;
 
 // Export additional utilities
-export {
-    makeRequestWithRetry,
-    isAuthenticated,
-    getCurrentUserRole
-};
+// Exports already declared above
