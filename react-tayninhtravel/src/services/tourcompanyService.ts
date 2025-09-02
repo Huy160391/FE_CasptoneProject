@@ -729,6 +729,7 @@ export const getTourCompanyById = async (
   const response = await axios.get(`/Cms/TourCompany/${tourCompanyId}`, { headers });
   return response.data;
 };
+
 export const getRecentBookings = async (
   pageSize: number = 10,
   token?: string

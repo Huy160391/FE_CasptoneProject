@@ -24,6 +24,7 @@ import {
     ReloadOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import {
     getMyBookings
@@ -85,6 +86,7 @@ const getBookingStatusColor = (status: string): string => {
 
 const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     // Status options for filter
     const statusOptions = [
         { value: 'Pending', label: t('bookingHistory.statuses.pending', 'Chờ thanh toán') },
@@ -202,6 +204,12 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
 
     const handleRefresh = () => {
         loadBookings(currentPage);
+    };
+
+    const handleViewTourDetail = (tourDetailsId: string) => {
+        if (tourDetailsId) {
+            navigate(`/tour-details/${tourDetailsId}`);
+        }
     };
 
     // If using legacy data prop
@@ -335,7 +343,22 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                                     width: 200,
                                     render: (text, record) => (
                                         <div>
-                                            <Text strong>{text || 'Tour'}</Text>
+                                            {record.tourOperation?.tourDetailsId ? (
+                                                <Button
+                                                    type="link"
+                                                    style={{
+                                                        padding: 0,
+                                                        height: 'auto',
+                                                        fontWeight: 'bold',
+                                                        textAlign: 'left'
+                                                    }}
+                                                    onClick={() => handleViewTourDetail(record.tourOperation.tourDetailsId)}
+                                                >
+                                                    {text || 'Tour'}
+                                                </Button>
+                                            ) : (
+                                                <Text strong>{text || 'Tour'}</Text>
+                                            )}
                                             {record.tourOperation?.guideName && (
                                                 <div>
                                                     <Text type="secondary" style={{ fontSize: '12px' }}>
@@ -478,7 +501,21 @@ const BookingHistory: React.FC<BookingHistoryProps> = ({ data }) => {
                             </Descriptions.Item>
 
                             <Descriptions.Item label="Tên tour">
-                                {selectedBooking.tourOperation?.tourTitle || 'N/A'}
+                                {selectedBooking.tourOperation?.tourDetailsId ? (
+                                    <Button
+                                        type="link"
+                                        style={{
+                                            padding: 0,
+                                            height: 'auto',
+                                            fontWeight: 'normal'
+                                        }}
+                                        onClick={() => handleViewTourDetail(selectedBooking.tourOperation!.tourDetailsId)}
+                                    >
+                                        {selectedBooking.tourOperation?.tourTitle || 'N/A'}
+                                    </Button>
+                                ) : (
+                                    selectedBooking.tourOperation?.tourTitle || 'N/A'
+                                )}
                             </Descriptions.Item>
 
                             {selectedBooking.tourOperation?.tourTitle && (
