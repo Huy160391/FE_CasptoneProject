@@ -1864,7 +1864,7 @@
         "paginationText": "of",
         "paginationTotal": "orders",
         "loadingError": "Unable to load order history",
-        "searchPlaceholder": "Search by order number, shop name...",
+        "searchPlaceholder": "Search by order number",
         "filterByStatus": "Filter by status",
         "showCancelled": "Show cancelled",
         "refresh": "Refresh",
@@ -2056,6 +2056,127 @@
             "notFoundMessage": "This product does not exist or has been deleted.",
             "backToShop": "Back to shop",
             "imagePagination": "{{current}}/{{total}}"
+        }
+    },
+    "booking": {
+        "title": "Book Tour",
+        "viewOtherTours": "View other tours",
+        "steps": {
+            "tourInfo": "Tour Information",
+            "customerInfo": "Customer Information",
+            "confirmPayment": "Confirmation & Payment"
+        },
+        "common": {
+            "continue": "Continue",
+            "back": "Back",
+            "person": "person"
+        },
+        "errors": {
+            "tourIdNotFound": "Tour ID not found",
+            "loadTourDetails": "Unable to load tour details",
+            "loadTourDetailsGeneric": "An error occurred while loading tour details",
+            "cannotLoadTour": "Unable to load tour information",
+            "tourNotExists": "Tour does not exist or has been deleted",
+            "cannotCalculatePrice": "Unable to calculate tour price",
+            "pleaseSelectDate": "Please select a tour date",
+            "pleaseCompleteInfo": "Please complete all required information"
+        },
+        "tourInfo": {
+            "title": "Tour Information",
+            "tourName": "Tour Name",
+            "startLocation": "Departure Point",
+            "endLocation": "End Point",
+            "basePrice": "Base Price",
+            "maxGuests": "Maximum Guests",
+            "booked": "Booked",
+            "selectDate": "Select tour date",
+            "loadingSchedule": "Loading schedule...",
+            "selectDateInstruction": "Select the date you want to join the tour:",
+            "noScheduleAvailable": "No schedule available for this tour at the moment",
+            "noScheduleDescription": "Tour slots may be fully booked or unavailable. Please contact us for more information.",
+            "tourDescription": "Tour Description",
+            "tourTimeline": "Tour Timeline"
+        },
+        "customerInfo": {
+            "title": "Customer Information",
+            "bookingType": "Booking Type",
+            "numberOfGuests": "Number of Guests",
+            "contactName": "Contact Name",
+            "contactPhone": "Phone Number",
+            "contactEmail": "Email",
+            "specialRequests": "Special Requests (Optional)",
+            "individualGuestsInfo": "Individual Guest Information",
+            "guestNotice": "Notice",
+            "guestNoticeDescription": "Each guest will receive a separate QR code for check-in at stops",
+            "guestName": "Full Name",
+            "guestEmail": "Email",
+            "guestPhone": "Phone Number (Optional)",
+            "guestNumber": "Guest {{number}}",
+            "validation": {
+                "selectBookingType": "Please select a booking type",
+                "enterNumberOfGuests": "Please enter number of guests",
+                "minGuests": "Must have at least 1 guest",
+                "enterContactName": "Please enter contact name",
+                "maxContactNameLength": "Name cannot exceed 100 characters",
+                "enterContactPhone": "Please enter phone number",
+                "invalidPhone": "Invalid phone number",
+                "enterContactEmail": "Please enter email",
+                "invalidEmail": "Invalid email",
+                "enterGuestName": "Please enter guest name",
+                "minGuestNameLength": "Name must be at least 2 characters",
+                "maxGuestNameLength": "Name cannot exceed 100 characters",
+                "enterGuestEmail": "Please enter email",
+                "invalidGuestEmail": "Invalid email",
+                "invalidGuestPhone": "Invalid phone number"
+            },
+            "placeholders": {
+                "numberOfGuests": "Enter number of guests",
+                "contactName": "Enter full name",
+                "contactPhone": "0123456789",
+                "contactEmail": "email@example.com",
+                "specialRequests": "Example: Vegetarian, food allergies, private room request...",
+                "guestName": "Enter full name",
+                "guestEmail": "email@example.com",
+                "guestPhone": "0123456789"
+            }
+        },
+        "confirmation": {
+            "title": "Confirm Booking",
+            "tourSummary": "Tour Summary",
+            "tourDate": "Departure Date",
+            "numberOfGuests": "Number of Guests",
+            "contactName": "Contact Person",
+            "contactPhone": "Phone Number",
+            "contactEmail": "Email",
+            "specialRequests": "Special Requests",
+            "customerInfo": "Customer Information",
+            "paymentMethod": "Payment Method",
+            "payNow": "Pay Now",
+            "payLater": "Pay Later",
+            "termsAndConditions": "Terms and Conditions",
+            "termsText": "I have read and agree to the service terms and conditions",
+            "privacyPolicy": "Privacy Policy",
+            "privacyText": "I agree to the privacy policy and data processing",
+            "confirmBooking": "Confirm Booking",
+            "bookingSuccess": "Booking Successful!",
+            "bookingSuccessMessage": "Thank you for booking. We will send detailed information via email and SMS.",
+            "viewBookingDetails": "View Booking Details",
+            "backToHome": "Back to Home",
+            "validation": {
+                "acceptTerms": "Please accept terms and conditions",
+                "acceptPrivacy": "Please accept privacy policy"
+            }
+        },
+        "summary": {
+            "title": "Order Summary",
+            "calculatingPrice": "Calculating price...",
+            "originalPrice": "Original Price",
+            "discount": "Discount",
+            "total": "Total",
+            "earlyBird": "Early Bird Discount",
+            "priceType": "Price Type",
+            "selectGuestsToSeePrice": "Select number of guests to see price",
+            "availableSlots": "Available Slots"
         }
     }
 }

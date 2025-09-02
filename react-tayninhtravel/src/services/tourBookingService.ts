@@ -907,3 +907,51 @@ export const validateBookingRequest = (
     );
   }
 };
+
+// ===== FEEDBACK/REVIEW TYPES =====
+
+export interface UserFeedback {
+  type: 'Tour' | 'Product';
+  itemId: string;
+  itemName: string;
+  userId: string;
+  userFullName: string;
+  createdAt: string;
+  rating: number;
+  comment: string;
+}
+
+export interface GetUserFeedbackResponse extends ApiResponse {
+  data: UserFeedback[];
+}
+
+/**
+ * Get all feedback/reviews made by the current user
+ */
+export const getUserFeedback = async (
+  token: string
+): Promise<GetUserFeedbackResponse> => {
+  try {
+    const response = await axios.get<UserFeedback[]>(
+      '/TourBooking/GetAll-Feedback',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return {
+      success: true,
+      message: 'Lấy lịch sử đánh giá thành công',
+      data: response.data,
+    };
+  } catch (error: any) {
+    console.error('Error fetching user feedback:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Không thể lấy lịch sử đánh giá',
+      data: [],
+    };
+  }
+};
