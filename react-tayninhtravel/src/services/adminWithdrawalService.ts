@@ -6,6 +6,7 @@
  */
 
 import axios from '@/config/axios';
+
 import { WithdrawalRequestListParams, ProcessWithdrawalRequest } from '@/types';
 
 // ==================== ADMIN WITHDRAWAL REQUEST APIs ====================
@@ -299,3 +300,4 @@ export default {
     getStatusColor,
     validateAdminNotes
 };
+

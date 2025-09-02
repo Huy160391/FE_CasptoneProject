@@ -1,4 +1,5 @@
 import axios from '../config/axios';
+
 import { ApiResponse } from '../types';
 
 // LocationOption interface for start/end location options
@@ -200,3 +201,4 @@ export const tourDetailsService = new TourDetailsService();
 
 // Export default for convenient imports
 export default tourDetailsService;
+

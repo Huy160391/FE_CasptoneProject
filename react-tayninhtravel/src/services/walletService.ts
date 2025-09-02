@@ -1,4 +1,5 @@
 import axiosInstance from '../config/axios';
+import { getErrorMessage } from '@/utils/errorHandler';
 
 // Types for Specialty Shop Wallet
 export interface Wallet {
@@ -32,9 +33,12 @@ export const walletService = {
             const response = await axiosInstance.get<SpecialtyShopWalletResponse>('/Wallet/specialty-shop');
             return response.data;
         } catch (error: any) {
-            console.error('Error fetching specialty shop wallet:', error);
-            throw error;
-        }
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
     getTourCompanyWallet: async (): Promise<SpecialtyShopWalletResponse> => {
@@ -42,9 +46,12 @@ export const walletService = {
             const response = await axiosInstance.get<SpecialtyShopWalletResponse>('/Wallet/tour-company');
             return response.data;
         } catch (error: any) {
-            console.error('Error fetching tour company wallet:', error);
-            throw error;
-        }
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
 
@@ -73,3 +80,4 @@ export const walletService = {
 
 
 export default walletService;
+

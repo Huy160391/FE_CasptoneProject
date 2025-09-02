@@ -1,6 +1,7 @@
 import axiosInstance from '@/config/axios';
 import { jwtDecode } from 'jwt-decode';
 import tokenExpirationService from './tokenExpirationService';
+import { getErrorMessage } from '@/utils/errorHandler';
 import {
     User,
     RegisterForm,
@@ -89,8 +90,12 @@ export const authService = {
                 };
             }
             throw new Error('Invalid response from server');
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            // Error is already handled by axios interceptor
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
@@ -152,24 +157,34 @@ export const authService = {
                 };
             }
             throw new Error('Invalid response from server');
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            // Error is already handled by axios interceptor
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
     register: async (credentials: RegisterForm): Promise<void> => {
         try {
             await axiosInstance.post('/Authentication/register', credentials);
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
     verifyOTP: async (email: string, otp: string): Promise<void> => {
         try {
             await axiosInstance.post('/Authentication/verify-otp', { email, otp });
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
@@ -184,8 +199,11 @@ export const authService = {
                     Authorization: `Bearer ${token}`
                 }
             });
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 

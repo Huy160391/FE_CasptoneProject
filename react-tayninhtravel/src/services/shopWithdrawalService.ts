@@ -1,4 +1,5 @@
 import axiosInstance from '@/config/axios';
+import { getErrorMessage } from '@/utils/errorHandler';
 import {
     BankAccount,
     CreateBankAccountRequest,
@@ -65,9 +66,12 @@ export const getSupportedBanks = async (): Promise<SupportedBank[]> => {
     try {
         const response = await axiosInstance.get('BankAccount/supported-banks');
         return response.data.data || [];
-    } catch (error) {
-        console.error('Error fetching supported banks:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -78,9 +82,12 @@ export const createBankAccount = async (data: CreateBankAccountRequest): Promise
     try {
         const response = await axiosInstance.post('BankAccount', data);
         return response.data.data;
-    } catch (error) {
-        console.error('Error creating bank account:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -91,9 +98,12 @@ export const getMyBankAccounts = async (): Promise<BankAccount[]> => {
     try {
         const response = await axiosInstance.get('BankAccount/my-accounts');
         return response.data.data || [];
-    } catch (error) {
-        console.error('Error fetching bank accounts:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -104,9 +114,12 @@ export const getDefaultBankAccount = async (): Promise<BankAccount | null> => {
     try {
         const response = await axiosInstance.get('BankAccount/default');
         return response.data.data || null;
-    } catch (error) {
-        console.error('Error fetching default bank account:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -117,9 +130,12 @@ export const updateBankAccount = async (id: string, data: UpdateBankAccountReque
     try {
         const response = await axiosInstance.put(`BankAccount/${id}`, data);
         return response.data.data;
-    } catch (error) {
-        console.error('Error updating bank account:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -129,9 +145,12 @@ export const updateBankAccount = async (id: string, data: UpdateBankAccountReque
 export const deleteBankAccount = async (id: string): Promise<void> => {
     try {
         await axiosInstance.delete(`BankAccount/${id}`);
-    } catch (error) {
-        console.error('Error deleting bank account:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -141,9 +160,12 @@ export const deleteBankAccount = async (id: string): Promise<void> => {
 export const setDefaultBankAccount = async (id: string): Promise<void> => {
     try {
         await axiosInstance.put(`BankAccount/${id}/set-default`);
-    } catch (error) {
-        console.error('Error setting default bank account:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -306,9 +328,12 @@ export const getWithdrawalRequestById = async (id: string): Promise<WithdrawalRe
     try {
         const response = await axiosInstance.get(`WithdrawalRequest/${id}`);
         return response.data.data;
-    } catch (error) {
-        console.error('Error fetching withdrawal request:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -319,9 +344,12 @@ export const getLatestWithdrawalRequest = async (): Promise<WithdrawalRequest | 
     try {
         const response = await axiosInstance.get('WithdrawalRequest/latest');
         return response.data.data || null;
-    } catch (error) {
-        console.error('Error fetching latest withdrawal request:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -331,9 +359,12 @@ export const getLatestWithdrawalRequest = async (): Promise<WithdrawalRequest | 
 export const cancelWithdrawalRequest = async (id: string, data: CancelWithdrawalRequest): Promise<void> => {
     try {
         await axiosInstance.put(`WithdrawalRequest/${id}/cancel`, data);
-    } catch (error) {
-        console.error('Error cancelling withdrawal request:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -352,9 +383,12 @@ export const getWithdrawalStatistics = async (): Promise<WithdrawalStatistics> =
             pendingAmount: 0,
             currentBalance: 0
         };
-    } catch (error) {
-        console.error('Error fetching withdrawal statistics:', error);
-        throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
 };
 
@@ -491,3 +525,4 @@ export default {
     validateMinimumAmount,
     canCancelWithdrawal
 };
+

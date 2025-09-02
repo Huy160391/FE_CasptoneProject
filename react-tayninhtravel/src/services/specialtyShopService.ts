@@ -1,5 +1,6 @@
 
 import axios from '../config/axios';
+
 import { Product, GetProductsParams, GetProductsResponse } from '../types';
 
 // Interface cho dữ liệu tạo/cập nhật sản phẩm
@@ -101,8 +102,9 @@ export const getProductById = async (id: string, token?: string): Promise<Produc
             return response.data.data;
         }
         return response.data;
-    } catch (error) {
-        console.error('Error fetching product:', error);
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
         return null;
     }
 };

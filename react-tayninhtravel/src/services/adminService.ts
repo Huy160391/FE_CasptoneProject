@@ -1,4 +1,5 @@
 import axios from "@/config/axios";
+import { getErrorMessage } from '@/utils/errorHandler';
 // Import type definitions
 import type { TourGuideApplication } from "@/types";
 import type { CreateUserPayload, UpdateUserPayload } from "@/types/user";
@@ -857,9 +858,12 @@ class AdminService {
         params,
       });
       return response.data;
-    } catch (error) {
-      console.error("Error fetching revenue stats:", error);
-      throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
   }
 
@@ -879,9 +883,12 @@ class AdminService {
         { params }
       );
       return response.data;
-    } catch (error) {
-      console.error("Error fetching revenue detail:", error);
-      throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
   }
 
@@ -892,9 +899,12 @@ class AdminService {
     try {
       const response = await axios.get(`/Admin/tour-slots/${tourSlotId}`);
       return response.data;
-    } catch (error) {
-      console.error("Error fetching tour slot:", error);
-      throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
   }
 
@@ -908,9 +918,12 @@ class AdminService {
         { status }
       );
       return response.data;
-    } catch (error) {
-      console.error("Error updating tour slot status:", error);
-      throw error;
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
     }
   }
 
@@ -992,3 +1005,4 @@ class AdminService {
 
 export const adminService = new AdminService();
 export default adminService;
+

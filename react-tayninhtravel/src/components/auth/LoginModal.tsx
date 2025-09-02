@@ -85,14 +85,9 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         throw new Error('Login response invalid')
       }
     } catch (error: any) {
+      // Error message is already shown by axios interceptor
+      // Just log for debugging
       console.error('Login error:', error)
-      if (error.response?.status === 401) {
-        message.error(t('common.loginFailed'))
-      } else if (error.response?.status === 403) {
-        message.error(t('common.loginFailed'))
-      } else {
-        message.error(error.response?.data?.message || t('common.loginFailed'))
-      }
     } finally {
       setLoading(false)
     }
@@ -153,7 +148,8 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
                   throw new Error('Login response invalid');
                 }
               } catch (error: any) {
-                message.error(error.response?.data?.message || t('common.loginFailed'));
+                // Error message is already shown by axios interceptor
+                console.error('Google login error:', error);
               } finally {
                 setLoading(false);
               }

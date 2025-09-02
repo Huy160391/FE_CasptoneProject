@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { ConfigProvider, theme as antTheme } from 'antd';
 import routes from './routes';
 import AIChatWrapper from './components/ChatBot';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import { useThemeStore } from './store/useThemeStore';
 import appInitService from './services/appInitService';
 import './styles/global.scss';
@@ -70,14 +71,16 @@ const App = () => {
   };
 
   return (
-    <ConfigProvider theme={theme}>
-      <Router>
-        {/* Tự động scroll lên đầu trang khi chuyển route */}
-        <ScrollToTop />
-        <AppRoutes />
-        <AIChatWrapper version="enhanced" />
-      </Router>
-    </ConfigProvider>
+    <ErrorBoundary>
+      <ConfigProvider theme={theme}>
+        <Router>
+          {/* Tự động scroll lên đầu trang khi chuyển route */}
+          <ScrollToTop />
+          <AppRoutes />
+          <AIChatWrapper version="enhanced" />
+        </Router>
+      </ConfigProvider>
+    </ErrorBoundary>
   );
 };
 

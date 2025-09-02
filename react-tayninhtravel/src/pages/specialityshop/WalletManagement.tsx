@@ -38,6 +38,7 @@ import { useThemeStore } from '@/store/useThemeStore';
 import shopWithdrawalService from '@/services/shopWithdrawalService';
 import { walletService } from '@/services/walletService';
 import { BankAccount, BankAccountFormData, WithdrawalFormData } from '@/types';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import dayjs from 'dayjs';
 import './WalletManagement.scss';
 
@@ -59,6 +60,7 @@ interface WalletStatistics {
 const WalletManagement: React.FC = () => {
     const { user } = useAuthStore();
     const { isDarkMode } = useThemeStore();
+    const { handleError } = useErrorHandler();
     const [loading, setLoading] = useState(false);
     const [statisticsLoading, setStatisticsLoading] = useState(false);
     const [balance, setBalance] = useState(0);
@@ -121,7 +123,7 @@ const WalletManagement: React.FC = () => {
             setBankAccounts(accountsData || []);
         } catch (error) {
             console.error('Error loading wallet data:', error);
-            message.error('Không thể tải dữ liệu ví');
+            handleError('Không thể tải dữ liệu ví');
         } finally {
             setLoading(false);
         }
@@ -172,7 +174,7 @@ const WalletManagement: React.FC = () => {
             }
         } catch (error) {
             console.error('Error loading statistics:', error);
-            message.error('Không thể tải thống kê');
+            handleError('Không thể tải thống kê');
             // Keep mock data on error
             setStatistics({
                 totalWithdrawals: 15,
@@ -212,7 +214,7 @@ const WalletManagement: React.FC = () => {
             loadWalletData();
         } catch (error) {
             console.error('Error creating account:', error);
-            message.error('Có lỗi xảy ra khi thêm tài khoản');
+            handleError('Có lỗi xảy ra khi thêm tài khoản');
         }
     };
 
@@ -224,7 +226,7 @@ const WalletManagement: React.FC = () => {
             loadWalletData();
         } catch (error) {
             console.error('Error updating account:', error);
-            message.error('Có lỗi xảy ra khi cập nhật tài khoản');
+            handleError('Có lỗi xảy ra khi cập nhật tài khoản');
         }
     };
 
@@ -235,7 +237,7 @@ const WalletManagement: React.FC = () => {
             loadWalletData();
         } catch (error) {
             console.error('Error deleting account:', error);
-            message.error('Có lỗi xảy ra khi xóa tài khoản');
+            handleError('Có lỗi xảy ra khi xóa tài khoản');
         }
     };
 
@@ -246,7 +248,7 @@ const WalletManagement: React.FC = () => {
             loadWalletData();
         } catch (error) {
             console.error('Error setting default account:', error);
-            message.error('Có lỗi xảy ra khi đặt tài khoản mặc định');
+            handleError('Có lỗi xảy ra khi đặt tài khoản mặc định');
         }
     };
 
@@ -259,7 +261,7 @@ const WalletManagement: React.FC = () => {
             }
             setIsBankAccountModalVisible(false);
         } catch (error) {
-            message.error('Có lỗi xảy ra');
+            handleError('Có lỗi xảy ra');
         }
     };
 
@@ -277,7 +279,7 @@ const WalletManagement: React.FC = () => {
             // Check if user can create withdrawal request first
             const canCreate = await shopWithdrawalService.canCreateWithdrawalRequest();
             if (!canCreate) {
-                message.error('Bạn không thể tạo yêu cầu rút tiền lúc này');
+                handleError('Bạn không thể tạo yêu cầu rút tiền lúc này');
                 return;
             }
 
@@ -291,7 +293,7 @@ const WalletManagement: React.FC = () => {
                 const errorMessage = validation.errors && Array.isArray(validation.errors)
                     ? validation.errors.join(', ')
                     : 'Yêu cầu rút tiền không hợp lệ';
-                message.error(errorMessage);
+                handleError(errorMessage);
                 return;
             }
 
@@ -316,7 +318,7 @@ const WalletManagement: React.FC = () => {
                 errorMessage = error.message;
             }
 
-            message.error(errorMessage);
+            handleError(errorMessage);
         }
     };
 
@@ -553,3 +555,4 @@ const WalletManagement: React.FC = () => {
 };
 
 export default WalletManagement;
+

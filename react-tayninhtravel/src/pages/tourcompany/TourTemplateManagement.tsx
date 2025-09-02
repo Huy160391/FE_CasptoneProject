@@ -38,6 +38,7 @@ import {
 import TourSlotsList from "../../components/tourcompany/TourSlotsList";
 import TourTemplateFormModal from "./TourTemplateFormModal";
 import HolidayTourForm from "../../components/tourcompany/HolidayTourForm";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 import "./TourTemplateManagement.scss";
 import "./TourTemplateModal.scss";
 
@@ -47,6 +48,7 @@ const { Title } = Typography;
 
 const TourTemplateManagement: React.FC = () => {
   // const { isDarkMode } = useThemeStore();
+  const { handleError } = useErrorHandler();
   const [templates, setTemplates] = useState<TourTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -244,7 +246,7 @@ const TourTemplateManagement: React.FC = () => {
         const res = await getTourTemplates({}, token);
         setTemplates(res.data || []);
       } catch (err) {
-        message.error("Không thể tải danh sách template");
+        handleError(err, "Không thể tải danh sách template");
       } finally {
         setLoading(false);
       }
@@ -403,7 +405,7 @@ const TourTemplateManagement: React.FC = () => {
           setTemplates(templates.filter((t) => t.id !== id));
           message.success("Xóa template thành công");
         } catch (error) {
-          message.error("Xóa template thất bại");
+          handleError(error, "Xóa template thất bại");
         }
       },
     });
@@ -481,7 +483,7 @@ const TourTemplateManagement: React.FC = () => {
       setTemplates(res.data || []);
       setLoading(false);
     } catch (error) {
-      message.error("Có lỗi khi lưu template");
+      handleError(error, "Có lỗi khi lưu template");
       console.error("Validation failed or API error:", error);
     }
   };
@@ -524,7 +526,7 @@ const TourTemplateManagement: React.FC = () => {
         }
       } catch (error) {
         console.error("Error fetching templates:", error);
-        message.error("Không thể tải danh sách template");
+        handleError(error, "Không thể tải danh sách template");
       } finally {
         setLoading(false);
       }

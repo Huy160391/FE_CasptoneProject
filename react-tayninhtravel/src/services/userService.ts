@@ -1,4 +1,5 @@
 import axios from '@/config/axios';
+import { getErrorMessage } from '@/utils/errorHandler';
 import {
     UpdateUserPayload,
     CreateUserPayload,
@@ -193,8 +194,12 @@ export const userService = {
         try {
             const response = await axios.get('/UserTourSearch/search', { params });
             return response.data;
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            // Error already shown by axios interceptor
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || 500
+            };
         }
     },
     /**
@@ -301,21 +306,11 @@ export const userService = {
                 images: Array.isArray(ticket.images) ? ticket.images : [],
                 response: ticket.response
             }));
-        } catch (error) {
-            if (error && typeof error === 'object' && 'response' in error) {
-                // Add preventDefault flag to suppress default error handling
-                (error as any).preventDefault = true;
+        } catch (error: any) {
+            // Error already shown by axios interceptor
+            console.error('Error fetching support tickets:', error);
 
-                // Log error in development only
-                if (process.env.NODE_ENV === 'development') {
-                    const axiosError = error as { response?: { status: number; data: any } };
-                    console.error(
-                        'Support tickets fetch error:',
-                        axiosError.response?.status,
-                        axiosError.response?.data
-                    );
-                }
-            }
+            // Return empty array for graceful degradation
             return [];
         }
     },
@@ -601,10 +596,11 @@ export const userService = {
             });
 
             return response.data;
-        } catch (error) {
-            console.error('Error creating comment:', error);
-            return null;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return null;
+    }
     },
 
     /**
@@ -628,10 +624,11 @@ export const userService = {
             });
 
             return response.data;
-        } catch (error) {
-            console.error('Error creating reply comment:', error);
-            return null;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return null;
+    }
     },    /**
      * Like a comment
      * @param commentId Comment ID
@@ -647,10 +644,11 @@ export const userService = {
                 } : undefined
             });
             return response.data;
-        } catch (error) {
-            console.error('Error liking comment:', error);
-            return null;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return null;
+    }
     },
 
     /**
@@ -679,10 +677,13 @@ export const userService = {
             });
 
             return response.data;
-        } catch (error) {
-            console.error('Error toggling blog reaction:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
     /**
@@ -831,3 +832,4 @@ export type ApiGetUsersResponse = {
     page: number;
     pageSize: number;
 };
+

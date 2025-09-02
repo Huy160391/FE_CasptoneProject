@@ -1,4 +1,5 @@
 import axios from '../config/axios';
+import { getErrorMessage } from '@/utils/errorHandler';
 import { ApiResponse } from '../types';
 
 // Skills Types
@@ -30,10 +31,13 @@ class SkillsService {
         try {
             const response = await axios.get(`${this.baseUrl}/categories`);
             return response.data;
-        } catch (error) {
-            console.error('❌ Error fetching skills categories:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     /**
@@ -44,10 +48,13 @@ class SkillsService {
         try {
             const response = await axios.get(`${this.baseUrl}/all`);
             return response.data;
-        } catch (error) {
-            console.error('❌ Error fetching all skills:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     /**
@@ -63,10 +70,13 @@ class SkillsService {
                 }
             });
             return response.data;
-        } catch (error) {
-            console.error('❌ Error validating skills string:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     /**
@@ -77,10 +87,13 @@ class SkillsService {
         try {
             const response = await axios.get(`${this.baseUrl}/names`);
             return response.data;
-        } catch (error) {
-            console.error('❌ Error fetching skill names:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     /**
@@ -166,3 +179,4 @@ export const {
     getDisplayName,
     validateSelectedSkills
 } = skillsService;
+

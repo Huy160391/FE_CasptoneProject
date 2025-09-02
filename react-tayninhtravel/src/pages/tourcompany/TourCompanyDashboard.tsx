@@ -11,7 +11,6 @@ import {
   DatePicker,
   Button,
   Typography,
-  message,
   Spin,
 } from "antd";
 import {
@@ -28,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { getDashboardStatistics, getRecentBookings } from "@/services/tourcompanyService";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { TourCompanyDashboardStatistics } from "@/types/dashboard";
 import "./TourCompanyDashboard.scss";
 
@@ -39,6 +39,7 @@ const { RangePicker } = DatePicker;
 const TourCompanyDashboard: React.FC = () => {
   const { t } = useTranslation();
   const { token } = useAuthStore();
+  const { handleError } = useErrorHandler();
   const navigate = useNavigate();
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
     dayjs().subtract(30, "day"),
@@ -172,11 +173,11 @@ const TourCompanyDashboard: React.FC = () => {
       }
 
       if (!monthlyResponse.success || !overallResponse.success) {
-        message.error("Không thể tải đầy đủ dữ liệu dashboard");
+        handleError(new Error("API response failed"), "Không thể tải đầy đủ dữ liệu dashboard");
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
-      message.error("Có lỗi xảy ra khi tải dữ liệu dashboard");
+      handleError(error, "Có lỗi xảy ra khi tải dữ liệu dashboard");
     } finally {
       setLoading(false);
     }
@@ -577,3 +578,4 @@ const TourCompanyDashboard: React.FC = () => {
 };
 
 export default TourCompanyDashboard;
+

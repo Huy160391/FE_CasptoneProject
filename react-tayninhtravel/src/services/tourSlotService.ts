@@ -1,5 +1,6 @@
 import axiosInstance from "../config/axios";
 
+
 export interface TourSlotDto {
   id: string;
   tourTemplateId: string;
@@ -374,3 +375,4 @@ class TourSlotService {
 
 export const tourSlotService = new TourSlotService();
 export default tourSlotService;
+

@@ -1,4 +1,5 @@
 import axiosInstance from '@/config/axios';
+import { getErrorMessage } from '@/utils/errorHandler';
 import { BlogPost, ApiBlogPost, ApiGetBlogsResponse, GetBlogsParams, GetBloggerBlogsResponse, CreateBlogPayload, UpdateBlogPayload } from '@/types/blog';
 
 /**
@@ -87,10 +88,13 @@ export const bloggerService = {
                 pageSize: responseData.pageSize || 10,
                 totalPages: responseData.totalPages || 0,
             };
-        } catch (error) {
-            console.error('Error fetching blogger posts:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
     /**
@@ -109,10 +113,13 @@ export const bloggerService = {
             }
 
             return this.mapApiBlogToApp(response.data.data);
-        } catch (error) {
-            console.error('Error fetching blog post:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
     /**
@@ -281,10 +288,13 @@ export const bloggerService = {
     async deleteBlog(id: string): Promise<void> {
         try {
             await axiosInstance.delete(`/Blogger/blog/${id}`);
-        } catch (error) {
-            console.error('Error deleting blog post:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
     /**
@@ -299,10 +309,13 @@ export const bloggerService = {
             }>(`/Blogger/Blog-Blogger/${id}/publish`);
 
             return this.mapApiBlogToApp(response.data.data);
-        } catch (error) {
-            console.error('Error publishing blog post:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
     /**
@@ -311,10 +324,13 @@ export const bloggerService = {
     async saveDraft(blogData: CreateBlogPayload): Promise<BlogPost> {
         try {
             return await this.createBlog(blogData);
-        } catch (error) {
-            console.error('Error saving draft:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
 
@@ -410,3 +426,4 @@ export const bloggerService = {
 };
 
 export default bloggerService;
+
