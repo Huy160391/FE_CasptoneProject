@@ -16,7 +16,7 @@ import {
     Progress,
     Tooltip,
     Tabs,
-    Badge
+   
 } from 'antd';
 import {
     UserOutlined,
@@ -28,19 +28,11 @@ import {
     MailOutlined,
     EnvironmentOutlined,
     TrophyOutlined,
-    HistoryOutlined,
-    ShoppingOutlined,
-    CommentOutlined,
-    QuestionCircleOutlined,
-    CalendarOutlined
+   
 } from '@ant-design/icons';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getMyProfile, updateMyProfile } from '@/services/tourguideService';
-import BookingHistory from '@/pages/BookingHistory';
-import TransactionHistory from '@/pages/TransactionHistory';
-import CommentHistory from '@/pages/CommentHistory';
-import SupportTicketHistory from '@/pages/SupportTicketHistory';
-import RegisterHistory from '@/pages/RegisterHistory';
+
 const { Text } = Typography;
 const { TextArea } = Input;
 
@@ -59,35 +51,8 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ collapsed = true, onTog
 
     // BookingHistory component now uses real API calls instead of mock data
 
-    const [transactionHistory] = useState([
-        {
-            id: 1,
-            type: 'Tour booking',
-            amount: '1,500,000 ₫',
-            date: '2024-03-15',
-            status: 'completed',
-        },
-        {
-            id: 2,
-            type: 'Product purchase',
-            amount: '850,000 ₫',
-            date: '2024-03-18',
-            status: 'completed',
-        },
-    ]);
 
-    const [commentHistory] = useState([
-        {
-            id: 1,
-            tourName: 'Tour Tây Ninh',
-            rating: 5,
-            comment: 'Tour rất tuyệt vời!',
-            date: '2024-03-16',
-        },
-    ]);
-
-    const [supportTickets] = useState([]);
-    const [ticketsLoading] = useState(false);
+   
 
     // Load profile data
     const loadProfile = async () => {
@@ -407,59 +372,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ collapsed = true, onTog
                             </div>
                         )
                     },
-                    {
-                        key: 'bookings',
-                        label: (
-                            <Space>
-                                <HistoryOutlined />
-                                Lịch sử đặt tour
-                            </Space>
-                        ),
-                        children: <BookingHistory />
-                    },
-                    {
-                        key: 'transactions',
-                        label: (
-                            <Space>
-                                <ShoppingOutlined />
-                                Lịch sử giao dịch
-                                <Badge count={transactionHistory.length} showZero />
-                            </Space>
-                        ),
-                        children: <TransactionHistory data={transactionHistory} />
-                    },
-                    {
-                        key: 'comments',
-                        label: (
-                            <Space>
-                                <CommentOutlined />
-                                Lịch sử đánh giá
-                                <Badge count={commentHistory.length} showZero />
-                            </Space>
-                        ),
-                        children: <CommentHistory data={commentHistory} />
-                    },
-                    {
-                        key: 'support-tickets',
-                        label: (
-                            <Space>
-                                <QuestionCircleOutlined />
-                                Yêu cầu hỗ trợ
-                                <Badge count={supportTickets.length} showZero />
-                            </Space>
-                        ),
-                        children: <SupportTicketHistory data={supportTickets} loading={ticketsLoading} />
-                    },
-                    {
-                        key: 'register-history',
-                        label: (
-                            <Space>
-                                <CalendarOutlined />
-                                Lịch sử đăng ký
-                            </Space>
-                        ),
-                        children: <RegisterHistory />
-                    }
+                    
                 ]}
             />
         </Card>
