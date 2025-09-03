@@ -28,12 +28,7 @@ export const createTourTemplate = async (
   data: CreateTourTemplateRequest,
   token?: string
 ): Promise<ApiResponse<TourTemplate>> => {
-  const headers = token
-    ? {
-      Authorization: `Bearer ${token}`,
-      'X-Skip-Auto-Notification': 'true'
-    }
-    : { 'X-Skip-Auto-Notification': 'true' };
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const response = await axios.post("/TourCompany/template", data, { headers });
   return response.data;
 };
@@ -48,6 +43,63 @@ export const createHolidayTourTemplate = async (
     headers,
   });
   return response.data;
+};
+
+// Enhanced Holiday Tour creation with detailed error handling
+export const createHolidayTourTemplateEnhanced = async (
+  data: CreateHolidayTourTemplateRequest,
+  token?: string
+): Promise<ApiResponse<TourTemplate>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  try {
+    const response = await axios.post("/TourCompany/template/holiday", data, {
+      headers,
+      // Disable automatic error handling for this request
+      validateStatus: () => true, // Accept all status codes
+    });
+
+    // Always return the response data, whether success or error
+    return {
+      success: response.data.success || response.status < 400,
+      statusCode: response.status,
+      message: response.data.message || (response.status < 400 ? "Thành công" : "Có lỗi xảy ra"),
+      validationErrors: response.data.validationErrors || response.data.ValidationErrors || [],
+      fieldErrors: response.data.fieldErrors || response.data.FieldErrors || {},
+      data: response.data.data || null,
+    } as ApiResponse<TourTemplate>;
+
+  } catch (error: any) {
+    // Handle network errors
+    if (error.code === 'ECONNABORTED') {
+      return {
+        success: false,
+        statusCode: 408,
+        message: "Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.",
+        validationErrors: [],
+        fieldErrors: {},
+      } as unknown as ApiResponse<TourTemplate>;
+    }
+
+    if (error.code === 'ERR_NETWORK') {
+      return {
+        success: false,
+        statusCode: 0,
+        message: "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.",
+        validationErrors: [],
+        fieldErrors: {},
+      } as unknown as ApiResponse<TourTemplate>;
+    }
+
+    // For other errors, return generic error
+    return {
+      success: false,
+      statusCode: 500,
+      message: "Có lỗi không xác định xảy ra. Vui lòng thử lại.",
+      validationErrors: [],
+      fieldErrors: {},
+    } as unknown as ApiResponse<TourTemplate>;
+  }
 };
 
 // Lấy danh sách incidents cho tour company
@@ -160,12 +212,7 @@ export const updateTourTemplate = async (
   data: UpdateTourTemplateRequest,
   token?: string
 ): Promise<ApiResponse<TourTemplate>> => {
-  const headers = token
-    ? {
-      Authorization: `Bearer ${token}`,
-      'X-Skip-Auto-Notification': 'true'
-    }
-    : { 'X-Skip-Auto-Notification': 'true' };
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const response = await axios.patch(`/TourCompany/template/${id}`, data, {
     headers,
   });
@@ -740,7 +787,6 @@ export const getTourCompanyById = async (
   const response = await axios.get(`/Cms/TourCompany/${tourCompanyId}`, { headers });
   return response.data;
 };
-
 export const getRecentBookings = async (
   pageSize: number = 10,
   token?: string
@@ -751,4 +797,39 @@ export const getRecentBookings = async (
     { headers }
   );
   return response.data;
+};
+
+// ===== INCIDENT MANAGEMENT APIs =====
+
+/**
+ * Lấy danh sách sự cố theo TourSlotId
+ */
+export const getTourSlotIncidents = async (
+  tourSlotId: string,
+  pageIndex: number = 0,
+  pageSize: number = 10,
+  token?: string
+): Promise<ApiResponse<any>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await axios.get(
+    `/TourCompany/tour-slot/${tourSlotId}/incidents?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+    { headers }
+  );
+  return response.data;
+};
+
+/**
+ * Lấy tổng số sự cố của một tour slot (để hiển thị badge)
+ */
+export const getTourSlotIncidentCount = async (
+  tourSlotId: string,
+  token?: string
+): Promise<number> => {
+  try {
+    const response = await getTourSlotIncidents(tourSlotId, 0, 1, token);
+    return response.data?.totalCount || 0;
+  } catch (error) {
+    console.error('Error getting incident count:', error);
+    return 0;
+  }
 };

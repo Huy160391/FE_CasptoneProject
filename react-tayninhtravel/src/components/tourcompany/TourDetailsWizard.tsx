@@ -260,6 +260,12 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
           return;
         }
       }
+      if (currentStep === 0) {
+        if (uploadedImageUrls.length === 0) {
+          message.error("Vui lòng tải lên ít nhất một hình ảnh cho tour.");
+          return;
+        }
+      }
 
       await form.validateFields();
       const values = form.getFieldsValue();
@@ -451,6 +457,19 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
       .validateFields()
       .then((values) => {
         const newCheckInTime = values.checkInTime.format("HH:mm");
+        // Kiểm tra trùng lặp specialtyShopId
+        const existingSpecialtyShopIds = wizardData.timeline.map(
+          (item) => item.specialtyShopId
+        );
+        if (
+          values.specialtyShopId &&
+          existingSpecialtyShopIds.includes(values.specialtyShopId)
+        ) {
+          message.error(
+            "Specialty shop đã tồn tại trong timeline. Vui lòng chọn shop khác."
+          );
+          return;
+        }
 
         // Validate timeline order - check if new time is after the last item
         if (wizardData.timeline.length > 0) {
@@ -631,7 +650,12 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
       </Form.Item>
 
       {/* Multiple Images Upload Section */}
-      <Form.Item label="Hình ảnh tour (bắt buộc)" style={{ marginBottom: 16 }} required>
+      <Form.Item
+        label="Hình ảnh tour"
+        style={{ marginBottom: 16 }}
+        validateStatus={uploadedImageUrls.length === 0 ? "error" : ""}
+        help={uploadedImageUrls.length === 0 ? "Vui lòng tải lên ít nhất một hình ảnh." : ""}
+      >
         <div>
           {/* Alert for image requirement */}
           {uploadedImageUrls.length === 0 && (
