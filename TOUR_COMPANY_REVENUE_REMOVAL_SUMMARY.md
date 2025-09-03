@@ -1,4 +1,4 @@
-# Tài liệu xóa màn hình Revenue Dashboard của Tour Company
+# Tài liệu xóa màn hình Revenue Dashboard và Reviews của Tour Company
 
 ## Tổng quan về cấu trúc Tour Company
 
@@ -7,7 +7,7 @@
 - **Layout**: `TourCompanyLayout` (src/components/layout/TourCompanyLayout.tsx)
 - **Routes con**: Được định nghĩa trong `tourCompanyRoutes.tsx`
 
-### 2. Các màn hình Tour Company hiện có (sau khi xóa revenue)
+### 2. Các màn hình Tour Company hiện có (sau khi xóa revenue và reviews)
 
 | Route | Component | Mô tả |
 |-------|-----------|-------|
@@ -15,7 +15,6 @@
 | `/tour-company/tour-templates` | TourTemplateManagement | Quản lý template tour |
 | `/tour-company/tours` | TourDetailsManagement | Quản lý chi tiết tour |
 | `/tour-company/tours-old` | TourManagement | Quản lý tour (phiên bản cũ) |
-| `/tour-company/reviews` | ReviewHistory | Lịch sử đánh giá |
 | `/tour-company/analytics` | DetailedAnalytics | Phân tích chi tiết |
 | `/tour-company/wallet` | TourCompanyWalletManagement | Quản lý ví |
 | `/tour-company/incidents` | IncidentManagement | Quản lý sự cố |
@@ -24,9 +23,8 @@
 ### 3. Sidebar Menu
 Sidebar được định nghĩa trong `TourCompanyLayout.tsx` với các menu items:
 - Dashboard
-- Tour Templates  
+- Tour Templates
 - Tours Management
-- Review History
 - Wallet (Quản lý ví)
 
 ## Những thay đổi đã thực hiện

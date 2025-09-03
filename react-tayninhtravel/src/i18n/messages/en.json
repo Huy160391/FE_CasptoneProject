@@ -1366,7 +1366,6 @@
             "dashboard": "Dashboard",
             "tourTemplates": "Tour Templates",
             "tours": "Tours Management",
-            "reviews": "Review History",
             "profile": "Profile",
             "backToSite": "Back to Site",
             "logout": "Logout"
@@ -1572,32 +1571,6 @@
                 "active": "Active",
                 "full": "Full",
                 "cancelled": "Cancelled"
-            }
-        },
-        "reviews": {
-            "title": "Review History",
-            "searchPlaceholder": "Search by tour name, customer",
-            "columns": {
-                "customerName": "Customer Name",
-                "tourName": "Tour Name",
-                "rating": "Rating",
-                "comment": "Comment",
-                "date": "Review Date",
-                "actions": "Actions"
-            },
-            "actions": {
-                "reply": "Reply",
-                "view": "View Details"
-            },
-            "stats": {
-                "title": "Review Statistics",
-                "averageRating": "Average Rating",
-                "totalReviews": "Total Reviews",
-                "fiveStars": "5 Stars",
-                "fourStars": "4 Stars",
-                "threeStars": "3 Stars",
-                "twoStars": "2 Stars",
-                "oneStar": "1 Star"
             }
         },
         "common": {

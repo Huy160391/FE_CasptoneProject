@@ -5,7 +5,6 @@ import {
     DashboardOutlined,
     FormOutlined,
     ShoppingOutlined,
-    StarOutlined,
     UserOutlined,
     LogoutOutlined,
     MenuFoldOutlined,
@@ -48,11 +47,6 @@ const TourCompanyLayout: React.FC = () => {
             key: '/tour-company/tours',
             icon: <ShoppingOutlined />,
             label: t('tourCompany.sidebar.tours'),
-        },
-        {
-            key: '/tour-company/reviews',
-            icon: <StarOutlined />,
-            label: t('tourCompany.sidebar.reviews'),
         },
         {
             key: '/tour-company/wallet',

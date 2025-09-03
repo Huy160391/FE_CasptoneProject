@@ -1401,7 +1401,6 @@
             "dashboard": "Dashboard",
             "tourTemplates": "Quản lý Tour Template",
             "tours": "Quản lý Tour",
-            "reviews": "Lịch sử đánh giá",
             "wallet": "Quản lý ví",
             "profile": "Thông tin cá nhân",
             "backToSite": "Về trang chủ",
@@ -1608,32 +1607,6 @@
                 "active": "Hoạt động",
                 "full": "Đã đầy",
                 "cancelled": "Đã hủy"
-            }
-        },
-        "reviews": {
-            "title": "Lịch sử đánh giá",
-            "searchPlaceholder": "Tìm kiếm theo tên tour, khách hàng",
-            "columns": {
-                "customerName": "Tên khách hàng",
-                "tourName": "Tên tour",
-                "rating": "Đánh giá",
-                "comment": "Nhận xét",
-                "date": "Ngày đánh giá",
-                "actions": "Thao tác"
-            },
-            "actions": {
-                "reply": "Trả lời",
-                "view": "Xem chi tiết"
-            },
-            "stats": {
-                "title": "Thống kê đánh giá",
-                "averageRating": "Đánh giá trung bình",
-                "totalReviews": "Tổng số đánh giá",
-                "fiveStars": "5 sao",
-                "fourStars": "4 sao",
-                "threeStars": "3 sao",
-                "twoStars": "2 sao",
-                "oneStar": "1 sao"
             }
         },
         "common": {

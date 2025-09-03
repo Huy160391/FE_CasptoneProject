@@ -1,5 +1,4 @@
 import IncidentManagement from "@/pages/tourcompany/IncidentManagement";
-import ReviewHistory from "@/pages/tourcompany/ReviewHistory";
 import TourCompanyDashboard from "@/pages/tourcompany/TourCompanyDashboard";
 import TourCompanyProfile from "@/pages/tourcompany/TourCompanyProfile";
 import TourCompanyWalletManagement from "@/pages/tourcompany/TourCompanyWalletManagement";
@@ -28,10 +27,6 @@ export const tourCompanyRoutes: RouteObject[] = [
       {
         path: "tours-old",
         element: <TourManagement />,
-      },
-      {
-        path: "reviews",
-        element: <ReviewHistory />,
       },
       {
         path: "analytics",
