@@ -172,6 +172,93 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
         }
     }, [invitationData]);
 
+    // Helper function to show schedule conflict error
+    const showScheduleConflictError = (errorMessage: string) => {
+        console.log('🔍 Parsing schedule conflict error:', errorMessage);
+
+        // Extract tour information from error message if available
+        let conflictingTours: string[] = [];
+        let currentTour = '';
+
+        // Try to extract current tour info
+        const currentTourMatch = errorMessage.match(/Tour hiện tại:\s*([^.]+)/);
+        if (currentTourMatch) {
+            currentTour = currentTourMatch[1].trim();
+        }
+
+        // Try to extract conflicting tour info
+        const conflictingTourMatch = errorMessage.match(/Tour bị trùng:\s*([^.]+)/);
+        if (conflictingTourMatch) {
+            conflictingTours.push(conflictingTourMatch[1].trim());
+        }
+
+        Modal.error({
+            title: '🚫 Xung đột lịch trình',
+            width: 500,
+            content: (
+                <div>
+                    <p style={{ marginBottom: '12px', fontWeight: 'bold', color: '#ff4d4f' }}>
+                        Không thể chấp nhận lời mời do trùng lịch với tour đã đăng ký.
+                    </p>
+
+                    {currentTour && (
+                        <div style={{
+                            background: '#fff1f0',
+                            border: '1px solid #ffccc7',
+                            borderRadius: '4px',
+                            padding: '8px',
+                            margin: '8px 0',
+                            fontSize: '13px'
+                        }}>
+                            <strong>📅 Lịch trình hiện tại:</strong><br />
+                            {currentTour}
+                        </div>
+                    )}
+
+                    {conflictingTours.length > 0 && (
+                        <div style={{
+                            background: '#fff2e8',
+                            border: '1px solid #ffbb96',
+                            borderRadius: '4px',
+                            padding: '8px',
+                            margin: '8px 0',
+                            fontSize: '12px'
+                        }}>
+                            <strong>🚫 Tour đã đăng ký trùng lịch:</strong>
+                            <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                                {conflictingTours.map((tour, index) => (
+                                    <li key={index} style={{ marginBottom: '2px' }}>
+                                        {tour.trim()}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Show original message if parsing failed */}
+                    {conflictingTours.length === 0 && !currentTour && (
+                        <div style={{
+                            background: '#f6f6f6',
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '4px',
+                            padding: '8px',
+                            margin: '8px 0',
+                            fontSize: '11px',
+                            fontFamily: 'monospace'
+                        }}>
+                            <strong>Chi tiết lỗi:</strong><br />
+                            {errorMessage}
+                        </div>
+                    )}
+
+                    <p style={{ marginTop: '12px', fontSize: '12px', color: '#666' }}>
+                        💡 <strong>Gợi ý:</strong> Vui lòng kiểm tra lại lịch của bạn hoặc liên hệ công ty tour để được hỗ trợ.
+                    </p>
+                </div>
+            ),
+        });
+    };
+
     // Handle accept invitation
     const handleAccept = async () => {
         if (!invitationData) return;
@@ -190,11 +277,49 @@ const TourInvitationDetails: React.FC<TourInvitationDetailsProps> = ({
                 onUpdate?.();
                 onClose();
             } else {
-                message.error(response.message || 'Không thể chấp nhận lời mời');
+                // Handle specific error cases
+                const errorMessage = response.message || 'Không thể chấp nhận lời mời';
+
+                // Check for schedule conflict error
+                if (errorMessage.includes('trùng thời gian biểu') ||
+                    errorMessage.includes('KHÔNG THỂ CHẤP NHẬN') ||
+                    errorMessage.includes('đồng ý tham gia tour khác') ||
+                    errorMessage.includes('Tour bị trùng') ||
+                    errorMessage.includes('conflict') ||
+                    errorMessage.includes('thời gian')) {
+
+                    showScheduleConflictError(errorMessage);
+                } else {
+                    // Handle other errors
+                    message.error(errorMessage);
+                }
             }
         } catch (error: any) {
             console.error('Error accepting invitation:', error);
-            message.error('Có lỗi xảy ra khi chấp nhận lời mời');
+
+            // Handle HTTP errors
+            if (error.response?.data) {
+                const { status, data } = error.response;
+
+                if ((status === 400 || status === 409) && data?.message) {
+                    // Handle 400 Bad Request and 409 Conflict with specific message
+                    if (data.message.includes('trùng thời gian biểu') ||
+                        data.message.includes('KHÔNG THỂ CHẤP NHẬN') ||
+                        data.message.includes('đồng ý tham gia tour khác') ||
+                        data.message.includes('Tour bị trùng') ||
+                        data.message.includes('conflict') ||
+                        data.message.includes('thời gian')) {
+
+                        showScheduleConflictError(data.message);
+                    } else {
+                        message.error(data.message);
+                    }
+                } else {
+                    message.error(data?.message || 'Có lỗi xảy ra từ server');
+                }
+            } else {
+                message.error('Có lỗi xảy ra khi chấp nhận lời mời');
+            }
         } finally {
             setActionLoading(false);
         }

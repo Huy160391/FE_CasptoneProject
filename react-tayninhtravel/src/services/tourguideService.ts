@@ -72,7 +72,10 @@ export const acceptInvitation = async (
   token?: string
 ): Promise<ApiResponse<any>> => {
   try {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'X-Skip-Auto-Notification': 'true' // Skip auto notification to handle errors manually
+    };
     const requestData: AcceptInvitationRequest = {
       invitationId,
       acceptanceMessage,
@@ -87,7 +90,12 @@ export const acceptInvitation = async (
 
     return response.data;
   } catch (error: any) {
-    // Error already shown by axios interceptor
+    // Return the original error response for manual handling
+    if (error.response?.data) {
+      return error.response.data;
+    }
+
+    // Fallback for network errors
     throw {
       message: error.standardizedError?.message || getErrorMessage(error),
       statusCode: error.standardizedError?.statusCode || 500
