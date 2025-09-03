@@ -424,7 +424,7 @@ const TourDetailsManagement: React.FC = () => {
                             console.log('🧙‍♂️ setWizardVisible(true) called');
                         }}
                     >
-                        Tạo Tour (Wizard)
+                        Tạo Tour
                     </Button>
                 </div>
 

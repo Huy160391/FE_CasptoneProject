@@ -210,6 +210,45 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
     }
   }, [visible, token]);
 
+  // Initialize default timeline items when entering timeline step
+  useEffect(() => {
+    if (currentStep === 1 && wizardData.timeline.length === 0) {
+      const defaultTimelineItems: CreateTimelineItemRequest[] = [
+        {
+          tourDetailsId: "", // Will be set when creating
+          checkInTime: "06:00",
+          activity: "Checkin nhà xe",
+          location: "Bến xe",
+          specialtyShopId: null,
+          sortOrder: 1,
+        },
+        {
+          tourDetailsId: "", // Will be set when creating
+          checkInTime: "12:00",
+          activity: "Tiến hành ăn trưa",
+          location: "Nhà hàng",
+          specialtyShopId: null,
+          sortOrder: 2,
+        },
+        {
+          tourDetailsId: "", // Will be set when creating
+          checkInTime: "17:00",
+          activity: "Trả khách tại bến xe",
+          location: "Bến xe",
+          specialtyShopId: null,
+          sortOrder: 3,
+        },
+      ];
+
+      setWizardData((prev) => ({
+        ...prev,
+        timeline: defaultTimelineItems,
+      }));
+
+      console.log('✅ Initialized default timeline items:', defaultTimelineItems);
+    }
+  }, [currentStep, wizardData.timeline.length]);
+
   const loadInitialData = async () => {
     try {
       console.log("🔄 Loading wizard data from cache/API...");
