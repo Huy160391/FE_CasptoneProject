@@ -24,7 +24,6 @@ import {
     CalendarOutlined,
     TeamOutlined,
     ClockCircleOutlined,
-    ShoppingCartOutlined,
     EnvironmentOutlined,
     ArrowLeftOutlined,
     CheckCircleOutlined,
@@ -151,16 +150,47 @@ const TourDetailsPage: React.FC = () => {
                         }
                     }
 
-                    // Fetch tour guide data if tourGuideId exists
-                    if (data.data.tourGuideId) {
+                    // Fetch tour guide data if guideId exists in tourOperation
+                    if (data.data.tourOperation?.guideId) {
                         try {
-                            const guideResponse = await getTourGuideById(data.data.tourGuideId, token ?? undefined);
+                            const guideResponse = await getTourGuideById(data.data.tourOperation.guideId, token ?? undefined);
                             if (guideResponse.success && guideResponse.data) {
                                 setTourGuide(guideResponse.data);
                             }
                         } catch (error) {
                             console.error('Error fetching tour guide:', error);
+                            // Fallback: Use basic guide info from tourOperation if API call fails
+                            setTourGuide({
+                                id: data.data.tourOperation.guideId,
+                                fullName: data.data.tourOperation.guideName || 'Hướng dẫn viên',
+                                email: data.data.tourOperation.guideEmail || '',
+                                phoneNumber: data.data.tourOperation.guidePhoneNumber || '',
+                                profileImageUrl: undefined,
+                                rating: 0,
+                                experience: '',
+                                skills: '',
+                                totalToursGuided: 0,
+                                isAvailable: true,
+                                approvedAt: null,
+                                approvedByName: null
+                            } as TourGuideInfo);
                         }
+                    } else if (data.data.tourOperation?.guideName) {
+                        // If no guideId but has guideName, create basic guide info
+                        setTourGuide({
+                            id: '',
+                            fullName: data.data.tourOperation.guideName,
+                            email: data.data.tourOperation.guideEmail || '',
+                            phoneNumber: data.data.tourOperation.guidePhoneNumber || '',
+                            profileImageUrl: undefined,
+                            rating: 0,
+                            experience: '',
+                            skills: '',
+                            totalToursGuided: 0,
+                            isAvailable: true,
+                            approvedAt: null,
+                            approvedByName: null
+                        } as TourGuideInfo);
                     }
                 } else {
                     setError(data.message || t('tours.detail.loadError'));
@@ -498,12 +528,6 @@ const TourDetailsPage: React.FC = () => {
                                                         <Text strong>{t('tours.detail.guideTotalTours')}: </Text>
                                                         <Text>{tourGuide.totalToursGuided}</Text>
                                                     </div>
-                                                    <div style={{ marginBottom: 8 }}>
-                                                        <Text strong>{t('tours.detail.guideStatus')}: </Text>
-                                                        <Tag color={tourGuide.isAvailable ? 'green' : 'orange'}>
-                                                            {tourGuide.isAvailable ? t('tours.detail.guideAvailable') : t('tours.detail.guideUnavailable')}
-                                                        </Tag>
-                                                    </div>
                                                     <Space direction="vertical" size="small">
                                                         {tourGuide.phoneNumber && (
                                                             <div>
@@ -515,20 +539,6 @@ const TourDetailsPage: React.FC = () => {
                                                             <div>
                                                                 <MailOutlined style={{ marginRight: 8 }} />
                                                                 {tourGuide.email}
-                                                            </div>
-                                                        )}
-                                                        {tourGuide.approvedAt && (
-                                                            <div>
-                                                                <Text type="secondary">
-                                                                    {t('tours.detail.approvedDate')}: {new Date(tourGuide.approvedAt).toLocaleDateString('vi-VN')}
-                                                                </Text>
-                                                            </div>
-                                                        )}
-                                                        {tourGuide.approvedByName && (
-                                                            <div>
-                                                                <Text type="secondary">
-                                                                    {t('tours.detail.approvedBy')}: {tourGuide.approvedByName}
-                                                                </Text>
                                                             </div>
                                                         )}
                                                     </Space>
@@ -715,25 +725,6 @@ const TourDetailsPage: React.FC = () => {
 
                             <Divider />
 
-                            {/* Availability Warning */}
-                            {availableSlots < 5 && availableSlots > 0 && (
-                                <div className="availability-info warning">
-                                    <div className="availability-text">
-                                        <TeamOutlined />
-                                        <Text>{t('tour.onlyLeft', { count: availableSlots })}</Text>
-                                    </div>
-                                </div>
-                            )}
-
-                            {availableSlots === 0 && (
-                                <div className="availability-info error">
-                                    <div className="availability-text">
-                                        <TeamOutlined />
-                                        <Text>{t('tour.full')}</Text>
-                                    </div>
-                                </div>
-                            )}
-
                             {/* Tour Info */}
                             <Descriptions column={1} size="small" className="tour-info-grid">
                                 {tour.tourOperation && (
@@ -742,23 +733,6 @@ const TourDetailsPage: React.FC = () => {
                                             <Space>
                                                 <TeamOutlined />
                                                 {tour.tourOperation.maxGuests} {t('tour.unitPerson')}
-                                            </Space>
-                                        </Descriptions.Item>
-
-                                        <Descriptions.Item label={t('tour.booked')}>
-                                            <Space>
-                                                <ShoppingCartOutlined />
-                                                {realTimeAvailability
-                                                    ? realTimeAvailability.currentBookings
-                                                    : (tour.tourOperation.currentBookings || 0)} {t('tour.unitPerson')}
-                                            </Space>
-                                        </Descriptions.Item>
-
-                                        <Descriptions.Item label={t('tour.availableSpots')}>
-                                            <Space>
-                                                <Text style={{ color: availableSlots > 5 ? 'green' : 'orange' }}>
-                                                    {availableSlots} {t('tour.unitSpot')}
-                                                </Text>
                                             </Space>
                                         </Descriptions.Item>
 

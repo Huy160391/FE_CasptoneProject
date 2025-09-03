@@ -264,6 +264,40 @@ const BookingPage: React.FC = () => {
     }
   };
 
+  // Update availability when slot changes
+  const updateSlotAvailability = async (slot: TourSlotDto, guestCount: number = 1) => {
+    if (!slot) return;
+
+    try {
+      const availabilityResponse = await checkTourSlotCapacity(
+        slot.id,
+        guestCount,
+        token ?? undefined
+      );
+
+      if (availabilityResponse.success) {
+        console.log("Updated slot availability:", availabilityResponse.data);
+        setAvailability(availabilityResponse.data);
+      } else {
+        console.warn("Failed to check slot availability:", availabilityResponse.message);
+        // Fallback to legacy TourOperation check
+        if (tourDetails) {
+          const legacyResponse = await checkTourAvailability(
+            tourDetails.tourOperation.id,
+            guestCount,
+            token ?? undefined
+          );
+          if (legacyResponse.success) {
+            console.log("Fallback availability:", legacyResponse.data);
+            setAvailability(legacyResponse.data);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error checking slot availability:", error);
+    }
+  };
+
   // Calculate price when guest count changes
   const handleGuestCountChange = async (values: Partial<BookingFormData>) => {
     if (!tourDetails || !values.numberOfGuests || !selectedSlot) return;
@@ -689,9 +723,6 @@ const BookingPage: React.FC = () => {
                   <Descriptions.Item label={t('booking.tourInfo.maxGuests', 'Số chỗ tối đa')}>
                     {tourDetails.tourOperation.maxGuests} {t('booking.common.person', 'người')}
                   </Descriptions.Item>
-                  <Descriptions.Item label={t('booking.tourInfo.booked', 'Đã đặt')}>
-                    {tourDetails.tourOperation.currentBookings} {t('booking.common.person', 'người')}
-                  </Descriptions.Item>
                   {/* Tour Slot Selection */}
                   <Descriptions.Item label={t('booking.tourInfo.selectDate', 'Chọn ngày tour')} span={2}>
                     {slotsLoading ? (
@@ -737,6 +768,21 @@ const BookingPage: React.FC = () => {
                                                         opacity: 0.7;
                                                     }
 
+                                                    .tour-slot.completed {
+                                                        border-color: #d9d9d9;
+                                                        background-color: #f5f5f5;
+                                                        cursor: not-allowed;
+                                                        opacity: 0.5;
+                                                        color: #bfbfbf;
+                                                    }
+
+                                                    .tour-slot.completed:hover {
+                                                        border-color: #d9d9d9;
+                                                        background-color: #f5f5f5;
+                                                        transform: none;
+                                                        box-shadow: none;
+                                                    }
+
                                                     /* Dark mode */
                                                     [data-theme="dark"] .tour-slot {
                                                         border-color: #434343;
@@ -756,6 +802,21 @@ const BookingPage: React.FC = () => {
 
                                                     [data-theme="dark"] .tour-slot.sold-out {
                                                         background-color: #2a1215;
+                                                    }
+
+                                                    [data-theme="dark"] .tour-slot.completed {
+                                                        border-color: #434343;
+                                                        background-color: #262626;
+                                                        color: #595959;
+                                                        cursor: not-allowed;
+                                                        opacity: 0.5;
+                                                    }
+
+                                                    [data-theme="dark"] .tour-slot.completed:hover {
+                                                        border-color: #434343;
+                                                        background-color: #262626;
+                                                        transform: none;
+                                                        box-shadow: none;
                                                     }
                                                 `}</style>
                         <div style={{ marginBottom: 12 }}>
@@ -800,13 +861,30 @@ const BookingPage: React.FC = () => {
                             // Ensure non-negative
                             availableSpots = Math.max(0, availableSpots);
 
-                            // ✅ FIXED: Check status properly - only FullyBooked (status 2) or Cancelled (status 3) should be disabled
+                            // ✅ FIXED: Check status properly - disable FullyBooked (status 2), Cancelled (status 3), and Completed (status 4/5)
                             const isSoldOut =
                               availableSpots === 0 ||
                               slot.status === 2 ||
                               slot.status === 3;
+
+                            // Check if slot is completed - typically status 4 or 5, or check by statusName
+                            const isCompleted =
+                              slot.status === 4 ||
+                              slot.status === 5 ||
+                              slot.statusName?.toLowerCase().includes('hoàn thành') ||
+                              slot.statusName?.toLowerCase().includes('completed') ||
+                              slot.statusName?.toLowerCase().includes('finished');
+
                             const isLowAvailability =
                               availableSpots > 0 && availableSpots < 5;
+
+                            // ✅ OPTION 1: Hide completed slots entirely (current behavior)
+                            if (isCompleted) {
+                              return null;
+                            }
+
+                            // ✅ OPTION 2: Show completed slots but disabled (uncomment below and comment above)
+                            // Completed slots will be shown with grayed-out style and not clickable
 
                             // ✅ NEW: Special case for FullyBooked but has spots (status inconsistency)
                             // Đã xoá biến isInconsistent vì không sử dụng
@@ -816,8 +894,9 @@ const BookingPage: React.FC = () => {
                                 key={slot.id}
                                 className={`tour-slot ${selectedSlot?.id === slot.id ? "selected" : ""
                                   } ${isLowAvailability ? "low-availability" : ""
-                                  } ${isSoldOut ? "sold-out" : ""}`}
-                                onClick={(e) => {
+                                  } ${isSoldOut ? "sold-out" : ""
+                                  } ${isCompleted ? "completed" : ""}`}
+                                onClick={async (e) => {
                                   // ✅ FIXED: Check for disabled statuses
                                   if (slot.status === 2) {
                                     // FullyBooked
@@ -832,6 +911,13 @@ const BookingPage: React.FC = () => {
                                     // Cancelled
                                     e.preventDefault();
                                     message.warning("Slot này đã bị hủy");
+                                    return;
+                                  }
+
+                                  // ✅ NEW: Check for completed slots
+                                  if (isCompleted) {
+                                    e.preventDefault();
+                                    message.warning("Slot này đã hoàn thành, không thể đặt booking");
                                     return;
                                   }
 
@@ -854,15 +940,30 @@ const BookingPage: React.FC = () => {
                                   }
 
                                   setSelectedSlot(slot);
-                                  // Recalculate pricing when slot changes
+                                  // Update availability for the new slot immediately
                                   const currentValues = form.getFieldsValue();
+                                  const guestCount = currentValues.numberOfGuests || 1;
+
+                                  // Update availability first
+                                  await updateSlotAvailability(slot, guestCount);
+
+                                  // Only recalculate pricing if we have guest count
                                   if (currentValues.numberOfGuests > 0) {
-                                    handleGuestCountChange(currentValues);
-                                  } else {
-                                    // If no guests specified yet, use default of 1
-                                    handleGuestCountChange({
-                                      numberOfGuests: 1,
-                                    });
+                                    // Just call price calculation, availability already updated
+                                    try {
+                                      const response = await calculateBookingPrice(
+                                        {
+                                          tourOperationId: tourDetails.tourOperation.id,
+                                          numberOfGuests: currentValues.numberOfGuests,
+                                        },
+                                        token ?? undefined
+                                      );
+                                      if (response.success && response.data) {
+                                        setPriceCalculation(response.data);
+                                      }
+                                    } catch (error) {
+                                      console.error("Error calculating price:", error);
+                                    }
                                   }
                                 }}>
                                 <div style={{ textAlign: "center" }}>

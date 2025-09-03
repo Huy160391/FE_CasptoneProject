@@ -164,6 +164,7 @@ export interface GetProductsParams {
   textSearch?: string;
   status?: boolean;
   sortBySoldCount?: "asc" | "desc";
+  specialtyShopId?: string;
 }
 
 // Extend global Blog interface for specific API response
