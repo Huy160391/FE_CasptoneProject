@@ -176,6 +176,51 @@ const CONTEXT_ERROR_HANDLERS: Record<string, (error: BackendErrorResponse) => vo
       });
     }
   },
+  '/TourCompany/template': (error) => {
+    if (error.message.includes('Template đã tồn tại') || error.message.includes('đã có template')) {
+      notification.warning({
+        message: 'Template đã tồn tại',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Tháng và năm đã có template')) {
+      notification.warning({
+        message: 'Thời gian không hợp lệ',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('Dữ liệu không hợp lệ')) {
+      notification.error({
+        message: 'Dữ liệu không hợp lệ',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message.includes('scheduleDays')) {
+      notification.error({
+        message: 'Ngày trong tuần không hợp lệ',
+        description: 'Chỉ chấp nhận Thứ 7 (6) hoặc Chủ nhật (0)',
+        duration: 5
+      });
+    } else if (error.message.includes('templateType')) {
+      notification.error({
+        message: 'Loại tour không hợp lệ',
+        description: 'Vui lòng chọn loại tour hợp lệ',
+        duration: 5
+      });
+    } else if (error.statusCode === 400) {
+      notification.error({
+        message: 'Dữ liệu không hợp lệ',
+        description: error.message || 'Vui lòng kiểm tra lại thông tin đã nhập',
+        duration: 5
+      });
+    } else if (error.statusCode === 409) {
+      notification.warning({
+        message: 'Xung đột dữ liệu',
+        description: error.message,
+        duration: 5
+      });
+    }
+  },
   '/upload': (error) => {
     if (error.message.includes('File vượt quá dung lượng')) {
       notification.error({
@@ -321,7 +366,7 @@ export const retryRequest = async <T>(
       return await requestFn();
     } catch (error) {
       lastError = error as Error;
-      
+
       // Don't retry for client errors (4xx)
       if (error instanceof AxiosError && error.response?.status && error.response.status < 500) {
         throw error;
@@ -345,11 +390,11 @@ export const getErrorMessage = (error: any): string => {
     const errorData = error.response?.data as BackendErrorResponse;
     return errorData?.message || DEFAULT_ERROR_MESSAGES[error.response?.status || 500] || 'Có lỗi xảy ra';
   }
-  
+
   if (error instanceof Error) {
     return error.message;
   }
-  
+
   return 'Có lỗi không xác định xảy ra';
 };
 
@@ -359,7 +404,7 @@ export const getErrorMessage = (error: any): string => {
 export const logError = (error: any, context?: string): void => {
   if (import.meta.env.DEV) {
     console.group(`🔴 Error ${context ? `in ${context}` : ''}`);
-    
+
     if (error instanceof AxiosError) {
       console.error('Status:', error.response?.status);
       console.error('Message:', getErrorMessage(error));
@@ -369,7 +414,7 @@ export const logError = (error: any, context?: string): void => {
     } else {
       console.error('Error:', error);
     }
-    
+
     console.groupEnd();
   }
 };

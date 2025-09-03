@@ -91,6 +91,7 @@ export interface Order {
     id: string;
     orderNumber: string;
     shopName: string;
+    shopId?: string;
     items: OrderItem[];
     totalAmount: number;
     status: 'unpaid' | 'paid' | 'cancelled' | 'delivered' | 'not-delivered';
@@ -132,10 +133,13 @@ const transformApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         ? apiOrder.orderDetails[0].shopName
         : 'Cửa hàng đặc sản';
 
+    const shopId = apiOrder.orderDetails.length > 0 ? apiOrder.orderDetails[0].shopId : undefined;
+
     return {
         id: apiOrder.id,
         orderNumber: apiOrder.payOsOrderCode,
         shopName: shopName,
+        shopId: shopId,
         items,
         totalAmount: apiOrder.totalAfterDiscount,
         status: mapApiStatusToComponentStatus(apiOrder.status, apiOrder.isChecked),
@@ -176,6 +180,12 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
         if (order.items && order.items.length > 0) {
             const productId = order.items[0].id;
             navigate(`/shop/product/${productId}`);
+        }
+    };
+
+    const handleViewShop = (shopId: string) => {
+        if (shopId) {
+            navigate(`/shop/${shopId}`);
         }
     };
 
@@ -326,10 +336,25 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
             dataIndex: 'shopName',
             key: 'shopName',
             width: 200,
-            render: (text: string) => (
-                <Text>
-                    <ShopOutlined /> {text}
-                </Text>
+            render: (text: string, record: Order) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <ShopOutlined style={{ marginRight: 8 }} />
+                    {record.shopId ? (
+                        <Button
+                            type="link"
+                            style={{
+                                padding: 0,
+                                height: 'auto',
+                                textAlign: 'left'
+                            }}
+                            onClick={() => handleViewShop(record.shopId!)}
+                        >
+                            {text}
+                        </Button>
+                    ) : (
+                        <Text>{text}</Text>
+                    )}
+                </div>
             ),
         },
         {
@@ -560,7 +585,21 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ data }) => {
                             </Descriptions.Item>
 
                             <Descriptions.Item label={t('orderHistory.shopName')}>
-                                {selectedOrder.shopName}
+                                {selectedOrder.shopId ? (
+                                    <Button
+                                        type="link"
+                                        style={{
+                                            padding: 0,
+                                            height: 'auto'
+                                        }}
+                                        onClick={() => handleViewShop(selectedOrder.shopId!)}
+                                        icon={<ShopOutlined />}
+                                    >
+                                        {selectedOrder.shopName}
+                                    </Button>
+                                ) : (
+                                    selectedOrder.shopName
+                                )}
                             </Descriptions.Item>
 
                             <Descriptions.Item label={t('orderHistory.status')}>

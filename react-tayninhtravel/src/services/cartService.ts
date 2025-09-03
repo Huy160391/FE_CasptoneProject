@@ -8,8 +8,27 @@ export const updateCart = async (data: any, token: string) => {
     // Xoá toàn bộ cart trước khi thêm mới
     try {
         await removeCart(token);
-    } catch { }
+    } catch (error: any) {
+        // Ignore 404 error khi cart không tồn tại
+        if (error.response?.status !== 404) {
+            console.warn('Error removing cart before update:', error);
+        }
+    }
 
+    const response = await axios.post(
+        '/Product/AddtoCart',
+        data,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+    return response.data;
+};
+
+// Sync cart lên server mà không xóa cart cũ trước (dùng cho logout)
+export const syncCartToServer = async (data: any, token: string) => {
     const response = await axios.post(
         '/Product/AddtoCart',
         data,
@@ -160,4 +179,78 @@ export const removeCart = async (token: string) => {
         },
     });
     return response.data;
+};
+
+// Hàm đồng bộ cart khi logout - đảm bảo cart được lưu lên server
+export const syncCartOnLogout = async (token: string) => {
+    try {
+        // Lấy cart hiện tại từ store
+        const localItems = useCartStore.getState().items || [];
+
+        if (localItems.length > 0) {
+            // Nếu local cart có items, cần kiểm tra server cart trước
+            try {
+                const serverCart = await getCurrentCart(token);
+                const serverItems = serverCart?.items || [];
+
+                if (serverItems.length > 0) {
+                    // Server cart có items, xóa trước rồi add mới
+                    await updateCart({ items: localItems }, token);
+                } else {
+                    // Server cart rỗng, chỉ cần add thôi
+                    await syncCartToServer({ items: localItems }, token);
+                }
+            } catch (error: any) {
+                // Nếu getCurrentCart báo lỗi (cart không tồn tại), chỉ cần add
+                await syncCartToServer({ items: localItems }, token);
+            }
+        } else {
+            // Nếu local cart rỗng, xóa luôn server cart để đồng bộ
+            try {
+                await removeCart(token);
+            } catch (error: any) {
+                // Ignore 404 error khi server cart đã không tồn tại
+                if (error.response?.status !== 404) {
+                    console.warn('Error removing server cart:', error);
+                }
+            }
+        }
+
+        // Clear cart trong store
+        if (useCartStore.setState) {
+            useCartStore.setState({ items: [] });
+        }
+
+        // Clear cart storage
+        localStorage.removeItem('cart-storage');
+
+    } catch (error) {
+        // Không throw error khi logout để không làm gián đoạn quá trình logout
+        console.warn('Error syncing cart on logout:', error);
+    }
+};
+
+// Xóa cart sau khi thanh toán thành công
+export const clearCartAfterPayment = async () => {
+    const token = useAuthStore.getState().token;
+
+    if (token) {
+        try {
+            // Xóa cart trên server
+            await removeCart(token);
+        } catch (error: any) {
+            // Ignore 404 error nếu cart đã không tồn tại
+            if (error.response?.status !== 404) {
+                console.warn('Error clearing server cart after payment:', error);
+            }
+        }
+    }
+
+    // Clear cart trong store
+    if (useCartStore.setState) {
+        useCartStore.setState({ items: [] });
+    }
+
+    // Clear cart storage
+    localStorage.removeItem('cart-storage');
 };

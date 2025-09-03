@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
   createTourTemplate,
-  deleteTourTemplate,
   getTourTemplateDetail,
   getTourTemplates,
   updateTourTemplate,
 } from "../../services/tourcompanyService";
 import { ScheduleDay, TourTemplate, TourTemplateType } from "../../types/tour";
+import axiosInstance from "../../config/axios";
 
 import publicService from "../../services/publicService";
 
@@ -34,6 +34,7 @@ import {
   Tag,
   Tooltip,
   Typography,
+  notification,
 } from "antd";
 import TourSlotsList from "../../components/tourcompany/TourSlotsList";
 import TourTemplateFormModal from "./TourTemplateFormModal";
@@ -59,6 +60,12 @@ const TourTemplateManagement: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [uploadFileList, setUploadFileList] = useState<any[]>([]);
   const [isHolidayModalVisible, setIsHolidayModalVisible] = useState(false);
+  const [errorInfo, setErrorInfo] = useState<{
+    type: 'error' | 'warning' | 'info';
+    message: string;
+    description?: string;
+    details?: string[];
+  } | null>(null);
 
   // Create dropdown menu items for each record
   const getActionMenuItems = (record: TourTemplate) => {
@@ -266,16 +273,17 @@ const TourTemplateManagement: React.FC = () => {
       year: new Date().getFullYear(),
       images: [],
     });
+    setErrorInfo(null); // Clear any previous errors
     setIsModalVisible(true);
   };
   const handleEdit = (template: TourTemplate) => {
     const fileList = Array.isArray(template.images)
       ? template.images.map((url, idx) => ({
-          uid: idx + "",
-          name: `image_${idx}`,
-          status: "done",
-          url,
-        }))
+        uid: idx + "",
+        name: `image_${idx}`,
+        status: "done",
+        url,
+      }))
       : [];
     const formValues: any = {
       title: template.title,
@@ -290,6 +298,7 @@ const TourTemplateManagement: React.FC = () => {
     setEditingTemplate(template);
     setUploadFileList(fileList); // set fileList cho Upload
     form.setFieldsValue(formValues);
+    setErrorInfo(null); // Clear any previous errors
     setIsModalVisible(true);
   };
 
@@ -401,11 +410,68 @@ const TourTemplateManagement: React.FC = () => {
       onOk: async () => {
         try {
           const token = localStorage.getItem("token") || undefined;
-          await deleteTourTemplate(id, token);
-          setTemplates(templates.filter((t) => t.id !== id));
-          message.success("Xóa template thành công");
-        } catch (error) {
-          handleError(error, "Xóa template thất bại");
+          // Use axios directly to avoid interceptor notifications
+          const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+          try {
+            const response = await axiosInstance.delete(`/TourCompany/template/${id}`, {
+              headers,
+              validateStatus: () => true // Accept all status codes to handle manually
+            });
+
+            if (response.status === 200 || response.status === 204) {
+              // Success
+              setTemplates(templates.filter((t) => t.id !== id));
+              message.success("Xóa template thành công");
+              setErrorInfo(null); // Clear any previous errors
+            } else if (response.status === 409) {
+              // Conflict - throw error to be caught by outer catch
+              const error = new Error('Conflict');
+              (error as any).response = response;
+              throw error;
+            } else {
+              // Other errors
+              const error = new Error('Delete failed');
+              (error as any).response = response;
+              throw error;
+            }
+          } catch (deleteError: any) {
+            // Re-throw to be caught by outer catch block
+            throw deleteError;
+          }
+        } catch (error: any) {
+          console.error('Delete template error:', error);
+
+          // Check if it's a conflict error with blocking reasons
+          if (error?.response?.status === 409) {
+            // For 409 conflicts, show notification like add/edit errors
+            const errorData = error.response.data;
+            notification.error({
+              message: errorData.message || "Template đang được sử dụng và không thể xóa",
+              description: (
+                <div>
+                  <p>Template này đang được sử dụng bởi các tour details:</p>
+                  {errorData.blockingReasons && errorData.blockingReasons.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                      <strong>Chi tiết:</strong>
+                      <ul style={{ marginTop: 4, marginBottom: 0 }}>
+                        {errorData.blockingReasons.map((reason: string, index: number) => (
+                          <li key={index}>{reason}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ),
+              duration: 8,
+              placement: 'topRight'
+            });
+            // Don't call handleError to avoid default notification
+            return; // Exit early to prevent any further error handling
+          } else {
+            // For other errors, use the default error handler
+            handleError(error, "Xóa template thất bại");
+          }
         }
       },
     });
@@ -442,7 +508,7 @@ const TourTemplateManagement: React.FC = () => {
             "Image upload failed, proceeding without images:",
             uploadError
           );
-          // Continue without images for now
+          message.warning("Không thể tải lên hình ảnh. Template sẽ được tạo không có hình ảnh.");
         }
       }
       images = [...existedUrls, ...uploadedUrls];
@@ -467,24 +533,75 @@ const TourTemplateManagement: React.FC = () => {
       console.log("Form values:", processedValues);
 
       if (editingTemplate) {
-        // EDIT: gọi updateTourTemplate
-        await updateTourTemplate(editingTemplate.id, apiBody, token);
-        message.success("Cập nhật template thành công");
+        // EDIT: gọi updateTourTemplate với skip auto notification
+        try {
+          const response = await updateTourTemplate(editingTemplate.id, apiBody, token);
+          if (response.success) {
+            message.success("Cập nhật template thành công");
+          } else {
+            throw new Error(response.message || "Cập nhật thất bại");
+          }
+        } catch (apiError: any) {
+          // Skip default error handling and use our custom one
+          throw apiError;
+        }
       } else {
-        // CREATE: gọi createTourTemplate
-        await createTourTemplate(apiBody);
-        message.success("Thêm template thành công");
+        // CREATE: gọi createTourTemplate với skip auto notification
+        try {
+          const response = await createTourTemplate(apiBody, token);
+          if (response.success) {
+            message.success("Thêm template thành công");
+          } else {
+            throw new Error(response.message || "Tạo template thất bại");
+          }
+        } catch (apiError: any) {
+          // Skip default error handling and use our custom one
+          throw apiError;
+        }
       }
       setIsModalVisible(false);
       form.resetFields();
       setUploadFileList([]);
+
+      // Refresh templates list
       setLoading(true);
-      const res = await getTourTemplates({}, token);
-      setTemplates(res.data || []);
-      setLoading(false);
+      try {
+        const res = await getTourTemplates({}, token);
+        setTemplates(res.data || []);
+      } catch (refreshError) {
+        console.error("Error refreshing templates:", refreshError);
+        message.warning("Không thể tải lại danh sách template. Vui lòng tải lại trang.");
+      } finally {
+        setLoading(false);
+      }
     } catch (error) {
-      handleError(error, "Có lỗi khi lưu template");
-      console.error("Validation failed or API error:", error);
+      // Prevent default error handling to avoid duplicate notifications
+      // Only show our custom error message
+      notification.error({
+        message: "Dữ liệu không hợp lệ",
+        description: (
+          <div>
+            <p>Vui lòng kiểm tra và sửa các thông tin sau:</p>
+            <div style={{ marginTop: 8 }}>
+              <strong>Chi tiết:</strong>
+              <p>Dữ liệu không hợp lệ - Vui lòng kiểm tra và sửa các lỗi sau</p>
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <strong>Hướng dẫn:</strong>
+              <ul style={{ marginTop: 4, marginBottom: 0 }}>
+                <li>Kiểm tra tất cả các trường bắt buộc đã được điền</li>
+                <li>Đảm bảo định dạng dữ liệu đúng yêu cầu</li>
+                <li>Xem chi tiết lỗi bên dưới</li>
+              </ul>
+            </div>
+          </div>
+        ),
+        duration: 6,
+        placement: 'topRight'
+      });
+
+      // Log error for debugging but don't trigger other error handlers
+      console.error("Tour Template Error:", error);
     }
   };
 
@@ -492,6 +609,7 @@ const TourTemplateManagement: React.FC = () => {
     setIsModalVisible(false);
     form.resetFields();
     setUploadFileList([]);
+    setErrorInfo(null); // Clear error info when closing modal
   };
 
   const handleSearch = (value: string) => {
@@ -582,6 +700,7 @@ const TourTemplateManagement: React.FC = () => {
         setUploadFileList={setUploadFileList}
         editingTemplate={editingTemplate}
         loading={loading}
+        errorInfo={errorInfo}
       />
 
       <HolidayTourForm

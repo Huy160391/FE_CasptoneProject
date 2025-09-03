@@ -75,7 +75,60 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         slotId,
         token ?? undefined
       );
-      setBookingsData(response.data);
+
+      // Map API response to expected format
+      const mappedData = {
+        ...response.data,
+        bookings: response.data.bookings?.map((booking: any) => {
+          // Convert string status to number if needed
+          let statusNumber = booking.status;
+          if (typeof booking.status === 'string') {
+            switch (booking.status.toLowerCase()) {
+              case 'pending':
+                statusNumber = 0;
+                break;
+              case 'confirmed':
+                statusNumber = 1;
+                break;
+              case 'completed':
+                statusNumber = 4;
+                break;
+              case 'cancelled':
+              case 'canceled':
+                statusNumber = 2;
+                break;
+              default:
+                statusNumber = booking.status; // Keep original if unknown
+            }
+          }
+
+          return {
+            id: booking.id,
+            bookingId: booking.id,
+            userId: booking.user?.id || '',
+            userName: booking.user?.name || booking.contactName || '',
+            userEmail: booking.user?.email || booking.contactEmail,
+            contactName: booking.contactName,
+            contactPhone: booking.contactPhone,
+            contactEmail: booking.contactEmail,
+            numberOfGuests: booking.numberOfGuests,
+            totalPrice: booking.totalPrice,
+            originalPrice: booking.originalPrice || booking.totalPrice,
+            discountPercent: booking.discountPercent || 0,
+            status: statusNumber, // Use converted number status
+            statusName: booking.status, // Keep original string for reference
+            bookingDate: booking.createdAt,
+            confirmedDate: booking.confirmedDate,
+            bookingCode: booking.bookingCode,
+            customerNotes: booking.customerNotes
+          };
+        }) || []
+      };
+
+      console.log('Raw API response:', response.data);
+      console.log('Mapped bookings data:', mappedData.bookings);
+
+      setBookingsData(mappedData);
     } catch (error) {
       console.error("Error loading bookings data:", error);
       message.error("Không thể tải danh sách booking");
@@ -84,14 +137,34 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     }
   };
 
-  const getStatusColor = (status: number) => {
+  const getStatusColor = (status: number | string) => {
+    // Handle both number and string status
+    if (typeof status === 'string') {
+      switch (status.toLowerCase()) {
+        case 'completed':
+          return "blue"; // Completed tours
+        case 'confirmed':
+          return "green"; // Confirmed bookings
+        case 'pending':
+          return "orange"; // Pending bookings
+        case 'cancelled':
+        case 'canceled':
+          return "red";
+        default:
+          return "default";
+      }
+    }
+
+    // Handle number status
     switch (status) {
-      case 1:
-        return "green"; // Confirmed
       case 0:
-        return "orange"; // Pending
+        return "orange"; // Pending - Khách đặt tour
+      case 1:
+        return "green"; // Confirmed - Thanh toán/xác nhận
+      case 4:
+        return "blue"; // Completed - Tour hoàn thành
       case 2:
-        return "red"; // Cancelled
+        return "red"; // Cancelled (if exists)
       default:
         return "default";
     }
@@ -166,21 +239,81 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: number, record: BookedUserInfo) => (
-        <Tag
-          color={getStatusColor(status)}
-          icon={
-            status === 1 ? (
-              <CheckCircleOutlined />
-            ) : status === 0 ? (
-              <ClockCircleOutlined />
-            ) : (
-              <CloseCircleOutlined />
-            )
-          }>
-          {record.statusName}
-        </Tag>
-      ),
+      render: (status: number | string, record: BookedUserInfo) => {
+        // Helper function to get icon based on status
+        const getStatusIcon = (status: number | string) => {
+          if (typeof status === 'string') {
+            switch (status.toLowerCase()) {
+              case 'completed':
+                return <CheckCircleOutlined />; // Tour completed
+              case 'confirmed':
+                return <CheckCircleOutlined />; // Payment confirmed
+              case 'pending':
+                return <ClockCircleOutlined />; // Waiting for payment
+              case 'cancelled':
+              case 'canceled':
+                return <CloseCircleOutlined />;
+              default:
+                return <ClockCircleOutlined />;
+            }
+          }
+
+          // Handle number status
+          switch (status) {
+            case 0:
+              return <ClockCircleOutlined />; // Pending - Khách đặt tour
+            case 1:
+              return <CheckCircleOutlined />; // Confirmed - Thanh toán/xác nhận
+            case 4:
+              return <CheckCircleOutlined />; // Completed - Tour hoàn thành
+            case 2:
+              return <CloseCircleOutlined />; // Cancelled (if exists)
+            default:
+              return <ClockCircleOutlined />;
+          }
+        };
+
+        // Helper function to get Vietnamese status name
+        const getVietnameseStatusName = (status: number | string) => {
+          if (typeof status === 'string') {
+            switch (status.toLowerCase()) {
+              case 'completed':
+                return 'Tour hoàn thành';
+              case 'confirmed':
+                return 'Đã xác nhận';
+              case 'pending':
+                return 'Chờ thanh toán';
+              case 'cancelled':
+              case 'canceled':
+                return 'Đã hủy';
+              default:
+                return status;
+            }
+          }
+
+          // Handle number status
+          switch (status) {
+            case 0:
+              return 'Chờ thanh toán'; // Pending - Khách đặt tour
+            case 1:
+              return 'Đã xác nhận'; // Confirmed - Thanh toán/xác nhận
+            case 4:
+              return 'Tour hoàn thành'; // Completed - Tour hoàn thành
+            case 2:
+              return 'Đã hủy'; // Cancelled (if exists)
+            default:
+              return 'Không xác định';
+          }
+        };
+
+        return (
+          <Tag
+            color={getStatusColor(status)}
+            icon={getStatusIcon(status)}>
+            {record.statusName || getVietnameseStatusName(status)}
+          </Tag>
+        );
+      },
     },
     {
       title: "Ngày đặt",
@@ -292,9 +425,9 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                   </Descriptions.Item>
                   <Descriptions.Item label="Còn trống">
                     {bookingsData.tourOperation?.maxGuests &&
-                    bookingsData.tourOperation?.currentBookings !== undefined
+                      bookingsData.tourOperation?.currentBookings !== undefined
                       ? bookingsData.tourOperation.maxGuests -
-                        bookingsData.tourOperation.currentBookings
+                      bookingsData.tourOperation.currentBookings
                       : 0}{" "}
                     chỗ
                   </Descriptions.Item>

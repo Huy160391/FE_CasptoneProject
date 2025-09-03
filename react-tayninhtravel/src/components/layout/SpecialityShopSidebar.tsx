@@ -5,7 +5,6 @@ import {
     DashboardOutlined,
     ShopOutlined,
     ShoppingCartOutlined,
-    StarOutlined,
     UserOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
@@ -27,8 +26,8 @@ const SpecialityShopSidebar = () => {
     const { t } = useTranslation();
     const { user, logout } = useAuthStore();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         navigate('/');
     };
 
@@ -52,11 +51,11 @@ const SpecialityShopSidebar = () => {
             icon: <ShoppingCartOutlined />,
             label: <Link to="/speciality-shop/orders">Quản lý đơn hàng</Link>,
         },
-        {
-            key: '/speciality-shop/reviews',
-            icon: <StarOutlined />,
-            label: <Link to="/speciality-shop/reviews">Đánh giá sản phẩm</Link>,
-        },
+        // {
+        //     key: '/speciality-shop/reviews',
+        //     icon: <StarOutlined />,
+        //     label: <Link to="/speciality-shop/reviews">Đánh giá sản phẩm</Link>,
+        // },
         {
             key: '/speciality-shop/wallet',
             icon: <WalletOutlined />,

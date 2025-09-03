@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Button, Drawer, Space, Badge, message, Dropdown } from 'antd'
+import { Layout, Menu, Button, Drawer, Space, Badge, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   MenuOutlined,
@@ -25,6 +25,7 @@ import CartDrawer from '../cart/CartDrawer'
 import { useCartStore } from '@/store/useCartStore'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useThemeStore } from '@/store/useThemeStore'
+import { handleLogoutWithCartSync } from '@/utils/logoutHandler'
 // import { authService } from '@/services/authService'
 import logoImage from '@/assets/TNDT_Logo.png'
 import darkLogo from '@/assets/TNDT_logo_darkmode.png'
@@ -39,8 +40,8 @@ const Navbar = () => {
   const [isCartDrawerVisible, setIsCartDrawerVisible] = useState(false)
   const { t } = useTranslation()
   const location = useLocation()
-  const { getTotalItems, clearCart } = useCartStore()
-  const { isAuthenticated, user, logout } = useAuthStore()
+  const { getTotalItems } = useCartStore()
+  const { isAuthenticated, user } = useAuthStore()
   const { isDarkMode } = useThemeStore()
   const navigate = useNavigate()
 
@@ -77,25 +78,7 @@ const Navbar = () => {
   }
 
   const handleLogout = async () => {
-    // Gửi cart hiện tại lên server trước khi logout (nếu có token)
-    const token = localStorage.getItem('token');
-    if (token) {
-      const items = useCartStore.getState().items;
-      if (items && items.length > 0) {
-        try {
-          await import('@/services/cartService').then(mod => mod.updateCart({ items }, token));
-        } catch (e) {
-          // Không cần báo lỗi cho user khi logout
-        }
-      }
-    }
-    // Đợi updateCart hoàn thành rồi mới clear cart và logout
-    clearCart();
-    logout();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('cart');
-    message.success(t('common.logoutSuccess'));
+    await handleLogoutWithCartSync(true);
   }
 
   const menuItems = [

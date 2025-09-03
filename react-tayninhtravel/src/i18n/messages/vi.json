@@ -1898,7 +1898,7 @@
         "paginationText": "của",
         "paginationTotal": "đơn hàng",
         "loadingError": "Không thể tải lịch sử đơn hàng",
-        "searchPlaceholder": "Tìm kiếm theo mã đơn hàng, tên cửa hàng...",
+        "searchPlaceholder": "Tìm kiếm theo mã đơn hàng",
         "filterByStatus": "Lọc theo trạng thái",
         "showCancelled": "Hiển thị đã hủy",
         "refresh": "Làm mới",
@@ -2100,6 +2100,127 @@
             "notFoundMessage": "Sản phẩm này không tồn tại hoặc đã bị xóa.",
             "backToShop": "Quay lại cửa hàng",
             "imagePagination": "{{current}}/{{total}}"
+        }
+    },
+    "booking": {
+        "title": "Đặt Tour",
+        "viewOtherTours": "Xem tour khác",
+        "steps": {
+            "tourInfo": "Thông tin tour",
+            "customerInfo": "Thông tin khách hàng",
+            "confirmPayment": "Xác nhận & Thanh toán"
+        },
+        "common": {
+            "continue": "Tiếp tục",
+            "back": "Quay lại",
+            "person": "người"
+        },
+        "errors": {
+            "tourIdNotFound": "Không tìm thấy ID tour",
+            "loadTourDetails": "Không thể tải thông tin tour",
+            "loadTourDetailsGeneric": "Có lỗi xảy ra khi tải thông tin tour",
+            "cannotLoadTour": "Không thể tải thông tin tour",
+            "tourNotExists": "Tour không tồn tại hoặc đã bị xóa",
+            "cannotCalculatePrice": "Không thể tính giá tour",
+            "pleaseSelectDate": "Vui lòng chọn ngày tour",
+            "pleaseCompleteInfo": "Vui lòng điền đầy đủ thông tin"
+        },
+        "tourInfo": {
+            "title": "Thông tin tour",
+            "tourName": "Tên tour",
+            "startLocation": "Điểm khởi hành",
+            "endLocation": "Điểm kết thúc",
+            "basePrice": "Giá cơ bản",
+            "maxGuests": "Số chỗ tối đa",
+            "booked": "Đã đặt",
+            "selectDate": "Chọn ngày tour",
+            "loadingSchedule": "Đang tải lịch trình...",
+            "selectDateInstruction": "Chọn ngày bạn muốn tham gia tour:",
+            "noScheduleAvailable": "Hiện tại chưa có lịch trình khả dụng cho tour này",
+            "noScheduleDescription": "Các tour slots có thể đã được đặt hết hoặc không có chỗ trống. Vui lòng liên hệ để biết thêm thông tin.",
+            "tourDescription": "Mô tả tour",
+            "tourTimeline": "Lịch trình tour"
+        },
+        "customerInfo": {
+            "title": "Thông tin khách hàng",
+            "bookingType": "Loại đặt tour",
+            "numberOfGuests": "Số người",
+            "contactName": "Tên người liên hệ",
+            "contactPhone": "Số điện thoại",
+            "contactEmail": "Email",
+            "specialRequests": "Yêu cầu đặc biệt (tùy chọn)",
+            "individualGuestsInfo": "Thông tin từng khách hàng",
+            "guestNotice": "Lưu ý",
+            "guestNoticeDescription": "Mỗi khách hàng sẽ nhận được mã QR riêng để check-in tại các điểm dừng chân",
+            "guestName": "Họ và tên",
+            "guestEmail": "Email",
+            "guestPhone": "Số điện thoại (tùy chọn)",
+            "guestNumber": "Khách hàng {{number}}",
+            "validation": {
+                "selectBookingType": "Vui lòng chọn loại đặt tour",
+                "enterNumberOfGuests": "Vui lòng nhập số người",
+                "minGuests": "Phải có ít nhất 1 người",
+                "enterContactName": "Vui lòng nhập tên người liên hệ",
+                "maxContactNameLength": "Tên không được quá 100 ký tự",
+                "enterContactPhone": "Vui lòng nhập số điện thoại",
+                "invalidPhone": "Số điện thoại không hợp lệ",
+                "enterContactEmail": "Vui lòng nhập email",
+                "invalidEmail": "Email không hợp lệ",
+                "enterGuestName": "Vui lòng nhập tên khách hàng",
+                "minGuestNameLength": "Tên phải có ít nhất 2 ký tự",
+                "maxGuestNameLength": "Tên không quá 100 ký tự",
+                "enterGuestEmail": "Vui lòng nhập email",
+                "invalidGuestEmail": "Email không hợp lệ",
+                "invalidGuestPhone": "Số điện thoại không hợp lệ"
+            },
+            "placeholders": {
+                "numberOfGuests": "Nhập số người",
+                "contactName": "Nhập tên đầy đủ",
+                "contactPhone": "0123456789",
+                "contactEmail": "email@example.com",
+                "specialRequests": "Ví dụ: Ăn chay, dị ứng thực phẩm, yêu cầu phòng riêng...",
+                "guestName": "Nhập họ và tên đầy đủ",
+                "guestEmail": "email@example.com",
+                "guestPhone": "0123456789"
+            }
+        },
+        "confirmation": {
+            "title": "Xác nhận đặt tour",
+            "tourSummary": "Tóm tắt tour",
+            "tourDate": "Ngày khởi hành",
+            "numberOfGuests": "Số người",
+            "contactName": "Người liên hệ",
+            "contactPhone": "Số điện thoại",
+            "contactEmail": "Email",
+            "specialRequests": "Yêu cầu đặc biệt",
+            "customerInfo": "Thông tin khách hàng",
+            "paymentMethod": "Phương thức thanh toán",
+            "payNow": "Thanh toán ngay",
+            "payLater": "Thanh toán sau",
+            "termsAndConditions": "Điều khoản và điều kiện",
+            "termsText": "Tôi đã đọc và đồng ý với các điều khoản và điều kiện của dịch vụ",
+            "privacyPolicy": "Chính sách bảo mật",
+            "privacyText": "Tôi đồng ý với chính sách bảo mật và xử lý dữ liệu cá nhân",
+            "confirmBooking": "Xác nhận đặt tour",
+            "bookingSuccess": "Đặt tour thành công!",
+            "bookingSuccessMessage": "Cảm ơn bạn đã đặt tour. Chúng tôi sẽ gửi thông tin chi tiết qua email và SMS.",
+            "viewBookingDetails": "Xem chi tiết đặt tour",
+            "backToHome": "Về trang chủ",
+            "validation": {
+                "acceptTerms": "Vui lòng chấp nhận điều khoản và điều kiện",
+                "acceptPrivacy": "Vui lòng chấp nhận chính sách bảo mật"
+            }
+        },
+        "summary": {
+            "title": "Tóm tắt đơn hàng",
+            "calculatingPrice": "Đang tính giá...",
+            "originalPrice": "Giá gốc",
+            "discount": "Giảm giá",
+            "total": "Tổng cộng",
+            "earlyBird": "Ưu đãi đặt sớm",
+            "priceType": "Loại giá",
+            "selectGuestsToSeePrice": "Chọn số lượng khách để xem giá",
+            "availableSlots": "Chỗ trống"
         }
     }
 }

@@ -28,6 +28,7 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import LoginModal from "../components/auth/LoginModal";
 import { useEnhancedPayment } from "../services/enhancedPaymentService";
 import { formatCurrency } from "../services/paymentService";
@@ -61,6 +62,7 @@ interface BookingFormData {
 }
 
 const BookingPage: React.FC = () => {
+  const { t } = useTranslation();
   const { tourId } = useParams<{ tourId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -115,7 +117,7 @@ const BookingPage: React.FC = () => {
   useEffect(() => {
     const loadTourDetails = async () => {
       if (!tourId) {
-        setError("Không tìm thấy ID tour");
+        setError(t('booking.errors.tourIdNotFound', 'Không tìm thấy ID tour'));
         setLoading(false);
         return;
       }
@@ -156,11 +158,11 @@ const BookingPage: React.FC = () => {
             }
           }, 100);
         } else {
-          setError(response.message || "Không thể tải thông tin tour");
+          setError(response.message || t('booking.errors.loadTourDetails', 'Không thể tải thông tin tour'));
         }
       } catch (error: any) {
         console.error("Error loading tour details:", error);
-        setError(error.message || "Có lỗi xảy ra khi tải thông tin tour");
+        setError(error.message || t('booking.errors.loadTourDetailsGeneric', 'Có lỗi xảy ra khi tải thông tin tour'));
       } finally {
         setLoading(false);
       }
@@ -268,7 +270,7 @@ const BookingPage: React.FC = () => {
 
     try {
       setCalculating(true);
-        console.log(" - TourOperation ID:", tourDetails.tourOperation.id);
+      console.log(" - TourOperation ID:", tourDetails.tourOperation.id);
       const response1 = await calculateBookingPrice(
         {
           tourOperationId: tourDetails.tourOperation.id, // ✅ FIXED: Pass correct ID to the service
@@ -276,11 +278,11 @@ const BookingPage: React.FC = () => {
         },
         token ?? undefined
       );
-    console.log("API response:", response1);
+      console.log("API response:", response1);
 
       if (response1.success && response1.data) {
         setPriceCalculation(response1.data);
-      console.log("Set priceCalculation:", response1.data);
+        console.log("Set priceCalculation:", response1.data);
 
         // ✅ FIXED: Check slot-specific availability instead of TourOperation
         const availabilityResponse = await checkTourSlotCapacity(
@@ -314,7 +316,7 @@ const BookingPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error("Error calculating price:", error);
-      message.error("Không thể tính giá tour");
+      message.error(t('booking.errors.cannotCalculatePrice', 'Không thể tính giá tour'));
     } finally {
       setCalculating(false);
     }
@@ -408,7 +410,7 @@ const BookingPage: React.FC = () => {
     // Validate slot selection for step 0
     if (currentStep === 0) {
       if (tourSlots.length > 0 && !selectedSlot) {
-        message.error("Vui lòng chọn ngày tour");
+        message.error(t('booking.errors.pleaseSelectDate', 'Vui lòng chọn ngày tour'));
         return;
       }
     }
@@ -425,7 +427,7 @@ const BookingPage: React.FC = () => {
         }
       })
       .catch(() => {
-        message.error("Vui lòng điền đầy đủ thông tin");
+        message.error(t('booking.errors.pleaseCompleteInfo', 'Vui lòng điền đầy đủ thông tin'));
       });
   };
 
@@ -468,7 +470,7 @@ const BookingPage: React.FC = () => {
 
     // Validate selected slot
     if (!selectedSlot) {
-      message.error("Vui lòng chọn ngày tour");
+      message.error(t('booking.errors.pleaseSelectDate'));
       setSubmitting(false);
       return;
     }
@@ -624,13 +626,13 @@ const BookingPage: React.FC = () => {
     return (
       <div style={{ padding: "40px 20px", textAlign: "center" }}>
         <Alert
-          message="Không thể tải thông tin tour"
-          description={error || "Tour không tồn tại hoặc đã bị xóa"}
+          message={t('booking.errors.cannotLoadTour', 'Không thể tải thông tin tour')}
+          description={error || t('booking.errors.tourNotExists', 'Tour không tồn tại hoặc đã bị xóa')}
           type="error"
           showIcon
           action={
             <Button type="primary" onClick={() => navigate("/tours")}>
-              Xem tour khác
+              {t('booking.viewOtherTours', 'Xem tour khác')}
             </Button>
           }
         />
@@ -640,23 +642,23 @@ const BookingPage: React.FC = () => {
 
   const steps = [
     {
-      title: "Thông tin tour",
+      title: t('booking.steps.tourInfo', 'Thông tin tour'),
       icon: <InfoCircleOutlined />,
     },
     {
-      title: "Thông tin khách hàng",
+      title: t('booking.steps.customerInfo', 'Thông tin khách hàng'),
       icon: <UserOutlined />,
     },
     {
-      title: "Xác nhận & Thanh toán",
+      title: t('booking.steps.confirmPayment', 'Xác nhận & Thanh toán'),
       icon: <CreditCardOutlined />,
     },
   ];
-console.log("DEBUG priceCalculation:", priceCalculation);
+  console.log("DEBUG priceCalculation:", priceCalculation);
   return (
     <div style={{ padding: "20px", maxWidth: 1200, margin: "0 auto" }}>
       <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
-        Đặt Tour: {tourDetails.title}
+        {t('booking.title', 'Đặt Tour')}: {tourDetails.title}
       </Title>
 
       <Steps current={currentStep} style={{ marginBottom: 32 }}>
@@ -670,31 +672,31 @@ console.log("DEBUG priceCalculation:", priceCalculation);
           <Card>
             {currentStep === 0 && (
               <div>
-                <Title level={4}>Thông tin tour</Title>
+                <Title level={4}>{t('booking.tourInfo.title', 'Thông tin tour')}</Title>
                 <Descriptions column={1} bordered>
-                  <Descriptions.Item label="Tên tour">
+                  <Descriptions.Item label={t('booking.tourInfo.tourName', 'Tên tour')}>
                     {tourDetails.title}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Điểm khởi hành">
+                  <Descriptions.Item label={t('booking.tourInfo.startLocation', 'Điểm khởi hành')}>
                     {tourDetails.startLocation}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Điểm kết thúc">
+                  <Descriptions.Item label={t('booking.tourInfo.endLocation', 'Điểm kết thúc')}>
                     {tourDetails.endLocation}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Giá cơ bản">
-                    {formatCurrency(tourDetails.tourOperation.price)} / người
+                  <Descriptions.Item label={t('booking.tourInfo.basePrice', 'Giá cơ bản')}>
+                    {formatCurrency(tourDetails.tourOperation.price)} / {t('booking.common.person', 'người')}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Số chỗ tối đa">
-                    {tourDetails.tourOperation.maxGuests} người
+                  <Descriptions.Item label={t('booking.tourInfo.maxGuests', 'Số chỗ tối đa')}>
+                    {tourDetails.tourOperation.maxGuests} {t('booking.common.person', 'người')}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Đã đặt">
-                    {tourDetails.tourOperation.currentBookings} người
+                  <Descriptions.Item label={t('booking.tourInfo.booked', 'Đã đặt')}>
+                    {tourDetails.tourOperation.currentBookings} {t('booking.common.person', 'người')}
                   </Descriptions.Item>
                   {/* Tour Slot Selection */}
-                  <Descriptions.Item label="Chọn ngày tour" span={2}>
+                  <Descriptions.Item label={t('booking.tourInfo.selectDate', 'Chọn ngày tour')} span={2}>
                     {slotsLoading ? (
                       <div style={{ textAlign: "center", padding: "20px" }}>
-                        <Spin /> Đang tải lịch trình...
+                        <Spin /> {t('booking.tourInfo.loadingSchedule', 'Đang tải lịch trình...')}
                       </div>
                     ) : tourSlots.length > 0 ? (
                       <div>
@@ -902,7 +904,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                         </div>
                         {!selectedSlot && (
                           <Alert
-                            message="Vui lòng chọn ngày tour"
+                            message={t('booking.errors.pleaseSelectDate')}
                             type="warning"
                             showIcon
                             style={{ marginTop: 12 }}
@@ -912,8 +914,8 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                     ) : (
                       <div>
                         <Alert
-                          message="Hiện tại chưa có lịch trình khả dụng cho tour này"
-                          description="Các tour slots có thể đã được đặt hết hoặc không có chỗ trống. Vui lòng liên hệ để biết thêm thông tin."
+                          message={t('booking.tourInfo.noScheduleAvailable')}
+                          description={t('booking.tourInfo.noScheduleDescription')}
                           type="info"
                           showIcon
                         />
@@ -934,14 +936,14 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
                 {tourDetails.description && (
                   <div style={{ marginTop: 16 }}>
-                    <Title level={5}>Mô tả tour</Title>
+                    <Title level={5}>{t('booking.tourInfo.tourDescription')}</Title>
                     <Paragraph>{tourDetails.description}</Paragraph>
                   </div>
                 )}
 
                 {tourDetails.timeline && tourDetails.timeline.length > 0 && (
                   <div style={{ marginTop: 16 }}>
-                    <Title level={5}>Lịch trình tour</Title>
+                    <Title level={5}>{t('booking.tourInfo.tourTimeline')}</Title>
                     {tourDetails.timeline
                       .sort((a, b) => a.sortOrder - b.sortOrder)
                       .map((item) => (
@@ -969,7 +971,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
                 <div style={{ textAlign: "right", marginTop: 24 }}>
                   <Button type="primary" onClick={handleNext}>
-                    Tiếp tục
+                    {t('booking.common.continue', 'Tiếp tục')}
                   </Button>
                 </div>
               </div>
@@ -977,7 +979,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
             {currentStep === 1 && (
               <div>
-                <Title level={4}>Thông tin khách hàng</Title>
+                <Title level={4}>{t('booking.customerInfo.title', 'Thông tin khách hàng')}</Title>
                 <Form
                   form={form}
                   layout="vertical"
@@ -993,11 +995,11 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                   {/* NEW: Booking Type Selection */}
                   <Form.Item
                     name="bookingType"
-                    label="Loại đặt tour"
+                    label={t('booking.customerInfo.bookingType', 'Loại đặt tour')}
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng chọn loại đặt tour",
+                        message: t('booking.customerInfo.validation.selectBookingType', 'Vui lòng chọn loại đặt tour'),
                       },
                     ]}>
                     <Radio.Group>
@@ -1034,13 +1036,13 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                     <Col xs={24} sm={12}>
                       <Form.Item
                         name="numberOfGuests"
-                        label="Số người"
+                        label={t('booking.customerInfo.numberOfGuests')}
                         rules={[
-                          { required: true, message: "Vui lòng nhập số người" },
+                          { required: true, message: t('booking.customerInfo.validation.enterNumberOfGuests') },
                           {
                             type: "number",
                             min: 1,
-                            message: "Phải có ít nhất 1 người",
+                            message: t('booking.customerInfo.validation.minGuests'),
                           },
                         ]}>
                         <InputNumber
@@ -1048,7 +1050,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                           max={50}
                           style={{ width: "100%" }}
                           prefix={<TeamOutlined />}
-                          placeholder="Nhập số người"
+                          placeholder={t('booking.customerInfo.placeholders.numberOfGuests')}
                         />
                       </Form.Item>
                     </Col>
@@ -1058,17 +1060,17 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
                   <Form.Item
                     name="contactName"
-                    label="Tên người liên hệ"
+                    label={t('booking.customerInfo.contactName')}
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng nhập tên người liên hệ",
+                        message: t('booking.customerInfo.validation.enterContactName'),
                       },
-                      { max: 100, message: "Tên không được quá 100 ký tự" },
+                      { max: 100, message: t('booking.customerInfo.validation.maxContactNameLength') },
                     ]}>
                     <Input
                       prefix={<UserOutlined />}
-                      placeholder="Nhập tên đầy đủ"
+                      placeholder={t('booking.customerInfo.placeholders.contactName')}
                     />
                   </Form.Item>
 
@@ -1076,34 +1078,34 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                     <Col xs={24} sm={12}>
                       <Form.Item
                         name="contactPhone"
-                        label="Số điện thoại"
+                        label={t('booking.customerInfo.contactPhone')}
                         rules={[
                           {
                             required: true,
-                            message: "Vui lòng nhập số điện thoại",
+                            message: t('booking.customerInfo.validation.enterContactPhone'),
                           },
                           {
                             pattern: /^[0-9+\-\s()]+$/,
-                            message: "Số điện thoại không hợp lệ",
+                            message: t('booking.customerInfo.validation.invalidPhone'),
                           },
                         ]}>
                         <Input
                           prefix={<PhoneOutlined />}
-                          placeholder="0123456789"
+                          placeholder={t('booking.customerInfo.placeholders.contactPhone')}
                         />
                       </Form.Item>
                     </Col>
                     <Col xs={24} sm={12}>
                       <Form.Item
                         name="contactEmail"
-                        label="Email"
+                        label={t('booking.customerInfo.contactEmail')}
                         rules={[
-                          { required: true, message: "Vui lòng nhập email" },
-                          { type: "email", message: "Email không hợp lệ" },
+                          { required: true, message: t('booking.customerInfo.validation.enterContactEmail') },
+                          { type: "email", message: t('booking.customerInfo.validation.invalidEmail') },
                         ]}>
                         <Input
                           prefix={<MailOutlined />}
-                          placeholder="email@example.com"
+                          placeholder={t('booking.customerInfo.placeholders.contactEmail')}
                         />
                       </Form.Item>
                     </Col>
@@ -1111,10 +1113,10 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
                   <Form.Item
                     name="specialRequests"
-                    label="Yêu cầu đặc biệt (tùy chọn)">
+                    label={t('booking.customerInfo.specialRequests')}>
                     <Input.TextArea
                       rows={3}
-                      placeholder="Ví dụ: Ăn chay, dị ứng thực phẩm, yêu cầu phòng riêng..."
+                      placeholder={t('booking.customerInfo.placeholders.specialRequests')}
                       maxLength={500}
                     />
                   </Form.Item>
@@ -1122,10 +1124,10 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                   {/* ✅ NEW: Individual guest information - Only show if individual booking type selected */}
                   {formValues.bookingType === "individual" && (
                     <>
-                      <Divider>Thông tin từng khách hàng</Divider>
+                      <Divider>{t('booking.customerInfo.individualGuestsInfo')}</Divider>
                       <Alert
-                        message="Lưu ý"
-                        description="Mỗi khách hàng sẽ nhận được mã QR riêng để check-in tại các điểm dừng chân"
+                        message={t('booking.customerInfo.guestNotice')}
+                        description={t('booking.customerInfo.guestNoticeDescription')}
                         type="info"
                         showIcon
                         style={{ marginBottom: 16 }}
@@ -1144,7 +1146,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                             key={index}
                             size="small"
                             style={{ marginBottom: 16 }}>
-                            <Title level={5}>Khách hàng {index + 1}</Title>
+                            <Title level={5}>{t('booking.customerInfo.guestNumber', { number: index + 1 })}</Title>
 
                             <Row gutter={16}>
                               <Col xs={24} sm={12}>
@@ -1254,9 +1256,9 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
                 <div style={{ textAlign: "right", marginTop: 24 }}>
                   <Space>
-                    <Button onClick={handlePrev}>Quay lại</Button>
+                    <Button onClick={handlePrev}>{t('booking.common.back', 'Quay lại')}</Button>
                     <Button type="primary" onClick={handleNext}>
-                      Tiếp tục
+                      {t('booking.common.continue', 'Tiếp tục')}
                     </Button>
                   </Space>
                 </div>
@@ -1265,36 +1267,36 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
             {currentStep === 2 && (
               <div>
-                <Title level={4}>Xác nhận thông tin & Thanh toán</Title>
+                <Title level={4}>{t('booking.confirmation.title', 'Xác nhận thông tin & Thanh toán')}</Title>
 
                 <Alert
-                  message="Vui lòng kiểm tra lại thông tin trước khi thanh toán"
+                  message={t('booking.confirmation.pleaseReview', 'Vui lòng kiểm tra lại thông tin trước khi thanh toán')}
                   type="info"
                   showIcon
                   style={{ marginBottom: 16 }}
                 />
 
-                <Descriptions title="Thông tin tour" column={1} bordered>
-                  <Descriptions.Item label="Tên tour">
+                <Descriptions title={t('booking.confirmation.tourInfo')} column={1} bordered>
+                  <Descriptions.Item label={t('booking.confirmation.tourName')}>
                     {tourDetails.title}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Ngày tour">
+                  <Descriptions.Item label={t('booking.confirmation.tourDate')}>
                     {selectedSlot?.formattedDateWithDay || "Chưa chọn"}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Số khách">
-                    {formValues.numberOfGuests} người
+                  <Descriptions.Item label={t('booking.confirmation.numberOfGuests')}>
+                    {formValues.numberOfGuests} {t('booking.common.person')}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Người liên hệ">
+                  <Descriptions.Item label={t('booking.confirmation.contactName')}>
                     {formValues.contactName}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Điện thoại">
+                  <Descriptions.Item label={t('booking.confirmation.contactPhone')}>
                     {formValues.contactPhone}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Email">
+                  <Descriptions.Item label={t('booking.confirmation.contactEmail')}>
                     {formValues.contactEmail}
                   </Descriptions.Item>
                   {formValues.specialRequests && (
-                    <Descriptions.Item label="Yêu cầu đặc biệt">
+                    <Descriptions.Item label={t('booking.confirmation.specialRequests')}>
                       {formValues.specialRequests}
                     </Descriptions.Item>
                   )}
@@ -1319,10 +1321,11 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                 {/* Confirmation checkbox */}
                 <div style={{ marginTop: 24, marginBottom: 16 }}>
                   <Card
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      border: "1px solid #d9d9d9",
-                    }}>
+                  // style={{
+                  //   backgroundColor: "var(--ant-color-bg-container, #f9f9f9)",
+                  //   border: "1px solid var(--ant-color-border, #d9d9d9)",
+                  // }}
+                  >
                     <Checkbox
                       checked={isTermsAccepted}
                       onChange={(e) => setIsTermsAccepted(e.target.checked)}
@@ -1345,7 +1348,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
                 <div style={{ textAlign: "right", marginTop: 24 }}>
                   <Space>
-                    <Button onClick={handlePrev}>Quay lại</Button>
+                    <Button onClick={handlePrev}>{t('booking.common.back', 'Quay lại')}</Button>
                     <Button
                       type="primary"
                       size="large"
@@ -1361,7 +1364,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                       }
                       onClick={handleSubmit}
                       icon={<CreditCardOutlined />}>
-                      {submitting ? "Đang xử lý..." : "Đặt tour & Thanh toán"}
+                      {submitting ? t('booking.confirmation.processing', 'Đang xử lý...') : t('booking.confirmation.bookAndPay', 'Đặt tour & Thanh toán')}
                     </Button>
                   </Space>
                 </div>
@@ -1372,7 +1375,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
         <Col xs={24} lg={8}>
           <Card
-            title="Tóm tắt đơn hàng"
+            title={t('booking.summary.title', 'Tóm tắt đơn hàng')}
             style={{ position: "sticky", top: 20 }}>
             <img
               src={
@@ -1396,14 +1399,14 @@ console.log("DEBUG priceCalculation:", priceCalculation);
               <div style={{ textAlign: "center", padding: 20 }}>
                 <Spin />
                 <Text style={{ display: "block", marginTop: 8 }}>
-                  Đang tính giá...
+                  {t('booking.summary.calculatingPrice', 'Đang tính giá...')}
                 </Text>
               </div>
             ) : priceCalculation ? (
               <div>
                 <div style={{ marginBottom: 8 }}>
                   <Text>
-                    Giá gốc ({priceCalculation.numberOfGuests} người):
+                    {t('booking.summary.originalPrice', 'Giá gốc')} ({priceCalculation.numberOfGuests} {t('booking.common.person', 'người')}):
                   </Text>
                   <Text style={{ float: "right" }}>
                     {formatCurrency(priceCalculation.totalOriginalPrice)}
@@ -1413,7 +1416,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
                 {priceCalculation.discountPercent > 0 && (
                   <div style={{ marginBottom: 8 }}>
                     <Text type="success">
-                      Giảm giá ({priceCalculation.discountPercent}%):
+                      {t('booking.summary.discount', 'Giảm giá')} ({priceCalculation.discountPercent}%):
                     </Text>
                     <Text style={{ float: "right", color: "#52c41a" }}>
                       -{formatCurrency(priceCalculation.discountAmount)}
@@ -1425,7 +1428,7 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
                 <div style={{ marginBottom: 16 }}>
                   <Text strong style={{ fontSize: 16 }}>
-                    Tổng cộng:
+                    {t('booking.summary.total', 'Tổng cộng')}:
                   </Text>
                   <Text
                     strong
@@ -1436,23 +1439,23 @@ console.log("DEBUG priceCalculation:", priceCalculation);
 
                 {priceCalculation.isEarlyBird && (
                   <Tag color="green" style={{ marginBottom: 8 }}>
-                    🎉 Ưu đãi đặt sớm
+                    🎉 {t('booking.summary.earlyBird', 'Ưu đãi đặt sớm')}
                   </Tag>
                 )}
 
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                  Loại giá: {priceCalculation.pricingType}
+                  {t('booking.summary.priceType', 'Loại giá')}: {priceCalculation.pricingType}
                 </Text>
               </div>
             ) : (
-              <Text type="secondary">Chọn số lượng khách để xem giá</Text>
+              <Text type="secondary">{t('booking.summary.selectGuestsToSeePrice', 'Chọn số lượng khách để xem giá')}</Text>
             )}
 
             {availability && (
               <div style={{ marginTop: 16 }}>
                 <Divider />
                 <div style={{ marginBottom: 8 }}>
-                  <Text>Chỗ trống:</Text>
+                  <Text>{t('booking.summary.availableSlots', 'Chỗ trống')}:</Text>
                   <Text style={{ float: "right" }}>
                     {availability.availableSlots}/{availability.maxGuests}
                   </Text>

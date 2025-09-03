@@ -9,7 +9,21 @@ import TourDetailModal from '@/pages/admin/TourDetailModal';
 import type { PendingTour } from '@/types/tour';
 import { getTourDetailsStatusColor } from '@/types/tour';
 
-
+// Function to convert status to Vietnamese
+const getTourStatusText = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    'Pending': 'Chờ duyệt',
+    'Approved': 'Đã được duyệt',
+    'Rejected': 'Bị từ chối',
+    'Suspended': 'Tạm ngưng',
+    'AwaitingGuideAssignment': 'Chờ phân công HDV',
+    'Cancelled': 'Đã hủy',
+    'AwaitingAdminApproval': 'Chờ admin duyệt',
+    'WaitToPublic': 'Chờ mở bán vé',
+    'Public': 'Đã công khai',
+  };
+  return statusMap[status] || status;
+};
 
 const Tours = () => {
   const [searchText, setSearchText] = useState('');
@@ -23,6 +37,7 @@ const Tours = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchTours = async () => {
+    console.log('Fetching tours with params:', { searchText, includeInactive, pageIndex, pageSize });
     setLoading(true);
     try {
       const res = await adminService.getAllTours({
@@ -32,6 +47,7 @@ const Tours = () => {
         pageSize: pageSize,
       });
       const data = Array.isArray(res.data) ? res.data : [];
+      console.log('Tours fetched:', data.length, 'items');
       setTours(data);
       setTotalCount(res.totalCount || data.length);
     } catch (err) {
@@ -193,7 +209,7 @@ const Tours = () => {
       render: (_: any, record: PendingTour) => {
         // Hiển thị status text trực tiếp từ response, hoặc dùng hàm chuyển đổi nếu cần
         const color = getTourDetailsStatusColor(record.status);
-        const text = record.status;
+        const text = getTourStatusText(record.status);
         return <Tag color={color}>{text}</Tag>;
       },
       filters: [
@@ -261,7 +277,7 @@ const Tours = () => {
               checked={includeInactive}
               onChange={checked => {
                 setIncludeInactive(checked);
-                setTimeout(() => fetchTours(), 0);
+                setPageIndex(0); // Reset về trang đầu khi thay đổi filter
               }}
             />
           </div>
@@ -293,12 +309,12 @@ const Tours = () => {
 
 
       <TourDetailModal
-  open={detailModalOpen}
-  onClose={() => setDetailModalOpen(false)}
-  tour={selectedTour}
-  onApprove={handleApprove}
-  onReject={handleReject}
-/>
+        open={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        tour={selectedTour}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
     </div>
   );
 };
