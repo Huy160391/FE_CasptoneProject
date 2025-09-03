@@ -9,7 +9,6 @@ import {
 } from 'antd';
 import {
     SearchOutlined,
-    EditOutlined,
     EyeOutlined,
     UserOutlined
 } from '@ant-design/icons';
@@ -133,7 +132,7 @@ const TourCompanyManagement = () => {
             render: (_, record) => (
                 <Space>
                     <Button icon={<EyeOutlined />} size="small" onClick={() => { setModalCompany(record); setModalOpen(true); setModalEdit(false); }}>Xem</Button>
-                    <Button icon={<EditOutlined />} size="small" onClick={() => { setModalCompany(record); setModalOpen(true); setModalEdit(true); }}>Sửa</Button>
+                    {/* <Button icon={<EditOutlined />} size="small" onClick={() => { setModalCompany(record); setModalOpen(true); setModalEdit(true); }}>Sửa</Button> */}
                 </Space>
             ),
         },
@@ -142,7 +141,7 @@ const TourCompanyManagement = () => {
     return (
         <div className="company-management-page">
             <div className="header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Quản lý công ty du lịch</h1>
+                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Danh sách công ty</h1>
                 <Input
                     placeholder="Tìm kiếm tên công ty, đại diện..."
                     prefix={<SearchOutlined />}

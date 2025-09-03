@@ -44,8 +44,8 @@ const BlogPosts: React.FC = () => {
         <section className="blog-posts">
             <div className="container">
                 <div className="section-header">
-                    <Title level={2}>{t("home.blogPosts.title")}</Title>
-                    <Paragraph>{t("home.blogPosts.subtitle")}</Paragraph>
+                    <h2 className="section-title">{t("home.blogPosts.title")}</h2>
+                    <p className="section-subtitle">{t("home.blogPosts.subtitle")}</p>
                 </div>
 
                 <Row gutter={[24, 24]} className="bento-grid">

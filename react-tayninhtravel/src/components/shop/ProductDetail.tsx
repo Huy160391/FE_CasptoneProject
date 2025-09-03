@@ -227,11 +227,11 @@ const ProductDetail = () => {
     })
   }
 
-  const handleBuyNow = () => {
-    handleAddToCart()
-    // Navigate to checkout page
-    // navigate('/checkout')
-  }
+  // const handleBuyNow = () => {
+  //   handleAddToCart()
+  //   // Navigate to checkout page
+  //   // navigate('/checkout')
+  // }
 
   const ProductImages = React.memo(({ product }: { product: EnhancedProduct }) => {
     const [mainImage, setMainImage] = useState<string>(product.additionalImages[0] || '');
@@ -515,7 +515,7 @@ const ProductDetail = () => {
             <div className="product-meta">
               <Rate disabled defaultValue={product.rating} />
               <Text className="review-count">({product.reviews} đánh giá)</Text>
-              <Text className="sku">SKU: {product.sku}</Text>
+              {/* <Text className="sku">SKU: {product.sku}</Text> */}
               <Text className="sold-count" style={{ marginLeft: 16, color: '#888' }}>
                 {t('shop.soldCount', { count: product.soldCount })}
               </Text>
@@ -587,7 +587,7 @@ const ProductDetail = () => {
                     : t('cart.addToCart')
                   }
                 </Button>
-                <Button
+                {/* <Button
                   type="default"
                   size="large"
                   onClick={handleBuyNow}
@@ -595,7 +595,7 @@ const ProductDetail = () => {
                   disabled={productCart.loading}
                 >
                   Mua ngay
-                </Button>
+                </Button> */}
                 <Button type="text" icon={<ShareAltOutlined />} className="share-btn" onClick={() => setSharePopupVisible(true)} />
               </div>
             </div>

@@ -6,6 +6,7 @@
 import tokenExpirationService from './tokenExpirationService';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '../store/useAuthStore';
+import { useCartStore } from '../store/useCartStore';
 
 interface JWTPayload {
     exp?: number;
@@ -94,6 +95,23 @@ export const appInitService = {
     },
 
     /**
+     * Clear cart nếu user không phải là role 'user'
+     */
+    clearCartForNonUsers: (): void => {
+        const authStore = useAuthStore.getState();
+        const user = authStore.user;
+
+        // Nếu có user và role không phải 'user', clear cart
+        if (user && user.role !== 'user') {
+            console.log('Clearing cart for non-user role:', user.role);
+            const cartStore = useCartStore.getState();
+            cartStore.clearCart();
+            // Clear cart storage để không load lại từ localStorage
+            localStorage.removeItem('cart-storage');
+        }
+    },
+
+    /**
      * Khởi tạo app - validate token và setup services
      */
     /**
@@ -141,6 +159,9 @@ export const appInitService = {
 
         // Setup periodic token validation (every 1 minute)
         appInitService.startPeriodicValidation();
+
+        // Clear cart cho các role không phải user
+        appInitService.clearCartForNonUsers();
 
         console.log('App services initialized successfully');
     },

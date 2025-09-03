@@ -69,13 +69,15 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         form.resetFields()
         onClose()
 
-        // Đồng bộ cart sau khi login thành công
-        const syncedCart = await syncCartOnLogin(response.token)
-        // Cập nhật Zustand store trực tiếp (không import động)
-        if (syncedCart && Array.isArray(syncedCart.items)) {
-          const { useCartStore } = await import('@/store/useCartStore');
-          if (useCartStore?.setState) {
-            useCartStore.setState({ items: syncedCart.items });
+        // Chỉ đồng bộ cart cho user role
+        if (response.user.role === 'user') {
+          const syncedCart = await syncCartOnLogin(response.token)
+          // Cập nhật Zustand store trực tiếp (không import động)
+          if (syncedCart && Array.isArray(syncedCart.items)) {
+            const { useCartStore } = await import('@/store/useCartStore');
+            if (useCartStore?.setState) {
+              useCartStore.setState({ items: syncedCart.items });
+            }
           }
         }
 
@@ -143,12 +145,14 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
                   message.success(t('common.loginSuccess'));
                   form.resetFields();
                   onClose();
-                  // Đồng bộ cart sau khi login thành công
-                  const syncedCart = await syncCartOnLogin(loginRes.token);
-                  if (syncedCart && Array.isArray(syncedCart.items)) {
-                    const { useCartStore } = await import('@/store/useCartStore');
-                    if (useCartStore?.setState) {
-                      useCartStore.setState({ items: syncedCart.items });
+                  // Chỉ đồng bộ cart cho user role
+                  if (loginRes.user.role === 'user') {
+                    const syncedCart = await syncCartOnLogin(loginRes.token);
+                    if (syncedCart && Array.isArray(syncedCart.items)) {
+                      const { useCartStore } = await import('@/store/useCartStore');
+                      if (useCartStore?.setState) {
+                        useCartStore.setState({ items: syncedCart.items });
+                      }
                     }
                   }
                   if (onLoginSuccess) {
