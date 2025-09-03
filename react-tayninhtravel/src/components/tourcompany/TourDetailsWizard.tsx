@@ -415,6 +415,19 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
       .validateFields()
       .then((values) => {
         const newCheckInTime = values.checkInTime.format("HH:mm");
+        // Kiểm tra trùng lặp specialtyShopId
+            const existingSpecialtyShopIds = wizardData.timeline.map(
+                (item) => item.specialtyShopId
+            );
+            if (
+                values.specialtyShopId &&
+                existingSpecialtyShopIds.includes(values.specialtyShopId)
+            ) {
+                message.error(
+                    "Specialty shop đã tồn tại trong timeline. Vui lòng chọn shop khác."
+                );
+                return;
+            }
 
         // Validate timeline order - check if new time is after the last item
         if (wizardData.timeline.length > 0) {
