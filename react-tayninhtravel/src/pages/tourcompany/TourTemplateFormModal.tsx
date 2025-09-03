@@ -60,11 +60,11 @@ const TourTemplateFormModal: React.FC<TourTemplateFormModalProps> = ({
                     message.error('Vui lòng nhập điểm kết thúc');
                     return;
                 }
-                if (!values.templateType) {
+                if (values.templateType === undefined || values.templateType === null) {
                     message.error('Vui lòng chọn loại tour');
                     return;
                 }
-                if (!values.scheduleDays) {
+                if (values.scheduleDays === undefined || values.scheduleDays === null) {
                     message.error('Vui lòng chọn ngày trong tuần');
                     return;
                 }

@@ -182,7 +182,7 @@ export const validateTourTemplate = (data: any): string[] => {
   }
 
   // Template type validation
-  if (!data.templateType || !rules.templateType.enum.includes(data.templateType)) {
+  if (data.templateType === undefined || data.templateType === null || !rules.templateType.enum.includes(data.templateType)) {
     errors.push(rules.templateType.message);
   }
 
