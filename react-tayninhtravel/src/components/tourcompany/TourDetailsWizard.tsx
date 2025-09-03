@@ -241,8 +241,14 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
         if (wizardData.basicInfo.selectedSkills.length === 0) {
           message.error("Vui lòng chọn ít nhất một kỹ năng yêu cầu");
           return;
-        }
+        }        
       }
+       if (currentStep === 0) {
+            if (uploadedImageUrls.length === 0) {
+                message.error("Vui lòng tải lên ít nhất một hình ảnh cho tour.");
+                return;
+            }
+        }
 
       await form.validateFields();
       const values = form.getFieldsValue();
@@ -570,7 +576,12 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
       </Form.Item>
 
       {/* Multiple Images Upload Section */}
-      <Form.Item label="Hình ảnh tour (tùy chọn)" style={{ marginBottom: 16 }}>
+      <Form.Item
+  label="Hình ảnh tour"
+  style={{ marginBottom: 16 }}
+  validateStatus={uploadedImageUrls.length === 0 ? "error" : ""}
+  help={uploadedImageUrls.length === 0 ? "Vui lòng tải lên ít nhất một hình ảnh." : ""}
+>
         <div>
           <Upload
             accept="image/*"
