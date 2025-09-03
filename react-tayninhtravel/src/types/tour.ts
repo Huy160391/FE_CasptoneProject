@@ -324,7 +324,7 @@ export interface CreateHolidayTourTemplateRequest {
     startLocation: string;
     endLocation: string;
     templateType: TourTemplateType;
-    tourDate: string; // Format: YYYY-MM-DDTHH:mm:ss.SSSZ (ISO datetime)
+    tourDate: string; // Format: YYYY-MM-DD (DateOnly for backend)
     images: string[];
 }
 
