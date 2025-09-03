@@ -98,6 +98,9 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
         images: imageUrls.length > 0 ? imageUrls : [],
       };
 
+      // Debug logging để kiểm tra request data
+      console.log("Holiday Tour Template Request Data:", JSON.stringify(requestData, null, 2));
+
       // Use the enhanced service or fallback to original with error handling
       let response;
       try {
