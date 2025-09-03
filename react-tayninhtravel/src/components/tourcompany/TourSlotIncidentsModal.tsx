@@ -30,10 +30,10 @@ interface Incident {
     description: string;
     severity: 'Low' | 'Medium' | 'High' | 'Critical';
     status: string;
-    createdAt: string;
-    reportedAt?: string;
+    createdAt: string | Date;
+    reportedAt?: string | Date;
     tourSlotId: string;
-    tourSlotDate: string;
+    tourSlotDate: string; // DateOnly field - kept as string
     tourName: string;
     guideName?: string;
     guidePhone?: string;
@@ -99,15 +99,18 @@ const TourSlotIncidentsModal: React.FC<TourSlotIncidentsModalProps> = ({
         }
     };
 
-    const formatDate = (dateString: string | undefined): string => {
-        if (!dateString) return 'N/A';
+    const formatDate = (dateValue: string | Date | undefined): string => {
+        if (!dateValue) return 'N/A';
         try {
-            return new Date(dateString).toLocaleString('vi-VN');
+            const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+            return date.toLocaleString('vi-VN');
         } catch (error) {
             console.error('Error formatting date:', error);
             return 'N/A';
         }
     };
+
+
 
     const handleClose = () => {
         setIncidents([]);

@@ -62,8 +62,8 @@ export const transformResponseData = (data: any): any => {
         const transformed: any = {};
         for (const [key, value] of Object.entries(data)) {
             if (typeof value === 'string' && isDateString(value)) {
-                // Skip transformation for tourDate field (DateOnly from backend)
-                if (key === 'tourDate') {
+                // Skip transformation for date-only fields (DateOnly from backend)
+                if (key === 'tourDate' || key === 'tourSlotDate') {
                     transformed[key] = value;
                 } else {
                     // Convert date strings to Vietnam timezone Date objects
