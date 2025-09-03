@@ -1575,7 +1575,6 @@
                 "cancelled": "Cancelled"
             }
         },
-
         "reviews": {
             "title": "Review History",
             "searchPlaceholder": "Search by tour name, customer",
@@ -2141,7 +2140,8 @@
             "validation": {
                 "acceptTerms": "Please accept terms and conditions",
                 "acceptPrivacy": "Please accept privacy policy"
-            }
+            },
+            "tourInfo": "Tour Information"
         },
         "summary": {
             "title": "Order Summary",

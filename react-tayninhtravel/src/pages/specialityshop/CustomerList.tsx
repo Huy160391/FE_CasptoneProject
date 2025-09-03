@@ -256,6 +256,17 @@ const CustomerList: React.FC = () => {
             },
         },
         {
+            title: 'Giá tiền đơn hàng',
+            key: 'orderAmount',
+            width: 150,
+            render: (_: any, record: any) => {
+                const amount = record.paidOrdersFull?.[0]?.totalAmount;
+                return amount && typeof amount === 'number'
+                    ? `${amount.toLocaleString()} ₫`
+                    : '0 ₫';
+            },
+        },
+        {
             title: 'Thao tác',
             key: 'action',
             width: 200,
@@ -386,8 +397,8 @@ const CustomerList: React.FC = () => {
                                     : '0 ₫'}
                             </Descriptions.Item>
                             <Descriptions.Item label="Thành tiền">
-                                {(selectedOrder.paidOrdersFull?.[0]?.totalAfterDiscount && typeof selectedOrder.paidOrdersFull[0].totalAfterDiscount === 'number')
-                                    ? selectedOrder.paidOrdersFull[0].totalAfterDiscount.toLocaleString() + ' ₫'
+                                {(selectedOrder.paidOrdersFull?.[0]?.totalAmount && typeof selectedOrder.paidOrdersFull[0].totalAmount === 'number')
+                                    ? selectedOrder.paidOrdersFull[0].totalAmount.toLocaleString() + ' ₫'
                                     : '0 ₫'}
                             </Descriptions.Item>
                             <Descriptions.Item label="Trạng thái thanh toán">
@@ -449,11 +460,11 @@ const CustomerList: React.FC = () => {
                                 summary={() => (
                                     <Table.Summary.Row>
                                         <Table.Summary.Cell index={0} colSpan={3}>
-                                            <strong>Tổng cộng (sau giảm giá)</strong>
+                                            <strong>Tổng cộng</strong>
                                         </Table.Summary.Cell>
                                         <Table.Summary.Cell index={1}>
                                             <strong>
-                                                {selectedOrder.paidOrdersFull?.[0]?.totalAfterDiscount?.toLocaleString() || '0'} ₫
+                                                {selectedOrder.paidOrdersFull?.[0]?.totalAmount?.toLocaleString() || '0'} ₫
                                             </strong>
                                         </Table.Summary.Cell>
                                     </Table.Summary.Row>

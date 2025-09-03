@@ -212,6 +212,10 @@ const BookingPage: React.FC = () => {
         const availableSlots = response.data.filter((slot) => {
           const slotDate = new Date(slot.tourDate);
           const isNotPast = slotDate >= today;
+          const isInProgress = slot.status === 5 ||
+            slot.statusName?.toLowerCase().includes('inprogress') ||
+            slot.statusName?.toLowerCase().includes('đang thực hiện') ||
+            slot.statusName?.toLowerCase().includes('đang tiến hành'); // InProgress status
 
           console.log(`🔍 Slot ${slot.id} SIMPLE DEBUG:`, {
             tourDate: slot.tourDate,
@@ -222,16 +226,19 @@ const BookingPage: React.FC = () => {
             currentBookings: slot.currentBookings,
             availableSpots: slot.availableSpots,
             isNotPast: isNotPast,
-            willShow: slot.isActive && isNotPast ? "✅ SHOW" : "❌ HIDE",
+            isInProgress: isInProgress,
+            willShow: slot.isActive && isNotPast && !isInProgress ? "✅ SHOW" : "❌ HIDE",
             hideReason: !slot.isActive
               ? "not active"
               : !isNotPast
                 ? "in past"
-                : null,
+                : isInProgress
+                  ? "in progress"
+                  : null,
           });
 
-          // ✅ SIMPLIFIED: Only filter out inactive and past slots
-          return slot.isActive && isNotPast;
+          // ✅ UPDATED: Filter out inactive, past slots, and InProgress slots
+          return slot.isActive && isNotPast && !isInProgress;
         });
 
         console.log("Available slots after filtering:", availableSlots);
@@ -861,16 +868,21 @@ const BookingPage: React.FC = () => {
                             // Ensure non-negative
                             availableSpots = Math.max(0, availableSpots);
 
-                            // ✅ FIXED: Check status properly - disable FullyBooked (status 2), Cancelled (status 3), and Completed (status 4/5)
+                            // ✅ FIXED: Check status properly - disable FullyBooked (status 2), Cancelled (status 3), and InProgress (status 5)
                             const isSoldOut =
                               availableSpots === 0 ||
                               slot.status === 2 ||
                               slot.status === 3;
 
-                            // Check if slot is completed - typically status 4 or 5, or check by statusName
+                            // Check if slot is InProgress (status 5 or by statusName)
+                            const isInProgress = slot.status === 5 ||
+                              slot.statusName?.toLowerCase().includes('inprogress') ||
+                              slot.statusName?.toLowerCase().includes('đang thực hiện') ||
+                              slot.statusName?.toLowerCase().includes('đang tiến hành');
+
+                            // Check if slot is completed - typically status 4, or check by statusName
                             const isCompleted =
                               slot.status === 4 ||
-                              slot.status === 5 ||
                               slot.statusName?.toLowerCase().includes('hoàn thành') ||
                               slot.statusName?.toLowerCase().includes('completed') ||
                               slot.statusName?.toLowerCase().includes('finished');
@@ -878,8 +890,18 @@ const BookingPage: React.FC = () => {
                             const isLowAvailability =
                               availableSpots > 0 && availableSpots < 5;
 
-                            // ✅ OPTION 1: Hide completed slots entirely (current behavior)
-                            if (isCompleted) {
+                            // Debug log for each slot being rendered
+                            console.log(`🎯 RENDERING Slot ${slot.id}:`, {
+                              tourDate: slot.tourDate,
+                              status: slot.status,
+                              statusName: slot.statusName,
+                              isInProgress: isInProgress,
+                              isCompleted: isCompleted,
+                              willHide: isCompleted || isInProgress ? "YES" : "NO"
+                            });
+
+                            // ✅ OPTION 1: Hide completed and InProgress slots entirely (current behavior)
+                            if (isCompleted || isInProgress) {
                               return null;
                             }
 
@@ -911,6 +933,16 @@ const BookingPage: React.FC = () => {
                                     // Cancelled
                                     e.preventDefault();
                                     message.warning("Slot này đã bị hủy");
+                                    return;
+                                  }
+
+                                  if (slot.status === 5 ||
+                                    slot.statusName?.toLowerCase().includes('inprogress') ||
+                                    slot.statusName?.toLowerCase().includes('đang thực hiện') ||
+                                    slot.statusName?.toLowerCase().includes('đang tiến hành')) {
+                                    // InProgress
+                                    e.preventDefault();
+                                    message.warning("Slot này đang được thực hiện, không thể đặt booking");
                                     return;
                                   }
 
