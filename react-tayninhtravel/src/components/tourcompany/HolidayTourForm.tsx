@@ -88,17 +88,13 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
         showDetails: false,
       });
 
-      // Đảm bảo tourDate có thời gian mặc định (7:00 AM) nếu chỉ chọn ngày
-      const tourDateTime = values.tourDate.hour() === 0 && values.tourDate.minute() === 0
-        ? values.tourDate.hour(7).minute(0).second(0) // Set 7:00 AM nếu chưa set thời gian
-        : values.tourDate;
-
+      // Backend chỉ cần DateOnly, không cần thời gian
       const requestData: CreateHolidayTourTemplateRequest = {
         title: values.title,
         templateType: values.templateType,
         startLocation: values.startLocation,
         endLocation: values.endLocation,
-        tourDate: tourDateTime.format("YYYY-MM-DDTHH:mm:ss.SSSZ"), // Format datetime đầy đủ cho backend
+        tourDate: values.tourDate.format("YYYY-MM-DD"), // Chỉ gửi ngày, không gửi thời gian
         images: imageUrls.length > 0 ? imageUrls : [],
       };
 
@@ -133,7 +129,7 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
       }
 
       if (response.success) {
-        message.success("Tạo Tour Ngày Lễ thành công!");
+        message.success("Tạo Template Tour Ngày Lễ thành công!");
         form.resetFields();
         setImageUrls([]);
         setErrorState({
@@ -147,7 +143,7 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
         handleBackendErrors(response);
       }
     } catch (error) {
-      console.error("Error creating holiday tour:", error);
+      console.error("Error creating holiday tour template:", error);
       handleAxiosError(error as AxiosError);
     } finally {
       setLoading(false);
@@ -315,7 +311,7 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <CalendarOutlined />
-          <span>Tạo Tour Ngày Lễ</span>
+          <span>Tạo Template Tour Ngày Lễ</span>
         </div>
       }
       open={visible}
@@ -323,8 +319,8 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
       footer={null}
       width={800}>
       <Alert
-        message="Tour Ngày Lễ"
-        description="Tour Ngày Lễ được tạo cho một ngày cụ thể thay vì theo lịch hàng tuần. Hệ thống sẽ tự động tạo một slot duy nhất cho ngày được chọn."
+        message="Template Tour Ngày Lễ"
+        description="Template Tour Ngày Lễ được tạo cho một ngày cụ thể thay vì theo lịch hàng tuần. Hệ thống sẽ tự động tạo một slot duy nhất cho ngày được chọn."
         type="info"
         showIcon
         style={{ marginBottom: 24 }}
@@ -349,14 +345,14 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
             <Col span={24}>
               <Form.Item
                 name="title"
-                label="Tên Tour"
+                label="Tên Template Tour"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên tour" },
-                  { min: 5, message: "Tên tour phải có ít nhất 5 ký tự" },
-                  { max: 200, message: "Tên tour không được quá 200 ký tự" },
+                  { required: true, message: "Vui lòng nhập tên template tour" },
+                  { min: 5, message: "Tên template tour phải có ít nhất 5 ký tự" },
+                  { max: 200, message: "Tên template tour không được quá 200 ký tự" },
                 ]}>
                 <Input
-                  placeholder="Ví dụ: Tour Tết Nguyên Đán 2025"
+                  placeholder="Ví dụ: Template Tour Tết Nguyên Đán 2025"
                   data-field="title"
                 />
               </Form.Item>
@@ -367,19 +363,19 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
             <Col span={12}>
               <Form.Item
                 name="templateType"
-                label="Loại Tour"
+                label="Loại Template Tour"
                 rules={[
-                  { required: true, message: "Vui lòng chọn loại tour" },
+                  { required: true, message: "Vui lòng chọn loại template tour" },
                 ]}>
                 <Select
-                  placeholder="Chọn loại tour"
+                  placeholder="Chọn loại template tour"
                   data-field="templateType"
                 >
                   <Option value={TourTemplateType.FreeScenic}>
-                    Tour Miễn Phí (Cảnh Quan)
+                    Template Tour Miễn Phí (Cảnh Quan)
                   </Option>
                   <Option value={TourTemplateType.PaidAttraction}>
-                    Tour Có Phí (Điểm Tham Quan)
+                    Template Tour Có Phí (Điểm Tham Quan)
                   </Option>
                 </Select>
               </Form.Item>
@@ -401,13 +397,13 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
 
                       if (selectedDate.isBefore(minDate)) {
                         return Promise.reject(
-                          new Error(`Ngày tour phải sau ít nhất 30 ngày từ hôm nay (${minDate.format('DD/MM/YYYY')})`)
+                          new Error(`Ngày template tour phải sau ít nhất 30 ngày từ hôm nay (${minDate.format('DD/MM/YYYY')})`)
                         );
                       }
 
                       if (selectedDate.isAfter(maxDate)) {
                         return Promise.reject(
-                          new Error(`Ngày tour không được quá 2 năm trong tương lai (${maxDate.format('DD/MM/YYYY')})`)
+                          new Error(`Ngày template tour không được quá 2 năm trong tương lai (${maxDate.format('DD/MM/YYYY')})`)
                         );
                       }
 
@@ -415,7 +411,7 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
                     }
                   }
                 ]}
-                extra="Ngày tour phải sau ít nhất 30 ngày từ hôm nay và không quá 2 năm trong tương lai"
+                extra="Ngày template tour phải sau ít nhất 30 ngày từ hôm nay và không quá 2 năm trong tương lai"
               >
                 <DatePicker
                   style={{ width: "100%" }}
@@ -457,10 +453,10 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
             </Col>
           </Row>
 
-          <Form.Item name="description" label="Mô Tả Tour">
+          <Form.Item name="description" label="Mô Tả Template Tour">
             <TextArea
               rows={4}
-              placeholder="Mô tả chi tiết về Tour Ngày Lễ..."
+              placeholder="Mô tả chi tiết về Template Tour Ngày Lễ..."
               maxLength={1000}
               showCount
               data-field="description"
@@ -531,7 +527,7 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
             <Space>
               <Button onClick={handleCancel}>Hủy</Button>
               <Button type="primary" htmlType="submit" loading={loading}>
-                Tạo Tour Ngày Lễ
+                Tạo Template Tour Ngày Lễ
               </Button>
             </Space>
           </div>

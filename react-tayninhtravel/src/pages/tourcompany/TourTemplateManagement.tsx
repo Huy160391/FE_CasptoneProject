@@ -676,7 +676,7 @@ const TourTemplateManagement: React.FC = () => {
               backgroundColor: "#f0f8ff",
               borderColor: "#1890ff",
             }}>
-            Tour Ngày Lễ
+            Template Tour Ngày Lễ
           </Button>
         </div>
       </div>

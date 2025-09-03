@@ -160,7 +160,7 @@ const HolidayTourErrorDisplay: React.FC<HolidayTourErrorDisplayProps> = ({
 
   return (
     <Alert
-      message="Chi tiết lỗi Holiday Tour"
+      message="Chi tiết lỗi Template Holiday Tour"
       type="error"
       showIcon
       icon={<ExclamationCircleOutlined />}
