@@ -2,7 +2,6 @@
 import HeroSection from "../components/home/HeroSection";
 import TourismHighlights from "../components/home/TourismHighlights";
 import FeaturedTours from "../components/home/FeaturedTours";
-import HolidayTours from "../components/home/HolidayTours";
 import WhyChooseUs from "../components/home/WhyChooseUs";
 import FeaturedGuides from "../components/home/FeaturedGuides";
 import BestSellers from "../components/home/BestSellers";
@@ -18,7 +17,6 @@ const Home = () => {
       <div className="container">
         <TourismHighlights />
         <FeaturedTours />
-        <HolidayTours />
         <FeaturedGuides />
 
         <BlogPosts />

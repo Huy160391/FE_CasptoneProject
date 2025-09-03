@@ -3,19 +3,171 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 24px;
+        margin-bottom: 32px;
+        padding: 0 4px;
 
         .ant-typography {
             margin-bottom: 0;
+            color: #262626;
+            font-weight: 600;
         }
     }
 
-    .stats-cards {
+    // Main Revenue Cards - New Design
+    .main-revenue-cards {
+        margin-bottom: 32px;
+
+        .revenue-card {
+            height: 160px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+
+            &:hover {
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+                transform: translateY(-2px);
+            }
+
+            .ant-card-body {
+                padding: 24px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .card-header {
+                display: flex;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 16px;
+
+                .card-icon {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    color: white;
+                    flex-shrink: 0;
+                }
+
+                .card-info {
+                    flex: 1;
+
+                    .card-title {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #262626;
+                        margin-bottom: 4px;
+                        line-height: 1.3;
+                    }
+
+                    .card-subtitle {
+                        font-size: 12px;
+                        color: #8c8c8c;
+                        line-height: 1.2;
+                    }
+                }
+            }
+
+            .card-value {
+                font-size: 32px;
+                font-weight: 700;
+                color: #262626;
+                line-height: 1.2;
+                margin-bottom: 8px;
+            }
+
+            .growth-indicator {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            // Specific card colors
+            &.revenue-before-tax .card-icon {
+                background: linear-gradient(135deg, #1890ff, #40a9ff);
+            }
+
+            &.revenue-after-tax .card-icon {
+                background: linear-gradient(135deg, #52c41a, #73d13d);
+            }
+
+            &.average-revenue .card-icon {
+                background: linear-gradient(135deg, #722ed1, #9254de);
+            }
+        }
+    }
+
+    // Quick Stats Cards
+    .quick-stats-cards {
+        .stat-card {
+            height: 140px;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+
+            &:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                border-color: #d9d9d9;
+            }
+
+            .ant-card-body {
+                padding: 20px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .ant-statistic {
+                .ant-statistic-title {
+                    color: #666;
+                    font-weight: 500;
+                    font-size: 14px;
+                    margin-bottom: 12px;
+                    line-height: 1.2;
+                }
+
+                .ant-statistic-content {
+                    line-height: 1.2;
+                    margin-bottom: 8px;
+                }
+            }
+
+            .growth-indicator {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 12px;
+                font-weight: 500;
+                margin-top: auto;
+            }
+
+            .additional-info {
+                margin-top: auto;
+                font-size: 12px;
+                color: #8c8c8c;
+                line-height: 1.2;
+            }
+        }
+    }
+
+    .additional-stats {
+        margin-top: 32px; // Add space between main stats and additional stats
+        padding-top: 24px;
+        border-top: 1px solid #f0f0f0; // Subtle separator line
+
         .ant-card {
-            height: 140px; // Fixed height for all cards
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            height: 140px; // Same height as main stats
 
             .ant-card-body {
                 padding: 16px;
@@ -32,13 +184,12 @@
                     font-size: 14px;
                     margin-bottom: 8px;
                     line-height: 1.2;
-                    min-height: 34px; // Fixed height for title area
+                    min-height: 34px;
                     display: flex;
                     align-items: center;
                 }
 
                 .ant-statistic-content {
-                    color: #1890ff;
                     font-size: 24px;
                     font-weight: 600;
                     line-height: 1.2;
@@ -46,33 +197,23 @@
                 }
             }
 
-            .growth-indicator {
-                margin-top: auto;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                font-size: 12px;
-                min-height: 20px;
-            }
-
-            // Additional info styling
             .additional-info {
-                margin-top: 8px;
+                margin-top: auto;
                 font-size: 12px;
                 color: #666;
-                min-height: 16px;
+                min-height: 20px;
                 line-height: 1.2;
             }
         }
     }
 
-    .additional-stats {
-        margin-top: 32px; // Add space between main stats and additional stats
-        padding-top: 24px;
-        border-top: 1px solid #f0f0f0; // Subtle separator line
-
+    // Tax and Commission Cards styling
+    .tax-commission-cards {
         .ant-card {
-            height: 140px; // Same height as main stats
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
 
             .ant-card-body {
                 padding: 16px;
@@ -177,14 +318,37 @@
     }
 
     .recent-bookings {
+        .ant-card {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
         .ant-table {
             .ant-table-thead > tr > th {
                 background-color: #fafafa;
                 font-weight: 600;
+                color: #262626;
+                border-bottom: 2px solid #f0f0f0;
+                padding: 16px 12px;
             }
 
-            .ant-table-tbody > tr:hover > td {
-                background-color: #f0f9ff;
+            .ant-table-tbody > tr {
+                &:hover > td {
+                    background-color: #f0f9ff;
+                }
+
+                > td {
+                    padding: 12px;
+                    border-bottom: 1px solid #f5f5f5;
+                }
+            }
+
+            .ant-tag {
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 500;
+                padding: 2px 8px;
+                border: none;
             }
         }
     }
@@ -194,31 +358,76 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 12px;
+            margin-bottom: 24px;
         }
 
-        .additional-stats {
-            margin-top: 24px; // Reduce margin on mobile
-            padding-top: 16px;
-        }
+        .main-revenue-cards {
+            margin-bottom: 24px;
 
-        .stats-cards, .additional-stats {
-            .ant-col {
-                margin-bottom: 16px;
+            .revenue-card {
+                height: 140px;
+
+                .ant-card-body {
+                    padding: 16px;
+                }
+
+                .card-header {
+                    gap: 12px;
+                    margin-bottom: 12px;
+
+                    .card-icon {
+                        width: 40px;
+                        height: 40px;
+                        font-size: 18px;
+                    }
+
+                    .card-info {
+                        .card-title {
+                            font-size: 14px;
+                        }
+
+                        .card-subtitle {
+                            font-size: 11px;
+                        }
+                    }
+                }
+
+                .card-value {
+                    font-size: 24px;
+                }
+
+                .growth-indicator {
+                    font-size: 12px;
+                }
             }
+        }
 
-            .ant-card {
-                height: auto; // Allow flexible height on mobile
-                min-height: 120px;
+        .quick-stats-cards {
+            .stat-card {
+                height: 120px;
+
+                .ant-card-body {
+                    padding: 16px;
+                }
 
                 .ant-statistic {
                     .ant-statistic-title {
-                        min-height: auto;
                         font-size: 13px;
                     }
 
                     .ant-statistic-content {
-                        font-size: 20px;
+                        font-size: 24px !important;
                     }
+                }
+            }
+        }
+
+        .recent-bookings {
+            .ant-table {
+                .ant-table-thead > tr > th,
+                .ant-table-tbody > tr > td {
+                    padding: 8px 6px;
+                    font-size: 12px;
                 }
             }
         }

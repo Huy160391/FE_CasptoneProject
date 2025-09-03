@@ -36,6 +36,18 @@ const { RangePicker } = DatePicker;
 
 // Interfaces removed - using types from dashboard.ts
 
+// Helper function to format currency
+const formatCurrency = (value: number): string => {
+  if (value >= 1000000000) {
+    return `${(value / 1000000000).toFixed(1)}B ₫`;
+  } else if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}M ₫`;
+  } else if (value >= 1000) {
+    return `${(value / 1000).toFixed(1)}K ₫`;
+  }
+  return `${value.toLocaleString('vi-VN')} ₫`;
+};
+
 const TourCompanyDashboard: React.FC = () => {
   const { t } = useTranslation();
   const { token } = useAuthStore();
@@ -56,6 +68,49 @@ const TourCompanyDashboard: React.FC = () => {
     undefined
   );
 
+  // Helper function to get booking status text
+  const getBookingStatusText = (status: string): string => {
+    switch (status) {
+      case 'Pending':
+        return 'Chờ thanh toán';
+      case 'Confirmed':
+        return 'Đã xác nhận';
+      case 'CancelledByCustomer':
+        return 'Khách hủy';
+      case 'CancelledByCompany':
+        return 'Công ty hủy';
+      case 'Completed':
+        return 'Hoàn thành';
+      case 'NoShow':
+        return 'Không đến';
+      case 'Refunded':
+        return 'Đã hoàn tiền';
+      default:
+        return status || 'Không xác định';
+    }
+  };
+
+  // Helper function to get booking status color
+  const getBookingStatusColor = (status: string): string => {
+    switch (status) {
+      case 'Pending':
+        return 'orange';
+      case 'Confirmed':
+        return 'green';
+      case 'CancelledByCustomer':
+      case 'CancelledByCompany':
+        return 'red';
+      case 'Completed':
+        return 'blue';
+      case 'NoShow':
+        return 'gray';
+      case 'Refunded':
+        return 'purple';
+      default:
+        return 'default';
+    }
+  };
+
   // Columns for recent bookings table
   const bookingColumns = [
     {
@@ -63,31 +118,38 @@ const TourCompanyDashboard: React.FC = () => {
       dataIndex: "id",
       key: "id",
       width: 120,
+      render: (id: string) => (
+        <span style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+          {id}
+        </span>
+      ),
     },
     {
       title: "Tên tour",
       dataIndex: "tourName",
       key: "tourName",
       width: 200,
+      ellipsis: true,
     },
     {
-      title: "Tên khách hàng",
+      title: "Khách hàng",
       dataIndex: "customerName",
       key: "customerName",
       width: 150,
+      ellipsis: true,
     },
     {
       title: "Ngày đặt",
       dataIndex: "bookingDate",
       key: "bookingDate",
-      width: 120,
+      width: 100,
       render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
     },
     {
       title: "Ngày tour",
       dataIndex: "tourDate",
       key: "tourDate",
-      width: 120,
+      width: 100,
       render: (date: string) => date ? dayjs(date).format("DD/MM/YYYY") : "N/A",
     },
     {
@@ -95,37 +157,22 @@ const TourCompanyDashboard: React.FC = () => {
       dataIndex: "amount",
       key: "amount",
       width: 120,
-      render: (amount: number) => `${amount?.toLocaleString("vi-VN") || 0} ₫`,
+      render: (amount: number) => (
+        <span style={{ fontWeight: 'bold', color: '#1890ff' }}>
+          {formatCurrency(amount || 0)}
+        </span>
+      ),
     },
     {
-      title: t("tourCompany.transactions.columns.status"),
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => {
-        const statusConfig = {
-          confirmed: {
-            color: "success",
-            text: t("tourCompany.transactions.status.completed"),
-          },
-          pending: {
-            color: "warning",
-            text: t("tourCompany.transactions.status.pending"),
-          },
-          cancelled: {
-            color: "error",
-            text: t("tourCompany.transactions.status.cancelled"),
-          },
-          completed: {
-            color: "success",
-            text: t("tourCompany.transactions.status.completed"),
-          },
-        };
-        const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || {
-          color: "default",
-          text: status || "Unknown",
-        };
-        return <Tag color={config.color}>{config.text}</Tag>;
-      },
+      width: 120,
+      render: (status: string) => (
+        <Tag color={getBookingStatusColor(status)}>
+          {getBookingStatusText(status)}
+        </Tag>
+      ),
     },
   ];
 
@@ -256,25 +303,53 @@ const TourCompanyDashboard: React.FC = () => {
           )}
         </Space>
       </div>
-      <Row gutter={[16, 16]} className="stats-cards">
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Doanh thu tháng này"
-              value={dashboardData?.revenueMetrics?.totalRevenue || 0}
-              prefix={<DollarOutlined />}
-              suffix="₫"
-              formatter={(value) => {
-                const num = Number(value);
-                if (num >= 1000000) {
-                  return `${(num / 1000000).toFixed(1)}M`;
-                } else if (num >= 1000) {
-                  return `${(num / 1000).toFixed(1)}K`;
-                }
-                return num.toLocaleString();
-              }}
-              valueStyle={{ color: '#1890ff' }}
-            />
+      {/* Main Revenue Cards */}
+      <Row gutter={[24, 24]} className="main-revenue-cards">
+        <Col xs={24} sm={12} md={8}>
+          <Card className="revenue-card revenue-before-tax">
+            <div className="card-header">
+              <div className="card-icon">
+                <DollarOutlined />
+              </div>
+              <div className="card-info">
+                <div className="card-title">Doanh thu trước thuế</div>
+                <div className="card-subtitle">Sau trừ phí nền tảng</div>
+              </div>
+            </div>
+            <div className="card-value">
+              {formatCurrency(dashboardData?.revenueMetrics?.totalRevenueBeforeTax || 0)}
+            </div>
+            {dashboardData?.revenueMetrics?.revenueBeforeTaxGrowth !== undefined && (
+              <div className="growth-indicator">
+                <RiseOutlined
+                  style={{
+                    color: dashboardData.revenueMetrics.revenueBeforeTaxGrowth >= 0 ? "#52c41a" : "#ff4d4f"
+                  }}
+                />
+                <span style={{
+                  color: dashboardData.revenueMetrics.revenueBeforeTaxGrowth >= 0 ? "#52c41a" : "#ff4d4f"
+                }}>
+                  {dashboardData.revenueMetrics.revenueBeforeTaxGrowth >= 0 ? '+' : ''}
+                  {dashboardData.revenueMetrics.revenueBeforeTaxGrowth.toFixed(1)}%
+                </span>
+              </div>
+            )}
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={8}>
+          <Card className="revenue-card revenue-after-tax">
+            <div className="card-header">
+              <div className="card-icon">
+                <DollarOutlined />
+              </div>
+              <div className="card-info">
+                <div className="card-title">Doanh thu sau thuế</div>
+                <div className="card-subtitle">Sau trừ VAT & phí nền tảng</div>
+              </div>
+            </div>
+            <div className="card-value">
+              {formatCurrency(dashboardData?.revenueMetrics?.totalRevenueAfterTax || 0)}
+            </div>
             {dashboardData?.revenueMetrics?.revenueGrowth !== undefined && (
               <div className="growth-indicator">
                 <RiseOutlined
@@ -292,13 +367,33 @@ const TourCompanyDashboard: React.FC = () => {
             )}
           </Card>
         </Col>
+        <Col xs={24} sm={12} md={8}>
+          <Card className="revenue-card average-revenue">
+            <div className="card-header">
+              <div className="card-icon">
+                <BarChartOutlined />
+              </div>
+              <div className="card-info">
+                <div className="card-title">Doanh thu TB/booking</div>
+                <div className="card-subtitle">Trung bình mỗi đơn</div>
+              </div>
+            </div>
+            <div className="card-value">
+              {formatCurrency(dashboardData?.revenueMetrics?.averageRevenuePerBooking || 0)}
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Quick Stats Cards */}
+      <Row gutter={[16, 16]} className="quick-stats-cards" style={{ marginTop: 24 }}>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="stat-card">
             <Statistic
               title="Tours đang hoạt động"
               value={dashboardData?.tourMetrics?.activeTours || 0}
               prefix={<ShoppingOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: '#52c41a', fontSize: '28px', fontWeight: 'bold' }}
             />
             <div className="additional-info">
               Tổng: {dashboardData?.tourMetrics?.totalToursCreated || 0} tours
@@ -306,12 +401,12 @@ const TourCompanyDashboard: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="stat-card">
             <Statistic
               title="Tổng bookings"
               value={dashboardData?.bookingMetrics?.totalBookings || 0}
               prefix={<UserOutlined />}
-              valueStyle={{ color: '#722ed1' }}
+              valueStyle={{ color: '#722ed1', fontSize: '28px', fontWeight: 'bold' }}
             />
             {dashboardData?.bookingMetrics?.bookingGrowth !== undefined && (
               <div className="growth-indicator">
@@ -440,6 +535,68 @@ const TourCompanyDashboard: React.FC = () => {
           </Card>
         </Col>
       </Row>
+
+      {/* Tax and Commission Information */}
+      <div style={{ marginTop: 32, marginBottom: 16 }}>
+        <h3 style={{
+          margin: 0,
+          fontSize: '16px',
+          fontWeight: 600,
+          color: '#262626',
+          borderBottom: '1px solid #f0f0f0',
+          paddingBottom: '8px'
+        }}>
+          Thông tin thuế và phí
+        </h3>
+      </div>
+      <Row gutter={[16, 16]} className="tax-commission-cards" style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Tổng VAT phải nộp"
+              value={dashboardData?.revenueMetrics?.totalVAT || 0}
+              prefix={<DollarOutlined />}
+              suffix="₫"
+              formatter={(value) => {
+                const num = Number(value);
+                if (num >= 1000000) {
+                  return `${(num / 1000000).toFixed(1)}M`;
+                } else if (num >= 1000) {
+                  return `${(num / 1000).toFixed(1)}K`;
+                }
+                return num.toLocaleString();
+              }}
+              valueStyle={{ color: "#fa8c16" }}
+            />
+            <div className="additional-info">
+              VAT ~9.09% trên doanh thu gốc
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Phí nền tảng"
+              value={dashboardData?.revenueMetrics?.totalPlatformCommission || 0}
+              prefix={<DollarOutlined />}
+              suffix="₫"
+              formatter={(value) => {
+                const num = Number(value);
+                if (num >= 1000000) {
+                  return `${(num / 1000000).toFixed(1)}M`;
+                } else if (num >= 1000) {
+                  return `${(num / 1000).toFixed(1)}K`;
+                }
+                return num.toLocaleString();
+              }}
+              valueStyle={{ color: "#f5222d" }}
+            />
+            <div className="additional-info">
+              10% phí nền tảng
+            </div>
+          </Card>
+        </Col>
+      </Row>
       <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
         {" "}
         <Col xs={24} lg={14}>
@@ -548,19 +705,25 @@ const TourCompanyDashboard: React.FC = () => {
             className="recent-bookings">
             {recentBookings && recentBookings.length > 0 ? (
               <Table
-                dataSource={recentBookings.map((booking) => ({
+                dataSource={recentBookings.map((booking, index) => ({
+                  key: booking.id || index,
                   id: booking.bookingCode || booking.id,
-                  tourName: booking.tourName,
-                  customerName: booking.customerName,
+                  tourName: booking.tourName || 'N/A',
+                  customerName: booking.customerName || 'N/A',
                   bookingDate: booking.bookingDate,
                   tourDate: booking.tourDate,
-                  amount: booking.amount,
-                  status: booking.status?.toLowerCase() || 'pending',
-                  numberOfGuests: booking.numberOfGuests,
+                  amount: booking.amount || 0,
+                  status: booking.status || 'Pending', // Keep original case for proper mapping
+                  numberOfGuests: booking.numberOfGuests || 1,
                 }))}
                 columns={bookingColumns}
-                rowKey="id"
-                pagination={{ pageSize: 5 }}
+                rowKey="key"
+                pagination={{
+                  pageSize: 5,
+                  showSizeChanger: false,
+                  showQuickJumper: false,
+                  showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} booking`
+                }}
                 scroll={{ x: 800 }}
               />
             ) : (

@@ -21,11 +21,23 @@ export interface CompanyInfoDto {
 }
 
 export interface RevenueMetricsDto {
+  // New fields for pre-tax and after-tax revenue
+  totalRevenueBeforeTax: number;
+  totalRevenueAfterTax: number;
+  previousPeriodRevenueBeforeTax: number;
+  previousPeriodRevenueAfterTax: number;
+  revenueBeforeTaxGrowth: number;
+
+  // Legacy fields for backward compatibility
   totalRevenue: number;
   previousPeriodRevenue: number;
   revenueGrowth: number;
   averageRevenuePerBooking: number;
   projectedRevenue: number;
+
+  // Additional fields
+  totalVAT: number;
+  totalPlatformCommission: number;
 }
 
 export interface BookingMetricsDto {

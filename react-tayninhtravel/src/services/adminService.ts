@@ -1001,6 +1001,22 @@ class AdminService {
       };
     }
   }
+
+  async skipToRevenueTransfer(tourSlotId: string): Promise<any> {
+    try {
+      const response = await axios.post(
+        `/Testing/skip-to-revenue-transfer/${tourSlotId}`
+      );
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Error skipping to revenue transfer:", error);
+      const err = error as any;
+      return {
+        success: false,
+        message: err.response?.data?.message || "An error occurred",
+      };
+    }
+  }
 }
 
 export const adminService = new AdminService();

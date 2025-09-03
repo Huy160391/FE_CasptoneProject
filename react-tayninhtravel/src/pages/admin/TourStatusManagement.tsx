@@ -25,6 +25,7 @@ import {
   StopOutlined,
   InfoCircleOutlined,
   ToolOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 import { adminService } from "../../services/adminService";
 import dayjs from "dayjs";
@@ -151,6 +152,15 @@ const TourStatusManagement: React.FC = () => {
       "Hủy Tour (Auto-Cancel)",
       () => adminService.triggerAutoCancel(tourSlotInfo.tourSlot.id),
       "Tour đã được hủy thành công"
+    );
+  };
+
+  const handleSkipToRevenueTransfer = () => {
+    if (!tourSlotInfo) return;
+    executeTestAction(
+      "Skip to Revenue Transfer",
+      () => adminService.skipToRevenueTransfer(tourSlotInfo.tourSlot.id),
+      "Revenue đã được chuyển thành công cho tour company"
     );
   };
 
@@ -314,6 +324,25 @@ const TourStatusManagement: React.FC = () => {
                 </Button>
                 <Paragraph type="secondary" style={{ textAlign: "center" }}>
                   Mô phỏng việc tour bị hủy do không đủ khách.
+                </Paragraph>
+
+                <Divider />
+
+                <Button
+                  icon={<DollarOutlined />}
+                  type="primary"
+                  style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+                  onClick={handleSkipToRevenueTransfer}
+                  disabled={
+                    !tourSlotInfo.testingActions.canTriggerRevenueTransfer ||
+                    actionLoading
+                  }
+                  loading={actionLoading}
+                  block>
+                  Skip to Revenue Transfer
+                </Button>
+                <Paragraph type="secondary" style={{ textAlign: "center" }}>
+                  Chuyển tiền từ revenue hold vào ví tour company (sau 3 ngày).
                 </Paragraph>
               </Space>
             </Card>
