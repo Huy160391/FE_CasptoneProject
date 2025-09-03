@@ -58,6 +58,7 @@ import TimelineEditor from './TimelineEditor';
 import BookingsModal from './BookingsModal';
 import CancelTourModal from './CancelTourModal';
 import ManualInviteGuideModal from './ManualInviteGuideModal';
+import IncidentsModal from './IncidentsModal';
 
 const { TabPane } = Tabs;
 
@@ -115,6 +116,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
         return isCancelled;
     };
     const [manualInviteModalVisible, setManualInviteModalVisible] = useState(false);
+    const [incidentsModalVisible, setIncidentsModalVisible] = useState(false);
+    const [selectedSlotForIncidents, setSelectedSlotForIncidents] = useState<TourSlotDto | null>(null);
 
     useEffect(() => {
         if (visible && tourDetailsId && token) {
@@ -209,6 +212,11 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const handleViewBookings = (slot: TourSlotDto) => {
         setSelectedSlotForBookings(slot);
         setBookingsModalVisible(true);
+    };
+
+    const handleViewIncidents = (slot: TourSlotDto) => {
+        setSelectedSlotForIncidents(slot);
+        setIncidentsModalVisible(true);
     };
 
     const handleCancelTour = (slot: TourSlotDto) => {
@@ -544,7 +552,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                                     (tourDetails.status === 3 || String(tourDetails.status).toLowerCase() === 'public') && (
                                                         <div style={{ marginTop: 12, textAlign: 'center' }}>
                                                             <Row gutter={4}>
-                                                                <Col span={!isSlotCancelled(slot) ? 12 : 24}>
+                                                                <Col span={8}>
                                                                     <Button
                                                                         type="primary"
                                                                         size="small"
@@ -554,15 +562,30 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                                                             backgroundColor: '#52c41a',
                                                                             borderColor: '#52c41a',
                                                                             width: '100%',
-                                                                            fontSize: '11px',
+                                                                            fontSize: '10px',
                                                                             padding: '2px 4px'
                                                                         }}
                                                                     >
                                                                         Xem
                                                                     </Button>
                                                                 </Col>
+                                                                <Col span={8}>
+                                                                    <Button
+                                                                        danger
+                                                                        size="small"
+                                                                        icon={<ExclamationCircleOutlined />}
+                                                                        onClick={() => handleViewIncidents(slot)}
+                                                                        style={{
+                                                                            width: '100%',
+                                                                            fontSize: '10px',
+                                                                            padding: '2px 4px'
+                                                                        }}
+                                                                    >
+                                                                        Sự cố
+                                                                    </Button>
+                                                                </Col>
                                                                 {!isSlotCancelled(slot) && (
-                                                                    <Col span={12}>
+                                                                    <Col span={8}>
                                                                         <Button
                                                                             danger
                                                                             size="small"
@@ -570,7 +593,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                                                             onClick={() => handleCancelTour(slot)}
                                                                             style={{
                                                                                 width: '100%',
-                                                                                fontSize: '11px',
+                                                                                fontSize: '10px',
                                                                                 padding: '2px 4px'
                                                                             }}
                                                                         >
@@ -969,6 +992,18 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                     title: tourDetails.title,
                     startDate: tourDetails.createdAt,
                     endDate: tourDetails.updatedAt || tourDetails.createdAt
+                } : undefined}
+            />
+
+            {/* Incidents Modal */}
+            <IncidentsModal
+                visible={incidentsModalVisible}
+                onClose={() => setIncidentsModalVisible(false)}
+                tourSlotId={selectedSlotForIncidents?.id || null}
+                tourSlotInfo={selectedSlotForIncidents ? {
+                    tourDate: selectedSlotForIncidents.tourDate,
+                    formattedDateWithDay: selectedSlotForIncidents.formattedDateWithDay,
+                    statusName: selectedSlotForIncidents.statusName
                 } : undefined}
             />
         </Modal>

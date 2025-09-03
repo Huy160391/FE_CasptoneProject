@@ -1,4 +1,5 @@
 import axios from "../config/axios";
+import { AxiosError } from "axios";
 
 import {
   ApiResponse,
@@ -39,10 +40,91 @@ export const createHolidayTourTemplate = async (
   token?: string
 ): Promise<ApiResponse<TourTemplate>> => {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const response = await axios.post("/TourCompany/template/holiday", data, {
-    headers,
-  });
-  return response.data;
+
+  try {
+    const response = await axios.post("/TourCompany/template/holiday", data, {
+      headers,
+    });
+    return response.data;
+  } catch (error: any) {
+    // For Holiday Tour, we want to handle errors in the component
+    // So we extract the backend error response and return it
+    if (error.response?.data) {
+      // Return the backend error response as if it was successful
+      // This allows the component to handle validation errors properly
+      return {
+        success: false,
+        statusCode: error.response.status,
+        message: error.response.data.message || "Có lỗi xảy ra khi tạo Holiday Tour",
+        validationErrors: error.response.data.validationErrors || [],
+        fieldErrors: error.response.data.fieldErrors || {},
+        data: null,
+      } as ApiResponse<TourTemplate>;
+    }
+
+    // For network errors or other issues, re-throw
+    throw error;
+  }
+};
+
+// Enhanced Holiday Tour creation with detailed error handling
+export const createHolidayTourTemplateEnhanced = async (
+  data: CreateHolidayTourTemplateRequest,
+  token?: string
+): Promise<ApiResponse<TourTemplate>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  try {
+    const response = await axios.post("/TourCompany/template/holiday", data, {
+      headers,
+      // Disable automatic error handling for this request
+      validateStatus: () => true, // Accept all status codes
+    });
+
+    // Always return the response data, whether success or error
+    return {
+      success: response.data.success || response.status < 400,
+      statusCode: response.status,
+      message: response.data.message || (response.status < 400 ? "Thành công" : "Có lỗi xảy ra"),
+      validationErrors: response.data.validationErrors || response.data.ValidationErrors || [],
+      fieldErrors: response.data.fieldErrors || response.data.FieldErrors || {},
+      data: response.data.data || null,
+    } as ApiResponse<TourTemplate>;
+
+  } catch (error: any) {
+    // Handle network errors
+    if (error.code === 'ECONNABORTED') {
+      return {
+        success: false,
+        statusCode: 408,
+        message: "Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.",
+        validationErrors: [],
+        fieldErrors: {},
+        data: null,
+      } as ApiResponse<TourTemplate>;
+    }
+
+    if (error.code === 'ERR_NETWORK') {
+      return {
+        success: false,
+        statusCode: 0,
+        message: "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.",
+        validationErrors: [],
+        fieldErrors: {},
+        data: null,
+      } as ApiResponse<TourTemplate>;
+    }
+
+    // For other errors, return generic error
+    return {
+      success: false,
+      statusCode: 500,
+      message: "Có lỗi không xác định xảy ra. Vui lòng thử lại.",
+      validationErrors: [],
+      fieldErrors: {},
+      data: null,
+    } as ApiResponse<TourTemplate>;
+  }
 };
 
 // Lấy danh sách incidents cho tour company
@@ -530,6 +612,75 @@ export const performanceTracker = {
       console.log(`${operation} completed in ${duration.toFixed(2)}ms`);
     }
   },
+};
+
+// ===== INCIDENTS APIs =====
+
+// Lấy incidents theo tour slot ID (sử dụng API mới với TourSlotId)
+export const getTourSlotIncidents = async (
+  tourSlotId: string,
+  pageIndex = 0,
+  pageSize = 50
+): Promise<ApiResponse<any>> => {
+  try {
+    // Sử dụng API UserTourBooking đã được cập nhật để filter theo TourSlotId
+    const response = await axios.get(
+      `/UserTourBooking/tour-slot/${tourSlotId}/incidents?pageIndex=${pageIndex}&pageSize=${pageSize}`
+    );
+    return response.data;
+  } catch (error: any) {
+    console.warn('UserTourBooking API failed, trying TourCompany API with filter');
+
+    try {
+      // Fallback: Lấy tất cả incidents của tour company và filter theo TourSlotId
+      const allIncidentsResponse = await getTourCompanyIncidents({
+        pageIndex: 0,
+        pageSize: 1000
+      });
+
+      if (!allIncidentsResponse.success || !allIncidentsResponse.data) {
+        throw new Error('Failed to get company incidents');
+      }
+
+      // Filter incidents theo tour slot ID
+      const allIncidents = allIncidentsResponse.data.incidents || [];
+      const filteredIncidents = allIncidents.filter((incident: any) =>
+        incident.tourSlotId === tourSlotId
+      );
+
+      // Apply pagination
+      const startIndex = pageIndex * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedIncidents = filteredIncidents.slice(startIndex, endIndex);
+
+      return {
+        success: true,
+        statusCode: 200,
+        message: 'Lấy danh sách sự cố thành công',
+        data: {
+          incidents: paginatedIncidents,
+          totalCount: filteredIncidents.length,
+          pageIndex: pageIndex,
+          pageSize: pageSize,
+          totalPages: Math.ceil(filteredIncidents.length / pageSize)
+        }
+      };
+    } catch (fallbackError) {
+      console.error('Both APIs failed:', fallbackError);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Không thể tải danh sách sự cố',
+        data: {
+          incidents: [],
+          totalCount: 0,
+          pageIndex: pageIndex,
+          pageSize: pageSize,
+          totalPages: 0
+        }
+      };
+    }
+  }
 };
 
 // ===== TOUR GUIDE APIs =====
