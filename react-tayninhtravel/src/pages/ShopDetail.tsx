@@ -45,6 +45,7 @@ const ShopDetail: React.FC = () => {
 
     const [shopData, setShopData] = useState<ShopData | null>(null)
     const [products, setProducts] = useState<Product[]>([])
+    const [productCount, setProductCount] = useState<number>(0)
     const [loading, setLoading] = useState(true)
     const [productsLoading, setProductsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -81,19 +82,20 @@ const ShopDetail: React.FC = () => {
                 setProductsLoading(true)
                 console.log('Fetching products for shopId:', shopId)
 
-                // Get all products and filter by specialtyShopId
-                const response = await specialtyShopService.getProducts({ pageSize: 1000 })
+                // Sử dụng API với specialtyShopId để filter trực tiếp
+                const response = await specialtyShopService.getProducts({
+                    pageSize: 1000,
+                    specialtyShopId: shopId,
+                    status: true // Chỉ lấy sản phẩm active
+                })
                 console.log('Products response:', response)
 
-                // Filter products by shopId
-                const shopProducts = response.data?.filter(product =>
-                    product.specialtyShopId === shopId
-                ) || []
-
-                setProducts(shopProducts)
+                setProducts(response.data || [])
+                setProductCount(response.totalRecord || 0)
             } catch (err) {
                 console.error('Error fetching products:', err)
                 setProducts([])
+                setProductCount(0)
             } finally {
                 setProductsLoading(false)
             }
@@ -169,7 +171,7 @@ const ShopDetail: React.FC = () => {
                                 </div>
                                 <div className="stat-item product-count">
                                     <ShopOutlined />
-                                    <span>{t('specialtyShop.detail.productCount', { count: products.length })}</span>
+                                    <span>{t('specialtyShop.detail.productCount', { count: productCount })}</span>
                                 </div>
                                 <div className="stat-item join-date">
                                     <CalendarOutlined />
@@ -241,7 +243,7 @@ const ShopDetail: React.FC = () => {
                 {/* Products Section */}
                 <div className="content-section products-section">
                     <Title level={3} className="section-title">
-                        {t('specialtyShop.detail.productsTitle', { count: products.length })}
+                        {t('specialtyShop.detail.productsTitle', { count: productCount })}
                     </Title>
                     {productsLoading ? (
                         <div className="products-loading">

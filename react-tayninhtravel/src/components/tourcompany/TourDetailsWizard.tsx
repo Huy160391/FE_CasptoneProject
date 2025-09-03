@@ -131,6 +131,9 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [imageUploading, setImageUploading] = useState(false);
 
+  // Force re-render state to update validation summary
+  const [, forceUpdate] = useState({});
+
   // Timeline editing state
   const [timelineForm] = Form.useForm();
 
@@ -242,6 +245,20 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
           message.error("Vui lòng chọn ít nhất một kỹ năng yêu cầu");
           return;
         }
+
+        // Validate images are required
+        if (uploadedImageUrls.length === 0) {
+          message.error("Vui lòng tải lên ít nhất một hình ảnh cho tour");
+          return;
+        }
+      }
+
+      // Custom validation for timeline in step 1
+      if (currentStep === 1) {
+        if (wizardData.timeline.length === 0) {
+          message.error("Vui lòng thêm ít nhất một hoạt động vào lịch trình");
+          return;
+        }
       }
 
       await form.validateFields();
@@ -261,6 +278,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             ...values,
             skillsRequired: skillsString,
             selectedSkills: prev.basicInfo.selectedSkills,
+            imageUrls: uploadedImageUrls, // Save uploaded images
+            imageUrl: uploadedImageUrls[0] || "", // Set first image as main image
           },
         }));
       } else if (currentStep === 2) {
@@ -278,7 +297,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
       if (currentStep < 2) {
         setCurrentStep(currentStep + 1);
-        form.resetFields();
+        // Don't reset fields - keep form data when moving between steps
       }
     } catch (error) {
       console.error("Validation failed:", error);
@@ -287,6 +306,29 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
   const handleStepPrev = () => {
     setCurrentStep(currentStep - 1);
+    // Set form values when going back to previous steps
+    if (currentStep === 1) {
+      // Going back to step 0 (Basic Info)
+      setTimeout(() => {
+        form.setFieldsValue({
+          tourTemplateId: wizardData.basicInfo.tourTemplateId,
+          title: wizardData.basicInfo.title,
+          description: wizardData.basicInfo.description,
+        });
+      }, 0);
+    } else if (currentStep === 2) {
+      // Going back to step 1 (Timeline) - no form fields to set
+      // But if going to step 0, set the basic info
+      if (currentStep - 1 === 0) {
+        setTimeout(() => {
+          form.setFieldsValue({
+            tourTemplateId: wizardData.basicInfo.tourTemplateId,
+            title: wizardData.basicInfo.title,
+            description: wizardData.basicInfo.description,
+          });
+        }, 0);
+      }
+    }
   };
 
   const handleCreateTourDetails = async (dataToUse?: WizardData) => {
@@ -425,27 +467,35 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
           const lastTimeMinutes = timeToMinutes(lastTime);
 
           if (newTimeMinutes <= lastTimeMinutes) {
-            Modal.warning({
+            // Calculate suggested minimum time (last time + 1 minute)
+            const suggestedMinutes = lastTimeMinutes + 1;
+            const suggestedHours = Math.floor(suggestedMinutes / 60);
+            const suggestedMins = suggestedMinutes % 60;
+            const suggestedTime = `${suggestedHours.toString().padStart(2, '0')}:${suggestedMins.toString().padStart(2, '0')}`;
+
+            Modal.error({
               title: "Thời gian không hợp lệ",
               content: (
                 <div>
-                  <p>
-                    Thời gian của hoạt động mới phải lớn hơn thời gian của hoạt
-                    động trước đó.
+                  <p style={{ marginBottom: 12 }}>
+                    Thời gian của hoạt động mới phải muộn hơn hoạt động trước đó.
                   </p>
-                  <p>
-                    <strong>Hoạt động cuối:</strong> {lastItem.activity} -{" "}
-                    {lastTime}
-                  </p>
-                  <p>
-                    <strong>Thời gian mới:</strong> {newCheckInTime}
-                  </p>
-                  <p style={{ color: "#ff4d4f", marginTop: 12 }}>
-                    Vui lòng chọn thời gian sau {lastTime}
-                  </p>
+                  <div style={{ backgroundColor: '#f6f6f6', padding: 12, borderRadius: 6, marginBottom: 12 }}>
+                    <p style={{ margin: 0, fontWeight: 'bold' }}>Hoạt động cuối cùng:</p>
+                    <p style={{ margin: 0 }}>{lastItem.activity} - <strong>{lastTime}</strong></p>
+                  </div>
+                  <div style={{ backgroundColor: '#fff2f0', padding: 12, borderRadius: 6, marginBottom: 12 }}>
+                    <p style={{ margin: 0, fontWeight: 'bold', color: '#ff4d4f' }}>Thời gian đã chọn:</p>
+                    <p style={{ margin: 0, color: '#ff4d4f' }}><strong>{newCheckInTime}</strong></p>
+                  </div>
+                  <div style={{ backgroundColor: '#f6ffed', padding: 12, borderRadius: 6 }}>
+                    <p style={{ margin: 0, fontWeight: 'bold', color: '#52c41a' }}>Thời gian tối thiểu được phép:</p>
+                    <p style={{ margin: 0, color: '#52c41a' }}><strong>{suggestedTime}</strong> hoặc muộn hơn</p>
+                  </div>
                 </div>
               ),
               okText: "Đã hiểu",
+              width: 500,
             });
             return;
           }
@@ -531,7 +581,18 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
   };
 
   const renderBasicInfoStep = () => (
-    <Form form={form} layout="vertical" initialValues={wizardData.basicInfo}>
+    <Form
+      form={form}
+      layout="vertical"
+      initialValues={wizardData.basicInfo}
+      onValuesChange={(changedValues) => {
+        // Only force update for validation summary, don't affect form values
+        if (Object.keys(changedValues).some(key => ['tourTemplateId', 'title', 'description'].includes(key))) {
+          // Use setTimeout to avoid conflicts with form updates
+          setTimeout(() => forceUpdate({}), 0);
+        }
+      }}
+    >
       <Form.Item
         name="tourTemplateId"
         label="Template Tour"
@@ -570,8 +631,18 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
       </Form.Item>
 
       {/* Multiple Images Upload Section */}
-      <Form.Item label="Hình ảnh tour (tùy chọn)" style={{ marginBottom: 16 }}>
+      <Form.Item label="Hình ảnh tour (bắt buộc)" style={{ marginBottom: 16 }} required>
         <div>
+          {/* Alert for image requirement */}
+          {uploadedImageUrls.length === 0 && (
+            <Alert
+              message="Vui lòng tải lên ít nhất một hình ảnh cho tour"
+              type="warning"
+              showIcon
+              style={{ marginBottom: 12 }}
+            />
+          )}
+
           <Upload
             accept="image/*"
             showUploadList={false}
@@ -665,13 +736,52 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
           size="middle"
         />
       </Form.Item>
+
+      {/* Validation Summary */}
+      <Divider />
+      <Alert
+        message="Kiểm tra thông tin"
+        description={
+          <div>
+            <div style={{ marginBottom: 8 }}>Vui lòng đảm bảo các thông tin sau đã được hoàn thành:</div>
+            <ul style={{ margin: 0, paddingLeft: 20 }}>
+              <li style={{ color: form.getFieldValue('tourTemplateId') ? '#52c41a' : '#ff4d4f' }}>
+                ✓ Đã chọn template tour
+              </li>
+              <li style={{ color: form.getFieldValue('title')?.trim() ? '#52c41a' : '#ff4d4f' }}>
+                ✓ Đã nhập tiêu đề
+              </li>
+              <li style={{ color: form.getFieldValue('description')?.trim() ? '#52c41a' : '#ff4d4f' }}>
+                ✓ Đã nhập mô tả
+              </li>
+              <li style={{ color: uploadedImageUrls.length > 0 ? '#52c41a' : '#ff4d4f' }}>
+                ✓ Đã tải lên ít nhất một hình ảnh ({uploadedImageUrls.length} ảnh)
+              </li>
+              <li style={{ color: wizardData.basicInfo.selectedSkills.length > 0 ? '#52c41a' : '#ff4d4f' }}>
+                ✓ Đã chọn kỹ năng yêu cầu ({wizardData.basicInfo.selectedSkills.length} kỹ năng)
+              </li>
+            </ul>
+          </div>
+        }
+        type={
+          form.getFieldValue('tourTemplateId') &&
+            form.getFieldValue('title')?.trim() &&
+            form.getFieldValue('description')?.trim() &&
+            uploadedImageUrls.length > 0 &&
+            wizardData.basicInfo.selectedSkills.length > 0
+            ? "success"
+            : "warning"
+        }
+        showIcon
+        style={{ marginTop: 16 }}
+      />
     </Form>
   );
 
   const renderTimelineStep = () => (
     <div>
       <Alert
-        message="Timeline Management"
+        message="Quản lý lịch trình"
         description="Tạo lịch trình chi tiết cho tour. Bạn có thể thêm các điểm dừng và liên kết với SpecialtyShop."
         type="info"
         style={{ marginBottom: 16 }}
@@ -679,14 +789,41 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
       <Alert
         message="⚠️ Lưu ý về thời gian"
-        description="Thời gian của mỗi hoạt động phải lớn hơn thời gian của hoạt động trước đó. Ví dụ: nếu hoạt động đầu tiên là 08:00, hoạt động tiếp theo phải từ 08:01 trở đi."
+        description={
+          wizardData.timeline.length > 0
+            ? `Thời gian của hoạt động mới phải sau ${wizardData.timeline[wizardData.timeline.length - 1]?.checkInTime || "00:00"} (hoạt động cuối: ${wizardData.timeline[wizardData.timeline.length - 1]?.activity || ""}). Hệ thống đã tự động vô hiệu hóa các thời gian không hợp lệ trong bộ chọn thời gian.`
+            : "Thời gian của mỗi hoạt động phải lớn hơn thời gian của hoạt động trước đó. Ví dụ: nếu hoạt động đầu tiên là 08:00, hoạt động tiếp theo phải từ 08:01 trở đi."
+        }
         type="warning"
         showIcon
         style={{ marginBottom: 16 }}
       />
 
+      {/* Timeline Validation Summary */}
+      <Alert
+        message="Kiểm tra lịch trình"
+        description={
+          <div>
+            <div style={{ marginBottom: 8 }}>Trạng thái lịch trình hiện tại:</div>
+            <ul style={{ margin: 0, paddingLeft: 20 }}>
+              <li style={{ color: wizardData.timeline.length > 0 ? '#52c41a' : '#ff4d4f' }}>
+                ✓ Đã thêm ít nhất một hoạt động ({wizardData.timeline.length} hoạt động)
+              </li>
+              {wizardData.timeline.length > 0 && (
+                <li style={{ color: '#52c41a' }}>
+                  ✓ Lịch trình từ {wizardData.timeline[0]?.checkInTime} đến {wizardData.timeline[wizardData.timeline.length - 1]?.checkInTime}
+                </li>
+              )}
+            </ul>
+          </div>
+        }
+        type={wizardData.timeline.length > 0 ? "success" : "warning"}
+        showIcon
+        style={{ marginBottom: 16 }}
+      />
+
       {/* Add Timeline Item Form */}
-      <Card title="Thêm Timeline Item" style={{ marginBottom: 16 }}>
+      <Card title="Thêm hoạt động" style={{ marginBottom: 16 }}>
         <Form form={timelineForm} layout="vertical">
           <Row gutter={16}>
             <Col span={6}>
@@ -695,11 +832,72 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 label="Thời gian"
                 rules={[
                   { required: true, message: "Vui lòng chọn thời gian" },
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+
+                      const newCheckInTime = value.format("HH:mm");
+
+                      if (wizardData.timeline.length > 0) {
+                        const lastItem = wizardData.timeline[wizardData.timeline.length - 1];
+                        const lastTime = lastItem.checkInTime;
+
+                        // Convert times to minutes for comparison
+                        const timeToMinutes = (timeStr: string) => {
+                          const [hours, minutes] = timeStr.split(":").map(Number);
+                          return hours * 60 + minutes;
+                        };
+
+                        const newTimeMinutes = timeToMinutes(newCheckInTime);
+                        const lastTimeMinutes = timeToMinutes(lastTime);
+
+                        if (newTimeMinutes <= lastTimeMinutes) {
+                          return Promise.reject(
+                            new Error(`Thời gian phải sau ${lastTime} (hoạt động cuối: ${lastItem.activity})`)
+                          );
+                        }
+                      }
+
+                      return Promise.resolve();
+                    },
+                  },
                 ]}>
                 <TimePicker
                   format="HH:mm"
-                  placeholder="Chọn giờ"
+                  placeholder={
+                    wizardData.timeline.length > 0
+                      ? `Chọn thời gian sau ${wizardData.timeline[wizardData.timeline.length - 1]?.checkInTime || "00:00"}`
+                      : "Chọn giờ"
+                  }
                   style={{ width: "100%" }}
+                  disabledTime={() => {
+                    if (wizardData.timeline.length === 0) return {};
+
+                    const lastTime = wizardData.timeline[wizardData.timeline.length - 1]?.checkInTime;
+                    if (!lastTime) return {};
+
+                    const [lastHour, lastMinute] = lastTime.split(":").map(Number);
+
+                    return {
+                      disabledHours: () => {
+                        const hours = [];
+                        for (let i = 0; i < lastHour; i++) {
+                          hours.push(i);
+                        }
+                        return hours;
+                      },
+                      disabledMinutes: (selectedHour: number) => {
+                        if (selectedHour === lastHour) {
+                          const minutes = [];
+                          for (let i = 0; i <= lastMinute; i++) {
+                            minutes.push(i);
+                          }
+                          return minutes;
+                        }
+                        return [];
+                      },
+                    };
+                  }}
                 />
               </Form.Item>
             </Col>
@@ -709,6 +907,8 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
                 label="Hoạt động"
                 rules={[
                   { required: true, message: "Vui lòng nhập hoạt động" },
+                  { min: 3, message: "Hoạt động phải có ít nhất 3 ký tự" },
+                  { max: 255, message: "Hoạt động không được quá 255 ký tự" },
                 ]}>
                 <Input placeholder="VD: Khởi hành từ TP.HCM" />
               </Form.Item>
@@ -723,7 +923,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
             <Col span={18}>
               <Form.Item
                 name="specialtyShopId"
-                label="SpecialtyShop (Tùy chọn)">
+                label="Cửa hàng lưu niệm (Tùy chọn)">
                 <Select placeholder="Chọn cửa hàng" allowClear>
                   {specialtyShops.map((shop) => (
                     <Option key={shop.id} value={shop.id}>
@@ -753,7 +953,7 @@ const TourDetailsWizard: React.FC<TourDetailsWizardProps> = ({
 
       {/* Timeline Items Table */}
       <Card
-        title={`Timeline Items (${wizardData.timeline.length})`}
+        title={`Lịch trình (${wizardData.timeline.length})`}
         extra={
           wizardData.timeline.length > 1 && (
             <Button

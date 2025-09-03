@@ -52,12 +52,12 @@ export const getMyInvitations = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -87,12 +87,12 @@ export const acceptInvitation = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -124,12 +124,12 @@ export const rejectInvitation = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -150,12 +150,12 @@ export const getInvitationDetails = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -177,12 +177,12 @@ export const validateInvitationAcceptance = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 // ===== TOUR GUIDE PROFILE APIs =====
@@ -201,12 +201,12 @@ export const getMyProfile = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -227,12 +227,12 @@ export const updateMyProfile = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 // ===== UTILITY FUNCTIONS =====
@@ -372,12 +372,12 @@ export const getMyActiveTours = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -398,12 +398,12 @@ export const getTourBookings = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -424,12 +424,12 @@ export const getTourTimeline = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -454,12 +454,12 @@ export const checkInGuest = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -484,12 +484,12 @@ export const checkInGuestWithOverride = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -514,12 +514,12 @@ export const completeTimelineItem = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -540,12 +540,12 @@ export const reportIncident = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 /**
@@ -570,12 +570,12 @@ export const notifyGuests = async (
 
     return response.data;
   } catch (error: any) {
-        // Error already shown by axios interceptor
-        throw {
-            message: error.standardizedError?.message || getErrorMessage(error),
-            statusCode: error.standardizedError?.statusCode || 500
-        };
-    }
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
+  }
 };
 
 export default {
@@ -615,9 +615,9 @@ export interface TourGuideInfo {
   isAvailable: boolean;
   notes?: string;
   profileImageUrl?: string;
-  approvedAt: string;
-  userName: string;
-  approvedByName: string;
+  approvedAt: string | null;
+  userName?: string; // Make optional for compatibility
+  approvedByName: string | null;
 }
 
 /**

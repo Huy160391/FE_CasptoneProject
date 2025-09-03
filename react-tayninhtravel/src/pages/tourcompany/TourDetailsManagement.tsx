@@ -311,9 +311,16 @@ const TourDetailsManagement: React.FC = () => {
         },
         {
             title: 'Template',
-            dataIndex: 'tourTemplateName',
             key: 'templateTitle',
             ellipsis: true,
+            render: (_: any, record: any) => {
+                return record.tourTemplate?.title || 'N/A';
+            },
+            sorter: (a: any, b: any) => {
+                const titleA = a.tourTemplate?.title || '';
+                const titleB = b.tourTemplate?.title || '';
+                return titleA.localeCompare(titleB);
+            },
         },
         {
             title: 'Trạng thái',
@@ -327,6 +334,11 @@ const TourDetailsManagement: React.FC = () => {
                         {getTourDetailsStatusLabel(statusEnum)}
                     </Tag>
                 );
+            },
+            sorter: (a: any, b: any) => {
+                const statusA = a.status || '';
+                const statusB = b.status || '';
+                return statusA.localeCompare(statusB);
             },
         },
         {

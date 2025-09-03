@@ -75,7 +75,8 @@ export const getProducts = async (params: GetProductsParams = {}, token?: string
         pageSize = 10,
         textSearch = '',
         status,
-        sortBySoldCount
+        sortBySoldCount,
+        specialtyShopId
     } = params;
 
     const queryParams: any = {
@@ -87,6 +88,7 @@ export const getProducts = async (params: GetProductsParams = {}, token?: string
     // Thêm các tham số tùy chọn nếu có giá trị
     if (status !== undefined) queryParams.status = status;
     if (sortBySoldCount !== undefined) queryParams.sortBySoldCount = sortBySoldCount;
+    if (specialtyShopId !== undefined) queryParams.specialtyShopId = specialtyShopId;
 
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.get('/Product/Product', { params: queryParams, headers });

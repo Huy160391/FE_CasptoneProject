@@ -70,7 +70,7 @@ const TourCompanyDetail: React.FC = () => {
         );
     }
 
-    if (error || !companyData) {
+    if (error || !companyData || (!companyData.name && !companyData.companyName)) {
         return (
             <div className="tourcompany-detail-page">
                 <div className="error-container">
@@ -89,6 +89,15 @@ const TourCompanyDetail: React.FC = () => {
         return new Date(dateString).toLocaleDateString('vi-VN');
     };
 
+    // Helper function để lấy tên công ty từ API response có thể có cả name và companyName
+    const getCompanyName = () => {
+        return companyData.name || companyData.companyName || 'Công ty du lịch';
+    };
+
+    const getContactName = () => {
+        return companyData.fullName || 'Chưa cập nhật';
+    };
+
     return (
         <div className="tourcompany-detail-page">
             {/* Breadcrumb */}
@@ -97,7 +106,7 @@ const TourCompanyDetail: React.FC = () => {
                 items={[
                     { title: <Link to="/">Trang Chủ</Link> },
                     { title: <Link to="/tours">Tour</Link> },
-                    { title: companyData.name }
+                    { title: getCompanyName() }
                 ]}
             />
 
@@ -106,11 +115,11 @@ const TourCompanyDetail: React.FC = () => {
                 <div className="company-header-content">
                     <Avatar
                         size={120}
-                        src={companyData.logoUrl || `https://placehold.co/120x120/667eea/FFFFFF?text=${companyData.name.charAt(0)}`}
+                        src={companyData.logoUrl || `https://placehold.co/120x120/667eea/FFFFFF?text=${getCompanyName().charAt(0)}`}
                         className="company-avatar"
                     />
                     <div className="company-main-info">
-                        <Title level={1} className="company-name">{companyData.name}</Title>
+                        <Title level={1} className="company-name">{getCompanyName()}</Title>
                         <Tag className="company-type-tag">Công ty du lịch</Tag>
                         <div className="company-rating">
                             <Rate disabled allowHalf value={companyData.rating || 0} />
@@ -120,7 +129,7 @@ const TourCompanyDetail: React.FC = () => {
                             <div className="company-stats" style={{ display: 'flex', gap: 32 }}>
                                 <div className="stat-item tour-count">
                                     <UserOutlined />
-                                    <span>{tours.length} tour</span>
+                                    <span>{companyData.publicTour || tours.length} tour</span>
                                 </div>
                                 <div className="stat-item join-date">
                                     <CalendarOutlined />
@@ -138,34 +147,41 @@ const TourCompanyDetail: React.FC = () => {
                 {/* Company Information */}
                 <div className="content-section company-info-section">
                     <Title level={3} className="section-title">Thông tin công ty</Title>
-                    <Paragraph className="company-description">{companyData.description}</Paragraph>
+                    <Paragraph className="company-description">{companyData.description || 'Chưa có mô tả về công ty.'}</Paragraph>
                     <div className="info-grid">
                         <div className="info-item">
                             <EnvironmentOutlined className="info-icon address-icon" />
                             <div className="info-content">
                                 <span className="info-label">Địa chỉ</span>
-                                <span className="info-value">{companyData.address}</span>
+                                <span className="info-value">{companyData.address || 'Chưa cập nhật'}</span>
+                            </div>
+                        </div>
+                        <div className="info-item">
+                            <UserOutlined className="info-icon contact-icon" />
+                            <div className="info-content">
+                                <span className="info-label">Người liên hệ</span>
+                                <span className="info-value">{getContactName()}</span>
                             </div>
                         </div>
                         <div className="info-item">
                             <PhoneOutlined className="info-icon phone-icon" />
                             <div className="info-content">
                                 <span className="info-label">Số điện thoại</span>
-                                <span className="info-value">{companyData.phoneNumber}</span>
+                                <span className="info-value">{companyData.phoneNumber || 'Chưa cập nhật'}</span>
                             </div>
                         </div>
                         <div className="info-item">
                             <MailOutlined className="info-icon email-icon" />
                             <div className="info-content">
                                 <span className="info-label">Email</span>
-                                <span className="info-value">{companyData.email}</span>
+                                <span className="info-value">{companyData.email || 'Chưa cập nhật'}</span>
                             </div>
                         </div>
                         <div className="info-item">
                             <FileTextOutlined className="info-icon license-icon" />
                             <div className="info-content">
                                 <span className="info-label">Giấy phép kinh doanh</span>
-                                <span className="info-value">{companyData.businessLicense}</span>
+                                <span className="info-value">{companyData.businessLicense || 'Chưa cập nhật'}</span>
                             </div>
                         </div>
                         {companyData.website && (
