@@ -190,11 +190,11 @@ const SpecialityShopOrders = () => {
         },
         {
             title: 'Tổng tiền',
-            dataIndex: 'totalAfterDiscount',
-            key: 'totalAfterDiscount',
+            dataIndex: 'totalAmount',
+            key: 'totalAmount',
             width: 120,
             render: (amount: number) => `${amount.toLocaleString()} ₫`,
-            sorter: (a, b) => a.totalAfterDiscount - b.totalAfterDiscount,
+            sorter: (a, b) => a.totalAmount - b.totalAmount,
         },
         {
             title: 'Ngày tạo',
@@ -391,10 +391,10 @@ const SpecialityShopOrders = () => {
                                 summary={() => (
                                     <Table.Summary.Row>
                                         <Table.Summary.Cell index={0} colSpan={3}>
-                                            <strong>Tổng cộng (sau giảm giá)</strong>
+                                            <strong>Tổng cộng</strong>
                                         </Table.Summary.Cell>
                                         <Table.Summary.Cell index={1}>
-                                            <strong>{selectedOrder.totalAfterDiscount.toLocaleString()} ₫</strong>
+                                            <strong>{selectedOrder.totalAmount.toLocaleString()} ₫</strong>
                                         </Table.Summary.Cell>
                                     </Table.Summary.Row>
                                 )}

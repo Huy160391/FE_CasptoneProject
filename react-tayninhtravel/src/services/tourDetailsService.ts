@@ -32,6 +32,13 @@ export interface TourDetail {
         isActive: boolean;
         tourStartDate?: string;
         tourEndDate?: string;
+        // Guide information from API response
+        guideId?: string;
+        guideName?: string;
+        guideEmail?: string;
+        guidePhoneNumber?: string;
+        status?: string;
+        statusName?: string;
     };
     timeline?: Array<{
         id: string;

@@ -1611,7 +1611,6 @@
                 "cancelled": "Đã hủy"
             }
         },
-
         "reviews": {
             "title": "Lịch sử đánh giá",
             "searchPlaceholder": "Tìm kiếm theo tên tour, khách hàng",
@@ -2185,7 +2184,8 @@
             "validation": {
                 "acceptTerms": "Vui lòng chấp nhận điều khoản và điều kiện",
                 "acceptPrivacy": "Vui lòng chấp nhận chính sách bảo mật"
-            }
+            },
+            "tourInfo": "Tour Information"
         },
         "summary": {
             "title": "Tóm tắt đơn hàng",
