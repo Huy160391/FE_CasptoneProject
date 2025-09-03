@@ -24,34 +24,41 @@ import {
     CalendarOutlined,
     TeamOutlined,
     ClockCircleOutlined,
-    ShoppingCartOutlined,
     EnvironmentOutlined,
     ArrowLeftOutlined,
     CheckCircleOutlined,
     InfoCircleOutlined,
-    HeartOutlined,
     ShareAltOutlined,
     StarOutlined,
-    UserOutlined
+    UserOutlined,
+    PhoneOutlined,
+    MailOutlined,
+    GlobalOutlined
 } from '@ant-design/icons';
+import SharePopup from '../components/common/SharePopup';
 import './TourDetailsPage.scss';
 
 import { useAuthStore } from '../store/useAuthStore';
 import TourPriceDisplay from '../components/common/TourPriceDisplay';
 import { checkTourAvailability } from '../services/tourBookingService';
 import { tourDetailsService, TourDetail } from '../services/tourDetailsService';
+import { getTourCompanyById, TourCompanyInfo } from '../services/tourcompanyService';
+import { getTourGuideById, TourGuideInfo } from '../services/tourguideService';
 import LoginModal from '../components/auth/LoginModal';
 import { getDefaultTourImage } from '../utils/imageUtils';
 
 const { Title, Text, Paragraph } = Typography;
 
 const TourDetailsPage: React.FC = () => {
+    const [sharePopupVisible, setSharePopupVisible] = useState(false);
     const { t } = useTranslation();
     const { tourId } = useParams<{ tourId: string }>();
     const navigate = useNavigate();
     const { isAuthenticated, token } = useAuthStore();
 
     const [tour, setTour] = useState<TourDetail | null>(null);
+    const [tourCompany, setTourCompany] = useState<TourCompanyInfo | null>(null);
+    const [tourGuide, setTourGuide] = useState<TourGuideInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
@@ -76,27 +83,27 @@ const TourDetailsPage: React.FC = () => {
     const mockReviews = [
         {
             id: 1,
-            name: 'Nguyễn Văn A',
+            name: t('tours.detail.mockReviews.review1.name'),
             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
             rating: 5,
             date: '15/03/2024',
-            comment: 'Tour rất tuyệt vời! Hướng dẫn viên nhiệt tình và chuyên nghiệp. Cảnh đẹp, thời gian hợp lý. Sẽ giới thiệu cho bạn bè!'
+            comment: t('tours.detail.mockReviews.review1.comment')
         },
         {
             id: 2,
-            name: 'Trần Thị B',
+            name: t('tours.detail.mockReviews.review2.name'),
             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
             rating: 4,
             date: '10/03/2024',
-            comment: 'Tour khá tốt, tuy nhiên thời gian ở một số điểm hơi ngắn. Nhìn chung rất hài lòng với trải nghiệm.'
+            comment: t('tours.detail.mockReviews.review2.comment')
         },
         {
             id: 3,
-            name: 'Lê Văn C',
+            name: t('tours.detail.mockReviews.review3.name'),
             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
             rating: 5,
             date: '05/03/2024',
-            comment: 'Đây là lần thứ hai tôi tham gia tour này và vẫn rất hài lòng. Cảnh đẹp, dịch vụ tốt, đáng đồng tiền bát gạo.'
+            comment: t('tours.detail.mockReviews.review3.comment')
         }
     ];
 
@@ -111,7 +118,7 @@ const TourDetailsPage: React.FC = () => {
     useEffect(() => {
         const loadTourDetails = async () => {
             if (!tourId) {
-                setError('Không tìm thấy ID tour');
+                setError(t('tours.detail.noTourId'));
                 setLoading(false);
                 return;
             }
@@ -125,23 +132,79 @@ const TourDetailsPage: React.FC = () => {
 
                 if (data.success && data.data) {
                     setTour(data.data);
+
                     // Load real-time availability
                     if (data.data.tourOperation?.id) {
                         loadRealTimeAvailability(data.data.tourOperation.id);
                     }
+
+                    // Fetch tour company data if tourCompanyId exists
+                    if (data.data.tourCompanyId) {
+                        try {
+                            const companyResponse = await getTourCompanyById(data.data.tourCompanyId, token ?? undefined);
+                            if (companyResponse.success && companyResponse.data) {
+                                setTourCompany(companyResponse.data);
+                            }
+                        } catch (error) {
+                            console.error('Error fetching tour company:', error);
+                        }
+                    }
+
+                    // Fetch tour guide data if guideId exists in tourOperation
+                    if (data.data.tourOperation?.guideId) {
+                        try {
+                            const guideResponse = await getTourGuideById(data.data.tourOperation.guideId, token ?? undefined);
+                            if (guideResponse.success && guideResponse.data) {
+                                setTourGuide(guideResponse.data);
+                            }
+                        } catch (error) {
+                            console.error('Error fetching tour guide:', error);
+                            // Fallback: Use basic guide info from tourOperation if API call fails
+                            setTourGuide({
+                                id: data.data.tourOperation.guideId,
+                                fullName: data.data.tourOperation.guideName || 'Hướng dẫn viên',
+                                email: data.data.tourOperation.guideEmail || '',
+                                phoneNumber: data.data.tourOperation.guidePhoneNumber || '',
+                                profileImageUrl: undefined,
+                                rating: 0,
+                                experience: '',
+                                skills: '',
+                                totalToursGuided: 0,
+                                isAvailable: true,
+                                approvedAt: null,
+                                approvedByName: null
+                            } as TourGuideInfo);
+                        }
+                    } else if (data.data.tourOperation?.guideName) {
+                        // If no guideId but has guideName, create basic guide info
+                        setTourGuide({
+                            id: '',
+                            fullName: data.data.tourOperation.guideName,
+                            email: data.data.tourOperation.guideEmail || '',
+                            phoneNumber: data.data.tourOperation.guidePhoneNumber || '',
+                            profileImageUrl: undefined,
+                            rating: 0,
+                            experience: '',
+                            skills: '',
+                            totalToursGuided: 0,
+                            isAvailable: true,
+                            approvedAt: null,
+                            approvedByName: null
+                        } as TourGuideInfo);
+                    }
                 } else {
-                    setError(data.message || 'Không thể tải thông tin tour');
+                    setError(data.message || t('tours.detail.loadError'));
                 }
             } catch (error: any) {
                 console.error('Error loading tour details:', error);
-                setError('Có lỗi xảy ra khi tải thông tin tour');
+                setError(t('tours.detail.generalError'));
             } finally {
                 setLoading(false);
             }
         };
 
         loadTourDetails();
-    }, [tourId]);
+    }, [tourId, token, t]);
 
     // Load real-time availability
     const loadRealTimeAvailability = async (tourOperationId: string) => {
@@ -167,7 +230,7 @@ const TourDetailsPage: React.FC = () => {
         }
 
         if (!tour?.tourOperation || !tour.tourOperation.isActive) {
-            message.error('Tour này hiện không khả dụng để đặt');
+            message.error(t('tours.detail.bookingUnavailable'));
             return;
         }
 
@@ -233,7 +296,7 @@ const TourDetailsPage: React.FC = () => {
                         className="breadcrumb"
                         items={[
                             { title: <Link to="/">{t('navigation.home')}</Link> },
-                            { title: <Link to="/things-to-do">{t('navigation.activities')}</Link> },
+                            { title: <Link to="/tours">{t('navigation.activities')}</Link> },
                             { title: tour.title }
                         ]}
                     />
@@ -317,6 +380,174 @@ const TourDetailsPage: React.FC = () => {
                             <Divider style={{ margin: '16px 0' }} />
 
                             <Paragraph>{tour.description}</Paragraph>
+
+                            <Divider style={{ margin: '24px 0' }} />
+
+                            {/* Thông tin công ty tổ chức */}
+                            {tourCompany && (
+                                <div className="company-info-section">
+                                    <Title level={5} style={{ marginBottom: 16 }}>
+                                        <UserOutlined style={{ marginRight: 8 }} />
+                                        {t('tours.detail.companyTitle')}
+                                    </Title>
+                                    <Card size="small" className="company-card">
+                                        <Row gutter={16} align="middle">
+                                            <Col xs={24} sm={8}>
+                                                <div className="company-logo">
+                                                    <Avatar
+                                                        size={80}
+                                                        src={`https://api.dicebear.com/7.x/initials/svg?seed=${tourCompany.companyName}`}
+                                                        alt={tourCompany.companyName}
+                                                    >
+                                                        {tourCompany.companyName.charAt(0)}
+                                                    </Avatar>
+                                                </div>
+                                            </Col>
+                                            <Col xs={24} sm={16}>
+                                                <div className="company-details">
+                                                    <Title level={4} style={{ marginBottom: 8 }}>
+                                                        <Link
+                                                            to={`/tour-company/${tourCompany.id}`}
+                                                            state={{ companyData: tourCompany }}
+                                                            style={{
+                                                                color: '#1890ff',
+                                                                textDecoration: 'none',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                                                            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                                                        >
+                                                            {tourCompany.companyName}
+                                                        </Link>
+                                                    </Title>
+                                                    {tourCompany.description && (
+                                                        <Paragraph ellipsis={{ rows: 2 }} style={{ marginBottom: 8 }}>
+                                                            {tourCompany.description}
+                                                        </Paragraph>
+                                                    )}
+                                                    <Space direction="vertical" size="small">
+                                                        {tourCompany.address && (
+                                                            <div>
+                                                                <EnvironmentOutlined style={{ marginRight: 8 }} />
+                                                                {tourCompany.address}
+                                                            </div>
+                                                        )}
+                                                        {tourCompany.phoneNumber && (
+                                                            <div>
+                                                                <PhoneOutlined style={{ marginRight: 8 }} />
+                                                                {tourCompany.phoneNumber}
+                                                            </div>
+                                                        )}
+                                                        {tourCompany.email && (
+                                                            <div>
+                                                                <MailOutlined style={{ marginRight: 8 }} />
+                                                                {tourCompany.email}
+                                                            </div>
+                                                        )}
+                                                        {tourCompany.website && (
+                                                            <div>
+                                                                <GlobalOutlined style={{ marginRight: 8 }} />
+                                                                <a href={tourCompany.website} target="_blank" rel="noopener noreferrer">
+                                                                    {tourCompany.website}
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <Text type="secondary">
+                                                                {t('tours.detail.companyStatus')}: <Tag color={tourCompany.isActive ? 'green' : 'red'}>
+                                                                    {tourCompany.isActive ? t('tours.detail.companyActive') : t('tours.detail.companyInactive')}
+                                                                </Tag>
+                                                            </Text>
+                                                        </div>
+                                                        <div>
+                                                            <Text type="secondary">
+                                                                {t('tours.detail.publicTours')}: {tourCompany.publicTour}
+                                                            </Text>
+                                                        </div>
+                                                    </Space>
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                    </Card>
+                                </div>
+                            )}
+
+                            <Divider style={{ margin: '24px 0' }} />
+
+                            {/* Thông tin hướng dẫn viên */}
+                            {tourGuide && (
+                                <div className="guide-info-section">
+                                    <Title level={5} style={{ marginBottom: 16 }}>
+                                        <UserOutlined style={{ marginRight: 8 }} />
+                                        {t('tours.detail.guideTitle')}
+                                    </Title>
+                                    <Card size="small" className="guide-card">
+                                        <Row gutter={16} align="middle">
+                                            <Col xs={24} sm={8}>
+                                                <div className="guide-avatar">
+                                                    <Avatar
+                                                        size={80}
+                                                        src={tourGuide.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${tourGuide.fullName}`}
+                                                        alt={tourGuide.fullName}
+                                                        icon={<UserOutlined />}
+                                                    >
+                                                        {tourGuide.fullName.charAt(0)}
+                                                    </Avatar>
+                                                </div>
+                                            </Col>
+                                            <Col xs={24} sm={16}>
+                                                <div className="guide-details">
+                                                    <Title level={4} style={{ marginBottom: 8 }}>
+                                                        {tourGuide.fullName}
+                                                    </Title>
+                                                    {tourGuide.rating > 0 && (
+                                                        <div style={{ marginBottom: 8 }}>
+                                                            <Rate disabled defaultValue={tourGuide.rating} />
+                                                            <Text style={{ marginLeft: 8 }}>
+                                                                {tourGuide.rating}/5
+                                                            </Text>
+                                                        </div>
+                                                    )}
+                                                    {tourGuide.experience && (
+                                                        <div style={{ marginBottom: 8 }}>
+                                                            <Text strong>{t('tours.detail.guideExperience')}: </Text>
+                                                            <Text>{tourGuide.experience}</Text>
+                                                        </div>
+                                                    )}
+                                                    {tourGuide.skills && (
+                                                        <div style={{ marginBottom: 8 }}>
+                                                            <Text strong>{t('tours.detail.guideSkills')}: </Text>
+                                                            <div style={{ marginTop: 4 }}>
+                                                                <Tag color="blue" style={{ marginRight: 4, marginBottom: 4 }}>
+                                                                    {tourGuide.skills}
+                                                                </Tag>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    <div style={{ marginBottom: 8 }}>
+                                                        <Text strong>{t('tours.detail.guideTotalTours')}: </Text>
+                                                        <Text>{tourGuide.totalToursGuided}</Text>
+                                                    </div>
+                                                    <Space direction="vertical" size="small">
+                                                        {tourGuide.phoneNumber && (
+                                                            <div>
+                                                                <PhoneOutlined style={{ marginRight: 8 }} />
+                                                                {tourGuide.phoneNumber}
+                                                            </div>
+                                                        )}
+                                                        {tourGuide.email && (
+                                                            <div>
+                                                                <MailOutlined style={{ marginRight: 8 }} />
+                                                                {tourGuide.email}
+                                                            </div>
+                                                        )}
+                                                    </Space>
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                    </Card>
+                                </div>
+                            )}
                         </Card>
 
                         {/* Tabs */}
@@ -378,42 +609,48 @@ const TourDetailsPage: React.FC = () => {
                                     key: '2',
                                     label: t('tour.infoTitle'),
                                     children: (
-                                        <div className="included-excluded">
-                                            <div className="included">
-                                                <Title level={5}>{t('tour.included')}</Title>
-                                                <ul>
-                                                    <li>
-                                                        <CheckCircleOutlined className="included-icon" />
-                                                        {t('tour.guide')}
-                                                    </li>
-                                                    <li>
-                                                        <CheckCircleOutlined className="included-icon" />
-                                                        {t('tour.insurance')}
-                                                    </li>
-                                                    <li>
-                                                        <CheckCircleOutlined className="included-icon" />
-                                                        {t('tour.transport')}
-                                                    </li>
-                                                </ul>
+                                        <div className="tour-info-content">
+                                            {/* Thông tin bao gồm và không bao gồm */}
+                                            <div className="included-excluded">
+                                                <div className="included">
+                                                    <Title level={5}>{t('tour.included')}</Title>
+                                                    <ul>
+                                                        <li>
+                                                            <CheckCircleOutlined className="included-icon" />
+                                                            {t('tour.guide')}
+                                                        </li>
+                                                        <li>
+                                                            <CheckCircleOutlined className="included-icon" />
+                                                            {t('tour.insurance')}
+                                                        </li>
+                                                        <li>
+                                                            <CheckCircleOutlined className="included-icon" />
+                                                            {t('tour.transport')}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
+                                                <div className="excluded">
+                                                    <Title level={5}>{t('tour.notIncluded')}</Title>
+                                                    <ul>
+                                                        <li>
+                                                            <InfoCircleOutlined className="excluded-icon" />
+                                                            {t('tour.personalCost')}
+                                                        </li>
+                                                        <li>
+                                                            <InfoCircleOutlined className="excluded-icon" />
+                                                            {t('tour.extraDrink')}
+                                                        </li>
+                                                        <li>
+                                                            <InfoCircleOutlined className="excluded-icon" />
+                                                            {t('tour.guideTip')}
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </div>
 
-                                            <div className="excluded">
-                                                <Title level={5}>{t('tour.notIncluded')}</Title>
-                                                <ul>
-                                                    <li>
-                                                        <InfoCircleOutlined className="excluded-icon" />
-                                                        {t('tour.personalCost')}
-                                                    </li>
-                                                    <li>
-                                                        <InfoCircleOutlined className="excluded-icon" />
-                                                        {t('tour.extraDrink')}
-                                                    </li>
-                                                    <li>
-                                                        <InfoCircleOutlined className="excluded-icon" />
-                                                        {t('tour.guideTip')}
-                                                    </li>
-                                                </ul>
-                                            </div>
+                                            <Divider />
+
                                         </div>
                                     )
                                 },
@@ -488,25 +725,6 @@ const TourDetailsPage: React.FC = () => {
 
                             <Divider />
 
-                            {/* Availability Warning */}
-                            {availableSlots < 5 && availableSlots > 0 && (
-                                <div className="availability-info warning">
-                                    <div className="availability-text">
-                                        <TeamOutlined />
-                                        <Text>{t('tour.onlyLeft', { count: availableSlots })}</Text>
-                                    </div>
-                                </div>
-                            )}
-
-                            {availableSlots === 0 && (
-                                <div className="availability-info error">
-                                    <div className="availability-text">
-                                        <TeamOutlined />
-                                        <Text>{t('tour.full')}</Text>
-                                    </div>
-                                </div>
-                            )}
-
                             {/* Tour Info */}
                             <Descriptions column={1} size="small" className="tour-info-grid">
                                 {tour.tourOperation && (
@@ -515,23 +733,6 @@ const TourDetailsPage: React.FC = () => {
                                             <Space>
                                                 <TeamOutlined />
                                                 {tour.tourOperation.maxGuests} {t('tour.unitPerson')}
-                                            </Space>
-                                        </Descriptions.Item>
-
-                                        <Descriptions.Item label={t('tour.booked')}>
-                                            <Space>
-                                                <ShoppingCartOutlined />
-                                                {realTimeAvailability
-                                                    ? realTimeAvailability.currentBookings
-                                                    : (tour.tourOperation.currentBookings || 0)} {t('tour.unitPerson')}
-                                            </Space>
-                                        </Descriptions.Item>
-
-                                        <Descriptions.Item label={t('tour.availableSpots')}>
-                                            <Space>
-                                                <Text style={{ color: availableSlots > 5 ? 'green' : 'orange' }}>
-                                                    {availableSlots} {t('tour.unitSpot')}
-                                                </Text>
                                             </Space>
                                         </Descriptions.Item>
 
@@ -570,12 +771,10 @@ const TourDetailsPage: React.FC = () => {
 
                             {/* Action Buttons */}
                             <div className="action-buttons">
-                                <Button icon={<HeartOutlined />} className="action-button">
-                                    {t('common.favorite')}
-                                </Button>
-                                <Button icon={<ShareAltOutlined />} className="action-button">
+                                <Button icon={<ShareAltOutlined />} className="action-button" onClick={() => setSharePopupVisible(true)}>
                                     {t('common.share')}
                                 </Button>
+                                <SharePopup visible={sharePopupVisible} onClose={() => setSharePopupVisible(false)} url={window.location.href} />
                             </div>
                         </Card>
                     </Col>
@@ -588,7 +787,7 @@ const TourDetailsPage: React.FC = () => {
                     onRegisterClick={() => { }}
                     onLoginSuccess={() => {
                         setIsLoginModalVisible(false);
-                        message.success('Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.');
+                        message.success(t('tours.detail.loginSuccess'));
                     }}
                 />
             </div>

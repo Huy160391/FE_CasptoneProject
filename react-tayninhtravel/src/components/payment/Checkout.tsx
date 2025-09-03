@@ -13,9 +13,7 @@ import {
     Table,
     Image,
     Modal,
-    Checkbox,
-    Form,
-    Input
+    Checkbox
 } from 'antd'
 import {
     ShoppingCartOutlined,
@@ -34,21 +32,9 @@ import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import VoucherModal from './VoucherModal'
 import { checkoutCart } from '@/services/cartService'
-import { useEnhancedPayment } from '@/services/enhancedPaymentService'
 import './Checkout.scss'
 
 const { Title, Text } = Typography
-
-interface DeliveryInfo {
-    fullName: string
-    phone: string
-    email: string
-    address: string
-    city: string
-    district: string
-    ward: string
-    note?: string
-}
 
 interface PaymentMethod {
     id: string
@@ -86,20 +72,10 @@ const Checkout = () => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { items, getTotalItems, getTotalPrice } = useCartStore()
-    const { isAuthenticated, user } = useAuthStore()
-    const { createPaymentLink } = useEnhancedPayment()
+    const { isAuthenticated } = useAuthStore()
     const { isDarkMode } = useThemeStore()
 
     const [currentStep, setCurrentStep] = useState(0)
-    const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
-        fullName: '',
-        phone: '',
-        email: '',
-        address: '',
-        city: '',
-        district: '',
-        ward: ''
-    })
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank_transfer')
     const [selectedShippingMethod, setSelectedShippingMethod] = useState('pickup')
     const [selectedVoucherCodeId, setSelectedVoucherCodeId] = useState<string | null>(null)
@@ -114,24 +90,6 @@ const Checkout = () => {
     const [loginModalVisible, setLoginModalVisible] = useState(false)
     const [registerModalVisible, setRegisterModalVisible] = useState(false)
 
-    // Check authentication on component mount
-    useEffect(() => {
-        if (!isAuthenticated) {
-            notification.warning({
-                message: t('Bạn cần đăng nhập để tiếp tục'),
-                description: t('Vui lòng đăng nhập để sử dụng chức năng thanh toán.')
-            })
-        }
-        if (user && isAuthenticated) {
-            setDeliveryInfo(prevInfo => ({
-                ...prevInfo,
-                fullName: user.name || '',
-                phone: user.phone || '',
-                email: user.email || ''
-            }))
-        }
-    }, [])
-
     // Payment methods
     const paymentMethods: PaymentMethod[] = [
         {
@@ -142,16 +100,8 @@ const Checkout = () => {
         }
     ]
 
-    // Shipping methods giữ cả hai phương án
+    // Shipping methods - chỉ giữ pickup
     const shippingMethods: ShippingMethod[] = [
-        {
-            id: 'ship_cod',
-            name: t('checkout.shipping.shipCod'),
-            description: t('checkout.shipping.shipCodDescription'),
-            price: 30000,
-            estimatedDays: '2-3',
-            icon: <ShopOutlined />
-        },
         {
             id: 'pickup',
             name: t('checkout.shipping.pickup'),
@@ -161,6 +111,16 @@ const Checkout = () => {
             icon: <ShopOutlined />
         }
     ]
+
+    // Check authentication on component mount
+    useEffect(() => {
+        if (!isAuthenticated) {
+            notification.warning({
+                message: t('Bạn cần đăng nhập để tiếp tục'),
+                description: t('Vui lòng đăng nhập để sử dụng chức năng thanh toán.')
+            })
+        }
+    }, [isAuthenticated, t])
 
     const formatPrice = (price: number) => {
         return `${price.toLocaleString()}VND`
@@ -309,48 +269,55 @@ const Checkout = () => {
 
         setLoading(true)
         try {
-            // === ENHANCED PAYMENT SYSTEM (ONLY) ===
-            notification.info({
-                message: 'Sử dụng Enhanced Payment System',
-                description: 'Đang tạo thanh toán với transaction tracking...'
-            })
-
-            // First create order via legacy system to get orderId
+            // Create order via checkout API
             const res = await checkoutCart('');
+            console.log('Checkout response:', res);
 
-            if (res.orderId) {
-                // Then create enhanced payment link
-                if (res.promotionMessages) {
+            if (res.checkoutUrl && res.orderId) {
+                // Show promotion messages if available
+                if (Array.isArray(res.promotionMessages) && res.promotionMessages.length > 0) {
                     await new Promise<void>(resolve => {
                         const modal = Modal.info({
                             title: t('checkout.promotionTitle', 'Khuyến mãi'),
                             content: (
-                                <div style={{ textAlign: 'center', fontSize: 16 }}>
+                                <div style={{
+                                    textAlign: 'center',
+                                    fontSize: 16,
+                                    color: isDarkMode ? '#fff' : '#000',
+                                    backgroundColor: isDarkMode ? '#141414' : '#fff'
+                                }}>
                                     {res.promotionMessages.join(', ')}
                                 </div>
                             ),
                             centered: true,
                             okButtonProps: { style: { display: 'none' } },
-                            onOk: () => resolve()
+                            onOk: () => resolve(),
+                            // Dark mode styling for modal
+                            style: {
+                                backgroundColor: isDarkMode ? '#141414' : '#fff'
+                            },
+                            className: isDarkMode ? 'dark-modal' : ''
                         });
                         setTimeout(() => {
                             modal.destroy();
                             resolve();
-                        }, 3000);
+                        }, 3500);
                     });
                 }
-                await createPaymentLink({
-                    orderId: res.orderId,
-                    amount: getTotalPrice(),
-                    description: `Product Order - ${res.orderId}`
+
+                // Redirect to PayOS using checkoutUrl from response
+                notification.success({
+                    message: 'Chuyển hướng đến PayOS',
+                    description: 'Đang chuyển hướng đến trang thanh toán...'
                 });
-                // createPaymentLink automatically redirects to PayOS
-                // clearCart()
+
+                window.location.href = res.checkoutUrl;
             } else {
-                throw new Error('Failed to create order');
+                throw new Error('Failed to create order or get checkout URL');
             }
 
         } catch (error) {
+            console.error('Checkout error:', error);
             notification.error({
                 message: t('checkout.orderError'),
                 description: t('checkout.orderErrorDescription')
@@ -419,16 +386,8 @@ const Checkout = () => {
         )
     }
 
-    // Thêm hàm xử lý khi chọn phương thức ship_cod
+    // Thêm hàm xử lý khi chọn phương thức - chỉ còn pickup
     const handleShippingMethodChange = (value: string) => {
-        if (value === 'ship_cod') {
-            notification.info({
-                message: 'Phương thức nhận hàng chưa khả dụng',
-                description: 'Phương thức nhận hàng này hiện chưa khả dụng, chúng tôi sẽ cập nhật trong thời gian tới. Mong quý khách hàng thông cảm.',
-                duration: 5
-            });
-            return;
-        }
         setSelectedShippingMethod(value);
     };
 
@@ -521,90 +480,8 @@ const Checkout = () => {
                                     </Radio.Group>
                                 </Card>
 
-                                {/* Form nhập địa chỉ khi chọn giao hàng tận nhà (ship_cod) */}
-                                {currentStep === 1 && selectedShippingMethod === 'ship_cod' && (
-                                    <Card title={t('checkout.deliveryInfo')} className="step-card">
-                                        <Form
-                                            layout="vertical"
-                                            initialValues={deliveryInfo}
-                                            onFinish={() => setCurrentStep(2)}
-                                        >
-                                            <Row gutter={16}>
-                                                <Col xs={24} md={12}>
-                                                    <Form.Item
-                                                        name="fullName"
-                                                        label={t('checkout.fullName')}
-                                                        rules={[{ required: true, message: t('checkout.fullNameRequired') }]}
-                                                    >
-                                                        <Input placeholder={t('checkout.enterFullName')} />
-                                                    </Form.Item>
-                                                </Col>
-                                                <Col xs={24} md={12}>
-                                                    <Form.Item
-                                                        name="phone"
-                                                        label={t('checkout.phone')}
-                                                        rules={[
-                                                            { required: true, message: t('checkout.phoneRequired') },
-                                                            { pattern: /^[0-9]{10,11}$/, message: t('checkout.phoneInvalid') }
-                                                        ]}
-                                                    >
-                                                        <Input placeholder={t('checkout.enterPhone')} />
-                                                    </Form.Item>
-                                                </Col>
-                                            </Row>
-                                            <Form.Item
-                                                name="email"
-                                                label={t('checkout.email')}
-                                                rules={[
-                                                    { required: true, message: t('checkout.emailRequired') },
-                                                    { type: 'email', message: t('checkout.emailInvalid') }
-                                                ]}
-                                            >
-                                                <Input placeholder={t('checkout.enterEmail')} />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name="address"
-                                                label={t('checkout.address')}
-                                                rules={[{ required: true, message: t('checkout.addressRequired') }]}
-                                            >
-                                                <Input placeholder={t('checkout.enterAddress')} />
-                                            </Form.Item>
-                                            <Row gutter={16}>
-                                                <Col xs={24} md={8}>
-                                                    <Form.Item
-                                                        name="city"
-                                                        label={t('checkout.city')}
-                                                        rules={[{ required: true, message: t('checkout.cityRequired') }]}
-                                                    >
-                                                        <Input placeholder={t('checkout.enterCity')} />
-                                                    </Form.Item>
-                                                </Col>
-                                                <Col xs={24} md={8}>
-                                                    <Form.Item
-                                                        name="district"
-                                                        label={t('checkout.district')}
-                                                        rules={[{ required: true, message: t('checkout.districtRequired') }]}
-                                                    >
-                                                        <Input placeholder={t('checkout.enterDistrict')} />
-                                                    </Form.Item>
-                                                </Col>
-                                                <Col xs={24} md={8}>
-                                                    <Form.Item
-                                                        name="ward"
-                                                        label={t('checkout.ward')}
-                                                        rules={[{ required: true, message: t('checkout.wardRequired') }]}
-                                                    >
-                                                        <Input placeholder={t('checkout.enterWard')} />
-                                                    </Form.Item>
-                                                </Col>
-                                            </Row>
-                                            <Form.Item name="note" label={t('checkout.note')}>
-                                                <Input.TextArea rows={3} placeholder={t('checkout.enterNote')} />
-                                            </Form.Item>
-                                            <Button type="primary" htmlType="submit">{t('checkout.next')}</Button>
-                                        </Form>
-                                    </Card>
-                                )}
+                                {/* Form nhập địa chỉ khi chọn giao hàng tận nhà (đã ẩn) */}
+                                {/* Phần này đã được ẩn vì chỉ còn phương thức pickup */}
                             </div>
                         )}
 
@@ -613,36 +490,9 @@ const Checkout = () => {
                             <Card title={t('checkout.orderConfirmation')} className="step-card">
                                 <div className="confirmation-section">
                                     <Title level={4}>{t('checkout.deliveryInfo')}</Title>
-                                    {selectedShippingMethod === 'ship_cod' ? (
-                                        <>
-                                            <div className="info-row">
-                                                <Text strong>{t('checkout.fullName')}:</Text>
-                                                <Text>{deliveryInfo.fullName}</Text>
-                                            </div>
-                                            <div className="info-row">
-                                                <Text strong>{t('checkout.phone')}:</Text>
-                                                <Text>{deliveryInfo.phone}</Text>
-                                            </div>
-                                            <div className="info-row">
-                                                <Text strong>{t('checkout.email')}:</Text>
-                                                <Text>{deliveryInfo.email}</Text>
-                                            </div>
-                                            <div className="info-row">
-                                                <Text strong>{t('checkout.address')}:</Text>
-                                                <Text>{`${deliveryInfo.address}, ${deliveryInfo.ward}, ${deliveryInfo.district}, ${deliveryInfo.city}`}</Text>
-                                            </div>
-                                            {deliveryInfo.note && (
-                                                <div className="info-row">
-                                                    <Text strong>{t('checkout.note')}:</Text>
-                                                    <Text>{deliveryInfo.note}</Text>
-                                                </div>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <div className="info-row">
-                                            <Text>{t('checkout.pickupNote')}</Text>
-                                        </div>
-                                    )}
+                                    <div style={{ marginTop: 8 }}>
+                                        <Text style={{ display: 'block', marginLeft: 0 }}>{t('checkout.pickupNote')}</Text>
+                                    </div>
                                 </div>
                                 <Divider />
                                 <div className="confirmation-section">
@@ -718,7 +568,7 @@ const Checkout = () => {
                             {/* Voucher Section */}
                             <div className="voucher-section" style={{ marginBottom: 16 }}>
                                 <Title level={5} style={{ color: isDarkMode ? '#fff' : undefined }}>
-                                    Mã giảm giá
+                                    {t('cart.voucher')}
                                 </Title>
                                 {selectedVoucher ? (
                                     <div className="applied-voucher" style={{
@@ -739,7 +589,7 @@ const Checkout = () => {
                                                 fontSize: 12,
                                                 color: isDarkMode ? '#bfbfbf' : undefined
                                             }}>
-                                                {selectedVoucher.voucherName} - Giảm {formatPrice(voucherDiscount)}
+                                                {selectedVoucher.voucherName} - {t('cart.discount')} {formatPrice(voucherDiscount)}
                                             </Text>
                                         </div>
                                         <Button
@@ -765,8 +615,7 @@ const Checkout = () => {
                                             backgroundColor: isDarkMode ? '#141414' : undefined
                                         }}
                                         onClick={() => setVoucherModalVisible(true)}
-                                    >
-                                        Chọn voucher
+                                    >{t('cart.chooseVoucher')}
                                     </Button>
                                 )}
                             </div>

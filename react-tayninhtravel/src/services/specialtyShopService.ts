@@ -1,5 +1,6 @@
 
 import axios from '../config/axios';
+
 import { Product, GetProductsParams, GetProductsResponse } from '../types';
 
 // Interface cho dữ liệu tạo/cập nhật sản phẩm
@@ -74,7 +75,8 @@ export const getProducts = async (params: GetProductsParams = {}, token?: string
         pageSize = 10,
         textSearch = '',
         status,
-        sortBySoldCount
+        sortBySoldCount,
+        specialtyShopId
     } = params;
 
     const queryParams: any = {
@@ -86,6 +88,7 @@ export const getProducts = async (params: GetProductsParams = {}, token?: string
     // Thêm các tham số tùy chọn nếu có giá trị
     if (status !== undefined) queryParams.status = status;
     if (sortBySoldCount !== undefined) queryParams.sortBySoldCount = sortBySoldCount;
+    if (specialtyShopId !== undefined) queryParams.specialtyShopId = specialtyShopId;
 
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.get('/Product/Product', { params: queryParams, headers });
@@ -101,8 +104,9 @@ export const getProductById = async (id: string, token?: string): Promise<Produc
             return response.data.data;
         }
         return response.data;
-    } catch (error) {
-        console.error('Error fetching product:', error);
+    } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
         return null;
     }
 };
@@ -191,7 +195,8 @@ export const deleteProduct = async (id: string, token?: string) => {
 export interface DashboardData {
     totalProducts: number;
     totalOrders: number;
-    totalRevenue: number;
+    totalRevenueBeforeTax: number;
+    totalRevenueAfterTax: number;
     wallet: number;
     averageProductRating: number;
     totalProductRatings: number;
@@ -230,7 +235,8 @@ export const getDashboardData = async (year: number, month: number, token?: stri
         return {
             totalProducts: actualData?.totalProducts || 0,
             totalOrders: actualData?.totalOrders || 0,
-            totalRevenue: actualData?.totalRevenue || 0,
+            totalRevenueBeforeTax: actualData?.totalRevenueBeforeTax || 0,
+            totalRevenueAfterTax: actualData?.totalRevenueAfterTax || 0,
             wallet: actualData?.wallet || 0,
             averageProductRating: actualData?.averageProductRating || 0,
             totalProductRatings: actualData?.totalProductRatings || 0,
@@ -250,7 +256,8 @@ export const getDashboardData = async (year: number, month: number, token?: stri
         return {
             totalProducts: 0,
             totalOrders: 0,
-            totalRevenue: 0,
+            totalRevenueBeforeTax: 0,
+            totalRevenueAfterTax: 0,
             wallet: 0,
             averageProductRating: 0,
             totalProductRatings: 0,

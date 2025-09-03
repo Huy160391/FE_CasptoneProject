@@ -428,3 +428,4 @@ export class BookingValidation {
     return phoneRegex.test(phone);
   }
 }
+

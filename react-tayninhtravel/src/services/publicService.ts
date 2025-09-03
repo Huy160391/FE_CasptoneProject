@@ -1,4 +1,5 @@
 import axiosInstance from '@/config/axios';
+
 import {
     Product,
     GetBlogsResponse,
@@ -90,10 +91,11 @@ export const publicService = {
             }
 
             return relatedBlogs;
-        } catch (error) {
-            console.error('Error fetching related blogs:', error);
-            return [];
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return [];
+    }
     },
     /**
      * Upload image file to server, return url string
@@ -110,10 +112,11 @@ export const publicService = {
                 return response.data.urls[0];
             }
             return null;
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            return null;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return null;
+    }
     },
     /**
      * Upload nhiều file ảnh, trả về mảng url string
@@ -127,10 +130,11 @@ export const publicService = {
                 return response.data.urls;
             }
             return [];
-        } catch (error) {
-            console.error('Error uploading images:', error);
-            return [];
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return [];
+    }
     },
     async getPublicProducts(
         params: GetProductsParams = {}
@@ -220,3 +224,4 @@ export const publicService = {
 };
 
 export default publicService;
+

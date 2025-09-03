@@ -21,23 +21,6 @@ const Profile = () => {
 
     // BookingHistory component now uses real API calls instead of mock data
 
-    const commentHistory = [
-        {
-            id: 1,
-            tourName: 'Tour Tây Ninh 1 ngày',
-            rating: 5,
-            comment: 'Tour rất tuyệt vời, hướng dẫn viên nhiệt tình!',
-            date: '2024-03-16',
-        },
-        {
-            id: 2,
-            tourName: 'Tour Núi Bà Đen',
-            rating: 4,
-            comment: 'Cảnh đẹp, giá cả hợp lý.',
-            date: '2024-03-21',
-        },
-    ];
-
     // Fetch support tickets
     useEffect(() => {
         const fetchSupportTickets = async () => {
@@ -130,7 +113,7 @@ const Profile = () => {
                                     </span>
                                 ),
                                 children: (
-                                    <CommentHistory data={commentHistory} />
+                                    <CommentHistory />
                                 )
                             },
                             {

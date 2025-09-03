@@ -7,7 +7,7 @@
             "totalProducts": "{{total}} sản phẩm",
             "thankYou": "Cảm ơn bạn đã đánh giá sản phẩm!",
             "error": "Có lỗi xảy ra",
-            "submitFailed": "Gửi đánh giá thất bại. Vui lòng thử lại.",
+            "submitFailed": "Bạn không thể đánh giá khi chưa sử dụng sản phẩm này.",
             "ratingRequired": "Vui lòng chọn số sao",
             "pleaseRate": "Bạn cần chọn số sao để đánh giá.",
             "commentPlaceholder": "Nhập nhận xét về sản phẩm..."
@@ -84,7 +84,7 @@
             "confirmations": {
                 "delete": {
                     "title": "Xác nhận xóa",
-                    "content": "Bạn có chắc chắn muốn xóa người dùng \"{name}\" không?"
+                    "content": "Bạn có chắc chắn muốn xóa người dùng này không?"
                 },
                 "activate": {
                     "title": "Xác nhận kích hoạt",
@@ -309,7 +309,63 @@
         "maxParticipants": "Số người tối đa",
         "startDate": "Ngày khởi hành",
         "person": "người",
-        "unavailable": "Không khả dụng"
+        "unavailable": "Không khả dụng",
+        "detail": {
+            "notFoundTitle": "Không tìm thấy tour",
+            "mockReviews": {
+                "review1": {
+                    "name": "Nguyễn Văn A",
+                    "comment": "Tour rất tuyệt vời! Hướng dẫn viên nhiệt tình và chuyên nghiệp. Cảnh đẹp, thời gian hợp lý. Sẽ giới thiệu cho bạn bè!"
+                },
+                "review2": {
+                    "name": "Trần Thị B",
+                    "comment": "Tour khá tốt, tuy nhiên thời gian ở một số điểm hơi ngắn. Nhìn chung rất hài lòng với trải nghiệm."
+                },
+                "review3": {
+                    "name": "Lê Văn C",
+                    "comment": "Đây là lần thứ hai tôi tham gia tour này và vẫn rất hài lòng. Cảnh đẹp, dịch vụ tốt, đáng đồng tiền bát gạo."
+                }
+            },
+            "noTourId": "Không tìm thấy ID tour",
+            "mockCompany": {
+                "name": "Công ty Du lịch Tay Ninh Travel",
+                "description": "Chuyên tổ chức các tour du lịch chất lượng cao tại vùng Đông Nam Bộ với hơn 10 năm kinh nghiệm.",
+                "address": "123 Đường ABC, Thành phố Tây Ninh"
+            },
+            "mockGuide": {
+                "name": "Nguyễn Văn Hướng Dẫn",
+                "experience": "5 năm kinh nghiệm hướng dẫn tour",
+                "skills": {
+                    "professional": "Hướng dẫn viên chuyên nghiệp",
+                    "local": "Kinh nghiệm địa phương",
+                    "multilingual": "Đa ngôn ngữ",
+                    "safety": "An toàn tour"
+                },
+                "languages": {
+                    "vietnamese": "Tiếng Việt",
+                    "english": "Tiếng Anh",
+                    "chinese": "Tiếng Trung"
+                }
+            },
+            "loadError": "Không thể tải thông tin tour",
+            "generalError": "Có lỗi xảy ra khi tải thông tin tour",
+            "bookingUnavailable": "Tour này hiện không khả dụng để đặt",
+            "loginSuccess": "Đăng nhập thành công! Bạn có thể đặt tour ngay bây giờ.",
+            "companyTitle": "Công ty tổ chức",
+            "guideTitle": "Hướng dẫn viên",
+            "companyStatus": "Trạng thái",
+            "companyActive": "Hoạt động",
+            "companyInactive": "Không hoạt động",
+            "publicTours": "Số tour công khai",
+            "guideExperience": "Kinh nghiệm",
+            "guideSkills": "Kỹ năng",
+            "guideTotalTours": "Số tour đã dẫn",
+            "guideStatus": "Trạng thái",
+            "guideAvailable": "Có sẵn",
+            "guideUnavailable": "Không có sẵn",
+            "approvedDate": "Được duyệt",
+            "approvedBy": "Được duyệt bởi"
+        }
     },
     "thingsToDo": {
         "pageTitle": "Khám phá Tây Ninh",
@@ -636,7 +692,66 @@
         "cartClearedDescription": "Tất cả sản phẩm đã được xóa khỏi giỏ hàng",
         "checkoutDescription": "Chức năng thanh toán đang được phát triển",
         "error": "Lỗi",
-        "errorDescription": "Đã xảy ra lỗi khi xử lý giỏ hàng. Vui lòng thử lại sau."
+        "errorDescription": "Đã xảy ra lỗi khi xử lý giỏ hàng. Vui lòng thử lại sau.",
+        "vatIncluded": "* Giá thành đã bao gồm VAT",
+        "chooseVoucher": "Chọn voucher",
+        "voucher": "Mã giảm giá",
+        "discount": "Giảm giá",
+        "outOfStockRemoved": "{{name}} đã hết hàng và được xóa khỏi giỏ hàng",
+        "quantityReduced": "Số lượng {{name}} đã được giảm xuống {{newQuantity}} do tồn kho không đủ"
+    },
+    "paymentCancel": {
+        "processing": "Đang xử lý hủy thanh toán...",
+        "updatingOrderStatus": "Đang cập nhật trạng thái đơn hàng...",
+        "errorTitle": "Có lỗi xảy ra",
+        "goHome": "Về trang chủ",
+        "continueShopping": "Tiếp tục mua sắm",
+        "cancelTitle": "Thanh toán đã bị hủy",
+        "cancelSubTitle": "Bạn đã hủy quá trình thanh toán. Đơn hàng của bạn chưa được xác nhận.",
+        "orderInfoTitle": "Thông tin đơn hàng",
+        "payosOrderCode": "Mã thanh toán PAYOS",
+        "totalAmount": "Tổng tiền gốc",
+        "discount": "Giảm giá",
+        "totalAfterDiscount": "Tổng cần thanh toán",
+        "status": "Trạng thái",
+        "cancelled": "Đã hủy thanh toán",
+        "createdAt": "Thời gian tạo đơn",
+        "importantInfoTitle": "Thông tin quan trọng",
+        "importantInfoOrderCancelled": "Đơn hàng vẫn được lưu trong hệ thống với trạng thái \"Đã hủy\"",
+        "importantInfoProductInCart": "Sản phẩm vẫn còn trong giỏ hàng của bạn",
+        "importantInfoCanRetry": "Bạn có thể thử thanh toán lại bất cứ lúc nào",
+        "importantInfoHotline": "Liên hệ hotline nếu cần hỗ trợ: 1900-xxxx",
+        "retryPayment": "Thử thanh toán lại",
+        "viewCart": "Xem giỏ hàng",
+        "viewOrders": "Xem đơn hàng",
+        "needHelp": "Cần hỗ trợ?",
+        "contactUs": "Liên hệ với chúng tôi"
+    },
+    "paymentSuccess": {
+        "processing": "Đang xử lý thanh toán...",
+        "confirmingWithSystem": "Đang xác nhận thanh toán với hệ thống...",
+        "errorTitle": "Có lỗi xảy ra",
+        "goHome": "Về trang chủ",
+        "continueShopping": "Tiếp tục mua sắm",
+        "successTitle": "Thanh toán thành công!",
+        "successSubTitle": "Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đã được xác nhận.",
+        "orderInfoTitle": "Thông tin đơn hàng",
+        "printOrder": "In đơn hàng",
+        "payosOrderCode": "Mã thanh toán PAYOS",
+        "totalAmount": "Tổng tiền gốc",
+        "discount": "Giảm giá",
+        "totalAfterDiscount": "Tổng thanh toán",
+        "status": "Trạng thái",
+        "paid": "Đã thanh toán",
+        "createdAt": "Thời gian đặt hàng",
+        "importantInfoTitle": "Lưu ý quan trọng",
+        "importantInfoSaveOrderCode": "Vui lòng lưu lại mã đơn hàng để tra cứu sau này",
+        "importantInfoEmailConfirm": "Chúng tôi sẽ gửi email xác nhận trong vòng 24 giờ",
+        "importantInfoDeliveryTime": "Đơn hàng sẽ được xử lý và giao trong 2-3 ngày làm việc",
+        "importantInfoHotline": "Liên hệ hotline nếu cần hỗ trợ: 1900-xxxx",
+        "viewOrders": "Xem đơn hàng của tôi",
+        "needHelp": "Cần hỗ trợ?",
+        "contactUs": "Liên hệ với chúng tôi"
     },
     "checkout": {
         "promotionTitle": "Khuyến mãi",
@@ -1286,7 +1401,6 @@
             "dashboard": "Dashboard",
             "tourTemplates": "Quản lý Tour Template",
             "tours": "Quản lý Tour",
-            "transactions": "Lịch sử giao dịch",
             "reviews": "Lịch sử đánh giá",
             "revenue": "Quản lý doanh thu",
             "wallet": "Quản lý ví",
@@ -1312,6 +1426,36 @@
                 "newBooking": "Đặt chỗ mới",
                 "newReview": "Đánh giá mới",
                 "tourCreated": "Tạo tour mới"
+            }
+        },
+        "profile": {
+            "title": "Thông Tin Công Ty Du Lịch",
+            "description": "Cập nhật thông tin chi tiết về công ty du lịch của bạn",
+            "avatar": {
+                "title": "Ảnh đại diện Công ty",
+                "changeButton": "Thay đổi ảnh đại diện",
+                "note": "Chỉ chấp nhận ảnh JPG, JPEG, PNG (dưới 2MB)",
+                "updateSuccess": "Cập nhật avatar thành công!",
+                "updateError": "Cập nhật avatar thất bại!",
+                "fileTypeError": "Chỉ chấp nhận ảnh JPG, JPEG, PNG!",
+                "fileSizeError": "Ảnh phải nhỏ hơn 2MB!"
+            },
+            "form": {
+                "companyName": "Tên Công Ty",
+                "companyNamePlaceholder": "Nhập tên công ty",
+                "companyNameRequired": "Vui lòng nhập tên công ty",
+                "phone": "Số Điện Thoại",
+                "phonePlaceholder": "Nhập số điện thoại",
+                "phoneRequired": "Vui lòng nhập số điện thoại",
+                "address": "Địa Chỉ",
+                "addressPlaceholder": "Nhập địa chỉ",
+                "addressRequired": "Vui lòng nhập địa chỉ",
+                "description": "Mô Tả",
+                "descriptionPlaceholder": "Mô tả về công ty du lịch...",
+                "saveButton": "Lưu Thay Đổi",
+                "cancelButton": "Hủy Bỏ",
+                "updateSuccess": "Cập nhật thông tin công ty du lịch thành công!",
+                "updateError": "Cập nhật thất bại!"
             }
         },
         "tourTemplates": {
@@ -1465,30 +1609,6 @@
                 "active": "Hoạt động",
                 "full": "Đã đầy",
                 "cancelled": "Đã hủy"
-            }
-        },
-        "transactions": {
-            "title": "Lịch sử giao dịch",
-            "searchPlaceholder": "Tìm kiếm theo mã giao dịch",
-            "columns": {
-                "transactionId": "Mã giao dịch",
-                "customerName": "Tên khách hàng",
-                "tourName": "Tên tour",
-                "amount": "Số tiền",
-                "commission": "Hoa hồng",
-                "date": "Ngày giao dịch",
-                "status": "Trạng thái"
-            },
-            "status": {
-                "completed": "Hoàn thành",
-                "pending": "Đang xử lý",
-                "cancelled": "Đã hủy"
-            },
-            "summary": {
-                "title": "Tổng kết",
-                "totalRevenue": "Tổng doanh thu",
-                "totalCommission": "Tổng hoa hồng",
-                "totalTransactions": "Tổng giao dịch"
             }
         },
         "reviews": {
@@ -1680,7 +1800,7 @@
     "bookingHistory": {
         "title": "Lịch sử đặt tour",
         "description": "Quản lý và theo dõi các tour bạn đã đặt",
-        "searchPlaceholder": "Tìm kiếm theo tên tour, mã đặt tour...",
+        "searchPlaceholder": "Tìm kiếm theo tên tour, đơn vị tổ chức...",
         "filterByStatus": "Lọc theo trạng thái",
         "showCancelled": "Hiển thị đã hủy",
         "total": "Tổng",
@@ -1688,7 +1808,8 @@
         "viewDetails": "Chi tiết",
         "guide": "HDV",
         "columns": {
-            "bookingCode": "Mã đặt tour",
+            "bookingCode": "Mã thanh toán",
+            "tourCompanyName": "Công ty ",
             "tourName": "Tên tour",
             "tourDate": "Ngày tour",
             "guestCount": "Số khách",
@@ -1752,7 +1873,7 @@
         "paginationText": "của",
         "paginationTotal": "đơn hàng",
         "loadingError": "Không thể tải lịch sử đơn hàng",
-        "searchPlaceholder": "Tìm kiếm theo mã đơn hàng, tên cửa hàng...",
+        "searchPlaceholder": "Tìm kiếm theo mã đơn hàng",
         "filterByStatus": "Lọc theo trạng thái",
         "showCancelled": "Hiển thị đã hủy",
         "refresh": "Làm mới",
@@ -1765,11 +1886,13 @@
         "deliveryStatus": "Trạng thái giao hàng",
         "delivered": "Đã nhận hàng",
         "notDelivered": "Chưa nhận hàng",
+        "review": "Đánh giá sản phẩm",
         "statuses": {
             "paid": "Đã thanh toán",
             "notDelivered": "Chưa nhận hàng",
             "delivered": "Đã nhận hàng",
-            "cancelled": "Bị hủy"
+            "cancelled": "Bị hủy",
+            "unpaid": "Chưa thanh toán"
         },
         "paymentStatuses": {
             "unpaid": "Chưa thanh toán",
@@ -1791,7 +1914,7 @@
         "infoTitle": "Thông tin tour",
         "included": "Bao gồm",
         "guide": "Hướng dẫn viên chuyên nghiệp",
-        "insurance": "Bảo hiểm du lịch",
+        "insurance": "Nhanh chóng, an toàn",
         "transport": "Vận chuyển theo chương trình",
         "notIncluded": "Không bao gồm",
         "personalCost": "Chi phí cá nhân",
@@ -1825,9 +1948,255 @@
             "allLocations": "Tất cả địa điểm",
             "datePlaceholder": "Chọn ngày khởi hành",
             "keywordPlaceholder": "Tìm kiếm tour...",
-            "searchButton": "Tìm kiếm"
+            "searchButton": "Tìm kiếm",
+            "scheduleDaySunday": "Chủ nhật",
+            "scheduleDaySaturday": "Thứ bảy",
+            "scheduleDayAll": "Tất cả các ngày",
+            "loadingSuggestion": "Đang tải gợi ý...",
+            "noSuggestion": "Không có gợi ý nào"
         },
         "found": "Tour",
         "total": "Tổng số tour"
+    },
+    "specialtyShop": {
+        "profile": {
+            "title": "Thông Tin Shop",
+            "description": "Cập nhật thông tin chi tiết về shop của bạn",
+            "avatar": {
+                "title": "Ảnh đại diện Shop",
+                "changeButton": "Thay đổi ảnh đại diện",
+                "note": "Chỉ chấp nhận ảnh JPG, JPEG, PNG (dưới 2MB)",
+                "updateSuccess": "Cập nhật logo thành công!",
+                "updateError": "Cập nhật logo thất bại!",
+                "fileTypeError": "Chỉ chấp nhận ảnh JPG, JPEG, PNG!",
+                "fileSizeError": "Ảnh phải nhỏ hơn 2MB!"
+            },
+            "form": {
+                "shopName": "Tên Shop",
+                "shopNamePlaceholder": "Nhập tên shop",
+                "shopNameRequired": "Vui lòng nhập tên shop",
+                "businessType": "Loại Hình Kinh Doanh",
+                "businessTypePlaceholder": "Chọn loại hình",
+                "businessTypeRequired": "Chọn loại hình",
+                "description": "Mô Tả Shop",
+                "descriptionPlaceholder": "Mô tả về shop của bạn...",
+                "address": "Địa Chỉ",
+                "addressPlaceholder": "Nhập địa chỉ shop",
+                "addressRequired": "Nhập địa chỉ shop",
+                "phone": "Số Điện Thoại",
+                "phonePlaceholder": "Nhập số điện thoại",
+                "phoneRequired": "Nhập số điện thoại",
+                "representativeName": "Tên Người Đại Diện",
+                "representativeNamePlaceholder": "Nhập tên người đại diện",
+                "representativeNameRequired": "Vui lòng nhập tên người đại diện",
+                "email": "Email",
+                "emailPlaceholder": "Nhập email",
+                "emailRequired": "Vui lòng nhập email",
+                "emailInvalid": "Email không hợp lệ",
+                "businessLicense": "Giấy Phép Kinh Doanh",
+                "businessLicensePlaceholder": "Số giấy phép kinh doanh",
+                "website": "Website",
+                "websitePlaceholder": "https://example.com",
+                "openTime": "Giờ Mở Cửa",
+                "openTimePlaceholder": "--:--",
+                "closeTime": "Giờ Đóng Cửa",
+                "closeTimePlaceholder": "--:--",
+                "saveButton": "Lưu Thay Đổi",
+                "cancelButton": "Hủy Bỏ",
+                "updateSuccess": "Cập nhật thông tin shop thành công!",
+                "updateError": "Cập nhật thất bại!"
+            },
+            "businessTypes": {
+                "specialty": "Đặc sản",
+                "food": "Ẩm thực",
+                "souvenir": "Quà lưu niệm",
+                "handicrafts": "Thủ công mỹ nghệ"
+            }
+        },
+        "info": {
+            "title": "Thông tin cửa hàng",
+            "loading": "Đang tải thông tin cửa hàng...",
+            "error": "Không thể tải thông tin cửa hàng",
+            "notFound": "Không tìm thấy thông tin cửa hàng",
+            "rating": "{{rating}} điểm",
+            "openHours": "Mở cửa: {{open}} - {{close}}",
+            "viewShop": "Xem cửa hàng"
+        },
+        "detail": {
+            "loading": "Đang tải thông tin cửa hàng...",
+            "error": "Không thể tải thông tin cửa hàng",
+            "notFoundTitle": "Không thể tải thông tin cửa hàng",
+            "notFoundMessage": "Cửa hàng không tồn tại hoặc đã bị xóa",
+            "backButton": "Quay lại",
+            "breadcrumbHome": "Trang Chủ",
+            "breadcrumbShop": "Cửa Hàng",
+            "ratingText": "{{rating}} / 5",
+            "openHours": "Mở cửa: {{open}} - {{close}}",
+            "productCount": "{{count}} sản phẩm",
+            "joinedDate": "Tham gia từ {{date}}",
+            "infoTitle": "Thông tin cửa hàng",
+            "address": "Địa chỉ",
+            "phone": "Số điện thoại",
+            "email": "Email",
+            "representative": "Người đại diện",
+            "businessLicense": "Giấy phép kinh doanh",
+            "website": "Website",
+            "productsTitle": "Sản phẩm của cửa hàng ({{count}})",
+            "noProducts": "Cửa hàng chưa có sản phẩm nào"
+        }
+    },
+    "product": {
+        "detail": {
+            "breadcrumbHome": "Trang Chủ",
+            "breadcrumbShop": "Cửa Hàng",
+            "tags": {
+                "specialty": "đặc sản",
+                "gift": "quà tặng",
+                "traditional": "truyền thống"
+            },
+            "defaultDescription": "Sản phẩm đặc trưng từ Tây Ninh, chất lượng cao",
+            "anonymous": "Ẩn danh",
+            "stockExceeded": "Số lượng vượt quá tồn kho hiện có!",
+            "newBadge": "Mới",
+            "discountBadge": "Giảm {{percent}}%",
+            "imageHint": "Nhấp để xem ảnh lớn",
+            "reviewCount": "{{count}} đánh giá",
+            "sku": "SKU: {{sku}}",
+            "soldCount": "Đã bán {{count}}",
+            "quantityLabel": "Số lượng",
+            "addToCartButton": "Thêm vào giỏ",
+            "buyNowButton": "Mua ngay",
+            "category": "Danh mục: {{category}}",
+            "location": "Xuất xứ: Tây Ninh",
+            "descriptionTab": "Mô tả sản phẩm",
+            "reviewsTab": "Đánh giá ({{count}})",
+            "relatedProducts": "Sản phẩm liên quan",
+            "notFoundTitle": "Không tìm thấy sản phẩm",
+            "notFoundMessage": "Sản phẩm này không tồn tại hoặc đã bị xóa.",
+            "backToShop": "Quay lại cửa hàng",
+            "imagePagination": "{{current}}/{{total}}"
+        }
+    },
+    "booking": {
+        "title": "Đặt Tour",
+        "viewOtherTours": "Xem tour khác",
+        "steps": {
+            "tourInfo": "Thông tin tour",
+            "customerInfo": "Thông tin khách hàng",
+            "confirmPayment": "Xác nhận & Thanh toán"
+        },
+        "common": {
+            "continue": "Tiếp tục",
+            "back": "Quay lại",
+            "person": "người"
+        },
+        "errors": {
+            "tourIdNotFound": "Không tìm thấy ID tour",
+            "loadTourDetails": "Không thể tải thông tin tour",
+            "loadTourDetailsGeneric": "Có lỗi xảy ra khi tải thông tin tour",
+            "cannotLoadTour": "Không thể tải thông tin tour",
+            "tourNotExists": "Tour không tồn tại hoặc đã bị xóa",
+            "cannotCalculatePrice": "Không thể tính giá tour",
+            "pleaseSelectDate": "Vui lòng chọn ngày tour",
+            "pleaseCompleteInfo": "Vui lòng điền đầy đủ thông tin"
+        },
+        "tourInfo": {
+            "title": "Thông tin tour",
+            "tourName": "Tên tour",
+            "startLocation": "Điểm khởi hành",
+            "endLocation": "Điểm kết thúc",
+            "basePrice": "Giá cơ bản",
+            "maxGuests": "Số chỗ tối đa",
+            "booked": "Đã đặt",
+            "selectDate": "Chọn ngày tour",
+            "loadingSchedule": "Đang tải lịch trình...",
+            "selectDateInstruction": "Chọn ngày bạn muốn tham gia tour:",
+            "noScheduleAvailable": "Hiện tại chưa có lịch trình khả dụng cho tour này",
+            "noScheduleDescription": "Các tour slots có thể đã được đặt hết hoặc không có chỗ trống. Vui lòng liên hệ để biết thêm thông tin.",
+            "tourDescription": "Mô tả tour",
+            "tourTimeline": "Lịch trình tour"
+        },
+        "customerInfo": {
+            "title": "Thông tin khách hàng",
+            "bookingType": "Loại đặt tour",
+            "numberOfGuests": "Số người",
+            "contactName": "Tên người liên hệ",
+            "contactPhone": "Số điện thoại",
+            "contactEmail": "Email",
+            "specialRequests": "Yêu cầu đặc biệt (tùy chọn)",
+            "individualGuestsInfo": "Thông tin từng khách hàng",
+            "guestNotice": "Lưu ý",
+            "guestNoticeDescription": "Mỗi khách hàng sẽ nhận được mã QR riêng để check-in tại các điểm dừng chân",
+            "guestName": "Họ và tên",
+            "guestEmail": "Email",
+            "guestPhone": "Số điện thoại (tùy chọn)",
+            "guestNumber": "Khách hàng {{number}}",
+            "validation": {
+                "selectBookingType": "Vui lòng chọn loại đặt tour",
+                "enterNumberOfGuests": "Vui lòng nhập số người",
+                "minGuests": "Phải có ít nhất 1 người",
+                "enterContactName": "Vui lòng nhập tên người liên hệ",
+                "maxContactNameLength": "Tên không được quá 100 ký tự",
+                "enterContactPhone": "Vui lòng nhập số điện thoại",
+                "invalidPhone": "Số điện thoại không hợp lệ",
+                "enterContactEmail": "Vui lòng nhập email",
+                "invalidEmail": "Email không hợp lệ",
+                "enterGuestName": "Vui lòng nhập tên khách hàng",
+                "minGuestNameLength": "Tên phải có ít nhất 2 ký tự",
+                "maxGuestNameLength": "Tên không quá 100 ký tự",
+                "enterGuestEmail": "Vui lòng nhập email",
+                "invalidGuestEmail": "Email không hợp lệ",
+                "invalidGuestPhone": "Số điện thoại không hợp lệ"
+            },
+            "placeholders": {
+                "numberOfGuests": "Nhập số người",
+                "contactName": "Nhập tên đầy đủ",
+                "contactPhone": "0123456789",
+                "contactEmail": "email@example.com",
+                "specialRequests": "Ví dụ: Ăn chay, dị ứng thực phẩm, yêu cầu phòng riêng...",
+                "guestName": "Nhập họ và tên đầy đủ",
+                "guestEmail": "email@example.com",
+                "guestPhone": "0123456789"
+            }
+        },
+        "confirmation": {
+            "title": "Xác nhận đặt tour",
+            "tourSummary": "Tóm tắt tour",
+            "tourDate": "Ngày khởi hành",
+            "numberOfGuests": "Số người",
+            "contactName": "Người liên hệ",
+            "contactPhone": "Số điện thoại",
+            "contactEmail": "Email",
+            "specialRequests": "Yêu cầu đặc biệt",
+            "customerInfo": "Thông tin khách hàng",
+            "paymentMethod": "Phương thức thanh toán",
+            "payNow": "Thanh toán ngay",
+            "payLater": "Thanh toán sau",
+            "termsAndConditions": "Điều khoản và điều kiện",
+            "termsText": "Tôi đã đọc và đồng ý với các điều khoản và điều kiện của dịch vụ",
+            "privacyPolicy": "Chính sách bảo mật",
+            "privacyText": "Tôi đồng ý với chính sách bảo mật và xử lý dữ liệu cá nhân",
+            "confirmBooking": "Xác nhận đặt tour",
+            "bookingSuccess": "Đặt tour thành công!",
+            "bookingSuccessMessage": "Cảm ơn bạn đã đặt tour. Chúng tôi sẽ gửi thông tin chi tiết qua email và SMS.",
+            "viewBookingDetails": "Xem chi tiết đặt tour",
+            "backToHome": "Về trang chủ",
+            "validation": {
+                "acceptTerms": "Vui lòng chấp nhận điều khoản và điều kiện",
+                "acceptPrivacy": "Vui lòng chấp nhận chính sách bảo mật"
+            },
+            "tourInfo": "Tour Information"
+        },
+        "summary": {
+            "title": "Tóm tắt đơn hàng",
+            "calculatingPrice": "Đang tính giá...",
+            "originalPrice": "Giá gốc",
+            "discount": "Giảm giá",
+            "total": "Tổng cộng",
+            "earlyBird": "Ưu đãi đặt sớm",
+            "priceType": "Loại giá",
+            "selectGuestsToSeePrice": "Chọn số lượng khách để xem giá",
+            "availableSlots": "Chỗ trống"
+        }
     }
 }

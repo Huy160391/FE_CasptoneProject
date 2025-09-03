@@ -1,108 +1,109 @@
-import { DatePicker, Input, Button } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Button, Select, AutoComplete } from 'antd';
+import { tourDetailsService, TourDetail } from '../services/tourDetailsService';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import dayjs from 'dayjs';
 import './TourSearchBar.scss';
 
-// const { Option } = Select;
+interface TourSearchBarProps {
+    onSearchTermChange?: (term: string, schedule?: string, startLoc?: string, endLoc?: string) => void;
+    searchTerm?: string;
+    scheduleDay?: string;
+}
 
-const TourSearchBar = () => {
-    const { t } = useTranslation();
+const { Option } = Select;
+
+const TourSearchBar = ({ onSearchTermChange, searchTerm, scheduleDay }: TourSearchBarProps) => {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
+    const { t } = useTranslation();
+    const [keyword, setKeyword] = useState<string>(searchTerm || '');
+    const [scheduleDayState, setScheduleDayState] = useState<string>(scheduleDay || '');
+    const [options, setOptions] = useState<{ value: string }[]>([]);
+    const [suggestionTours, setSuggestionTours] = useState<TourDetail[]>([]);
+    const [fetching, setFetching] = useState(false);
 
-    const locationParam = searchParams.get('location');
-    const dateParam = searchParams.get('date');
-    const keywordParam = searchParams.get('keyword');
-
-    const [location, setLocation] = useState<string | undefined>(locationParam || undefined);
-    const [date, setDate] = useState<any>(dateParam ? dayjs(dateParam) : null);
-    const [keyword, setKeyword] = useState<string>(keywordParam || '');
-
-    // const locations = [
-    //     { value: 'nui-ba-den', label: t('tour.location.nuiBaDen') },
-    //     { value: 'toa-thanh', label: t('tour.location.toaThanh') },
-    //     { value: 'ho-dau-tieng', label: t('tour.location.hoDauTieng') },
-    //     { value: 'thac-giang-dien', label: t('tour.location.thacGiangDien') },
-    //     { value: 'vuon-quoc-gia-lo-go', label: t('tour.location.vuonQuocGiaLoGo') }
-    // ];
-
-    // Load search values from URL parameters on component mount
     useEffect(() => {
-        if (locationParam) {
-            setLocation(locationParam);
+        setKeyword(searchTerm || '');
+    }, [searchTerm]);
+
+    useEffect(() => {
+        setScheduleDayState(scheduleDay || '');
+    }, [scheduleDay]);
+
+    useEffect(() => {
+        // Chỉ gọi API khi có keyword để search
+        if (!keyword || keyword.trim() === '') {
+            setOptions([]);
+            return;
+        }
+        setFetching(true);
+
+        const params: any = {
+            searchTerm: keyword,
+            pageSize: 5
+        };
+
+        // Chỉ thêm scheduleDay vào params nếu nó không phải là empty string
+        if (scheduleDayState && scheduleDayState !== '') {
+            params.scheduleDay = scheduleDayState;
         }
 
-        if (keywordParam) {
-            setKeyword(keywordParam);
-        }
-
-        if (dateParam) {
-            setDate(dayjs(dateParam));
-        }
-    }, [locationParam, dateParam, keywordParam]);
+        tourDetailsService.getPublicTourDetailsList(params).then(res => {
+            if (res.success && res.data) {
+                setOptions(res.data.map(tour => ({ value: tour.title })));
+                setSuggestionTours(res.data);
+            } else {
+                setOptions([]);
+                setSuggestionTours([]);
+            }
+        }).finally(() => setFetching(false));
+    }, [keyword, scheduleDayState]);
 
     const handleSearch = () => {
-        // Build query params
-        const params = new URLSearchParams();
-
-        if (location) params.append('location', location);
-        if (date) params.append('date', date.format('YYYY-MM-DD'));
-        if (keyword) params.append('keyword', keyword);
-
-        // Update URL with search params
-        navigate({
-            pathname: '/things-to-do',
-            search: params.toString()
-        });
+        if (onSearchTermChange) {
+            onSearchTermChange(keyword, scheduleDayState || undefined, undefined, undefined);
+        }
+        if (window.location.pathname === '/' || window.location.pathname === '/home') {
+            navigate('/tours', { state: { searchTerm: keyword, scheduleDay: scheduleDayState || undefined } });
+        }
     };
 
     return (
         <div className="tour-search-bar">
             <div className="search-container">
-                {/* <div className="search-item location">
+                <div className="search-item date-range" style={{ display: 'flex', alignItems: 'center', gap: 16, width: '100%' }}>
                     <Select
-                        placeholder={t('tour.search.destinationPlaceholder')}
-                        className="location-select"
-                        suffixIcon={<EnvironmentOutlined />}
-                        onChange={(value) => setLocation(value)}
-                        value={location}
+                        value={scheduleDayState}
+                        onChange={setScheduleDayState}
+                        style={{ width: 140 }}
+                        placeholder={t('tour.search.scheduleDayPlaceholder')}
                     >
-                        <Option value="all">Tất cả địa điểm</Option>
-                        <Option value="all">{t('tour.search.allLocations')}</Option>
-                        {locations.map(location => (
-                            <Option key={location.value} value={location.value}>
-                                {location.label}
-                            </Option>
-                        ))}
+                        <Option value="">{t('tour.search.scheduleDayAll')}</Option>
+                        <Option value="Sunday">{t('tour.search.scheduleDaySunday')}</Option>
+                        <Option value="Saturday">{t('tour.search.scheduleDaySaturday')}</Option>
                     </Select>
-                </div> */}
-
-                <div className="search-item date">
-                    <DatePicker
-                        className="date-picker"
-                        placeholder={t('tour.search.datePlaceholder')}
-                        format="DD/MM/YYYY"
-                        onChange={(value) => setDate(value)}
-                        value={date}
+                    <AutoComplete
+                        options={options}
+                        value={keyword}
+                        onSelect={value => {
+                            setKeyword(value);
+                            const found = suggestionTours.find(tour => tour.title === value);
+                            if (found) {
+                                navigate(`/tour-details/${found.id}`);
+                            } else {
+                                if (onSearchTermChange) onSearchTermChange(value, scheduleDayState || undefined, undefined, undefined);
+                            }
+                        }}
+                        onSearch={setKeyword}
+                        style={{ height: '42px', flexGrow: 1, marginLeft: 0, display: 'flex', alignItems: 'center', padding: 0, lineHeight: '42px' }}
+                        placeholder={t('tour.search.keywordPlaceholder')}
+                        notFoundContent={fetching ? <span>{t('tour.search.loadingSuggestion')}</span> : <span>{t('tour.search.noSuggestion')}</span>}
+                        allowClear
                     />
+                    <Button type="primary" className="search-button" onClick={handleSearch}>
+                        {t('tour.search.searchButton')}
+                    </Button>
                 </div>
-
-                <Input
-                    placeholder={t('tour.search.keywordPlaceholder')}
-                    prefix={<SearchOutlined />}
-                    className="keyword-input"
-                    style={{ height: '42px' }}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    value={keyword}
-                    onPressEnter={handleSearch}
-                />
-
-                <Button type="primary" className="search-button" onClick={handleSearch}>
-                    {t('tour.search.searchButton')}
-                </Button>
             </div>
         </div>
     );

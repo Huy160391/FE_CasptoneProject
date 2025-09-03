@@ -307,6 +307,44 @@
         }
       }
     }
+
+    .company-info-section, .guide-info-section {
+      margin-top: 24px;
+      
+      .company-card, .guide-card {
+        .ant-card-body {
+          padding: 20px;
+        }
+        
+        .company-logo, .guide-avatar {
+          text-align: center;
+          
+          .ant-avatar {
+            border: 2px solid #f0f0f0;
+          }
+        }
+        
+        .company-details, .guide-details {
+          h4 {
+            margin-bottom: 8px !important;
+            color: #1890ff;
+          }
+          
+          .ant-rate {
+            font-size: 14px;
+          }
+          
+          .ant-typography {
+            margin-bottom: 4px;
+          }
+          
+          .ant-tag {
+            margin-right: 4px;
+            margin-bottom: 4px;
+          }
+        }
+      }
+    }
     
     .tour-sidebar {
       .booking-card {

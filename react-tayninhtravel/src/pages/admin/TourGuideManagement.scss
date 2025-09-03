@@ -1,3 +1,134 @@
+  // Removed custom .status-tag styles to use Ant Design default/global styles
+      // Đưa vào trong .tourguides-table .ant-tag phía dưới
+// TourGuideManagement styles similar to ShopManagement/UserManagement
+.tourguide-management-page {
+  background: #fff;
+  min-height: 100vh;
+  padding: 24px;
+
+  .header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: #222;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+  }
+
+  .tourguides-table {
+    .ant-table-tbody > tr {
+      cursor: pointer;
+      transition: background-color 0.2s;
+      &:hover {
+        background-color: #f5f5f5;
+      }
+    }
+    // Tag dark mode (copied from ShopManagement.scss for consistency)
+    .ant-tag {
+      &.ant-tag-blue {
+        background-color: rgba(24, 144, 255, 0.2);
+        border-color: #1890ff;
+        color: #69c0ff;
+      }
+      &.ant-tag-green {
+        background-color: rgba(82, 196, 26, 0.2);
+        border-color: #52c41a;
+        color: #95de64;
+      }
+      &.ant-tag-red {
+        background-color: rgba(255, 77, 79, 0.2);
+        border-color: #ff4d4f;
+        color: #ff7875;
+      }
+      &.ant-tag-orange {
+        background-color: rgba(250, 173, 20, 0.2);
+        border-color: #faad14;
+        color: #ffc53d;
+      }
+      &.ant-tag-purple {
+        background-color: rgba(114, 46, 209, 0.2);
+        border-color: #722ed1;
+        color: #b37feb;
+      }
+      &.ant-tag-cyan {
+        background-color: rgba(19, 194, 194, 0.2);
+        border-color: #13c2c2;
+        color: #5cdbd3;
+      }
+    }
+    .ant-table-tbody > tr > td {
+      font-size: 15px;
+      color: #222;
+    }
+  }
+}
+
+body.dark-mode {
+  .tourguide-management-page {
+    background: #181818;
+    .header-bar {
+      h1 {
+        color: #fff;
+      }
+    }
+    .tourguides-table {
+      .ant-table-tbody > tr {
+        &:hover {
+          background-color: #232323;
+        }
+      }
+      .ant-tag {
+        border-radius: 4px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 2px 10px;
+        &.ant-tag-blue {
+          background: #e6f7ff;
+          color: #1677ff;
+          border: 1px solid #91d5ff;
+        }
+        &.ant-tag-green {
+          background: #f6ffed;
+          color: #52c41a;
+          border: 1px solid #b7eb8f;
+        }
+        &.ant-tag-red {
+          background: #fff2f0;
+          color: #f5222d;
+          border: 1px solid #ffccc7;
+        }
+        &.ant-tag-orange {
+          background: #fff7e6;
+          color: #fa8c16;
+          border: 1px solid #ffd591;
+        }
+        &.ant-tag-purple {
+          background: #f9f0ff;
+          color: #722ed1;
+          border: 1px solid #d3adf7;
+        }
+        &.ant-tag-cyan {
+          background: #e6fffb;
+          color: #13c2c2;
+          border: 1px solid #87e8de;
+        }
+      }
+      .ant-table-tbody > tr > td {
+        color: #eee;
+      }
+    }
+  }
+}
 .tour-guide-management {
   &.light-mode {
     .page-header {
@@ -761,5 +892,305 @@
       background-color: #262626;
       border-top-color: #434343;
     }
+  }
+}
+
+// New Professional Tour Guide Detail Modal
+.guide-detail-modal {
+  .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 24px;
+    margin: -24px -24px 24px -24px;
+    border-radius: 8px 8px 0 0;
+
+    &.dark {
+      background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .guide-avatar-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .guide-avatar-large {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 32px;
+          color: white;
+          border: 3px solid rgba(255, 255, 255, 0.3);
+
+          img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+          }
+        }
+
+        .guide-basic-info {
+          .guide-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: white;
+          }
+
+          .guide-username {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+          }
+
+          .guide-status-badge {
+            .ant-tag {
+              border-radius: 16px;
+              padding: 4px 12px;
+            }
+          }
+        }
+      }
+
+      .guide-stats {
+        display: flex;
+        gap: 24px;
+
+        .stat-item {
+          text-align: center;
+
+          .stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            display: block;
+          }
+
+          .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            color: white;
+          }
+        }
+      }
+    }
+  }
+
+  .skills-overview {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid #f0f0f0;
+
+    &.dark {
+      background: #2a2a2a;
+      border-color: #404040;
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #1890ff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .skills-content {
+      .skill-tag {
+        font-size: 14px;
+        padding: 6px 16px;
+        border-radius: 20px;
+      }
+    }
+  }
+
+  .info-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid #f0f0f0;
+
+    &.dark {
+      background: #2a2a2a;
+      border-color: #404040;
+
+      .section-title {
+        color: #81c784;
+      }
+
+      .info-item {
+        .info-label {
+          color: #999;
+        }
+
+        .info-value {
+          color: #e4e4e4;
+        }
+
+        .info-icon {
+          color: #81c784;
+        }
+      }
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1890ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+      }
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background: #fafafa;
+        border-radius: 6px;
+        border: 1px solid #f0f0f0;
+
+        .info-icon {
+          color: #1890ff;
+          font-size: 16px;
+        }
+
+        .info-label {
+          font-weight: 500;
+          color: #666;
+          min-width: 100px;
+        }
+
+        .info-value {
+          flex: 1;
+          color: #333;
+          
+          &.guide-id {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+          }
+        }
+      }
+    }
+  }
+
+  .experience-section, .notes-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid #f0f0f0;
+
+    &.dark {
+      background: #2a2a2a;
+      border-color: #404040;
+
+      .section-title {
+        color: #81c784;
+      }
+
+      .experience-content, .notes-content {
+        color: #e4e4e4;
+      }
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #1890ff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 16px;
+    }
+
+    .experience-content, .notes-content {
+      line-height: 1.6;
+      color: #555;
+      background: #fafafa;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 4px solid #1890ff;
+    }
+  }
+
+  .modal-footer {
+    text-align: center;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+
+    .ant-btn {
+      min-width: 120px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+  }
+}
+
+// Dark mode specific styles for the new modal
+.guide-detail-modal.dark {
+  .skills-overview.dark {
+    .section-title {
+      color: #81c784;
+    }
+
+    .skills-content {
+      .skill-tag {
+        background-color: rgba(124, 77, 255, 0.2);
+        border-color: #7c4dff;
+        color: #b388ff;
+      }
+    }
+  }
+
+  .info-section.dark {
+    .info-grid {
+      .info-item {
+        background: #383838;
+        border-color: #555;
+
+        &.guide-id {
+          background: #555;
+          color: #e4e4e4;
+        }
+      }
+    }
+  }
+
+  .experience-section.dark, .notes-section.dark {
+    .experience-content, .notes-content {
+      background: #383838;
+      border-left-color: #81c784;
+    }
+  }
+
+  .modal-footer {
+    border-top-color: #404040;
   }
 }

@@ -32,9 +32,8 @@ export interface ApiUser {
 
 export interface UpdateUserPayload {
     name?: string;
-    email?: string;
-    phone?: string;
-    role?: string;
+    phoneNumber?: string;
+    avatar?: string;
     isActive?: boolean;
 }
 

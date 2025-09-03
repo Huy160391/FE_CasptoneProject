@@ -1,4 +1,5 @@
 import axiosInstance from '../config/axios';
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export interface Notification {
     id: string;
@@ -79,10 +80,13 @@ class NotificationService {
                     totalPages: 0
                 };
             }
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     // Lấy số thông báo chưa đọc
@@ -112,30 +116,39 @@ class NotificationService {
     async markAsRead(notificationId: string): Promise<void> {
         try {
             await axiosInstance.put(`/Notification/${notificationId}/read`);
-        } catch (error) {
-            console.error('Error marking notification as read:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     // Đánh dấu đã đọc tất cả thông báo
     async markAllAsRead(): Promise<void> {
         try {
             await axiosInstance.put('/Notification/mark-all-read');
-        } catch (error) {
-            console.error('Error marking all notifications as read:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     // Xóa thông báo
     async deleteNotification(notificationId: string): Promise<void> {
         try {
             await axiosInstance.delete(`/Notification/${notificationId}`);
-        } catch (error) {
-            console.error('Error deleting notification:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     // Lấy thống kê thông báo
@@ -143,10 +156,13 @@ class NotificationService {
         try {
             const response = await axiosInstance.get('/Notification/stats');
             return response.data;
-        } catch (error) {
-            console.error('Error fetching notification stats:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     // Lấy thông báo mới nhất
@@ -154,10 +170,13 @@ class NotificationService {
         try {
             const response = await axiosInstance.get(`/Notification/latest?limit=${limit}`);
             return response.data.notifications;
-        } catch (error) {
-            console.error('Error fetching latest notifications:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 
     // Lấy thông báo theo loại
@@ -170,11 +189,15 @@ class NotificationService {
         try {
             const response = await axiosInstance.get(`/Notification/type/${type}?page=${page}&limit=${limit}`);
             return response.data;
-        } catch (error) {
-            console.error('Error fetching notifications by type:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     }
 }
 
 export const notificationService = new NotificationService();
+

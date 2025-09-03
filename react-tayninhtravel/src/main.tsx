@@ -1,5 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import 'antd/dist/reset.css'
+
 import './styles/global.scss'
 import App from './App.tsx'
 import './i18n'
@@ -10,7 +12,10 @@ import appInitService from './services/appInitService'
 setupConsoleSilencer()
 
 // Initialize app services (including token expiration timer)
-appInitService.initialize()
+// Nếu là trang public, truyền true. Có thể xác định bằng window.location.pathname
+const publicPaths = ['/', '/about', '/blog', '/shop', '/tour', '/404'];
+const isPublicPage = publicPaths.some(path => window.location.pathname.startsWith(path));
+appInitService.initialize(isPublicPage);
 
 // Additional event listener for network errors
 window.addEventListener('error', (event) => {

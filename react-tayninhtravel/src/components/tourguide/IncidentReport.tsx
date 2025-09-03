@@ -79,9 +79,12 @@ const IncidentReport: React.FC = () => {
     const handleSubmit = async (values: IncidentFormData) => {
         try {
             setSubmitting(true);
-            
+
             const response = await reportIncident({
-                ...values,
+                tourSlotId: values.tourOperationId, // Map tourOperationId to tourSlotId
+                title: values.title,
+                description: values.description,
+                severity: values.severity,
                 imageUrls: imageUrls.length > 0 ? imageUrls : undefined
             });
             

@@ -99,7 +99,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
     const handleCreate = async (values: CreateTourOperationRequest) => {
         try {
             setLoading(true);
-            
+
             // Validate
             const errors = validateTourOperation(values);
             if (errors.length > 0) {
@@ -134,7 +134,7 @@ const TourOperationManagement: React.FC<TourOperationManagementProps> = ({
 
         try {
             setLoading(true);
-            
+
             // Validate
             const errors = validateTourOperation(values);
             if (errors.length > 0) {

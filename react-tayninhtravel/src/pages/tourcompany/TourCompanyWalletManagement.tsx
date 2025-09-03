@@ -35,6 +35,7 @@ import {
 } from '@/components/wallet';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import shopWithdrawalService from '@/services/shopWithdrawalService';
 import { walletService } from '@/services/walletService';
 import { BankAccount, BankAccountFormData, WithdrawalFormData } from '@/types';
@@ -59,6 +60,7 @@ interface WalletStatistics {
 const TourCompanyWalletManagement: React.FC = () => {
     const { user } = useAuthStore();
     const { isDarkMode } = useThemeStore();
+    const { handleError } = useErrorHandler();
     const [loading, setLoading] = useState(false);
     const [statisticsLoading, setStatisticsLoading] = useState(false);
     const [balance, setBalance] = useState(0);
@@ -115,7 +117,7 @@ const TourCompanyWalletManagement: React.FC = () => {
             const accountsData = await shopWithdrawalService.getMyBankAccounts();
             setBankAccounts(accountsData || []);
         } catch (error) {
-            message.error('Không thể tải dữ liệu ví');
+            handleError('Không thể tải dữ liệu ví');
         } finally {
             setLoading(false);
         }
@@ -157,7 +159,7 @@ const TourCompanyWalletManagement: React.FC = () => {
                 setBalance(stats.currentBalance);
             }
         } catch (error) {
-            message.error('Không thể tải thống kê');
+            handleError('Không thể tải thống kê');
             setStatistics({
                 totalWithdrawals: 0,
                 pendingWithdrawals: 0,
@@ -192,7 +194,7 @@ const TourCompanyWalletManagement: React.FC = () => {
             message.success('Thêm tài khoản thành công');
             loadWalletData();
         } catch (error) {
-            message.error('Có lỗi xảy ra khi thêm tài khoản');
+            handleError('Có lỗi xảy ra khi thêm tài khoản');
         }
     };
     const handleUpdateAccount = async (id: string, data: BankAccountFormData) => {
@@ -202,7 +204,7 @@ const TourCompanyWalletManagement: React.FC = () => {
             message.success('Cập nhật tài khoản thành công');
             loadWalletData();
         } catch (error) {
-            message.error('Có lỗi xảy ra khi cập nhật tài khoản');
+            handleError('Có lỗi xảy ra khi cập nhật tài khoản');
         }
     };
     const handleDeleteAccount = async (id: string) => {
@@ -211,7 +213,7 @@ const TourCompanyWalletManagement: React.FC = () => {
             message.success('Xóa tài khoản thành công');
             loadWalletData();
         } catch (error) {
-            message.error('Có lỗi xảy ra khi xóa tài khoản');
+            handleError('Có lỗi xảy ra khi xóa tài khoản');
         }
     };
     const handleSetDefaultAccount = async (id: string) => {
@@ -220,7 +222,7 @@ const TourCompanyWalletManagement: React.FC = () => {
             message.success('Đặt tài khoản mặc định thành công');
             loadWalletData();
         } catch (error) {
-            message.error('Có lỗi xảy ra khi đặt tài khoản mặc định');
+            handleError('Có lỗi xảy ra khi đặt tài khoản mặc định');
         }
     };
     const handleBankAccountSubmit = async (data: BankAccountFormData) => {
@@ -232,7 +234,7 @@ const TourCompanyWalletManagement: React.FC = () => {
             }
             setIsBankAccountModalVisible(false);
         } catch (error) {
-            message.error('Có lỗi xảy ra');
+            handleError('Có lỗi xảy ra');
         }
     };
     // Withdrawal handlers
@@ -247,7 +249,7 @@ const TourCompanyWalletManagement: React.FC = () => {
         try {
             const canCreate = await shopWithdrawalService.canCreateWithdrawalRequest();
             if (!canCreate) {
-                message.error('Bạn không thể tạo yêu cầu rút tiền lúc này');
+                handleError('Bạn không thể tạo yêu cầu rút tiền lúc này');
                 return;
             }
             const validation = await shopWithdrawalService.validateWithdrawalRequest({
@@ -258,7 +260,7 @@ const TourCompanyWalletManagement: React.FC = () => {
                 const errorMessage = validation.errors && Array.isArray(validation.errors)
                     ? validation.errors.join(', ')
                     : 'Yêu cầu rút tiền không hợp lệ';
-                message.error(errorMessage);
+                handleError(errorMessage);
                 return;
             }
             const requestData = shopWithdrawalService.formatWithdrawalData(data);
@@ -268,7 +270,7 @@ const TourCompanyWalletManagement: React.FC = () => {
             loadWalletData();
             setRefreshTrigger(prev => prev + 1);
         } catch (error) {
-            message.error('Có lỗi xảy ra khi tạo yêu cầu rút tiền');
+            handleError('Có lỗi xảy ra khi tạo yêu cầu rút tiền');
         }
     };
 
@@ -499,3 +501,4 @@ const TourCompanyWalletManagement: React.FC = () => {
 };
 
 export default TourCompanyWalletManagement;
+

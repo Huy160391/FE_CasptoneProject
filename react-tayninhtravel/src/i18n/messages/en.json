@@ -6,7 +6,7 @@
             "success": "Review submitted successfully",
             "thankYou": "Thank you for your review!",
             "error": "An error occurred",
-            "submitFailed": "Failed to submit review. Please try again.",
+            "submitFailed": "You cannot review this product because you have not used it.",
             "ratingRequired": "Please select a rating",
             "pleaseRate": "You need to select a star rating.",
             "commentPlaceholder": "Enter your comments about the product..."
@@ -250,7 +250,63 @@
         "maxParticipants": "Max participants",
         "startDate": "Start date",
         "person": "person",
-        "unavailable": "Unavailable"
+        "unavailable": "Unavailable",
+        "detail": {
+            "notFoundTitle": "Tour not found",
+            "mockReviews": {
+                "review1": {
+                    "name": "Nguyen Van A",
+                    "comment": "Excellent tour! The guide was enthusiastic and professional. Beautiful scenery, reasonable timing. Will recommend to friends!"
+                },
+                "review2": {
+                    "name": "Tran Thi B",
+                    "comment": "Good tour, however the time at some locations was a bit short. Overall very satisfied with the experience."
+                },
+                "review3": {
+                    "name": "Le Van C",
+                    "comment": "This is my second time joining this tour and still very satisfied. Beautiful scenery, good service, worth the money."
+                }
+            },
+            "noTourId": "Tour ID not found",
+            "mockCompany": {
+                "name": "Tay Ninh Travel Company",
+                "description": "Specializing in organizing high-quality tours in the Southeast region with over 10 years of experience.",
+                "address": "123 ABC Street, Tay Ninh City"
+            },
+            "mockGuide": {
+                "name": "Nguyen Van Guide",
+                "experience": "5 years of tour guide experience",
+                "skills": {
+                    "professional": "Professional tour guide",
+                    "local": "Local knowledge",
+                    "multilingual": "Multilingual",
+                    "safety": "Tour safety"
+                },
+                "languages": {
+                    "vietnamese": "Vietnamese",
+                    "english": "English",
+                    "chinese": "Chinese"
+                }
+            },
+            "loadError": "Unable to load tour information",
+            "generalError": "An error occurred while loading tour information",
+            "bookingUnavailable": "This tour is currently unavailable for booking",
+            "loginSuccess": "Login successful! You can book the tour now.",
+            "companyTitle": "Organizer Company",
+            "guideTitle": "Tour Guide",
+            "companyStatus": "Status",
+            "companyActive": "Active",
+            "companyInactive": "Inactive",
+            "publicTours": "Public Tours",
+            "guideExperience": "Experience",
+            "guideSkills": "Skills",
+            "guideTotalTours": "Total Tours Guided",
+            "guideStatus": "Status",
+            "guideAvailable": "Available",
+            "guideUnavailable": "Unavailable",
+            "approvedDate": "Approved",
+            "approvedBy": "Approved By"
+        }
     },
     "thingsToDo": {
         "pageTitle": "Explore Tay Ninh",
@@ -617,7 +673,66 @@
         "cartClearedDescription": "All items have been removed from cart",
         "checkoutDescription": "Checkout functionality is under development",
         "error": "Error",
-        "errorDescription": "An error occurred while processing your cart. Please try again later."
+        "errorDescription": "An error occurred while processing your cart. Please try again later.",
+        "vatIncluded": "* Price includes VAT",
+        "chooseVoucher": "Select Voucher",
+        "voucher": "Voucher",
+        "discount": "Discount",
+        "outOfStockRemoved": "{{name}} is out of stock and has been removed from cart",
+        "quantityReduced": "{{name}} quantity has been reduced to {{newQuantity}} due to insufficient stock"
+    },
+    "paymentCancel": {
+        "processing": "Processing payment cancellation...",
+        "updatingOrderStatus": "Updating order status...",
+        "errorTitle": "An error occurred",
+        "goHome": "Go to homepage",
+        "continueShopping": "Continue shopping",
+        "cancelTitle": "Payment has been cancelled",
+        "cancelSubTitle": "You have cancelled the payment process. Your order has not been confirmed.",
+        "orderInfoTitle": "Order Information",
+        "payosOrderCode": "PAYOS Order Code",
+        "totalAmount": "Total Amount",
+        "discount": "Discount",
+        "totalAfterDiscount": "Total After Discount",
+        "status": "Status",
+        "cancelled": "Payment Cancelled",
+        "createdAt": "Order Created At",
+        "importantInfoTitle": "Important Information",
+        "importantInfoOrderCancelled": "Order is still saved in the system with status \"Cancelled\"",
+        "importantInfoProductInCart": "Product is still in your cart",
+        "importantInfoCanRetry": "You can retry payment at any time",
+        "importantInfoHotline": "Contact hotline for support: 1900-xxxx",
+        "retryPayment": "Retry Payment",
+        "viewCart": "View Cart",
+        "viewOrders": "View Orders",
+        "needHelp": "Need help?",
+        "contactUs": "Contact us"
+    },
+    "paymentSuccess": {
+        "processing": "Processing payment...",
+        "confirmingWithSystem": "Confirming payment with the system...",
+        "errorTitle": "An error occurred",
+        "goHome": "Go to homepage",
+        "continueShopping": "Continue shopping",
+        "successTitle": "Payment successful!",
+        "successSubTitle": "Thank you for shopping. Your order has been confirmed.",
+        "orderInfoTitle": "Order Information",
+        "printOrder": "Print Order",
+        "payosOrderCode": "PAYOS Order Code",
+        "totalAmount": "Total Amount",
+        "discount": "Discount",
+        "totalAfterDiscount": "Total After Discount",
+        "status": "Status",
+        "paid": "Paid",
+        "createdAt": "Order Created At",
+        "importantInfoTitle": "Important Note",
+        "importantInfoSaveOrderCode": "Please save your order code for future reference",
+        "importantInfoEmailConfirm": "We will send a confirmation email within 24 hours",
+        "importantInfoDeliveryTime": "Your order will be processed and delivered in 2-3 business days",
+        "importantInfoHotline": "Contact hotline for support: 1900-xxxx",
+        "viewOrders": "View My Orders",
+        "needHelp": "Need help?",
+        "contactUs": "Contact us"
     },
     "checkout": {
         "promotionTitle": "Promotion",
@@ -1251,7 +1366,6 @@
             "dashboard": "Dashboard",
             "tourTemplates": "Tour Templates",
             "tours": "Tours Management",
-            "transactions": "Transaction History",
             "reviews": "Review History",
             "revenue": "Revenue Dashboard",
             "profile": "Profile",
@@ -1276,6 +1390,36 @@
                 "newBooking": "New Booking",
                 "newReview": "New Review",
                 "tourCreated": "Tour Created"
+            }
+        },
+        "profile": {
+            "title": "Tour Company Information",
+            "description": "Update detailed information about your tour company",
+            "avatar": {
+                "title": "Company Avatar",
+                "changeButton": "Change Avatar",
+                "note": "Only accept JPG, JPEG, PNG images (under 2MB)",
+                "updateSuccess": "Avatar updated successfully!",
+                "updateError": "Avatar update failed!",
+                "fileTypeError": "Only accept JPG, JPEG, PNG images!",
+                "fileSizeError": "Image must be smaller than 2MB!"
+            },
+            "form": {
+                "companyName": "Company Name",
+                "companyNamePlaceholder": "Enter company name",
+                "companyNameRequired": "Please enter company name",
+                "phone": "Phone Number",
+                "phonePlaceholder": "Enter phone number",
+                "phoneRequired": "Please enter phone number",
+                "address": "Address",
+                "addressPlaceholder": "Enter address",
+                "addressRequired": "Please enter address",
+                "description": "Description",
+                "descriptionPlaceholder": "Describe your tour company...",
+                "saveButton": "Save Changes",
+                "cancelButton": "Cancel",
+                "updateSuccess": "Tour company information updated successfully!",
+                "updateError": "Update failed!"
             }
         },
         "tourTemplates": {
@@ -1429,30 +1573,6 @@
                 "active": "Active",
                 "full": "Full",
                 "cancelled": "Cancelled"
-            }
-        },
-        "transactions": {
-            "title": "Transaction History",
-            "searchPlaceholder": "Search by transaction ID",
-            "columns": {
-                "transactionId": "Transaction ID",
-                "customerName": "Customer Name",
-                "tourName": "Tour Name",
-                "amount": "Amount",
-                "commission": "Commission",
-                "date": "Transaction Date",
-                "status": "Status"
-            },
-            "status": {
-                "completed": "Completed",
-                "pending": "Pending",
-                "cancelled": "Cancelled"
-            },
-            "summary": {
-                "title": "Summary",
-                "totalRevenue": "Total Revenue",
-                "totalCommission": "Total Commission",
-                "totalTransactions": "Total Transactions"
             }
         },
         "reviews": {
@@ -1646,7 +1766,7 @@
     "bookingHistory": {
         "title": "Booking History",
         "description": "Manage and track your tour bookings",
-        "searchPlaceholder": "Search by tour name, booking code...",
+        "searchPlaceholder": "Search by tour name, tour company...",
         "filterByStatus": "Filter by status",
         "showCancelled": "Show cancelled",
         "total": "Total",
@@ -1654,7 +1774,8 @@
         "viewDetails": "Details",
         "guide": "Guide",
         "columns": {
-            "bookingCode": "Booking Code",
+            "bookingCode": "Payment code",
+            "tourCompanyName": "Tour Company",
             "tourName": "Tour Name",
             "tourDate": "Tour Date",
             "guestCount": "Guest Count",
@@ -1718,7 +1839,7 @@
         "paginationText": "of",
         "paginationTotal": "orders",
         "loadingError": "Unable to load order history",
-        "searchPlaceholder": "Search by order number, shop name...",
+        "searchPlaceholder": "Search by order number",
         "filterByStatus": "Filter by status",
         "showCancelled": "Show cancelled",
         "refresh": "Refresh",
@@ -1731,11 +1852,13 @@
         "deliveryStatus": "Delivery Status",
         "delivered": "Delivered",
         "notDelivered": "Not Delivered",
+        "review": "Review",
         "statuses": {
             "paid": "Paid",
             "notDelivered": "Not Delivered",
             "delivered": "Delivered",
-            "cancelled": "Cancelled"
+            "cancelled": "Cancelled",
+            "unpaid": "Unpaid"
         },
         "paymentStatuses": {
             "unpaid": "Unpaid",
@@ -1757,7 +1880,7 @@
         "infoTitle": "Tour Information",
         "included": "Included",
         "guide": "Professional guide",
-        "insurance": "Travel insurance",
+        "insurance": "Fast, safe, professional",
         "transport": "Transportation as per program",
         "notIncluded": "Not included",
         "personalCost": "Personal expenses",
@@ -1791,9 +1914,245 @@
             "allLocations": "All locations",
             "datePlaceholder": "Select departure date",
             "keywordPlaceholder": "Search tours...",
-            "searchButton": "Search"
+            "searchButton": "Search",
+            "scheduleDaySunday": "Sunday",
+            "scheduleDaySaturday": "Saturday",
+            "scheduleDayAll": "All days",
+            "loadingSuggestion": "Loading suggestions...",
+            "noSuggestion": "No suggestions available"
         },
         "found": "Tours found",
         "toal": "Total tours"
+    },
+    "specialtyShop": {
+        "profile": {
+            "title": "Shop Information",
+            "description": "Update detailed information about your shop",
+            "avatar": {
+                "title": "Shop Avatar",
+                "changeButton": "Change Avatar",
+                "note": "Only accept JPG, JPEG, PNG images (under 2MB)",
+                "updateSuccess": "Logo updated successfully!",
+                "updateError": "Logo update failed!",
+                "fileTypeError": "Only accept JPG, JPEG, PNG images!",
+                "fileSizeError": "Image must be smaller than 2MB!"
+            },
+            "form": {
+                "shopName": "Shop Name",
+                "shopNamePlaceholder": "Enter shop name",
+                "shopNameRequired": "Please enter shop name",
+                "businessType": "Business Type",
+                "businessTypePlaceholder": "Select business type",
+                "businessTypeRequired": "Select business type",
+                "description": "Shop Description",
+                "descriptionPlaceholder": "Describe your shop...",
+                "address": "Address",
+                "addressPlaceholder": "Enter shop address",
+                "addressRequired": "Enter shop address",
+                "phone": "Phone Number",
+                "phonePlaceholder": "Enter phone number",
+                "phoneRequired": "Enter phone number",
+                "website": "Website",
+                "websitePlaceholder": "https://example.com",
+                "openTime": "Opening Time",
+                "openTimePlaceholder": "--:--",
+                "closeTime": "Closing Time",
+                "closeTimePlaceholder": "--:--",
+                "saveButton": "Save Changes",
+                "cancelButton": "Cancel",
+                "updateSuccess": "Shop information updated successfully!",
+                "updateError": "Update failed!"
+            },
+            "businessTypes": {
+                "specialty": "Specialty",
+                "food": "Food",
+                "souvenir": "Souvenir"
+            }
+        },
+        "info": {
+            "title": "Shop Information",
+            "loading": "Loading shop information...",
+            "error": "Unable to load shop information",
+            "notFound": "Shop information not found",
+            "rating": "{{rating}} points",
+            "openHours": "Open: {{open}} - {{close}}",
+            "viewShop": "View Shop"
+        },
+        "detail": {
+            "loading": "Loading shop information...",
+            "error": "Unable to load shop information",
+            "notFoundTitle": "Unable to load shop information",
+            "notFoundMessage": "Shop does not exist or has been deleted",
+            "backButton": "Go Back",
+            "breadcrumbHome": "Home",
+            "breadcrumbShop": "Shop",
+            "ratingText": "{{rating}} / 5",
+            "openHours": "Open: {{open}} - {{close}}",
+            "productCount": "{{count}} products",
+            "joinedDate": "Joined since {{date}}",
+            "infoTitle": "Shop Information",
+            "address": "Address",
+            "phone": "Phone Number",
+            "email": "Email",
+            "representative": "Representative",
+            "businessLicense": "Business License",
+            "website": "Website",
+            "productsTitle": "Shop Products ({{count}})",
+            "noProducts": "Shop has no products yet"
+        }
+    },
+    "product": {
+        "detail": {
+            "breadcrumbHome": "Home",
+            "breadcrumbShop": "Shop",
+            "tags": {
+                "specialty": "specialty",
+                "gift": "gift",
+                "traditional": "traditional"
+            },
+            "defaultDescription": "Distinctive product from Tay Ninh, high quality",
+            "anonymous": "Anonymous",
+            "stockExceeded": "Quantity exceeds available stock!",
+            "newBadge": "New",
+            "discountBadge": "{{percent}}% Off",
+            "imageHint": "Click to view large image",
+            "reviewCount": "{{count}} reviews",
+            "sku": "SKU: {{sku}}",
+            "soldCount": "{{count}} sold",
+            "quantityLabel": "Quantity",
+            "addToCartButton": "Add to Cart",
+            "buyNowButton": "Buy Now",
+            "category": "Category: {{category}}",
+            "location": "Origin: Tay Ninh",
+            "descriptionTab": "Product Description",
+            "reviewsTab": "Reviews ({{count}})",
+            "relatedProducts": "Related Products",
+            "notFoundTitle": "Product not found",
+            "notFoundMessage": "This product does not exist or has been deleted.",
+            "backToShop": "Back to shop",
+            "imagePagination": "{{current}}/{{total}}"
+        }
+    },
+    "booking": {
+        "title": "Book Tour",
+        "viewOtherTours": "View other tours",
+        "steps": {
+            "tourInfo": "Tour Information",
+            "customerInfo": "Customer Information",
+            "confirmPayment": "Confirmation & Payment"
+        },
+        "common": {
+            "continue": "Continue",
+            "back": "Back",
+            "person": "person"
+        },
+        "errors": {
+            "tourIdNotFound": "Tour ID not found",
+            "loadTourDetails": "Unable to load tour details",
+            "loadTourDetailsGeneric": "An error occurred while loading tour details",
+            "cannotLoadTour": "Unable to load tour information",
+            "tourNotExists": "Tour does not exist or has been deleted",
+            "cannotCalculatePrice": "Unable to calculate tour price",
+            "pleaseSelectDate": "Please select a tour date",
+            "pleaseCompleteInfo": "Please complete all required information"
+        },
+        "tourInfo": {
+            "title": "Tour Information",
+            "tourName": "Tour Name",
+            "startLocation": "Departure Point",
+            "endLocation": "End Point",
+            "basePrice": "Base Price",
+            "maxGuests": "Maximum Guests",
+            "booked": "Booked",
+            "selectDate": "Select tour date",
+            "loadingSchedule": "Loading schedule...",
+            "selectDateInstruction": "Select the date you want to join the tour:",
+            "noScheduleAvailable": "No schedule available for this tour at the moment",
+            "noScheduleDescription": "Tour slots may be fully booked or unavailable. Please contact us for more information.",
+            "tourDescription": "Tour Description",
+            "tourTimeline": "Tour Timeline"
+        },
+        "customerInfo": {
+            "title": "Customer Information",
+            "bookingType": "Booking Type",
+            "numberOfGuests": "Number of Guests",
+            "contactName": "Contact Name",
+            "contactPhone": "Phone Number",
+            "contactEmail": "Email",
+            "specialRequests": "Special Requests (Optional)",
+            "individualGuestsInfo": "Individual Guest Information",
+            "guestNotice": "Notice",
+            "guestNoticeDescription": "Each guest will receive a separate QR code for check-in at stops",
+            "guestName": "Full Name",
+            "guestEmail": "Email",
+            "guestPhone": "Phone Number (Optional)",
+            "guestNumber": "Guest {{number}}",
+            "validation": {
+                "selectBookingType": "Please select a booking type",
+                "enterNumberOfGuests": "Please enter number of guests",
+                "minGuests": "Must have at least 1 guest",
+                "enterContactName": "Please enter contact name",
+                "maxContactNameLength": "Name cannot exceed 100 characters",
+                "enterContactPhone": "Please enter phone number",
+                "invalidPhone": "Invalid phone number",
+                "enterContactEmail": "Please enter email",
+                "invalidEmail": "Invalid email",
+                "enterGuestName": "Please enter guest name",
+                "minGuestNameLength": "Name must be at least 2 characters",
+                "maxGuestNameLength": "Name cannot exceed 100 characters",
+                "enterGuestEmail": "Please enter email",
+                "invalidGuestEmail": "Invalid email",
+                "invalidGuestPhone": "Invalid phone number"
+            },
+            "placeholders": {
+                "numberOfGuests": "Enter number of guests",
+                "contactName": "Enter full name",
+                "contactPhone": "0123456789",
+                "contactEmail": "email@example.com",
+                "specialRequests": "Example: Vegetarian, food allergies, private room request...",
+                "guestName": "Enter full name",
+                "guestEmail": "email@example.com",
+                "guestPhone": "0123456789"
+            }
+        },
+        "confirmation": {
+            "title": "Confirm Booking",
+            "tourSummary": "Tour Summary",
+            "tourDate": "Departure Date",
+            "numberOfGuests": "Number of Guests",
+            "contactName": "Contact Person",
+            "contactPhone": "Phone Number",
+            "contactEmail": "Email",
+            "specialRequests": "Special Requests",
+            "customerInfo": "Customer Information",
+            "paymentMethod": "Payment Method",
+            "payNow": "Pay Now",
+            "payLater": "Pay Later",
+            "termsAndConditions": "Terms and Conditions",
+            "termsText": "I have read and agree to the service terms and conditions",
+            "privacyPolicy": "Privacy Policy",
+            "privacyText": "I agree to the privacy policy and data processing",
+            "confirmBooking": "Confirm Booking",
+            "bookingSuccess": "Booking Successful!",
+            "bookingSuccessMessage": "Thank you for booking. We will send detailed information via email and SMS.",
+            "viewBookingDetails": "View Booking Details",
+            "backToHome": "Back to Home",
+            "validation": {
+                "acceptTerms": "Please accept terms and conditions",
+                "acceptPrivacy": "Please accept privacy policy"
+            },
+            "tourInfo": "Tour Information"
+        },
+        "summary": {
+            "title": "Order Summary",
+            "calculatingPrice": "Calculating price...",
+            "originalPrice": "Original Price",
+            "discount": "Discount",
+            "total": "Total",
+            "earlyBird": "Early Bird Discount",
+            "priceType": "Price Type",
+            "selectGuestsToSeePrice": "Select number of guests to see price",
+            "availableSlots": "Available Slots"
+        }
     }
 }

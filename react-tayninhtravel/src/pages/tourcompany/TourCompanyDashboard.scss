@@ -12,45 +12,135 @@
 
     .stats-cards {
         .ant-card {
+            height: 140px; // Fixed height for all cards
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            .ant-card-body {
+                padding: 16px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
             .ant-statistic {
                 .ant-statistic-title {
                     color: #666;
                     font-weight: 500;
+                    font-size: 14px;
+                    margin-bottom: 8px;
+                    line-height: 1.2;
+                    min-height: 34px; // Fixed height for title area
+                    display: flex;
+                    align-items: center;
                 }
 
                 .ant-statistic-content {
                     color: #1890ff;
+                    font-size: 24px;
+                    font-weight: 600;
+                    line-height: 1.2;
+                    margin-bottom: 8px;
                 }
             }
 
             .growth-indicator {
-                margin-top: 8px;
+                margin-top: auto;
                 display: flex;
                 align-items: center;
                 gap: 4px;
                 font-size: 12px;
+                min-height: 20px;
+            }
+
+            // Additional info styling
+            .additional-info {
+                margin-top: 8px;
+                font-size: 12px;
+                color: #666;
+                min-height: 16px;
+                line-height: 1.2;
             }
         }
     }
 
-    .revenue-chart {
-        .revenue-chart-placeholder {
+    .additional-stats {
+        margin-top: 32px; // Add space between main stats and additional stats
+        padding-top: 24px;
+        border-top: 1px solid #f0f0f0; // Subtle separator line
+
+        .ant-card {
+            height: 140px; // Same height as main stats
+
+            .ant-card-body {
+                padding: 16px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .ant-statistic {
+                .ant-statistic-title {
+                    color: #666;
+                    font-weight: 500;
+                    font-size: 14px;
+                    margin-bottom: 8px;
+                    line-height: 1.2;
+                    min-height: 34px;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .ant-statistic-content {
+                    font-size: 24px;
+                    font-weight: 600;
+                    line-height: 1.2;
+                    margin-bottom: 8px;
+                }
+            }
+
+            .additional-info {
+                margin-top: auto;
+                font-size: 12px;
+                color: #666;
+                min-height: 20px;
+                line-height: 1.2;
+            }
+        }
+    }
+
+    .bookings-chart {
+        .bookings-chart-placeholder {
             padding: 20px 0;
 
-            .revenue-bar {
+            .booking-bar {
                 display: flex;
                 align-items: center;
                 margin-bottom: 12px;
                 gap: 12px;
 
                 span {
-                    min-width: 30px;
+                    min-width: 80px;
                     font-weight: 500;
+                    font-size: 12px;
                 }
 
                 .ant-progress {
                     flex: 1;
                 }
+            }
+        }
+    }
+
+    .tour-customer-info {
+        .info-section {
+            h4 {
+                margin-bottom: 12px;
+                font-size: 14px;
+                font-weight: 600;
             }
         }
     }
@@ -106,9 +196,50 @@
             gap: 12px;
         }
 
-        .stats-cards {
+        .additional-stats {
+            margin-top: 24px; // Reduce margin on mobile
+            padding-top: 16px;
+        }
+
+        .stats-cards, .additional-stats {
             .ant-col {
                 margin-bottom: 16px;
+            }
+
+            .ant-card {
+                height: auto; // Allow flexible height on mobile
+                min-height: 120px;
+
+                .ant-statistic {
+                    .ant-statistic-title {
+                        min-height: auto;
+                        font-size: 13px;
+                    }
+
+                    .ant-statistic-content {
+                        font-size: 20px;
+                    }
+                }
+            }
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stats-cards, .additional-stats {
+            .ant-card {
+                .ant-statistic {
+                    .ant-statistic-content {
+                        font-size: 18px;
+                    }
+                }
+
+                .additional-info {
+                    font-size: 11px;
+                }
+
+                .growth-indicator {
+                    font-size: 11px;
+                }
             }
         }
     }

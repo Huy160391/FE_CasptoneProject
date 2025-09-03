@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Button, Drawer, Space, Badge, message, Dropdown } from 'antd'
+import { Layout, Menu, Button, Drawer, Space, Badge, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   MenuOutlined,
@@ -14,12 +14,10 @@ import {
   UserOutlined,
   ReadOutlined,
   LogoutOutlined,
-  SettingOutlined,
   DashboardOutlined
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from '../common/ThemeToggle'
-// ...existing code...
 import NotificationBell from '../common/NotificationBell'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
@@ -27,6 +25,7 @@ import CartDrawer from '../cart/CartDrawer'
 import { useCartStore } from '@/store/useCartStore'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useThemeStore } from '@/store/useThemeStore'
+import { handleLogoutWithCartSync } from '@/utils/logoutHandler'
 // import { authService } from '@/services/authService'
 import logoImage from '@/assets/TNDT_Logo.png'
 import darkLogo from '@/assets/TNDT_logo_darkmode.png'
@@ -41,8 +40,8 @@ const Navbar = () => {
   const [isCartDrawerVisible, setIsCartDrawerVisible] = useState(false)
   const { t } = useTranslation()
   const location = useLocation()
-  const { getTotalItems, clearCart } = useCartStore()
-  const { isAuthenticated, user, logout } = useAuthStore()
+  const { getTotalItems } = useCartStore()
+  const { isAuthenticated, user } = useAuthStore()
   const { isDarkMode } = useThemeStore()
   const navigate = useNavigate()
 
@@ -79,25 +78,7 @@ const Navbar = () => {
   }
 
   const handleLogout = async () => {
-    // Gửi cart hiện tại lên server trước khi logout (nếu có token)
-    const token = localStorage.getItem('token');
-    if (token) {
-      const items = useCartStore.getState().items;
-      if (items && items.length > 0) {
-        try {
-          await import('@/services/cartService').then(mod => mod.updateCart({ items }, token));
-        } catch (e) {
-          // Không cần báo lỗi cho user khi logout
-        }
-      }
-    }
-    // Đợi updateCart hoàn thành rồi mới clear cart và logout
-    clearCart();
-    logout();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('cart');
-    message.success(t('common.logoutSuccess'));
+    await handleLogoutWithCartSync(true);
   }
 
   const menuItems = [
@@ -106,9 +87,9 @@ const Navbar = () => {
       icon: <HomeOutlined />,
       label: <Link to="/">{t('navigation.home')}</Link>
     }, {
-      key: '/things-to-do',
+      key: '/tours',
       icon: <AppstoreOutlined />,
-      label: <Link to="/things-to-do">{t('navigation.tours')}</Link>
+      label: <Link to="/tours">{t('navigation.tours')}</Link>
     },
     {
       key: '/shop',
@@ -176,18 +157,25 @@ const Navbar = () => {
     ...(user?.role && ['Tour Guide', 'Admin', 'Blogger', 'Tour Company', 'Specialty Shop'].includes(user.role) ? [{
       type: 'divider' as const,
     }] : []),
-    {
-      key: 'profile',
-      label: t('common.profile'),
-      icon: <UserOutlined />,
-      onClick: () => navigate('/profile'),
-    },
-    {
-      key: 'settings',
-      label: t('common.settings'),
-      icon: <SettingOutlined />,
-      onClick: () => navigate('/settings'),
-    },
+    // Tab profile cho user
+    ...((user?.role === 'Admin') ? [] : [
+      (user?.role === 'Specialty Shop') ? {
+        key: 'profile',
+        label: t('common.profile'),
+        icon: <UserOutlined />,
+        onClick: () => navigate('/speciality-shop/profile'),
+      } : (user?.role === 'Tour Company') ? {
+        key: 'profile',
+        label: t('common.profile'),
+        icon: <UserOutlined />,
+        onClick: () => navigate('/tour-company/profile'),
+      } : {
+        key: 'profile',
+        label: t('common.profile'),
+        icon: <UserOutlined />,
+        onClick: () => navigate('/profile'),
+      }
+    ]),
     {
       type: 'divider',
     },

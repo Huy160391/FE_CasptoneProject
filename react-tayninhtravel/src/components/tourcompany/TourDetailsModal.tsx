@@ -35,7 +35,8 @@ import {
     getTourOperationByDetailsId,
     getTourGuideInvitations,
     handleApiError,
-    cancelTourSlot
+    cancelTourSlot,
+    getTourSlotIncidents
 } from '../../services/tourcompanyService';
 import { tourSlotService, TourSlotDto } from '../../services/tourSlotService';
 import {
@@ -57,6 +58,7 @@ import TourDetailsUpdateForm from './TourDetailsUpdateForm';
 import TimelineEditor from './TimelineEditor';
 import BookingsModal from './BookingsModal';
 import CancelTourModal from './CancelTourModal';
+import TourSlotIncidentsModal from './TourSlotIncidentsModal';
 import ManualInviteGuideModal from './ManualInviteGuideModal';
 
 const { TabPane } = Tabs;
@@ -93,6 +95,11 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
     const [cancelReason, setCancelReason] = useState('');
     const [cancelModalVisible, setCancelModalVisible] = useState(false);
     const [cancelSlotLoading, setCancelSlotLoading] = useState(false);
+
+    // Incidents modal states
+    const [incidentsModalVisible, setIncidentsModalVisible] = useState(false);
+    const [selectedSlotForIncidents, setSelectedSlotForIncidents] = useState<TourSlotDto | null>(null);
+    const [incidentCounts, setIncidentCounts] = useState<Record<string, number>>({});
 
     // Helper function to check if slot is cancelled
     const isSlotCancelled = (slot: TourSlotDto) => {
@@ -176,6 +183,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
             const response = await tourSlotService.getSlotsByTourDetails(tourDetailsId, token ?? undefined);
             if (response.success && response.data) {
                 setTourSlots(response.data);
+                // Load incident counts for all slots
+                await loadIncidentCounts(response.data);
             }
         } catch (error) {
             console.error('Error loading tour slots:', error);
@@ -269,8 +278,41 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
     const handleManualInviteSuccess = () => {
         setManualInviteModalVisible(false);
-        // Reload tour details data to refresh invitations
-        loadTourDetailsData();
+    };
+
+    // Handle incidents
+    const handleViewIncidents = (slot: TourSlotDto) => {
+        setSelectedSlotForIncidents(slot);
+        setIncidentsModalVisible(true);
+    };
+
+    // Load incident counts for all slots
+    const loadIncidentCounts = async (slots: TourSlotDto[]) => {
+        if (!token || slots.length === 0) return;
+
+        const counts: Record<string, number> = {};
+
+        // Load counts for each slot (in parallel for better performance)
+        const promises = slots.map(async (slot) => {
+            try {
+                // Only load if we don't already have the count
+                if (incidentCounts[slot.id] !== undefined) {
+                    counts[slot.id] = incidentCounts[slot.id];
+                    return;
+                }
+
+                const response = await getTourSlotIncidents(slot.id, 0, 1, token);
+                counts[slot.id] = response.data?.totalCount || 0;
+            } catch (error) {
+                console.error(`Error loading incident count for slot ${slot.id}:`, error);
+                counts[slot.id] = 0;
+            }
+        });
+
+        await Promise.all(promises);
+        setIncidentCounts(counts);
+        // Don't reload tour details data to avoid infinite loop
+        // loadTourDetailsData(); // REMOVED: This was causing infinite loop
         if (onUpdate) {
             onUpdate();
         }
@@ -543,8 +585,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                                 {tourDetails &&
                                                     (tourDetails.status === 3 || String(tourDetails.status).toLowerCase() === 'public') && (
                                                         <div style={{ marginTop: 12, textAlign: 'center' }}>
-                                                            <Row gutter={4}>
-                                                                <Col span={!isSlotCancelled(slot) ? 12 : 24}>
+                                                            <Row gutter={[4, 4]}>
+                                                                <Col span={!isSlotCancelled(slot) ? 8 : 12}>
                                                                     <Button
                                                                         type="primary"
                                                                         size="small"
@@ -554,15 +596,53 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                                                             backgroundColor: '#52c41a',
                                                                             borderColor: '#52c41a',
                                                                             width: '100%',
-                                                                            fontSize: '11px',
+                                                                            fontSize: '10px',
                                                                             padding: '2px 4px'
                                                                         }}
                                                                     >
                                                                         Xem
                                                                     </Button>
                                                                 </Col>
+                                                                <Col span={!isSlotCancelled(slot) ? 8 : 12}>
+                                                                    <Button
+                                                                        type="primary"
+                                                                        size="small"
+                                                                        icon={<ExclamationCircleOutlined />}
+                                                                        onClick={() => handleViewIncidents(slot)}
+                                                                        style={{
+                                                                            backgroundColor: '#ff4d4f',
+                                                                            borderColor: '#ff4d4f',
+                                                                            width: '100%',
+                                                                            fontSize: '10px',
+                                                                            padding: '2px 4px',
+                                                                            position: 'relative'
+                                                                        }}
+                                                                    >
+                                                                        Sự cố
+                                                                        {incidentCounts[slot.id] > 0 && (
+                                                                            <span style={{
+                                                                                position: 'absolute',
+                                                                                top: '-6px',
+                                                                                right: '-6px',
+                                                                                backgroundColor: '#fff',
+                                                                                color: '#ff4d4f',
+                                                                                borderRadius: '50%',
+                                                                                width: '16px',
+                                                                                height: '16px',
+                                                                                fontSize: '10px',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center',
+                                                                                fontWeight: 'bold',
+                                                                                border: '1px solid #ff4d4f'
+                                                                            }}>
+                                                                                {incidentCounts[slot.id]}
+                                                                            </span>
+                                                                        )}
+                                                                    </Button>
+                                                                </Col>
                                                                 {!isSlotCancelled(slot) && (
-                                                                    <Col span={12}>
+                                                                    <Col span={8}>
                                                                         <Button
                                                                             danger
                                                                             size="small"
@@ -570,7 +650,7 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                                                                             onClick={() => handleCancelTour(slot)}
                                                                             style={{
                                                                                 width: '100%',
-                                                                                fontSize: '11px',
+                                                                                fontSize: '10px',
                                                                                 padding: '2px 4px'
                                                                             }}
                                                                         >
@@ -970,6 +1050,16 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
                     startDate: tourDetails.createdAt,
                     endDate: tourDetails.updatedAt || tourDetails.createdAt
                 } : undefined}
+            />
+
+            {/* Incidents Modal */}
+            <TourSlotIncidentsModal
+                visible={incidentsModalVisible}
+                onClose={() => {
+                    setIncidentsModalVisible(false);
+                    setSelectedSlotForIncidents(null);
+                }}
+                tourSlot={selectedSlotForIncidents}
             />
         </Modal>
     );

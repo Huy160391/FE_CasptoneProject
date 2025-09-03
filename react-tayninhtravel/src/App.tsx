@@ -3,9 +3,11 @@ import { useEffect } from 'react';
 import { ConfigProvider, theme as antTheme } from 'antd';
 import routes from './routes';
 import AIChatWrapper from './components/ChatBot';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import { useThemeStore } from './store/useThemeStore';
 import appInitService from './services/appInitService';
 import './styles/global.scss';
+import ScrollToTop from './components/ScrollToTop';
 
 const AppRoutes = () => {
   const element = useRoutes(routes);
@@ -17,7 +19,10 @@ const App = () => {
 
   // Initialize app services and validate token on mount
   useEffect(() => {
-    appInitService.initialize();
+    // Nếu là trang public, truyền true. Có thể xác định bằng window.location.pathname
+    const publicPaths = ['/', '/about', '/blog', '/shop', '/tour', '/404'];
+    const isPublicPage = publicPaths.some(path => window.location.pathname.startsWith(path));
+    appInitService.initialize(isPublicPage);
 
     // Cleanup on unmount
     return () => {
@@ -66,12 +71,16 @@ const App = () => {
   };
 
   return (
-    <ConfigProvider theme={theme}>
-      <Router>
-        <AppRoutes />
-        <AIChatWrapper version="enhanced" />
-      </Router>
-    </ConfigProvider>
+    <ErrorBoundary>
+      <ConfigProvider theme={theme}>
+        <Router>
+          {/* Tự động scroll lên đầu trang khi chuyển route */}
+          <ScrollToTop />
+          <AppRoutes />
+          <AIChatWrapper version="enhanced" />
+        </Router>
+      </ConfigProvider>
+    </ErrorBoundary>
   );
 };
 

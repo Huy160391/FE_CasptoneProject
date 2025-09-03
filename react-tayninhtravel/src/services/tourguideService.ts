@@ -1,5 +1,6 @@
 import axiosInstance from "@/config/axios";
-import { ApiResponse } from "@/types/api";
+import { getErrorMessage } from '@/utils/errorHandler';
+import type { ApiResponse } from '@/types/index';
 import { InvitationStatistics, TourGuideInvitation } from "@/types/tour";
 import { getVietnamNow, toVietnamTime } from "../utils/vietnamTimezone";
 
@@ -51,8 +52,11 @@ export const getMyInvitations = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error fetching my invitations:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -83,8 +87,11 @@ export const acceptInvitation = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error accepting invitation:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -117,8 +124,11 @@ export const rejectInvitation = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error rejecting invitation:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -140,8 +150,11 @@ export const getInvitationDetails = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error fetching invitation details:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -164,8 +177,11 @@ export const validateInvitationAcceptance = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error validating invitation acceptance:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -185,8 +201,11 @@ export const getMyProfile = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error fetching tour guide profile:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -208,8 +227,11 @@ export const updateMyProfile = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error updating tour guide profile:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -324,7 +346,7 @@ export interface CompleteTimelineRequest {
 }
 
 export interface ReportIncidentRequest {
-  tourOperationId: string;
+  tourSlotId: string; // Required - mobile app reports by specific slot
   title: string;
   description: string;
   severity: "Low" | "Medium" | "High" | "Critical";
@@ -350,8 +372,11 @@ export const getMyActiveTours = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error fetching active tours:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -373,8 +398,11 @@ export const getTourBookings = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error fetching tour bookings:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -396,8 +424,11 @@ export const getTourTimeline = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error fetching tour timeline:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -423,8 +454,11 @@ export const checkInGuest = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error checking in guest:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -450,8 +484,11 @@ export const checkInGuestWithOverride = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error checking in guest with override:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -477,8 +514,11 @@ export const completeTimelineItem = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error completing timeline item:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -500,8 +540,11 @@ export const reportIncident = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error reporting incident:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -527,8 +570,11 @@ export const notifyGuests = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Error notifying guests:", error);
-    throw error;
+    // Error already shown by axios interceptor
+    throw {
+      message: error.standardizedError?.message || getErrorMessage(error),
+      statusCode: error.standardizedError?.statusCode || 500
+    };
   }
 };
 
@@ -553,3 +599,38 @@ export default {
   reportIncident,
   notifyGuests,
 };
+
+// ===== TOUR GUIDE INFO API =====
+
+// Tour Guide Info interface based on API response
+export interface TourGuideInfo {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+  experience: string;
+  skills: string;
+  rating: number;
+  totalToursGuided: number;
+  isAvailable: boolean;
+  notes?: string;
+  profileImageUrl?: string;
+  approvedAt: string | null;
+  userName?: string; // Make optional for compatibility
+  approvedByName: string | null;
+}
+
+/**
+ * Get tour guide details by ID
+ * @param tourGuideId - The tour guide ID
+ * @param token - JWT token (optional)
+ */
+export const getTourGuideById = async (
+  tourGuideId: string,
+  token?: string
+): Promise<ApiResponse<TourGuideInfo>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await api.get(`/Cms/TourGuide/${tourGuideId}`, { headers });
+  return response.data;
+};
+

@@ -2,11 +2,12 @@ import IncidentManagement from "@/pages/tourcompany/IncidentManagement";
 import RevenueDashboard from "@/pages/tourcompany/RevenueDashboard";
 import ReviewHistory from "@/pages/tourcompany/ReviewHistory";
 import TourCompanyDashboard from "@/pages/tourcompany/TourCompanyDashboard";
+import TourCompanyProfile from "@/pages/tourcompany/TourCompanyProfile";
 import TourCompanyWalletManagement from "@/pages/tourcompany/TourCompanyWalletManagement";
 import TourDetailsManagement from "@/pages/tourcompany/TourDetailsManagement";
 import TourManagement from "@/pages/tourcompany/TourManagement";
 import TourTemplateManagement from "@/pages/tourcompany/TourTemplateManagement";
-import TransactionHistory from "@/pages/tourcompany/TransactionHistory";
+import DetailedAnalytics from "@/pages/tourcompany/DetailedAnalytics";
 import { RouteObject } from "react-router-dom";
 
 export const tourCompanyRoutes: RouteObject[] = [
@@ -30,10 +31,6 @@ export const tourCompanyRoutes: RouteObject[] = [
         element: <TourManagement />,
       },
       {
-        path: "transactions",
-        element: <TransactionHistory />,
-      },
-      {
         path: "reviews",
         element: <ReviewHistory />,
       },
@@ -42,12 +39,20 @@ export const tourCompanyRoutes: RouteObject[] = [
         element: <RevenueDashboard />,
       },
       {
+        path: "analytics",
+        element: <DetailedAnalytics />,
+      },
+      {
         path: "wallet",
         element: <TourCompanyWalletManagement />,
       },
       {
         path: "incidents",
         element: <IncidentManagement />,
+      },
+      {
+        path: "profile",
+        element: <TourCompanyProfile />,
       },
     ],
   },

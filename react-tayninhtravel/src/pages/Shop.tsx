@@ -179,7 +179,7 @@ const Shop = () => {
 
         {/* Loading State */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '300px', width: '100%' }}>
             <Spin size="large" />
             <p style={{ marginTop: '16px' }}>{t('shop.loading')}</p>
           </div>
@@ -235,7 +235,7 @@ const Shop = () => {
                       <Slider
                         range
                         min={0}
-                        max={500000}
+                        max={2000000}
                         step={10000}
                         value={priceRange}
                         onChange={handlePriceRangeChange}
@@ -286,7 +286,10 @@ const Shop = () => {
                   <Row gutter={[16, 24]} className="products-grid">
                     {paginatedProducts.map(product => (
                       <Col xs={24} sm={12} lg={8} key={product.id}>
-                        <ProductCard product={product} />
+                        <ProductCard product={{
+                          ...product,
+                          description: product.description || undefined
+                        }} />
                       </Col>
                     ))}
                   </Row>

@@ -1,6 +1,7 @@
 import axiosInstance from '@/config/axios';
 import { jwtDecode } from 'jwt-decode';
 import tokenExpirationService from './tokenExpirationService';
+import { getErrorMessage } from '@/utils/errorHandler';
 import {
     User,
     RegisterForm,
@@ -35,7 +36,11 @@ export function decodeToken(token: string): DecodedToken | null {
 export const authService = {
     login: async (credentials: AuthCredentials): Promise<AuthResponse> => {
         try {
-            const response = await axiosInstance.post<LoginApiResponse>('/Authentication/login', credentials);
+            const response = await axiosInstance.post<LoginApiResponse>('/Authentication/login', credentials, {
+                headers: {
+                    'X-Skip-Auto-Notification': 'true'
+                }
+            });
             const { data } = response;
 
             if (data.token) {
@@ -89,8 +94,12 @@ export const authService = {
                 };
             }
             throw new Error('Invalid response from server');
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            // Error is already handled by axios interceptor
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
@@ -101,7 +110,11 @@ export const authService = {
      */
     loginWithGoogle: async (idToken: string): Promise<AuthResponse> => {
         try {
-            const response = await axiosInstance.post<LoginApiResponse>('/Authentication/login-google', { idToken });
+            const response = await axiosInstance.post<LoginApiResponse>('/Authentication/login-google', { idToken }, {
+                headers: {
+                    'X-Skip-Auto-Notification': 'true'
+                }
+            });
             const { data } = response;
 
             if (data.token) {
@@ -152,24 +165,34 @@ export const authService = {
                 };
             }
             throw new Error('Invalid response from server');
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            // Error is already handled by axios interceptor
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
     register: async (credentials: RegisterForm): Promise<void> => {
         try {
             await axiosInstance.post('/Authentication/register', credentials);
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
     verifyOTP: async (email: string, otp: string): Promise<void> => {
         try {
             await axiosInstance.post('/Authentication/verify-otp', { email, otp });
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
@@ -184,8 +207,11 @@ export const authService = {
                     Authorization: `Bearer ${token}`
                 }
             });
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || error.response?.status || 500
+            };
         }
     },
 
@@ -201,6 +227,8 @@ export const authService = {
             localStorage.removeItem('user');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('tokenExpirationTime');
+            // Đảm bảo clear cart storage khi logout
+            localStorage.removeItem('cart-storage');
         } catch (error) {
             throw error;
         }

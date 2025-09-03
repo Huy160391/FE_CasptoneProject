@@ -6,6 +6,7 @@ import {
 } from '@ant-design/icons'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { userService } from '@/services/userService'
 import './ShopInfo.scss'
 
@@ -43,6 +44,7 @@ interface ShopData {
 
 const ShopInfo: React.FC<ShopInfoProps> = ({ shopId }) => {
     const navigate = useNavigate()
+    const { t } = useTranslation()
     const [shopData, setShopData] = useState<ShopData | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -60,7 +62,7 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shopId }) => {
                 setShopData(response)
             } catch (err) {
                 console.error('Error fetching shop info:', err)
-                setError('Không thể tải thông tin cửa hàng')
+                setError(t('specialtyShop.info.error'))
             } finally {
                 setLoading(false)
             }
@@ -75,15 +77,15 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shopId }) => {
         return (
             <div className="shop-info-section">
                 <Title level={3} className="section-title">
-                    Thông tin cửa hàng
+                    {t('specialtyShop.info.title')}
                 </Title>
                 <Card
                     className="shop-info-card"
                     style={{ boxShadow: 'none', border: 'none' }}
                 >
-                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '200px', width: '100%' }}>
                         <Spin size="large" />
-                        <div style={{ marginTop: '10px' }}>Đang tải thông tin cửa hàng...</div>
+                        <div style={{ marginTop: '10px' }}>{t('specialtyShop.info.loading')}</div>
                     </div>
                 </Card>
             </div>
@@ -94,14 +96,14 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shopId }) => {
         return (
             <div className="shop-info-section">
                 <Title level={3} className="section-title">
-                    Thông tin cửa hàng
+                    {t('specialtyShop.info.title')}
                 </Title>
                 <Card
                     className="shop-info-card"
                     style={{ boxShadow: 'none', border: 'none' }}
                 >
                     <div style={{ textAlign: 'center', padding: '20px' }}>
-                        <Text type="danger">{error || 'Không tìm thấy thông tin cửa hàng'}</Text>
+                        <Text type="danger">{error || t('specialtyShop.info.notFound')}</Text>
                     </div>
                 </Card>
             </div>
@@ -116,7 +118,7 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shopId }) => {
     return (
         <div className="shop-info-section">
             <Title level={3} className="section-title">
-                Thông tin cửa hàng
+                {t('specialtyShop.info.title')}
             </Title>
             <Card
                 className="shop-info-card"
@@ -141,12 +143,15 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shopId }) => {
                             <div className="shop-rating">
                                 <Rate disabled defaultValue={shopData.rating} />
                                 <Text className="rating-text">
-                                    {shopData.rating} điểm
+                                    {t('specialtyShop.info.rating', { rating: shopData.rating })}
                                 </Text>
                             </div>
                             <div className="shop-hours">
                                 <Text type="secondary">
-                                    <ClockCircleOutlined /> Mở cửa: {shopData.openingHours} - {shopData.closingHours}
+                                    <ClockCircleOutlined /> {t('specialtyShop.info.openHours', {
+                                        open: shopData.openingHours,
+                                        close: shopData.closingHours
+                                    })}
                                 </Text>
                             </div>
                         </div>
@@ -159,7 +164,7 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shopId }) => {
                             onClick={handleViewShop}
                             className="view-shop-btn"
                         >
-                            Xem cửa hàng
+                            {t('specialtyShop.info.viewShop')}
                         </Button>
                     </div>
                 </div>

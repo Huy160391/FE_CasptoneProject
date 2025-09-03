@@ -51,6 +51,8 @@ interface WithdrawalRequestListProps {
     refreshTrigger?: number;
     /** Callback khi dữ liệu thay đổi (duyệt/từ chối) */
     onDataChanged?: () => void;
+    /** Dark mode flag */
+    isDarkMode?: boolean;
 }
 
 /**
@@ -69,7 +71,8 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
     initialStatus,
     refreshTrigger,
     onDataChanged,
-    onTabCountChanged
+    onTabCountChanged,
+    isDarkMode
 }) => {
     const { token } = useAuthStore();
     const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
@@ -454,16 +457,17 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                 }
             >
                 {/* Filters */}
-                <div className="filters-section">
-                    <Row gutter={16} align="middle">
+                <div className={`filters-section ${isDarkMode ? 'dark-mode' : ''}`}>
+                    <Row gutter={[16, 8]} align="middle" style={{ alignItems: 'center' }}>
                         {showStatusFilter && (
-                            <Col xs={24} sm={8} md={6}>
+                            <Col xs={24} sm={8} md={6} style={{ display: 'flex', alignItems: 'center' }}>
                                 <Select
                                     placeholder="Lọc theo trạng thái"
                                     allowClear
                                     value={filters.status}
                                     onChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
-                                    style={{ width: '100%' }}
+                                    style={{ width: '100%', height: '40px' }}
+                                    size="large"
                                     suffixIcon={<FilterOutlined />}
                                 >
                                     <Option value={WithdrawalStatus.Pending}>Chờ duyệt</Option>
@@ -473,21 +477,24 @@ const WithdrawalRequestList: React.FC<WithdrawalRequestListProps> = ({
                                 </Select>
                             </Col>
                         )}
-                        <Col xs={24} sm={showStatusFilter ? 8 : 12} md={showStatusFilter ? 6 : 8}>
+                        <Col xs={24} sm={showStatusFilter ? 8 : 12} md={showStatusFilter ? 8 : 10} style={{ display: 'flex', alignItems: 'center' }}>
                             <Search
                                 placeholder="Tìm theo tên/email người dùng"
                                 value={filters.search}
                                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                                 onSearch={() => loadWithdrawalRequests()}
-                                style={{ width: '100%' }}
+                                style={{ width: '100%', height: '40px' }}
+                                size="large"
+                                className={`search-input${isDarkMode ? ' dark' : ''}`}
                             />
                         </Col>
-                        <Col xs={24} sm={showStatusFilter ? 8 : 12} md={showStatusFilter ? 8 : 16}>
+                        <Col xs={24} sm={showStatusFilter ? 8 : 12} md={showStatusFilter ? 10 : 14} style={{ display: 'flex', alignItems: 'center' }}>
                             <RangePicker
                                 placeholder={['Từ ngày', 'Đến ngày']}
                                 value={filters.dateRange}
                                 onChange={(dates) => setFilters(prev => ({ ...prev, dateRange: dates as [dayjs.Dayjs, dayjs.Dayjs] | null }))}
-                                style={{ width: '100%' }}
+                                style={{ width: '100%', height: '40px' }}
+                                size="large"
                                 suffixIcon={<CalendarOutlined />}
                             />
                         </Col>

@@ -5,7 +5,6 @@ import {
     DashboardOutlined,
     FormOutlined,
     ShoppingOutlined,
-    HistoryOutlined,
     StarOutlined,
     BarChartOutlined,
     UserOutlined,
@@ -19,7 +18,6 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useTranslation } from 'react-i18next';
 import ThemeToggle from '../common/ThemeToggle';
-// ...existing code...
 import NotificationBell from '../common/NotificationBell';
 import './TourCompanyLayout.scss';
 
@@ -53,11 +51,6 @@ const TourCompanyLayout: React.FC = () => {
             label: t('tourCompany.sidebar.tours'),
         },
         {
-            key: '/tour-company/transactions',
-            icon: <HistoryOutlined />,
-            label: t('tourCompany.sidebar.transactions'),
-        },
-        {
             key: '/tour-company/reviews',
             icon: <StarOutlined />,
             label: t('tourCompany.sidebar.reviews'),
@@ -73,10 +66,6 @@ const TourCompanyLayout: React.FC = () => {
             label: t('tourCompany.sidebar.wallet'),
         },
     ];
-    const handleProfile = () => {
-        navigate('/profile');
-    };
-
     const handleMenuClick = (key: string) => {
         navigate(key);
     };
@@ -133,16 +122,7 @@ const TourCompanyLayout: React.FC = () => {
                 />
 
                 {/* Bottom actions */}
-                <div className="sidebar-bottom">                    <Button
-                    type="text"
-                    icon={<UserOutlined />}
-                    onClick={handleProfile}
-                    className="profile-btn"
-                    block
-                >
-                    {!collapsed && t('tourCompany.sidebar.profile')}
-                </Button>
-
+                <div className="sidebar-bottom">
                     <Button
                         type="primary"
                         icon={<HomeOutlined />}

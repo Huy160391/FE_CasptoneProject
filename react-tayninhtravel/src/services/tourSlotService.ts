@@ -1,5 +1,6 @@
 import axiosInstance from "../config/axios";
 
+
 export interface TourSlotDto {
   id: string;
   tourTemplateId: string;
@@ -81,7 +82,7 @@ export interface BookedUserInfo {
   totalPrice: number;
   originalPrice: number;
   discountPercent: number;
-  status: number;
+  status: number | string; // Support both number and string status
   statusName: string;
   bookingDate: string;
   confirmedDate?: string;
@@ -264,8 +265,8 @@ class TourSlotService {
       queryParams.append("includeInactive", includeInactive.toString());
 
     const url = queryParams.toString()
-      ? `${this.baseUrl}/tour-template/${tourTemplateId}/unassigned?${queryParams}`
-      : `${this.baseUrl}/tour-template/${tourTemplateId}/unassigned`;
+      ? `${this.baseUrl}/tour-template/${tourTemplateId}?${queryParams}`
+      : `${this.baseUrl}/tour-template/${tourTemplateId}`;
 
     const response = await axiosInstance.get<TourSlotsResponse>(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -374,3 +375,4 @@ class TourSlotService {
 
 export const tourSlotService = new TourSlotService();
 export default tourSlotService;
+

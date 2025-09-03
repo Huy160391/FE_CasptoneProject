@@ -1,7 +1,7 @@
+import { useLocation } from "react-router-dom";
 import {
   FilterOutlined,
   ReloadOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -9,52 +9,40 @@ import {
   Col,
   Divider,
   Empty,
-  InputNumber,
   message,
   Pagination,
   Row,
+  Select,
   Slider,
   Spin,
   Typography,
 } from "antd";
-import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LoginModal from "../components/auth/LoginModal";
 import RegisterModal from "../components/auth/RegisterModal";
 import TourCard from "../components/tours/TourCard";
-import { TourDetail, tourDetailsService } from "../services/tourDetailsService";
+import { TourDetail, tourDetailsService, LocationOption } from "../services/tourDetailsService";
 import { useAuthStore } from "../store/useAuthStore";
-import { TourDetailsStatus } from "../types/tour";
-import { mapStringToStatusEnum } from "../utils/statusMapper";
 import "./ThingsToDo.scss";
 import TourSearchBar from "./TourSearchBar";
 
 const { Title } = Typography;
 
 const ThingsToDo = () => {
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
-  const locationParam = searchParams.get("location");
-  const dateParam = searchParams.get("date");
-  const keywordParam = searchParams.get("keyword");
+  // const location = useLocation();
+  // const { state } = location;
   const { t } = useTranslation();
   const { isAuthenticated } = useAuthStore();
-
-  // State for search filters
-  const [selectedDestination, setSelectedDestination] = useState(
-    locationParam ? locationParam : "all"
-  );
-  const [searchKeyword, setSearchKeyword] = useState(keywordParam || "");
-  const [selectedDate, setSelectedDate] = useState(
-    dateParam ? dayjs(dateParam) : null
-  );
 
   // State for tours data
   const [tours, setTours] = useState<TourDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const pageSize = 6; // Số items trên mỗi trang
 
   // State for modals
@@ -64,66 +52,97 @@ const ThingsToDo = () => {
   // State for filters
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [showFilters, setShowFilters] = useState(true);
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
-  // const [minRating, setMinRating] = useState<number>(0) // Tạm ẩn vì API chưa có rating
-  const [maxGuests, setMaxGuests] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [scheduleDay, setScheduleDay] = useState<string>('');
+  const [hasEarlyBird, setHasEarlyBird] = useState<boolean>(true);
+  const [startLocation, setStartLocation] = useState<string>('');
+  const [endLocation, setEndLocation] = useState<string>('');
+
+  // State for location options
+  const [startLocationOptions, setStartLocationOptions] = useState<LocationOption[]>([]);
+  const [endLocationOptions, setEndLocationOptions] = useState<LocationOption[]>([]);
+  const [loadingLocationOptions, setLoadingLocationOptions] = useState(false);
 
   // Load tours from database
   const loadTours = async (page = 1) => {
     try {
       setLoading(true);
       const response = await tourDetailsService.getPublicTourDetailsList({
-        pageIndex: page - 1, // API uses 0-based indexing
+        pageIndex: page - 1,
         pageSize: pageSize,
         includeInactive: false,
+        searchTerm: searchTerm || undefined,
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
+        scheduleDay: scheduleDay || undefined,
+        startLocation: startLocation || undefined,
+        endLocation: endLocation || undefined,
+        hasEarlyBird: hasEarlyBird,
       });
 
       if (response.success && response.data) {
-        // Filter only public tours (status 8) - tours available for customer booking
-        const publicTours = response.data.filter((tour: TourDetail) => {
-          const mappedStatus = mapStringToStatusEnum(tour.status);
-          return mappedStatus === TourDetailsStatus.Public;
-        });
-
-        // Convert string status to number enum for TourCard compatibility
-        const toursWithStatus = publicTours.map((tour: TourDetail) => ({
+        const toursWithStatus = response.data.map((tour: TourDetail) => ({
           ...tour,
-          status: mapStringToStatusEnum(tour.status),
-          tourTemplateName: tour.title, // Use title as template name fallback
-          description: tour.description || "", // Ensure description is not undefined
-          timeline: tour.timeline || [], // Ensure timeline is not undefined
+          status: tour.status,
+          tourTemplateName: tour.title,
+          description: tour.description || "",
+          timeline: tour.timeline || [],
         }));
-
         setTours(toursWithStatus);
+        setTotalCount(response.totalCount || toursWithStatus.length);
       }
     } catch (error) {
       console.error("Error loading tours:", error);
       message.error("Không thể tải danh sách tour. Vui lòng thử lại sau.");
       setTours([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
   };
 
-  // Update search fields when URL params change
+  // Load location options from API
+  const loadLocationOptions = async () => {
+    try {
+      setLoadingLocationOptions(true);
+
+      const [startResponse, endResponse] = await Promise.all([
+        tourDetailsService.getStartLocationOptions(),
+        tourDetailsService.getEndLocationOptions()
+      ]);
+
+      if (startResponse.success && startResponse.data) {
+        setStartLocationOptions(startResponse.data);
+      }
+
+      if (endResponse.success && endResponse.data) {
+        setEndLocationOptions(endResponse.data);
+      }
+    } catch (error) {
+      console.error("Error loading location options:", error);
+      message.error("Không thể tải danh sách địa điểm. Sử dụng danh sách mặc định.");
+    } finally {
+      setLoadingLocationOptions(false);
+    }
+  };
+
+  // Chỉ lấy state từ location khi mount
   useEffect(() => {
-    if (locationParam) {
-      setSelectedDestination(locationParam);
+    if (location.state) {
+      if (location.state.searchTerm) setSearchTerm(location.state.searchTerm);
+      if (location.state.scheduleDay) setScheduleDay(location.state.scheduleDay);
     }
+  }, []);
 
-    if (keywordParam) {
-      setSearchKeyword(keywordParam);
-    }
+  // Load location options when component mounts
+  useEffect(() => {
+    loadLocationOptions();
+  }, []);
 
-    if (dateParam) {
-      setSelectedDate(dayjs(dateParam));
-    }
-  }, [locationParam, dateParam, keywordParam]);
-
-  // Load tours on component mount
+  // Load tours khi filter thay đổi
   useEffect(() => {
     loadTours(currentPage);
-  }, [currentPage]);
+  }, [currentPage, searchTerm, scheduleDay, startLocation, endLocation, hasEarlyBird]);
 
   // Handle booking button click
   const handleBookNow = (tour: TourDetail) => {
@@ -131,21 +150,10 @@ const ThingsToDo = () => {
       setIsLoginModalVisible(true);
       return;
     }
-
-    // // Check if tour has active operation and available slots
-    // const hasAvailableSlot = Array.isArray(tour.availableSlots) && tour.availableSlots.some(
-    //   slot => String(slot.status).toLowerCase() === 'available' && Number(slot.availableSpots) > 0
-    // );
-    // if (!tour.tourOperation || !tour.tourOperation.isActive || !hasAvailableSlot) {
-    //   message.error('Tour này hiện không khả dụng để đặt')
-    //   return
-    // }
-
     message.info({
       content: "Đang chuyển đến trang đặt tour...",
       duration: 1,
     });
-
     navigate(`/booking/${tour.id}`, {
       state: {
         tourData: tour,
@@ -172,109 +180,30 @@ const ThingsToDo = () => {
     setCurrentPage(1);
   };
 
-  const handleAvailableOnlyChange = (e: any) => {
-    setShowAvailableOnly(e.target.checked);
-    setCurrentPage(1);
-  };
-
-  // const handleRatingChange = (value: number) => {
-  //   setMinRating(value)
-  //   setCurrentPage(1)
-  // }
-
-  const handleMaxGuestsChange = (value: number | null) => {
-    setMaxGuests(value);
-    setCurrentPage(1);
-  };
-
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
   const resetFilters = () => {
-    setSearchKeyword("");
-    setSelectedDate(null);
     setPriceRange([0, 10000000]);
-    setShowAvailableOnly(false);
-    setMaxGuests(null);
+    setStartLocation('');
+    setEndLocation('');
+    setScheduleDay('');
+    setHasEarlyBird(true);
     setCurrentPage(1);
   };
 
-  // Filter tours based on search criteria
-  const filteredTours = tours.filter((tour) => {
-    // Match destination - simplified to always true for now
-    const matchDestination = true;
+  // Search bar callback
+  const handleSearchBarChange = (term: string, schedule?: string, startLoc?: string, endLoc?: string) => {
+    setSearchTerm(term);
+    setScheduleDay(schedule || '');
+    setStartLocation(startLoc || '');
+    setEndLocation(endLoc || '');
+    setCurrentPage(1);
+  };
 
-    // Match keyword - search in title and description
-    const matchKeyword =
-      searchKeyword === "" ||
-      tour.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      (tour.description &&
-        tour.description.toLowerCase().includes(searchKeyword.toLowerCase()));
-
-    // Filter by date if selected - simplified to always true for now
-    const matchDate = true;
-
-    // Filter by price range
-    const tourPrice = tour.tourOperation?.price || 0;
-    const matchPrice = tourPrice >= priceRange[0] && tourPrice <= priceRange[1];
-
-    // Filter by availability
-    const isAvailable = tour.tourOperation?.isActive;
-    const matchAvailable = !showAvailableOnly || isAvailable;
-
-    // Filter by rating - Tạm comment vì API chưa có rating
-    const matchRating = true;
-
-    // Filter by max guests
-    const tourMaxGuests = tour.tourOperation?.maxGuests || 0;
-    const matchGuests = !maxGuests || tourMaxGuests >= maxGuests;
-
-    return (
-      matchDestination &&
-      matchKeyword &&
-      matchDate &&
-      matchPrice &&
-      matchAvailable &&
-      matchRating &&
-      matchGuests
-    );
-  });
-
-  console.log("Filter debug:", {
-    totalTours: tours.length,
-    filteredTours: filteredTours.length,
-    filters: {
-      selectedDestination,
-      searchKeyword,
-      selectedDate: selectedDate?.format("YYYY-MM-DD"),
-      priceRange,
-      showAvailableOnly,
-      maxGuests,
-    },
-  });
-
-  // Calculate current page items
-  const currentItems = filteredTours.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
-  if (loading) {
-    return (
-      <div className="things-to-do-page">
-        <div className="container">
-          <div className="page-header">
-            <h1>{t("thingsToDo.pageTitle")}</h1>
-            <p>{t("thingsToDo.pageSubtitle")}</p>
-          </div>
-          <div style={{ textAlign: "center", padding: "50px 0" }}>
-            <Spin size="large" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Không filter lại trên FE, tours đã là danh sách đúng cho trang hiện tại từ API
+  const currentItems = tours;
 
   return (
     <div className="things-to-do-page">
@@ -284,180 +213,181 @@ const ThingsToDo = () => {
           <Title level={2}>{t("thingsToDo.pageTitle")}</Title>
           <p>{t("thingsToDo.pageSubtitle")}</p>
         </div>
-
         {/* Search Section */}
         <div className="search-filter-section">
-          <TourSearchBar />
+          <TourSearchBar onSearchTermChange={handleSearchBarChange} searchTerm={searchTerm} scheduleDay={scheduleDay} />
         </div>
-
         {/* Main Content */}
-        <Row gutter={[24, 24]} className="main-content">
-          {/* Filter Sidebar */}
-          <Col xs={24} md={6} className="filter-sidebar">
-            <div
-              className={`filters-container ${showFilters ? "show" : "hide"}`}>
-              <div className="filter-header">
-                <Title level={4}>
-                  <FilterOutlined /> {t("tours.filters")}
-                </Title>
-                <Button
-                  type="text"
-                  onClick={toggleFilters}
-                  className="toggle-filters-btn">
-                  {showFilters ? "Ẩn" : "Hiện"}
-                </Button>
-              </div>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "50px 0" }}>
+            <Spin size="large" />
+          </div>
+        ) : (
+          <Row gutter={[24, 24]} className="main-content">
+            {/* Filter Sidebar */}
+            <Col xs={24} md={6} className="filter-sidebar">
+              <div className={`filters-container ${showFilters ? "show" : "hide"}`}>
+                <div className="filter-header">
+                  <Title level={4}>
+                    <FilterOutlined /> {t("tours.filters")}
+                  </Title>
+                  <Button
+                    type="text"
+                    onClick={toggleFilters}
+                    className="toggle-filters-btn">
+                    {showFilters ? "Ẩn" : "Hiện"}
+                  </Button>
+                </div>
 
-              {showFilters && (
-                <div className="filter-content">
-                  {/* Price Range Filter */}
-                  <div className="filter-section">
-                    <Title level={5}>{t("tours.priceRange")}</Title>
-                    <Slider
-                      range
-                      min={0}
-                      max={10000000}
-                      step={100000}
-                      value={priceRange}
-                      onChange={handlePriceRangeChange}
-                      tooltip={{
-                        formatter: (value) =>
-                          `${value?.toLocaleString("vi-VN")}₫`,
-                      }}
-                    />
-                    <div className="price-range-display">
-                      <span>{priceRange[0].toLocaleString("vi-VN")}₫</span>
-                      <span> - </span>
-                      <span>{priceRange[1].toLocaleString("vi-VN")}₫</span>
+                {showFilters && (
+                  <div className="filter-content">
+                    {/* Price Range Filter */}
+                    <div className="filter-section">
+                      <Title level={5}>{t("tours.priceRange")}</Title>
+                      <Slider
+                        range
+                        min={0}
+                        max={5000000}
+                        step={100000}
+                        value={priceRange}
+                        onChange={handlePriceRangeChange}
+                        tooltip={{
+                          formatter: (value) => `${value?.toLocaleString("vi-VN")}₫`,
+                        }}
+                      />
+                      <div className="price-range-display">
+                        <span>{priceRange[0].toLocaleString("vi-VN")}₫</span>
+                        <span> - </span>
+                        <span>{priceRange[1].toLocaleString("vi-VN")}₫</span>
+                      </div>
+                    </div>
+
+                    <Divider />
+
+                    {/* Start Location Filter */}
+                    <div className="filter-section">
+                      <Title level={5}>Điểm bắt đầu</Title>
+                      <Select
+                        value={startLocation}
+                        onChange={value => { setStartLocation(value); setCurrentPage(1); }}
+                        style={{ width: '100%' }}
+                        placeholder="Chọn điểm bắt đầu"
+                        allowClear
+                        loading={loadingLocationOptions}
+                      >
+                        <Select.Option value="">Tất cả</Select.Option>
+                        {startLocationOptions.map((option, index) => (
+                          <Select.Option key={index} value={option.location}>
+                            {option.location} {option.isPopular}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </div>
+                    {/* End Location Filter */}
+                    <div className="filter-section">
+                      <Title level={5}>Điểm kết thúc</Title>
+                      <Select
+                        value={endLocation}
+                        onChange={value => { setEndLocation(value); setCurrentPage(1); }}
+                        style={{ width: '100%' }}
+                        placeholder="Chọn điểm kết thúc"
+                        allowClear
+                        loading={loadingLocationOptions}
+                      >
+                        <Select.Option value="">Tất cả</Select.Option>
+                        {endLocationOptions.map((option, index) => (
+                          <Select.Option key={index} value={option.location}>
+                            {option.location} {option.isPopular}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </div>
+
+                    <Divider />
+
+                    {/* Early Bird Discount Filter */}
+                    <div className="filter-section">
+                      <Checkbox
+                        checked={hasEarlyBird === true}
+                        onChange={e => { setHasEarlyBird(e.target.checked ? true : false); setCurrentPage(1); }}
+                      >
+                        Early Bird
+                      </Checkbox>
+                    </div>
+
+                    <Divider />
+
+                    <div className="filter-section">
+                      <Button
+                        type="default"
+                        icon={<ReloadOutlined />}
+                        onClick={resetFilters}
+                        block>
+                        {t("shopList.resetFilters")}
+                      </Button>
                     </div>
                   </div>
+                )}
+              </div>
+            </Col>
 
-                  <Divider />
+            {/* Tours Section */}
+            <Col xs={24} md={18} className="tours-section">
+              {/* Tours Grid */}
+              {currentItems.length === 0 ? (
+                <div className="empty-state">
+                  <Empty
+                    description={
+                      t("thingsToDo.noToursFound") ||
+                      "Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm"
+                    }
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
+                </div>
+              ) : (
+                <>
+                  <Row gutter={[16, 24]} className="tours-grid">
+                    {currentItems.map((tour) => (
+                      <Col xs={24} sm={12} lg={8} key={tour.id}>
+                        <TourCard
+                          tour={tour}
+                          onBookNow={handleBookNow}
+                          onViewDetails={handleViewDetails}
+                        />
+                      </Col>
+                    ))}
+                  </Row>
 
-                  {/* Rating Filter - Tạm comment vì API chưa có rating */}
-                  {/* <div className="filter-section">
-                    <Title level={5}>
-                      <StarOutlined /> {t('tours.minRating')}
-                    </Title>
-                    <Rate
-                      value={minRating}
-                      onChange={handleRatingChange}
-                      allowClear
-                      allowHalf
-                    />
-                    <div className="rating-text">
-                      {minRating > 0 && (
-                        <span>{minRating} sao trở lên</span>
+                  {/* Pagination */}
+                  <div className="pagination-container">
+                    <div className="pagination-controls">
+                      <div className="results-info">
+                        <span>
+                          {totalCount} {t("tour.found")}
+                        </span>
+                      </div>
+
+                      {totalCount > 0 && (
+                        <Pagination
+                          current={currentPage}
+                          total={totalCount}
+                          pageSize={pageSize}
+                          onChange={handlePageChange}
+                          showSizeChanger={false}
+                          showTotal={(_, range) => (
+                            <span className="results-info-total">
+                              {range[0]}-{range[1]} {t("shop.of")} {totalCount} {t("tour.total")}
+                            </span>
+                          )}
+                        />
                       )}
                     </div>
                   </div>
-
-                  <Divider /> */}
-
-                  {/* Max Guests Filter */}
-                  <div className="filter-section">
-                    <Title level={5}>
-                      <UserOutlined /> {t("tours.minCapacity")}
-                    </Title>
-                    <InputNumber
-                      value={maxGuests}
-                      onChange={handleMaxGuestsChange}
-                      min={1}
-                      max={100}
-                      placeholder={t("tours.minCapacityPlaceholder")}
-                      style={{ width: "100%" }}
-                      suffix={t("tours.unitPerson")}
-                    />
-                    {maxGuests && (
-                      <div className="guests-text">
-                        <span>Hiển thị tour từ {maxGuests} người trở lên</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <Divider />
-
-                  {/* Availability Filter */}
-                  <div className="filter-section">
-                    <Checkbox
-                      checked={showAvailableOnly}
-                      onChange={handleAvailableOnlyChange}>
-                      {t("tours.availableOnly")}
-                    </Checkbox>
-                  </div>
-                  <div className="filter-section">
-                    <Button
-                      type="default"
-                      icon={<ReloadOutlined />}
-                      onClick={resetFilters}
-                      block>
-                      {t("shopList.resetFilters")}
-                    </Button>
-                  </div>
-                </div>
+                </>
               )}
-            </div>
-          </Col>
-
-          {/* Tours Section */}
-          <Col xs={24} md={18} className="tours-section">
-            {/* Tours Grid */}
-            {currentItems.length === 0 ? (
-              <div className="empty-state">
-                <Empty
-                  description={
-                    t("thingsToDo.noToursFound") ||
-                    "Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm"
-                  }
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
-              </div>
-            ) : (
-              <>
-                <Row gutter={[16, 24]} className="tours-grid">
-                  {currentItems.map((tour) => (
-                    <Col xs={24} sm={12} lg={8} key={tour.id}>
-                      <TourCard
-                        tour={tour}
-                        onBookNow={handleBookNow}
-                        onViewDetails={handleViewDetails}
-                      />
-                    </Col>
-                  ))}
-                </Row>
-
-                {/* Pagination */}
-                <div className="pagination-container">
-                  <div className="pagination-controls">
-                    <div className="results-info">
-                      <span>
-                        {filteredTours.length} {t("tour.found")}
-                      </span>
-                    </div>
-
-                    {filteredTours.length > 0 && (
-                      <Pagination
-                        current={currentPage}
-                        total={filteredTours.length}
-                        pageSize={pageSize}
-                        onChange={handlePageChange}
-                        showSizeChanger={false}
-                        showQuickJumper={filteredTours.length > pageSize}
-                        showTotal={(total, range) => (
-                          <span className="results-info-total">
-                            {range[0]}-{range[1]} {t("shop.of")} {total}{" "}
-                            {t("tour.total")}
-                          </span>
-                        )}
-                      />
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </Col>
-        </Row>
-
+            </Col>
+          </Row>
+        )}
         {/* Login Modal */}
         <LoginModal
           isVisible={isLoginModalVisible}

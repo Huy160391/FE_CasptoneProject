@@ -7,7 +7,7 @@ import ShopList from '@/pages/ShopList';
 import ProductDetail from '@/pages/ProductDetail';
 import ShopDetail from '@/pages/ShopDetail';
 import ThingsToDo from '@/pages/ThingsToDo';
-import ThingsToDoDetail from '@/pages/ThingsToDoDetail';
+// import ThingsToDoDetail from '@/pages/ThingsToDoDetail';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import Career from '@/pages/Career';
@@ -32,6 +32,7 @@ import TourDetailsPage from '@/pages/TourDetailsPage';
 import DebugAuth from '@/pages/DebugAuth';
 import BookingHistoryTest from '@/components/debug/BookingHistoryTest';
 import ImageUploadTest from '@/components/debug/ImageUploadTest';
+import TourCompanyDetail from '@/pages/tourcompany/TourCompanyDetail';
 
 export const publicRoutes: RouteObject[] = [
     {
@@ -72,20 +73,16 @@ export const publicRoutes: RouteObject[] = [
         element: <OrderSuccess />,
     },
     {
-        path: '/things-to-do',
+        path: '/tours',
         element: <ThingsToDo />,
-    },
-    {
-        path: '/things-to-do/detail/:id',
-        element: <ThingsToDoDetail />,
-    },
-    {
-        path: '/things-to-do/:id',
-        element: <ThingsToDoDetail />,
     },
     {
         path: '/tour-details/:tourId',
         element: <TourDetailsPage />,
+    },
+    {
+        path: '/tour-company/:companyId',
+        element: <TourCompanyDetail />,
     },
     {
         path: '/blog',

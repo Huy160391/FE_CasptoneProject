@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import RevenueDetailModal from "./RevenueDetailModal"; // Import the new modal
 import {
   Card,
   Row,
@@ -64,6 +65,10 @@ const AdminRevenueDashboard: React.FC = () => {
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [isActive, setIsActive] = useState<boolean | null>(null);
+  const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
+    null
+  );
 
   const fetchRevenueStats = async () => {
     try {
@@ -101,8 +106,8 @@ const AdminRevenueDashboard: React.FC = () => {
   };
 
   const handleViewDetail = (companyId: string) => {
-    // TODO: Navigate to company detail page or open modal
-    message.info(`Xem chi tiết công ty: ${companyId}`);
+    setSelectedCompanyId(companyId);
+    setIsDetailModalVisible(true);
   };
 
   const formatCurrency = (amount: number) => {
@@ -370,6 +375,12 @@ const AdminRevenueDashboard: React.FC = () => {
           />
         </Card>
       </Spin>
+      <RevenueDetailModal
+        visible={isDetailModalVisible}
+        onClose={() => setIsDetailModalVisible(false)}
+        companyId={selectedCompanyId}
+        year={selectedYear}
+      />
     </div>
   );
 };

@@ -13,18 +13,22 @@ import {
   Alert,
   Spin,
   Space,
+  notification,
 } from "antd";
 import { PlusOutlined, CalendarOutlined } from "@ant-design/icons";
 import { useAuthStore } from "../../store/useAuthStore";
 import {
-  createHolidayTourTemplate,
+  createHolidayTourTemplateEnhanced,
   handleApiError,
 } from "../../services/tourcompanyService";
+import { publicService } from "../../services/publicService";
 import {
   TourTemplateType,
   CreateHolidayTourTemplateRequest,
 } from "../../types/tour";
 import dayjs, { Dayjs } from "dayjs";
+import { AxiosError } from "axios";
+import HolidayTourErrorDisplay from "./HolidayTourErrorDisplay";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -45,6 +49,20 @@ interface HolidayTourFormData {
   images?: string[];
 }
 
+interface BackendErrorResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  validationErrors?: string[];
+  fieldErrors?: Record<string, string[]>;
+}
+
+interface ErrorState {
+  validationErrors: string[];
+  fieldErrors: Record<string, string[]>;
+  showDetails: boolean;
+}
+
 const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
   visible,
   onCancel,
@@ -54,59 +72,242 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
   const [form] = Form.useForm<HolidayTourFormData>();
   const [loading, setLoading] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [errorState, setErrorState] = useState<ErrorState>({
+    validationErrors: [],
+    fieldErrors: {},
+    showDetails: false,
+  });
 
   const handleSubmit = async (values: HolidayTourFormData) => {
     try {
       setLoading(true);
+      // Clear previous errors
+      setErrorState({
+        validationErrors: [],
+        fieldErrors: {},
+        showDetails: false,
+      });
+
+      // Đảm bảo tourDate có thời gian mặc định (7:00 AM) nếu chỉ chọn ngày
+      const tourDateTime = values.tourDate.hour() === 0 && values.tourDate.minute() === 0
+        ? values.tourDate.hour(7).minute(0).second(0) // Set 7:00 AM nếu chưa set thời gian
+        : values.tourDate;
 
       const requestData: CreateHolidayTourTemplateRequest = {
         title: values.title,
         templateType: values.templateType,
         startLocation: values.startLocation,
         endLocation: values.endLocation,
-        tourDate: values.tourDate.format("YYYY-MM-DD"),
+        tourDate: tourDateTime.format("YYYY-MM-DDTHH:mm:ss.SSSZ"), // Format datetime đầy đủ cho backend
         images: imageUrls.length > 0 ? imageUrls : [],
       };
 
-      const response = await createHolidayTourTemplate(
-        requestData,
-        token || undefined
-      );
+      // Use the enhanced service or fallback to original with error handling
+      let response;
+      try {
+        response = await createHolidayTourTemplateEnhanced(
+          requestData,
+          token || undefined
+        );
+      } catch (importError) {
+        // Fallback if enhanced function is not available
+        console.warn("Enhanced function not available, using fallback");
+        const { createHolidayTourTemplate } = await import("../../services/tourcompanyService");
+        try {
+          response = await createHolidayTourTemplate(requestData, token || undefined);
+        } catch (apiError: any) {
+          // Handle API errors manually
+          if (apiError.response?.data) {
+            response = {
+              success: false,
+              statusCode: apiError.response.status,
+              message: apiError.response.data.message || "Có lỗi xảy ra",
+              validationErrors: apiError.response.data.validationErrors || [],
+              fieldErrors: apiError.response.data.fieldErrors || {},
+              data: null,
+            };
+          } else {
+            throw apiError;
+          }
+        }
+      }
 
       if (response.success) {
         message.success("Tạo Tour Ngày Lễ thành công!");
         form.resetFields();
         setImageUrls([]);
+        setErrorState({
+          validationErrors: [],
+          fieldErrors: {},
+          showDetails: false,
+        });
         onSuccess();
       } else {
-        message.error(response.message || "Có lỗi xảy ra khi tạo Tour Ngày Lễ");
+        // Handle backend validation errors
+        handleBackendErrors(response);
       }
     } catch (error) {
       console.error("Error creating holiday tour:", error);
-      handleApiError(error);
+      handleAxiosError(error as AxiosError);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle backend validation errors
+  const handleBackendErrors = (response: any) => {
+    const { message: errorMessage, validationErrors = [], fieldErrors = {} } = response;
+
+    // Show main error message
+    message.error(errorMessage || "Có lỗi xảy ra khi tạo Tour Ngày Lễ");
+
+    // Update error state
+    setErrorState({
+      validationErrors,
+      fieldErrors,
+      showDetails: validationErrors.length > 0 || Object.keys(fieldErrors).length > 0,
+    });
+
+    // Handle field-specific errors for form validation
+    if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+      const formErrors = Object.entries(fieldErrors).map(([backendField, errors]) => {
+        const formField = mapBackendFieldToFormField(backendField);
+        return {
+          name: formField as keyof HolidayTourFormData,
+          errors: Array.isArray(errors) ? errors : [errors as string]
+        };
+      });
+      form.setFields(formErrors as any);
+
+      // Also scroll to first error field
+      const firstErrorField = formErrors[0]?.name;
+      if (firstErrorField) {
+        setTimeout(() => {
+          const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`) as HTMLElement;
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
+
+    // Show detailed notification for validation errors
+    if (validationErrors.length > 0 || Object.keys(fieldErrors).length > 0) {
+      notification.error({
+        message: "Lỗi Validation Holiday Tour",
+        description: "Vui lòng kiểm tra thông tin theo hướng dẫn bên dưới",
+        duration: 10,
+        placement: "topRight",
+      });
+    }
+  };
+
+  // Handle Axios errors (network, server errors)
+  const handleAxiosError = (error: AxiosError) => {
+    const errorData = error.response?.data as BackendErrorResponse;
+
+    if (errorData) {
+      handleBackendErrors(errorData);
+    } else {
+      // Network or other errors
+      handleApiError(error);
     }
   };
 
   const handleCancel = () => {
     form.resetFields();
     setImageUrls([]);
+    setErrorState({
+      validationErrors: [],
+      fieldErrors: {},
+      showDetails: false,
+    });
     onCancel();
   };
 
-  // Disable past dates
+  const handleToggleErrorDetails = () => {
+    setErrorState(prev => ({
+      ...prev,
+      showDetails: !prev.showDetails,
+    }));
+  };
+
+  const handleDismissErrors = () => {
+    setErrorState({
+      validationErrors: [],
+      fieldErrors: {},
+      showDetails: false,
+    });
+  };
+
+  // Map backend field names to form field names
+  const mapBackendFieldToFormField = (backendField: string): string => {
+    const fieldMapping: Record<string, string> = {
+      'Title': 'title',
+      'title': 'title',
+      'TourDate': 'tourDate',
+      'tourDate': 'tourDate',
+      'StartLocation': 'startLocation',
+      'startLocation': 'startLocation',
+      'EndLocation': 'endLocation',
+      'endLocation': 'endLocation',
+      'TemplateType': 'templateType',
+      'templateType': 'templateType',
+      'Description': 'description',
+      'description': 'description',
+      'Images': 'images',
+      'images': 'images',
+    };
+    return fieldMapping[backendField] || backendField.toLowerCase();
+  };
+
+  // Disable past dates and dates that don't meet business rules
   const disabledDate = (current: Dayjs) => {
-    return current && current < dayjs().startOf("day");
+    if (!current) return false;
+
+    const now = dayjs();
+    const minDate = now.add(30, 'day');
+    const maxDate = now.add(2, 'year');
+
+    // Disable dates before minimum date (30 days from now)
+    if (current.isBefore(minDate, 'day')) {
+      return true;
+    }
+
+    // Disable dates after maximum date (2 years from now)
+    if (current.isAfter(maxDate, 'day')) {
+      return true;
+    }
+
+    return false;
   };
 
   const handleImageUpload = async (file: File) => {
-    // TODO: Implement image upload logic
-    // For now, just add a placeholder URL
-    const mockUrl = `https://example.com/images/${file.name}`;
-    setImageUrls((prev) => [...prev, mockUrl]);
-    message.success("Ảnh đã được tải lên thành công");
+    try {
+      setLoading(true);
+
+      // Sử dụng API upload thật
+      const imageUrl = await publicService.uploadImage(file);
+
+      if (imageUrl) {
+        setImageUrls((prev) => [...prev, imageUrl]);
+        message.success("Ảnh đã được tải lên thành công");
+      } else {
+        message.error("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      message.error("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+
     return false; // Prevent default upload
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setImageUrls((prev) => prev.filter((_, index) => index !== indexToRemove));
+    message.success("Đã xóa ảnh");
   };
 
   return (
@@ -120,14 +321,22 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
       open={visible}
       onCancel={handleCancel}
       footer={null}
-      width={800}
-      destroyOnClose>
+      width={800}>
       <Alert
         message="Tour Ngày Lễ"
         description="Tour Ngày Lễ được tạo cho một ngày cụ thể thay vì theo lịch hàng tuần. Hệ thống sẽ tự động tạo một slot duy nhất cho ngày được chọn."
         type="info"
         showIcon
         style={{ marginBottom: 24 }}
+      />
+
+      {/* Holiday Tour Error Display */}
+      <HolidayTourErrorDisplay
+        validationErrors={errorState.validationErrors}
+        fieldErrors={errorState.fieldErrors}
+        showDetails={errorState.showDetails}
+        onToggleDetails={handleToggleErrorDetails}
+        onDismiss={handleDismissErrors}
       />
 
       <Spin spinning={loading}>
@@ -146,7 +355,10 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
                   { min: 5, message: "Tên tour phải có ít nhất 5 ký tự" },
                   { max: 200, message: "Tên tour không được quá 200 ký tự" },
                 ]}>
-                <Input placeholder="Ví dụ: Tour Tết Nguyên Đán 2025" />
+                <Input
+                  placeholder="Ví dụ: Tour Tết Nguyên Đán 2025"
+                  data-field="title"
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -159,7 +371,10 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
                 rules={[
                   { required: true, message: "Vui lòng chọn loại tour" },
                 ]}>
-                <Select placeholder="Chọn loại tour">
+                <Select
+                  placeholder="Chọn loại tour"
+                  data-field="templateType"
+                >
                   <Option value={TourTemplateType.FreeScenic}>
                     Tour Miễn Phí (Cảnh Quan)
                   </Option>
@@ -175,12 +390,39 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
                 label="Ngày Diễn Ra"
                 rules={[
                   { required: true, message: "Vui lòng chọn ngày diễn ra" },
-                ]}>
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+
+                      const selectedDate = dayjs(value);
+                      const now = dayjs();
+                      const minDate = now.add(30, 'day');
+                      const maxDate = now.add(2, 'year');
+
+                      if (selectedDate.isBefore(minDate)) {
+                        return Promise.reject(
+                          new Error(`Ngày tour phải sau ít nhất 30 ngày từ hôm nay (${minDate.format('DD/MM/YYYY')})`)
+                        );
+                      }
+
+                      if (selectedDate.isAfter(maxDate)) {
+                        return Promise.reject(
+                          new Error(`Ngày tour không được quá 2 năm trong tương lai (${maxDate.format('DD/MM/YYYY')})`)
+                        );
+                      }
+
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
+                extra="Ngày tour phải sau ít nhất 30 ngày từ hôm nay và không quá 2 năm trong tương lai"
+              >
                 <DatePicker
                   style={{ width: "100%" }}
                   placeholder="Chọn ngày lễ"
                   disabledDate={disabledDate}
                   format="DD/MM/YYYY"
+                  data-field="tourDate"
                 />
               </Form.Item>
             </Col>
@@ -194,7 +436,10 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
                 rules={[
                   { required: true, message: "Vui lòng nhập điểm khởi hành" },
                 ]}>
-                <Input placeholder="Ví dụ: TP.HCM" />
+                <Input
+                  placeholder="Ví dụ: TP.HCM"
+                  data-field="startLocation"
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -204,7 +449,10 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
                 rules={[
                   { required: true, message: "Vui lòng nhập điểm kết thúc" },
                 ]}>
-                <Input placeholder="Ví dụ: Tây Ninh" />
+                <Input
+                  placeholder="Ví dụ: Tây Ninh"
+                  data-field="endLocation"
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -215,24 +463,68 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
               placeholder="Mô tả chi tiết về Tour Ngày Lễ..."
               maxLength={1000}
               showCount
+              data-field="description"
             />
           </Form.Item>
 
           <Form.Item label="Hình Ảnh Tour">
-            <Upload
-              listType="picture-card"
-              beforeUpload={handleImageUpload}
-              showUploadList={{
-                showPreviewIcon: true,
-                showRemoveIcon: true,
-              }}>
-              {imageUrls.length < 5 && (
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Tải lên</div>
+            <div>
+              {/* Hiển thị ảnh đã upload */}
+              {imageUrls.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <Row gutter={[8, 8]}>
+                    {imageUrls.map((url, index) => (
+                      <Col key={index} span={6}>
+                        <div style={{ position: 'relative', border: '1px solid #d9d9d9', borderRadius: 6, overflow: 'hidden' }}>
+                          <img
+                            src={url}
+                            alt={`Tour image ${index + 1}`}
+                            style={{ width: '100%', height: 100, objectFit: 'cover' }}
+                          />
+                          <Button
+                            type="text"
+                            danger
+                            size="small"
+                            onClick={() => handleRemoveImage(index)}
+                            style={{
+                              position: 'absolute',
+                              top: 4,
+                              right: 4,
+                              background: 'rgba(255,255,255,0.8)',
+                              minWidth: 24,
+                              height: 24
+                            }}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
                 </div>
               )}
-            </Upload>
+
+              {/* Upload button */}
+              <Upload
+                listType="picture-card"
+                beforeUpload={handleImageUpload}
+                showUploadList={false}
+                disabled={imageUrls.length >= 5}
+              >
+                {imageUrls.length < 5 && (
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Tải lên ({imageUrls.length}/5)</div>
+                  </div>
+                )}
+              </Upload>
+
+              {imageUrls.length >= 5 && (
+                <div style={{ color: '#999', fontSize: 12, marginTop: 8 }}>
+                  Đã đạt giới hạn tối đa 5 ảnh
+                </div>
+              )}
+            </div>
           </Form.Item>
 
           <div style={{ textAlign: "right", marginTop: 24 }}>

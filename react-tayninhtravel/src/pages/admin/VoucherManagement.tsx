@@ -46,6 +46,11 @@ const VoucherManagement = () => {
     const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null)
     const [form] = Form.useForm()
 
+    // Modal chỉnh sửa discount percent cho du khách
+    const [isEditDiscountModalVisible, setIsEditDiscountModalVisible] = useState(false)
+    const [discountPercent, setDiscountPercent] = useState<number | null>(null)
+    const [currentDiscountPercent, setCurrentDiscountPercent] = useState<number | null>(null)
+
     // Fetch vouchers from API
     const fetchVouchers = async () => {
         setLoading(true)
@@ -92,6 +97,48 @@ const VoucherManagement = () => {
         return () => clearTimeout(timer)
     }, [searchText])
 
+    // Mở modal chỉnh sửa discount percent cho du khách
+    const handleOpenEditDiscountModal = async () => {
+        try {
+            const res = await voucherService.getDiscountForVisitor()
+            setCurrentDiscountPercent(res.discountPercent)
+            setDiscountPercent(res.discountPercent)
+        } catch (err) {
+            setCurrentDiscountPercent(null)
+            setDiscountPercent(null)
+        }
+        setIsEditDiscountModalVisible(true)
+    }
+
+    // Xử lý lưu discount percent
+    const handleSaveDiscountPercent = () => {
+        if (discountPercent === null) {
+            message.error('Vui lòng nhập phần trăm giảm giá')
+            return
+        }
+        Modal.confirm({
+            title: 'Xác nhận cập nhật',
+            content: (
+                <div>
+                    <div>Bạn có chắc chắn muốn cập nhật phần trăm giảm giá cho du khách thành {discountPercent}%?</div>
+                    <div>Khi mua hàng, du khách sẽ được giảm giá {discountPercent}% trên tổng hóa đơn.</div>
+                </div>
+            ),
+            okText: 'Xác nhận',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    await voucherService.updateDiscountForVisitor(discountPercent)
+                    message.success('Cập nhật discount percent thành công!')
+                    setIsEditDiscountModalVisible(false)
+                    setCurrentDiscountPercent(discountPercent)
+                } catch (err) {
+                    message.error('Cập nhật thất bại!')
+                }
+            }
+        })
+    }
+
     // Handle table pagination change
     const handleTableChange = (newPagination: any, filters: any) => {
         setPagination({
@@ -99,7 +146,6 @@ const VoucherManagement = () => {
             current: newPagination.current,
             pageSize: newPagination.pageSize,
         })
-
         // Handle status filter
         if (filters.isActive && filters.isActive.length > 0) {
             setStatusFilter(filters.isActive[0])
@@ -346,6 +392,13 @@ const VoucherManagement = () => {
                     >
                         Thêm voucher
                     </Button>
+                    <Button
+                        type="default"
+                        style={{ marginLeft: 8 }}
+                        onClick={handleOpenEditDiscountModal}
+                    >
+                        Giảm giá dành riêng cho du khách đi tour
+                    </Button>
                 </div>
             </div>
 
@@ -532,6 +585,36 @@ const VoucherManagement = () => {
                             />
                         </Form.Item>
                     )}
+                </Form>
+            </Modal>
+            {/* Modal chỉnh sửa discount percent cho du khách */}
+            <Modal
+                title="Discount dành riêng cho du khách đi tour"
+                open={isEditDiscountModalVisible}
+                onOk={handleSaveDiscountPercent}
+                onCancel={() => setIsEditDiscountModalVisible(false)}
+                centered
+                okText="Lưu"
+                cancelText="Hủy"
+            >
+                <div style={{ marginBottom: 12, fontWeight: 500 }}>
+                    Phần trăm giảm giá hiện tại: <span style={{ color: '#1890ff' }}>{currentDiscountPercent !== null ? `${currentDiscountPercent}%` : '...'}</span>
+                </div>
+                <Form layout="vertical">
+                    <Form.Item
+                        label="Phần trăm (%)"
+                        required
+                    >
+                        <InputNumber
+                            min={1}
+                            max={100}
+                            value={discountPercent ?? undefined}
+                            onChange={setDiscountPercent}
+                            style={{ width: '100%' }}
+                            placeholder="Nhập phần trăm giảm giá khi mua hàng"
+                            addonAfter="%"
+                        />
+                    </Form.Item>
                 </Form>
             </Modal>
         </div>

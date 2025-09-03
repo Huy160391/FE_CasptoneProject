@@ -134,9 +134,10 @@ const SupportTickets = () => {
 
     const renderStatusTag = (status: TicketStatus) => {
         const config = STATUS_CONFIG[status]
+        const statusText = status === 'Open' ? 'Mở' : 'Đã đóng'
         return (
             <Tag color={config.color} icon={config.icon}>
-                {status}
+                {statusText}
             </Tag>
         )
     }

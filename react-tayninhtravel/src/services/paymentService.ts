@@ -1,5 +1,6 @@
 import axios from '../config/axios';
-import { ApiResponse } from '../types/api';
+
+import type { ApiResponse } from '@/types/index';
 
 // ===== PAYMENT TYPES =====
 

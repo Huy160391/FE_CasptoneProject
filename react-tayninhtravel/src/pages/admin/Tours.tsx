@@ -1,15 +1,29 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Input, Space, Tag, Modal, message, Switch } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Button, Input, Space, Tag, Modal, message, Switch, Tooltip } from 'antd';
+import { SearchOutlined, CheckOutlined, CloseOutlined, EyeOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import './Tours.scss';
 import { adminService } from '@/services/adminService';
 
 import TourDetailModal from '@/pages/admin/TourDetailModal';
 import type { PendingTour } from '@/types/tour';
-import { getTourDetailsStatusText, getTourDetailsStatusColor } from '@/types/tour';
+import { getTourDetailsStatusColor } from '@/types/tour';
 
-
+// Function to convert status to Vietnamese
+const getTourStatusText = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    'Pending': 'Chờ duyệt',
+    'Approved': 'Đã được duyệt',
+    'Rejected': 'Bị từ chối',
+    'Suspended': 'Tạm ngưng',
+    'AwaitingGuideAssignment': 'Chờ phân công HDV',
+    'Cancelled': 'Đã hủy',
+    'AwaitingAdminApproval': 'Chờ admin duyệt',
+    'WaitToPublic': 'Chờ mở bán vé',
+    'Public': 'Đã công khai',
+  };
+  return statusMap[status] || status;
+};
 
 const Tours = () => {
   const [searchText, setSearchText] = useState('');
@@ -18,25 +32,28 @@ const Tours = () => {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedTour, setSelectedTour] = useState<PendingTour | null>(null);
   const [includeInactive, setIncludeInactive] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchTours = async () => {
+    console.log('Fetching tours with params:', { searchText, includeInactive, pageIndex, pageSize });
     setLoading(true);
     try {
       const res = await adminService.getAllTours({
         searchTerm: searchText,
-        includeInactive: includeInactive
+        includeInactive: includeInactive,
+        pageIndex: pageIndex,
+        pageSize: pageSize,
       });
-      console.log('API Response:', res); // Debug log
-      const data = Array.isArray(res.data)
-        ? res.data.map((item: PendingTour) => {
-          console.log('Tour item status:', item.status); // Debug log for each tour status
-          return { ...item };
-        })
-        : [];
+      const data = Array.isArray(res.data) ? res.data : [];
+      console.log('Tours fetched:', data.length, 'items');
       setTours(data);
+      setTotalCount(res.totalCount || data.length);
     } catch (err) {
       console.error('Error fetching tours:', err);
       setTours([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -44,7 +61,7 @@ const Tours = () => {
 
   useEffect(() => {
     fetchTours();
-  }, [searchText, includeInactive]);
+  }, [searchText, includeInactive, pageIndex, pageSize]);
 
   const handleApprove = async (tour: PendingTour) => {
     let approveMessage = '';
@@ -115,9 +132,18 @@ const Tours = () => {
     });
   };
 
-  const handleRowClick = (record: PendingTour) => {
-    setSelectedTour(record);
-    setDetailModalOpen(true);
+  // Thay đổi handleRowClick để lấy chi tiết tour từ API
+  const handleRowClick = async (record: PendingTour) => {
+    setLoading(true);
+    try {
+      const detail = await adminService.getTourDetail(record.id);
+      setSelectedTour(detail.data || detail); // Đảm bảo truyền đúng dữ liệu vào modal
+      setDetailModalOpen(true);
+    } catch (err) {
+      message.error('Không thể lấy chi tiết tour');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns: ColumnsType<PendingTour> = [
@@ -141,53 +167,49 @@ const Tours = () => {
       key: 'title',
       render: (text: string, record: PendingTour) => (
         <div className="tour-cell">
-          <img src={record.imageUrl || (record.imageUrls && record.imageUrls[0])} alt={text} className="tour-image" />
+          <img src={(record.imageUrls && record.imageUrls[0]) || ''} alt={text} className="tour-image" />
           <span>{text}</span>
         </div>
       ),
       sorter: (a: PendingTour, b: PendingTour) => a.title.localeCompare(b.title),
     },
     {
+      title: 'Tên công ty',
+      key: 'company',
+      render: (_: any, record: PendingTour) => record.tourTemplate?.createdBy?.name || '-',
+    },
+    {
+      title: 'Thời gian',
+      key: 'scheduleDays',
+      render: (_: any, record: PendingTour) => record.tourTemplate?.scheduleDaysVietnamese || record.tourTemplate?.scheduleDays || '-',
+    },
+    {
+      title: 'Điểm khởi hành',
+      key: 'startLocation',
+      render: (_: any, record: PendingTour) => record.tourTemplate?.startLocation || '-',
+    },
+    {
+      title: 'Điểm kết thúc',
+      key: 'endLocation',
+      render: (_: any, record: PendingTour) => record.tourTemplate?.endLocation || '-',
+    },
+    {
       title: 'Số khách tối đa',
-      dataIndex: ['tourOperation', 'maxGuests'],
       key: 'maxGuests',
       render: (_: any, record: PendingTour) => record.tourOperation?.maxGuests ?? '-',
     },
     {
       title: 'Giá',
-      dataIndex: ['tourOperation', 'price'],
       key: 'price',
       render: (_: any, record: PendingTour) => record.tourOperation?.price ? `${record.tourOperation.price.toLocaleString()}₫` : '-',
     },
     {
-      title: 'Ngày tạo',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (text: string) => new Date(text).toLocaleString('vi-VN'),
-      sorter: (a: PendingTour, b: PendingTour) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    },
-    {
-      title: 'Công ty tổ chức',
-      dataIndex: 'tourCompanyName',
-      key: 'tourCompanyName',
-    },
-    {
-      title: 'Thời gian',
-      dataIndex: 'scheduleDays',
-      key: 'scheduleDays',
-    },
-    {
-      title: 'Điểm khởi hành',
-      dataIndex: 'startLocation',
-      key: 'startLocation',
-    },
-    {
       title: 'Trạng thái',
-      dataIndex: 'status',
       key: 'status',
-      render: (status: PendingTour['status']) => {
-        const color = getTourDetailsStatusColor(status);
-        const text = getTourDetailsStatusText(status);
+      render: (_: any, record: PendingTour) => {
+        // Hiển thị status text trực tiếp từ response, hoặc dùng hàm chuyển đổi nếu cần
+        const color = getTourDetailsStatusColor(record.status);
+        const text = getTourStatusText(record.status);
         return <Tag color={color}>{text}</Tag>;
       },
       filters: [
@@ -201,16 +223,35 @@ const Tours = () => {
         { text: 'Chờ mở bán vé', value: 'WaitToPublic' },
         { text: 'Đã công khai', value: 'Public' },
       ],
-      onFilter: (value: any, record: PendingTour) =>
-        record.status === value,
+      onFilter: (value: any, record: PendingTour) => record.status === value,
+    },
+    {
+      title: 'Ngày tạo',
+      key: 'createdAt',
+      render: (_: any, record: PendingTour) => {
+        const d = new Date(record.createdAt);
+        return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+      },
+      sorter: (a: PendingTour, b: PendingTour) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     },
     {
       title: 'Thao tác',
       key: 'action',
       render: (_: unknown, record: PendingTour) => (
         <Space size="middle">
-          <Button type="primary" onClick={e => { e.stopPropagation(); handleApprove(record); }}>Duyệt</Button>
-          <Button danger onClick={e => { e.stopPropagation(); handleReject(record); }}>Từ chối</Button>
+          <Tooltip title="Xem chi tiết">
+            <Button type="primary" icon={<EyeOutlined />} size="small" onClick={e => { e.stopPropagation(); handleRowClick(record); }} />
+          </Tooltip>
+          {record.status === 'Pending' && (
+            <>
+              <Tooltip title="Duyệt">
+                <Button type="primary" icon={<CheckOutlined />} size="small" onClick={e => { e.stopPropagation(); handleApprove(record); }} />
+              </Tooltip>
+              <Tooltip title="Từ chối">
+                <Button danger icon={<CloseOutlined />} size="small" onClick={e => { e.stopPropagation(); handleReject(record); }} />
+              </Tooltip>
+            </>
+          )}
         </Space>
       ),
     },
@@ -234,7 +275,10 @@ const Tours = () => {
             <span style={{ marginRight: 8 }}>Bao gồm tour không hoạt động:</span>
             <Switch
               checked={includeInactive}
-              onChange={setIncludeInactive}
+              onChange={checked => {
+                setIncludeInactive(checked);
+                setPageIndex(0); // Reset về trang đầu khi thay đổi filter
+              }}
             />
           </div>
         </div>
@@ -244,7 +288,17 @@ const Tours = () => {
         dataSource={tours}
         columns={columns}
         rowKey="id"
-        pagination={{ pageSize: 10 }}
+        pagination={{
+          pageSize,
+          current: pageIndex + 1,
+          total: totalCount,
+          showSizeChanger: true,
+          onChange: (page, size) => {
+            setPageIndex(page - 1);
+            setPageSize(size);
+            setTimeout(() => fetchTours(), 0);
+          },
+        }}
         className="tours-table"
         loading={loading}
         onRow={record => ({
@@ -252,10 +306,14 @@ const Tours = () => {
         })}
       />
 
+
+
       <TourDetailModal
         open={detailModalOpen}
         onClose={() => setDetailModalOpen(false)}
         tour={selectedTour}
+        onApprove={handleApprove}
+        onReject={handleReject}
       />
     </div>
   );

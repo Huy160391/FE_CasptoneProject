@@ -1,32 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import {
-    Typography,
-    Avatar,
-    Tag,
-    Rate,
-    Spin,
-    Empty,
-    Card,
-    Button,
-    Skeleton
-} from 'antd'
-import {
-    ShopOutlined,
-    EnvironmentOutlined,
-    PhoneOutlined,
-    MailOutlined,
-    ClockCircleOutlined,
-    UserOutlined,
-    FileTextOutlined,
-    CalendarOutlined,
-    GlobalOutlined,
-    ExclamationCircleOutlined
-} from '@ant-design/icons'
+import { useParams, Link } from 'react-router-dom';
+import { Typography, Avatar, Tag, Rate, Spin, Empty, Card, Button, Skeleton, Breadcrumb } from 'antd';
+import { ShareAltOutlined, ShopOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined, ClockCircleOutlined, UserOutlined, FileTextOutlined, CalendarOutlined, GlobalOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import SharePopup from '../components/common/SharePopup';
 import { userService } from '@/services/userService'
 import * as specialtyShopService from '@/services/specialtyShopService'
 import { Product } from '@/types'
 import ProductCard from '@/components/shop/ProductCard'
+import { useTranslation } from 'react-i18next'
 import './ShopDetail.scss'
 
 const { Title, Text, Paragraph } = Typography
@@ -58,10 +39,13 @@ interface ShopData {
 }
 
 const ShopDetail: React.FC = () => {
+    const { t } = useTranslation()
+    const [sharePopupVisible, setSharePopupVisible] = useState(false);
     const { shopId } = useParams<{ shopId: string }>()
 
     const [shopData, setShopData] = useState<ShopData | null>(null)
     const [products, setProducts] = useState<Product[]>([])
+    const [productCount, setProductCount] = useState<number>(0)
     const [loading, setLoading] = useState(true)
     const [productsLoading, setProductsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -81,7 +65,7 @@ const ShopDetail: React.FC = () => {
                 setShopData(response)
             } catch (err) {
                 console.error('Error fetching shop data:', err)
-                setError('Không thể tải thông tin cửa hàng')
+                setError(t('specialtyShop.detail.error'))
             } finally {
                 setLoading(false)
             }
@@ -98,19 +82,20 @@ const ShopDetail: React.FC = () => {
                 setProductsLoading(true)
                 console.log('Fetching products for shopId:', shopId)
 
-                // Get all products and filter by specialtyShopId
-                const response = await specialtyShopService.getProducts({ pageSize: 1000 })
+                // Sử dụng API với specialtyShopId để filter trực tiếp
+                const response = await specialtyShopService.getProducts({
+                    pageSize: 1000,
+                    specialtyShopId: shopId,
+                    status: true // Chỉ lấy sản phẩm active
+                })
                 console.log('Products response:', response)
 
-                // Filter products by shopId
-                const shopProducts = response.data?.filter(product =>
-                    product.specialtyShopId === shopId
-                ) || []
-
-                setProducts(shopProducts)
+                setProducts(response.data || [])
+                setProductCount(response.totalRecord || 0)
             } catch (err) {
                 console.error('Error fetching products:', err)
                 setProducts([])
+                setProductCount(0)
             } finally {
                 setProductsLoading(false)
             }
@@ -130,7 +115,7 @@ const ShopDetail: React.FC = () => {
             <div className="shop-detail-page">
                 <div className="loading-container">
                     <Spin size="large" />
-                    <div className="loading-text">Đang tải thông tin cửa hàng...</div>
+                    <div className="loading-text">{t('specialtyShop.detail.loading')}</div>
                 </div>
             </div>
         )
@@ -141,10 +126,10 @@ const ShopDetail: React.FC = () => {
             <div className="shop-detail-page">
                 <div className="error-container">
                     <ExclamationCircleOutlined className="error-icon" />
-                    <Title level={3} className="error-title">Không thể tải thông tin cửa hàng</Title>
-                    <Text className="error-message">{error || 'Cửa hàng không tồn tại hoặc đã bị xóa'}</Text>
+                    <Title level={3} className="error-title">{t('specialtyShop.detail.notFoundTitle')}</Title>
+                    <Text className="error-message">{error || t('specialtyShop.detail.notFoundMessage')}</Text>
                     <Button type="primary" onClick={() => window.history.back()}>
-                        Quay lại
+                        {t('specialtyShop.detail.backButton')}
                     </Button>
                 </div>
             </div>
@@ -153,6 +138,16 @@ const ShopDetail: React.FC = () => {
 
     return (
         <div className="shop-detail-page">
+            {/* Breadcrumb */}
+            <Breadcrumb
+                className="breadcrumb"
+                items={[
+                    { title: <Link to="/">{t('specialtyShop.detail.breadcrumbHome')}</Link> },
+                    { title: <Link to="/shop">{t('specialtyShop.detail.breadcrumbShop')}</Link> },
+                    { title: shopData.shopName }
+                ]}
+            />
+
             {/* Shop Header */}
             <div className="shop-header">
                 <div className="shop-header-content">
@@ -162,31 +157,29 @@ const ShopDetail: React.FC = () => {
                         className="shop-avatar"
                     />
                     <div className="shop-main-info">
-                        <Title level={1} className="shop-name">
-                            {shopData.shopName}
-                        </Title>
-                        <Tag className="shop-type-tag" style={{ marginBottom: '12px' }}>
-                            {shopData.shopType}
-                        </Tag>
+                        <Title level={1} className="shop-name">{shopData.shopName}</Title>
+                        <Tag className="shop-type-tag">{shopData.shopType}</Tag>
                         <div className="shop-rating">
-                            <Rate disabled defaultValue={shopData.rating} />
-                            <Text className="rating-text">
-                                {shopData.rating} điểm
-                            </Text>
+                            <Rate disabled allowHalf value={shopData.rating} />
+                            <Text className="rating-text">{t('specialtyShop.detail.ratingText', { rating: shopData.rating })}</Text>
                         </div>
-                        <div className="shop-stats">
-                            <div className="stat-item">
-                                <ClockCircleOutlined />
-                                <span>Mở cửa: {shopData.openingHours} - {shopData.closingHours}</span>
+                        <div className="shop-stats-with-share" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+                            <div className="shop-stats" style={{ display: 'flex', gap: 32 }}>
+                                <div className="stat-item open-hours">
+                                    <ClockCircleOutlined />
+                                    <span>{t('specialtyShop.detail.openHours', { open: shopData.openingHours, close: shopData.closingHours })}</span>
+                                </div>
+                                <div className="stat-item product-count">
+                                    <ShopOutlined />
+                                    <span>{t('specialtyShop.detail.productCount', { count: productCount })}</span>
+                                </div>
+                                <div className="stat-item join-date">
+                                    <CalendarOutlined />
+                                    <span>{t('specialtyShop.detail.joinedDate', { date: formatDate(shopData.createdAt) })}</span>
+                                </div>
                             </div>
-                            <div className="stat-item">
-                                <ShopOutlined />
-                                <span>{products.length} sản phẩm</span>
-                            </div>
-                            <div className="stat-item">
-                                <CalendarOutlined />
-                                <span>Tham gia từ {formatDate(shopData.createdAt)}</span>
-                            </div>
+                            <Button type="text" icon={<ShareAltOutlined />} className="share-btn" onClick={() => setSharePopupVisible(true)} />
+                            <SharePopup visible={sharePopupVisible} onClose={() => setSharePopupVisible(false)} url={window.location.href} />
                         </div>
                     </div>
                 </div>
@@ -194,60 +187,51 @@ const ShopDetail: React.FC = () => {
 
             <div className="shop-content">
                 {/* Shop Information */}
-                <div className="content-section">
-                    <Title level={3} className="section-title">Thông tin cửa hàng</Title>
-
-                    <Paragraph className="shop-description">
-                        {shopData.description}
-                    </Paragraph>
-
+                <div className="content-section shop-info-section">
+                    <Title level={3} className="section-title">{t('specialtyShop.detail.infoTitle')}</Title>
+                    <Paragraph className="shop-description">{shopData.description}</Paragraph>
                     <div className="info-grid">
                         <div className="info-item">
-                            <EnvironmentOutlined className="info-icon" />
+                            <EnvironmentOutlined className="info-icon address-icon" />
                             <div className="info-content">
-                                <span className="info-label">Địa chỉ</span>
+                                <span className="info-label">{t('specialtyShop.detail.address')}</span>
                                 <span className="info-value">{shopData.location}</span>
                             </div>
                         </div>
-
                         <div className="info-item">
-                            <PhoneOutlined className="info-icon" />
+                            <PhoneOutlined className="info-icon phone-icon" />
                             <div className="info-content">
-                                <span className="info-label">Số điện thoại</span>
+                                <span className="info-label">{t('specialtyShop.detail.phone')}</span>
                                 <span className="info-value">{shopData.phoneNumber}</span>
                             </div>
                         </div>
-
                         <div className="info-item">
-                            <MailOutlined className="info-icon" />
+                            <MailOutlined className="info-icon email-icon" />
                             <div className="info-content">
-                                <span className="info-label">Email</span>
+                                <span className="info-label">{t('specialtyShop.detail.email')}</span>
                                 <span className="info-value">{shopData.email}</span>
                             </div>
                         </div>
-
                         <div className="info-item">
-                            <UserOutlined className="info-icon" />
+                            <UserOutlined className="info-icon rep-icon" />
                             <div className="info-content">
-                                <span className="info-label">Người đại diện</span>
+                                <span className="info-label">{t('specialtyShop.detail.representative')}</span>
                                 <span className="info-value">{shopData.representativeName}</span>
                             </div>
                         </div>
-
                         <div className="info-item">
-                            <FileTextOutlined className="info-icon" />
+                            <FileTextOutlined className="info-icon license-icon" />
                             <div className="info-content">
-                                <span className="info-label">Giấy phép kinh doanh</span>
+                                <span className="info-label">{t('specialtyShop.detail.businessLicense')}</span>
                                 <span className="info-value">{shopData.businessLicense}</span>
                             </div>
                         </div>
-
                         {shopData.website && (
                             <div className="info-item">
-                                <GlobalOutlined className="info-icon" />
+                                <GlobalOutlined className="info-icon web-icon" />
                                 <div className="info-content">
-                                    <span className="info-label">Website</span>
-                                    <a href={shopData.website} target="_blank" rel="noopener noreferrer" className="info-value">
+                                    <span className="info-label">{t('specialtyShop.detail.website')}</span>
+                                    <a href={shopData.website} target="_blank" rel="noopener noreferrer" className="info-value website-link">
                                         {shopData.website}
                                     </a>
                                 </div>
@@ -259,14 +243,13 @@ const ShopDetail: React.FC = () => {
                 {/* Products Section */}
                 <div className="content-section products-section">
                     <Title level={3} className="section-title">
-                        Sản phẩm của cửa hàng ({products.length})
+                        {t('specialtyShop.detail.productsTitle', { count: productCount })}
                     </Title>
-
                     {productsLoading ? (
                         <div className="products-loading">
                             {Array.from({ length: 8 }).map((_, index) => (
-                                <Card key={index}>
-                                    <Skeleton.Image style={{ width: '100%', height: 200 }} />
+                                <Card key={index} className="product-skeleton">
+                                    <Skeleton.Image className="product-skeleton-img" />
                                     <Skeleton active paragraph={{ rows: 2 }} />
                                 </Card>
                             ))}
@@ -276,7 +259,10 @@ const ShopDetail: React.FC = () => {
                             {products.map((product) => (
                                 <ProductCard
                                     key={product.id}
-                                    product={product}
+                                    product={{
+                                        ...product,
+                                        description: product.description ?? undefined
+                                    }}
                                     showAddToCart={true}
                                 />
                             ))}
@@ -284,7 +270,7 @@ const ShopDetail: React.FC = () => {
                     ) : (
                         <div className="empty-products">
                             <Empty
-                                description="Cửa hàng chưa có sản phẩm nào"
+                                description={t('specialtyShop.detail.noProducts')}
                                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                             />
                         </div>

@@ -12,6 +12,7 @@ import {
     Divider,
     Tag
 } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
     CheckCircleOutlined,
     HomeOutlined,
@@ -30,15 +31,19 @@ import {
 } from '../../services/paymentService';
 import { EnhancedPaymentService } from '../../services/enhancedPaymentService';
 import { retryPaymentCallback, getPaymentErrorMessage } from '../../utils/retryUtils';
+import { useCartStore } from '@/store/useCartStore'
+import { getCurrentCart } from '@/services/cartService';
 
 const { Text } = Typography;
 
 const ProductPaymentSuccess: React.FC = () => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [orderInfo, setOrderInfo] = useState<ProductOrderInfo | null>(null);
     const [useEnhancedPayment, setUseEnhancedPayment] = useState(true); // Try Enhanced first
+    const { clearCart } = useCartStore()
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -149,6 +154,19 @@ const ProductPaymentSuccess: React.FC = () => {
         processPaymentSuccess();
     }, [location]);
 
+    useEffect(() => {
+        // Khi màn hình này hiển thị, clear giỏ hàng và get lại giỏ hàng qua API
+        const token = localStorage.getItem('token');
+        clearCart(); // Clear local cart state
+        if (token) {
+            getCurrentCart(token).then((cart) => {
+                // Có thể cập nhật lại store/cart UI tại đây nếu cần
+                // Ví dụ: setCartItems(cart.items)
+                console.log('Cart refreshed:', cart);
+            });
+        }
+    }, []);
+
     const handleGoHome = () => {
         navigate('/');
     };
@@ -176,10 +194,10 @@ const ProductPaymentSuccess: React.FC = () => {
                 gap: '16px'
             }}>
                 <Spin size="large" />
-                <Text>Đang xử lý thanh toán...</Text>
+                <Text>{t('paymentSuccess.processing')}</Text>
                 {processing && (
                     <Text type="secondary">
-                        Đang xác nhận thanh toán với hệ thống...
+                        {t('paymentSuccess.confirmingWithSystem')}
                     </Text>
                 )}
             </div>
@@ -191,14 +209,14 @@ const ProductPaymentSuccess: React.FC = () => {
             <div style={{ padding: '40px 20px', maxWidth: 800, margin: '0 auto' }}>
                 <Result
                     status="error"
-                    title="Có lỗi xảy ra"
+                    title={t('paymentSuccess.errorTitle')}
                     subTitle={error}
                     extra={[
                         <Button type="primary" key="home" onClick={handleGoHome}>
-                            <HomeOutlined /> Về trang chủ
+                            <HomeOutlined /> {t('paymentSuccess.goHome')}
                         </Button>,
                         <Button key="shop" onClick={handleContinueShopping}>
-                            <ShoppingCartOutlined /> Tiếp tục mua sắm
+                            <ShoppingCartOutlined /> {t('paymentSuccess.continueShopping')}
                         </Button>
                     ]}
                 />
@@ -210,14 +228,14 @@ const ProductPaymentSuccess: React.FC = () => {
         <div style={{ padding: '40px 20px', maxWidth: 800, margin: '0 auto' }}>
             <Result
                 status="success"
-                title="Thanh toán thành công!"
-                subTitle="Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đã được xác nhận."
+                title={t('paymentSuccess.successTitle')}
+                subTitle={t('paymentSuccess.successSubTitle')}
                 icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
             />
 
             {orderInfo && (
                 <Card
-                    title="Thông tin đơn hàng"
+                    title={t('paymentSuccess.orderInfoTitle')}
                     style={{ marginTop: 24 }}
                     extra={
                         <Button
@@ -225,38 +243,38 @@ const ProductPaymentSuccess: React.FC = () => {
                             icon={<PrinterOutlined />}
                             onClick={handlePrintOrder}
                         >
-                            In đơn hàng
+                            {t('paymentSuccess.printOrder')}
                         </Button>
                     }
                 >
                     <Descriptions column={1} bordered>
-                        <Descriptions.Item label="Mã đơn hàng">
+                        <Descriptions.Item label={t('paymentSuccess.payosOrderCode')}>
                             <Text strong>{orderInfo.payOsOrderCode}</Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Tổng tiền gốc">
+                        <Descriptions.Item label={t('paymentSuccess.totalAmount')}>
                             <Text>{formatCurrency(orderInfo.totalAmount)}</Text>
                         </Descriptions.Item>
 
                         {orderInfo.discountAmount > 0 && (
-                            <Descriptions.Item label="Giảm giá">
+                            <Descriptions.Item label={t('paymentSuccess.discount')}>
                                 <Text type="success">
                                     -{formatCurrency(orderInfo.discountAmount)}
                                 </Text>
                             </Descriptions.Item>
                         )}
 
-                        <Descriptions.Item label="Tổng thanh toán">
+                        <Descriptions.Item label={t('paymentSuccess.totalAfterDiscount')}>
                             <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
                                 {formatCurrency(orderInfo.totalAfterDiscount)}
                             </Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Trạng thái">
-                            <Tag color="success">Đã thanh toán</Tag>
+                        <Descriptions.Item label={t('paymentSuccess.status')}>
+                            <Tag color="success">{t('paymentSuccess.paid')}</Tag>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Thời gian đặt hàng">
+                        <Descriptions.Item label={t('paymentSuccess.createdAt')}>
                             <Text>{new Date(orderInfo.createdAt).toLocaleString('vi-VN')}</Text>
                         </Descriptions.Item>
                     </Descriptions>
@@ -264,13 +282,13 @@ const ProductPaymentSuccess: React.FC = () => {
                     <Divider />
 
                     <Alert
-                        message="Lưu ý quan trọng"
+                        message={t('paymentSuccess.importantInfoTitle')}
                         description={
                             <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                <li>Vui lòng lưu lại mã đơn hàng để tra cứu sau này</li>
-                                <li>Chúng tôi sẽ gửi email xác nhận trong vòng 24 giờ</li>
-                                <li>Đơn hàng sẽ được xử lý và giao trong 2-3 ngày làm việc</li>
-                                <li>Liên hệ hotline nếu cần hỗ trợ: 1900-xxxx</li>
+                                <li>{t('paymentSuccess.importantInfoSaveOrderCode')}</li>
+                                <li>{t('paymentSuccess.importantInfoEmailConfirm')}</li>
+                                <li>{t('paymentSuccess.importantInfoDeliveryTime')}</li>
+                                <li>{t('paymentSuccess.importantInfoHotline')}</li>
                             </ul>
                         }
                         type="info"
@@ -283,22 +301,22 @@ const ProductPaymentSuccess: React.FC = () => {
             <div style={{ textAlign: 'center', marginTop: 32 }}>
                 <Space size="large">
                     <Button type="primary" size="large" onClick={handleViewOrders}>
-                        <HistoryOutlined /> Xem đơn hàng của tôi
+                        <HistoryOutlined /> {t('paymentSuccess.viewOrders')}
                     </Button>
 
                     <Button size="large" onClick={handleContinueShopping}>
-                        <ShoppingCartOutlined /> Tiếp tục mua sắm
+                        <ShoppingCartOutlined /> {t('paymentSuccess.continueShopping')}
                     </Button>
 
                     <Button size="large" onClick={handleGoHome}>
-                        <HomeOutlined /> Về trang chủ
+                        <HomeOutlined /> {t('paymentSuccess.goHome')}
                     </Button>
                 </Space>
             </div>
 
             <div style={{ textAlign: 'center', marginTop: 24 }}>
                 <Text type="secondary">
-                    Cần hỗ trợ? <Link to="/contact">Liên hệ với chúng tôi</Link>
+                    {t('paymentSuccess.needHelp')} <Link to="/contact">{t('paymentSuccess.contactUs')}</Link>
                 </Text>
             </div>
         </div>

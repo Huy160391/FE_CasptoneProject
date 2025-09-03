@@ -5,11 +5,9 @@ import {
     Input,
     Space,
     Tag,
-    Card,
     message,
     Avatar,
     Tooltip,
-    Switch,
     Modal,
     Rate,
     Descriptions
@@ -17,19 +15,15 @@ import {
 import {
     SearchOutlined,
     ShopOutlined,
-    EditOutlined,
     EyeOutlined,
-    UserOutlined,
     EnvironmentOutlined,
-    PhoneOutlined,
-    MailOutlined,
     GlobalOutlined,
-    ClockCircleOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { adminService } from '@/services/adminService';
 import { useThemeStore } from '@/store/useThemeStore';
 import './ShopManagement.scss';
+// import ShopModal from './ShopModal';
 
 interface Shop {
     id: string;
@@ -65,9 +59,10 @@ const ShopManagement = () => {
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
-    const [includeInactive, setIncludeInactive] = useState(false);
+    // Removed unused includeInactive state
     const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
+    // Remove add/edit modal state
 
     // Fetch shops data
     const fetchShops = async () => {
@@ -76,7 +71,6 @@ const ShopManagement = () => {
             const response = await adminService.getSpecialtyShops({
                 pageIndex,
                 pageSize,
-                includeInactive,
                 searchTerm: searchText
             });
 
@@ -96,7 +90,7 @@ const ShopManagement = () => {
 
     useEffect(() => {
         fetchShops();
-    }, [pageIndex, pageSize, includeInactive]);
+    }, [pageIndex, pageSize]);
 
     // Search with debounce
     useEffect(() => {
@@ -135,113 +129,75 @@ const ShopManagement = () => {
         setDetailModalVisible(true);
     };
 
-    const handleToggleStatus = async (_shopId: string, _currentStatus: boolean) => {
-        try {
-            // TODO: Implement toggle shop status API
-            message.info('Tính năng đang phát triển');
-        } catch (error) {
-            message.error('Không thể cập nhật trạng thái cửa hàng');
-        }
-    };
+    // Remove add/edit handlers
+
+    // Remove delete/toggle status handlers
 
     const columns: ColumnsType<Shop> = [
         {
-            title: 'Cửa hàng',
-            key: 'shop',
-            width: 300,
-            render: (_, record) => (
-                <div className="shop-info">
-                    <div className="shop-header">
-                        <Avatar
-                            size={40}
-                            src={record.logoUrl}
-                            icon={<ShopOutlined />}
-                            className="shop-avatar"
-                        />
-                        <div className="shop-details">
-                            <div className="shop-name">{record.shopName}</div>
-                            <div className="shop-type">{getShopTypeTag(record.shopType)}</div>
-                        </div>
-                    </div>
-                    <div className="shop-description">
-                        {record.description?.length > 100
-                            ? `${record.description.substring(0, 100)}...`
-                            : record.description}
-                    </div>
-                </div>
+            title: 'Tên cửa hàng',
+            dataIndex: 'shopName',
+            key: 'shopName',
+            render: (text: string, record: Shop) => (
+                <Space>
+                    <Avatar size={32} src={record.logoUrl} />
+                    <span>{text}</span>
+                </Space>
             ),
+            sorter: (a, b) => a.shopName.localeCompare(b.shopName),
+        },
+        {
+            title: 'Loại cửa hàng',
+            dataIndex: 'shopType',
+            key: 'shopType',
+            render: (type: string) => getShopTypeTag(type),
+            filters: [
+                { text: 'Ẩm thực', value: 'Food' },
+                { text: 'Thủ công', value: 'Handicrafts' },
+                { text: 'Tôn giáo', value: 'Religious' },
+                { text: 'Quà lưu niệm', value: 'Souvenir' },
+                { text: 'Nghệ thuật', value: 'Art' },
+                { text: 'Khác', value: 'Other' },
+            ],
+            onFilter: (value, record) => record.shopType === value,
         },
         {
             title: 'Người đại diện',
-            key: 'representative',
-            width: 200,
-            render: (_, record) => (
-                <div className="representative-info">
-                    <div className="rep-name">
-                        <UserOutlined /> {record.representativeName}
-                    </div>
-                    <div className="rep-contact">
-                        <div><PhoneOutlined /> {record.phoneNumber}</div>
-                        <div><MailOutlined /> {record.email}</div>
-                    </div>
-                </div>
-            ),
+            dataIndex: 'representativeName',
+            key: 'representativeName',
+            render: (text: string) => <span>{text}</span>,
+            sorter: (a, b) => a.representativeName.localeCompare(b.representativeName),
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+            render: (text: string) => <span>{text}</span>,
+        },
+        {
+            title: 'Số điện thoại',
+            dataIndex: 'phoneNumber',
+            key: 'phoneNumber',
+            render: (text: string) => <span>{text}</span>,
         },
         {
             title: 'Địa chỉ',
             dataIndex: 'location',
             key: 'location',
-            width: 200,
             render: (location: string) => (
                 <Tooltip title={location}>
-                    <div className="location-text">
-                        <EnvironmentOutlined />
-                        {location?.length > 50 ? `${location.substring(0, 50)}...` : location}
-                    </div>
+                    <span><EnvironmentOutlined /> {location}</span>
                 </Tooltip>
             ),
         },
         {
-            title: 'Giờ hoạt động',
-            key: 'hours',
-            width: 120,
-            align: 'center',
-            render: (_, record) => (
-                <div className="operating-hours">
-                    <ClockCircleOutlined />
-                    <div>{formatTime(record.openingHours)}</div>
-                    <div>-</div>
-                    <div>{formatTime(record.closingHours)}</div>
-                </div>
-            ),
-        },
-        {
-            title: 'Đánh giá',
-            dataIndex: 'rating',
-            key: 'rating',
-            width: 120,
-            align: 'center',
-            render: (rating: number) => (
-                <div className="rating-display">
-                    <Rate disabled defaultValue={rating} allowHalf />
-                    <div className="rating-value">{rating?.toFixed(1) || 'N/A'}</div>
-                </div>
-            ),
-            sorter: (a, b) => (a.rating || 0) - (b.rating || 0),
-        },
-        {
             title: 'Trạng thái',
             dataIndex: 'isShopActive',
-            key: 'status',
-            width: 100,
-            align: 'center',
-            render: (isActive: boolean, record) => (
-                <Switch
-                    checked={isActive}
-                    onChange={(_checked) => handleToggleStatus(record.id, isActive)}
-                    checkedChildren="Hoạt động"
-                    unCheckedChildren="Tạm dừng"
-                />
+            key: 'isShopActive',
+            render: (isActive: boolean) => (
+                <Tag color={isActive ? 'success' : 'error'}>
+                    {isActive ? 'Hoạt động' : 'Tạm dừng'}
+                </Tag>
             ),
             filters: [
                 { text: 'Hoạt động', value: true },
@@ -253,112 +209,72 @@ const ShopManagement = () => {
             title: 'Ngày tạo',
             dataIndex: 'createdAt',
             key: 'createdAt',
-            width: 120,
             render: (date: string) => formatDate(date),
             sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         },
         {
             title: 'Thao tác',
-            key: 'actions',
-            width: 120,
+            key: 'action',
+            width: 100,
             fixed: 'right',
-            render: (_, record) => (
-                <Space size="small">
-                    <Tooltip title="Xem chi tiết">
-                        <Button
-                            type="primary"
-                            icon={<EyeOutlined />}
-                            size="small"
-                            onClick={() => handleViewDetails(record)}
-                        />
-                    </Tooltip>
-                    <Tooltip title="Chỉnh sửa">
-                        <Button
-                            icon={<EditOutlined />}
-                            size="small"
-                            onClick={() => message.info('Tính năng đang phát triển')}
-                        />
-                    </Tooltip>
-                </Space>
+            render: (_, record: Shop) => (
+                <Button
+                    icon={<EyeOutlined />}
+                    size="small"
+                    onClick={e => {
+                        e.stopPropagation();
+                        handleViewDetails(record);
+                    }}
+                />
             ),
         },
     ];
 
     return (
-        <div className={`shop-management ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-            <Card>
-                <div className="page-header">
-                    <div className="header-title">
-                        <ShopOutlined className="header-icon" />
-                        <h1>Quản lý cửa hàng</h1>
-                    </div>
-                    <div className="header-stats">
-                        <Tag color="blue">Tổng: {totalCount}</Tag>
-                        <Tag color="green">Hoạt động: {shops.filter(s => s.isShopActive).length}</Tag>
-                        <Tag color="red">Tạm dừng: {shops.filter(s => !s.isShopActive).length}</Tag>
-                    </div>
+        <div className={`shop-management-page ${isDarkMode ? 'dark-theme' : ''}`}>
+            <div className="header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Quản lý cửa hàng</h1>
+                <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <Input
+                        placeholder="Tìm kiếm cửa hàng..."
+                        prefix={<SearchOutlined />}
+                        onChange={e => setSearchText(e.target.value)}
+                        style={{ width: 250 }}
+                        allowClear
+                        value={searchText}
+                    />
                 </div>
-
-                <div className="filters-section">
-                    <Space size="middle" wrap>
-                        <Input
-                            placeholder="Tìm kiếm cửa hàng..."
-                            prefix={<SearchOutlined />}
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            style={{ width: 300 }}
-                            allowClear
-                        />
-                        <div className="filter-item">
-                            <label>Hiển thị cửa hàng đã tạm dừng:</label>
-                            <Switch
-                                checked={includeInactive}
-                                onChange={setIncludeInactive}
-                            />
-                        </div>
-                    </Space>
-                </div>
-
-                <Table
-                    columns={columns}
-                    dataSource={shops}
-                    rowKey="id"
-                    loading={loading}
-                    scroll={{ x: 1200 }}
-                    pagination={{
-                        current: pageIndex + 1,
-                        pageSize: pageSize,
-                        total: totalCount,
-                        showSizeChanger: true,
-                        showQuickJumper: true,
-                        pageSizeOptions: ['10', '20', '50', '100'],
-                        showTotal: (total, range) =>
-                            `${range[0]}-${range[1]} của ${total} cửa hàng`,
-                        onChange: (page, size) => {
-                            setPageIndex(page - 1);
-                            if (size !== pageSize) {
-                                setPageSize(size);
-                                setPageIndex(0);
-                            }
+            </div>
+            <Table
+                dataSource={shops}
+                columns={columns}
+                rowKey="id"
+                loading={loading}
+                pagination={{
+                    current: pageIndex + 1,
+                    pageSize: pageSize,
+                    total: totalCount,
+                    showSizeChanger: true,
+                    showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} cửa hàng`,
+                    onChange: (page, size) => {
+                        setPageIndex(page - 1);
+                        if (size !== pageSize) {
+                            setPageSize(size);
+                            setPageIndex(0);
                         }
-                    }}
-                />
-            </Card>
-
-            {/* Detail Modal */}
+                    }
+                }}
+                className="shops-table"
+                onRow={record => ({
+                    onClick: () => handleViewDetails(record)
+                })}
+            />
+            {/* No ShopModal, only view modal */}
             <Modal
-                title={
-                    <div className="modal-title">
-                        <ShopOutlined /> Chi tiết cửa hàng
-                    </div>
-                }
+                title={<div className="modal-title"><ShopOutlined /> Chi tiết cửa hàng</div>}
                 open={detailModalVisible}
                 onCancel={() => setDetailModalVisible(false)}
-                footer={[
-                    <Button key="close" onClick={() => setDetailModalVisible(false)}>
-                        Đóng
-                    </Button>
-                ]}
+                footer={[<Button key="close" onClick={() => setDetailModalVisible(false)}>Đóng</Button>]}
                 width={800}
             >
                 {selectedShop && (
@@ -411,15 +327,10 @@ const ShopManagement = () => {
                                 {selectedShop.description}
                             </Descriptions.Item>
                         </Descriptions>
-
                         {selectedShop.logoUrl && (
                             <div className="shop-logo-section">
                                 <h4>Logo cửa hàng:</h4>
-                                <img
-                                    src={selectedShop.logoUrl}
-                                    alt="Shop Logo"
-                                    style={{ maxWidth: 200, maxHeight: 200, objectFit: 'contain' }}
-                                />
+                                <img src={selectedShop.logoUrl} alt="Shop Logo" style={{ maxWidth: 200, maxHeight: 200, objectFit: 'contain' }} />
                             </div>
                         )}
                     </div>

@@ -7,7 +7,6 @@ import {
     Space,
     Empty,
     Image,
-    Tag,
     Row,
     Col,
     Breadcrumb,
@@ -22,6 +21,7 @@ import {
     ClearOutlined
 } from '@ant-design/icons'
 import { useCartStore } from '@/store/useCartStore'
+import { useStockValidation } from '@/hooks/useStockValidation'
 import type { CartItem } from '@/store/useCartStore'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
@@ -37,9 +37,15 @@ const CartDetail = () => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { items, removeItem, updateQuantity, clearCart, getTotalItems, getTotalPrice } = useCartStore()
+    const { canIncreaseQuantity, validateItemStock } = useStockValidation()
 
-    const handleQuantityChange = (cartItemId: string | number, type: 'product' | 'tour', quantity: number) => {
+    const handleQuantityChange = async (cartItemId: string | number, type: 'product' | 'tour', quantity: number) => {
         if (quantity < 1) return
+
+        // Validate stock before updating quantity
+        if (type === 'product' && quantity > 0) {
+            await validateItemStock(cartItemId.toString(), type)
+        }
         updateQuantity(cartItemId, type, quantity)
     }
 
@@ -95,11 +101,6 @@ const CartDetail = () => {
                     />
                     <div className="product-info">
                         <div className="product-name">{record.name}</div>
-                        <div className="product-type">
-                            <Tag color={record.type === 'product' ? 'blue' : 'green'}>
-                                {record.type === 'product' ? t('shop.product') : t('tour.tour')}
-                            </Tag>
-                        </div>
                         {/* {record.description && (
               <div className="product-description">{record.description}</div>
             )} */}
@@ -136,7 +137,7 @@ const CartDetail = () => {
                         type="text"
                         icon={<PlusOutlined />}
                         onClick={() => handleQuantityChange(record.productId, record.type, quantity + 1)}
-                        disabled={quantity >= 99}
+                        disabled={record.type === 'product' && !canIncreaseQuantity(record.productId, record.type)}
                         className="quantity-btn plus-btn"
                         size="small"
                     />
@@ -271,6 +272,7 @@ const CartDetail = () => {
                                 <Title level={4}>{t('cart.total')}:</Title>
                                 <Title level={4} className="total-price">{formatPrice(getTotalPrice())}</Title>
                             </div>
+                            <Text type="secondary" style={{ fontSize: '12px', marginLeft: 4 }}>{t('cart.vatIncluded')}</Text>
 
                             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                                 <Button

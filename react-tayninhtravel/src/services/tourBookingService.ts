@@ -1,5 +1,6 @@
 import axios from "../config/axios";
-import { ApiResponse } from "../types/api";
+import type { ApiResponse } from '@/types/index';
+
 import {
   BookingStatus,
   GuestInfoRequest,
@@ -111,7 +112,7 @@ export interface LegacyCreateTourBookingRequest {
 }
 
 export interface CalculatePriceRequest {
-  tourDetailsId: string;
+  tourOperationId: string; // ✅ FIXED: Align with backend DTO
   numberOfGuests: number;
   bookingDate?: string;
 }
@@ -197,86 +198,136 @@ export const getTourDetailsForBooking = async (
  * 2. Nếu đặt trong 14 ngày đầu sau khi tour được tạo: Early Bird (giảm 25%)
  * 3. Các trường hợp khác: Giá gốc (100%)
  */
-export const calculateBookingPrice = async (request: CalculatePriceRequest, token?: string): Promise<ApiResponse<PriceCalculation>> => {
-  try {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+// export const calculateBookingPrice = async (
+//   request: CalculatePriceRequest,
+//   token?: string
+// ): Promise<ApiResponse<PriceCalculation>> => {
+//   try {
+//     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    // Lấy thông tin tour để tính giá
-    const response = await axios.get(`/TourDetails/${request.tourDetailsId}`, { headers });
+//     // ✅ FIXED: Call the dedicated backend endpoint for price calculation
+//     const response = await axios.post(
+//       `/UserTourBooking/calculate-price`,
+//       request,
+//       { headers }
+//     );
 
-    if (response.data.success && response.data.data) {
-      const tourDetails = response.data.data;
-      const pricePerGuest = tourDetails.tourOperation?.price || 0;
+//     if (response.data.success && response.data.data) {
+//       const tourDetails = response.data.data;
+//       const pricePerGuest = tourDetails.tourOperation?.price || 0;
 
-      // Tính số ngày từ khi tour được tạo đến hiện tại
-      const tourCreatedDate = new Date(tourDetails.createdAt);
-      const currentDate = new Date();
-      const daysSinceCreated = Math.floor((currentDate.getTime() - tourCreatedDate.getTime()) / (1000 * 60 * 60 * 24));
+//       // Tính số ngày từ khi tour được tạo đến hiện tại
+//       const tourCreatedDate = new Date(tourDetails.createdAt);
+//       const currentDate = new Date();
+//       const daysSinceCreated = Math.floor((currentDate.getTime() - tourCreatedDate.getTime()) / (1000 * 60 * 60 * 24));
 
-      // Tính số ngày từ hiện tại đến ngày tour (nếu có tourDate)
-      let daysUntilTour = 0;
-      let isEarlyBird = false;
+//       // Tính số ngày từ hiện tại đến ngày tour (nếu có tourDate)
+//       let daysUntilTour = 0;
+//       let isEarlyBird = false;
 
-      // Kiểm tra nếu có tourDate từ tourOperation hoặc tourDates
-      const tourDate = tourDetails.tourOperation?.tourDate ||
-        tourDetails.tourDates?.[0]?.tourDate ||
-        request.bookingDate;
+//       // Kiểm tra nếu có tourDate từ tourOperation hoặc tourDates
+//       const tourDate = tourDetails.tourOperation?.tourDate ||
+//         tourDetails.tourDates?.[0]?.tourDate ||
+//         request.bookingDate;
 
-      if (tourDate) {
-        const tourStartDate = new Date(tourDate);
-        daysUntilTour = Math.floor((tourStartDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+//       if (tourDate) {
+//         const tourStartDate = new Date(tourDate);
+//         daysUntilTour = Math.floor((tourStartDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
 
-        // Condition 1: Tour còn > 30 ngày nữa
-        if (daysUntilTour > 30) {
-          isEarlyBird = true;
-        }
-      }
+//         // Condition 1: Tour còn > 30 ngày nữa
+//         if (daysUntilTour > 30) {
+//           isEarlyBird = true;
+//         }
+//       }
 
-      // Condition 2: Đặt trong 14 ngày đầu sau khi tour được tạo (khớp với backend)
-      if (!isEarlyBird && daysSinceCreated <= 14) {
-        isEarlyBird = true;
-      }
+//       // Condition 2: Đặt trong 14 ngày đầu sau khi tour được tạo (khớp với backend)
+//       if (!isEarlyBird && daysSinceCreated <= 14) {
+//         isEarlyBird = true;
+//       }
 
-      const discountPercent = isEarlyBird ? 25 : 0;
+//       const discountPercent = isEarlyBird ? 25 : 0;
 
-      // Tính giá
-      const totalOriginalPrice = pricePerGuest * request.numberOfGuests;
-      const discountAmount = (totalOriginalPrice * discountPercent) / 100;
-      const finalPrice = totalOriginalPrice - discountAmount;
+//       // Tính giá
+//       const totalOriginalPrice = pricePerGuest * request.numberOfGuests;
+//       const discountAmount = (totalOriginalPrice * discountPercent) / 100;
+//       const finalPrice = totalOriginalPrice - discountAmount;
 
-      return {
-        success: true,
-        data: {
-          tourDetailsId: request.tourDetailsId,
-          tourTitle: tourDetails.title || '',
-          numberOfGuests: request.numberOfGuests,
-          originalPricePerGuest: pricePerGuest,
-          totalOriginalPrice,
-          discountPercent,
-          discountAmount,
-          finalPrice,
-          isEarlyBird,
-          pricingType: isEarlyBird ? 'Early Bird' : 'Standard',
-          daysSinceCreated,
-          daysUntilTour,
-          bookingDate: new Date().toISOString()
-        }
-      };
-    }
+//       return {
+//         success: true,
+//         data: {
+//           tourDetailsId: tourDetails.id,
+//           tourTitle: tourDetails.title || '',
+//           numberOfGuests: request.numberOfGuests,
+//           originalPricePerGuest: pricePerGuest,
+//           totalOriginalPrice,
+//           discountPercent,
+//           discountAmount,
+//           finalPrice,
+//           isEarlyBird,
+//           pricingType: isEarlyBird ? 'Early Bird' : 'Standard',
+//           daysSinceCreated,
+//           daysUntilTour,
+//           bookingDate: new Date().toISOString()
+//         }
+//       };
+//     }
 
-    return {
-      success: false,
-      message: 'Không tìm thấy thông tin tour'
-    };
-  } catch (error: any) {
-    console.error('Error calculating booking price:', error);
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Không thể tính giá tour'
-    };
-  }
+//     return {
+//       success: false,
+//       message: 'Không tìm thấy thông tin tour',
+//       data: {
+//         tourDetailsId: '',
+//         tourTitle: '',
+//         numberOfGuests: 0,
+//         originalPricePerGuest: 0,
+//         totalOriginalPrice: 0,
+//         discountPercent: 0,
+//         discountAmount: 0,
+//         finalPrice: 0,
+//         isEarlyBird: false,
+//         pricingType: '',
+//         daysSinceCreated: 0,
+//         daysUntilTour: 0,
+//         bookingDate: ''
+//       }
+//     };
+//     // The backend now returns the correct PriceCalculationDto, which matches the frontend's PriceCalculation interface.
+//     return response.data;
+//   } catch (error: any) {
+//     console.error("Error calculating booking price:", error);
+//     return {
+//       success: false,
+//       message: error.response?.data?.message || 'Không thể tính giá tour',
+//       data: {
+//         tourDetailsId: '',
+//         tourTitle: '',
+//         numberOfGuests: 0,
+//         originalPricePerGuest: 0,
+//         totalOriginalPrice: 0,
+//         discountPercent: 0,
+//         discountAmount: 0,
+//         finalPrice: 0,
+//         isEarlyBird: false,
+//         pricingType: '',
+//         daysSinceCreated: 0,
+//         daysUntilTour: 0,
+//         bookingDate: ''
+//       }
+//     };
+//   }
+// };
+export const calculateBookingPrice = async (
+  request: CalculatePriceRequest,
+  token?: string
+): Promise<ApiResponse<PriceCalculation>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await axios.post(
+    `/UserTourBooking/calculate-price`,
+    request,
+    { headers }
+  );
+  return response.data; // Trả về đúng dữ liệu từ API
 };
-
 /**
  * ✅ NEW: Individual QR System - Tạo booking với guest info (Primary)
  */
@@ -292,6 +343,19 @@ export const createTourBooking = async (
     return {
       success: false,
       message: validation.errors.join(", "),
+      data: {
+        success: false,
+        message: validation.errors.join(", "),
+        bookingId: '',
+        bookingCode: '',
+        paymentUrl: '',
+        originalPrice: 0,
+        discountPercent: 0,
+        finalPrice: 0,
+        pricingType: '',
+        bookingDate: '',
+        tourStartDate: ''
+      }
     };
   }
 
@@ -370,8 +434,12 @@ export const getMyBookings = async (
   params?: {
     pageIndex?: number;
     pageSize?: number;
-    status?: BookingStatus;
+    status?: string;
     searchKeyword?: string;
+    startDate?: string;
+    endDate?: string;
+    searchTerm?: string;
+    bookingCode?: string;
   }
 ): Promise<
   ApiResponse<{
@@ -386,7 +454,11 @@ export const getMyBookings = async (
     pageIndex: params?.pageIndex || 1,
     pageSize: params?.pageSize || 10,
     ...(params?.status !== undefined && { status: params.status }),
-    ...(params?.searchKeyword && { searchKeyword: params.searchKeyword })
+    ...(params?.searchKeyword && { searchKeyword: params.searchKeyword }),
+    ...(params?.startDate && { startDate: params.startDate }),
+    ...(params?.endDate && { endDate: params.endDate }),
+    ...(params?.searchTerm && { searchTerm: params.searchTerm }),
+    ...(params?.bookingCode && { bookingCode: params.bookingCode }),
   };
 
   const response = await axios.get("/UserTourBooking/my-bookings", {
@@ -408,17 +480,7 @@ export const getMyBookings = async (
             guests: booking.guests || [], // ✅ NEW: Individual guests with QR codes
             tourOperation: booking.tourOperation
               ? {
-                id: booking.tourOperation.id,
-                price: booking.tourOperation.price,
-                maxGuests: booking.tourOperation.maxGuests,
-                tourTitle: booking.tourOperation.tourTitle,
-                tourDescription: booking.tourOperation.tourDescription,
-                tourDate: booking.tourOperation.tourDate,
-                guideName: booking.tourOperation.guideName,
-                guidePhone: booking.tourOperation.guidePhone,
-                // Legacy fields for backward compatibility
-                currentBookings: 0,
-                isActive: true,
+                ...booking.tourOperation, // Map all fields, including tourStartDate
               }
               : undefined,
           })) || [],
@@ -497,13 +559,10 @@ export const checkTourSlotCapacity = async (
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-    const response = await axios.get(
-      `/TourBooking/slot/${slotId}/capacity`,
-      {
-        headers,
-        params: { requestedGuests: numberOfGuests },
-      }
-    );
+    const response = await axios.get(`/TourBooking/slot/${slotId}/capacity`, {
+      headers,
+      params: { requestedGuests: numberOfGuests },
+    });
 
     // Transform response to match expected format
     if (response.data.success && response.data.capacityInfo) {
@@ -522,10 +581,17 @@ export const checkTourSlotCapacity = async (
 
     return response.data;
   } catch (error: any) {
-    console.error('Error checking slot capacity:', error);
+    console.error("Error checking slot capacity:", error);
     return {
       success: false,
-      message: error.response?.data?.message || 'Không thể kiểm tra capacity slot'
+      message: error.response?.data?.message || 'Không thể kiểm tra capacity slot',
+      data: {
+        isAvailable: false,
+        maxGuests: 0,
+        currentBookings: 0,
+        availableSlots: 0,
+        message: error.response?.data?.message || 'Không thể kiểm tra capacity slot'
+      }
     };
   }
 };
@@ -627,17 +693,17 @@ export const getAvailableTours = async (params?: {
 /**
  * Format booking status thành tiếng Việt
  */
-export const getBookingStatusText = (status: BookingStatus): string => {
+export const getBookingStatusText = (status: string): string => {
   switch (status) {
-    case BookingStatus.Pending:
+    case "Pending":
       return "Chờ thanh toán";
-    case BookingStatus.Confirmed:
+    case "Confirmed":
       return "Đã xác nhận";
-    case BookingStatus.Cancelled:
+    case "Cancelled":
       return "Đã hủy";
-    case BookingStatus.Completed:
+    case "Completed":
       return "Đã hoàn thành";
-    case BookingStatus.Refunded:
+    case "Refunded":
       return "Đã hoàn tiền";
     default:
       return "Không xác định";
@@ -647,17 +713,17 @@ export const getBookingStatusText = (status: BookingStatus): string => {
 /**
  * Get booking status color for UI
  */
-export const getBookingStatusColor = (status: BookingStatus): string => {
+export const getBookingStatusColor = (status: string): string => {
   switch (status) {
-    case BookingStatus.Pending:
+    case "Pending":
       return "orange";
-    case BookingStatus.Confirmed:
+    case "Confirmed":
       return "green";
-    case BookingStatus.Cancelled:
+    case "Cancelled":
       return "red";
-    case BookingStatus.Completed:
+    case "Completed":
       return "blue";
-    case BookingStatus.Refunded:
+    case "Refunded":
       return "purple";
     default:
       return "default";
@@ -839,5 +905,53 @@ export const validateBookingRequest = (
     return validateLegacyBookingRequest(
       request as LegacyCreateTourBookingRequest
     );
+  }
+};
+
+// ===== FEEDBACK/REVIEW TYPES =====
+
+export interface UserFeedback {
+  type: 'Tour' | 'Product';
+  itemId: string;
+  itemName: string;
+  userId: string;
+  userFullName: string;
+  createdAt: string;
+  rating: number;
+  comment: string;
+}
+
+export interface GetUserFeedbackResponse extends ApiResponse {
+  data: UserFeedback[];
+}
+
+/**
+ * Get all feedback/reviews made by the current user
+ */
+export const getUserFeedback = async (
+  token: string
+): Promise<GetUserFeedbackResponse> => {
+  try {
+    const response = await axios.get<UserFeedback[]>(
+      '/TourBooking/GetAll-Feedback',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return {
+      success: true,
+      message: 'Lấy lịch sử đánh giá thành công',
+      data: response.data,
+    };
+  } catch (error: any) {
+    console.error('Error fetching user feedback:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Không thể lấy lịch sử đánh giá',
+      data: [],
+    };
   }
 };

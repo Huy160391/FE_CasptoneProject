@@ -1,4 +1,5 @@
 import axios from '@/config/axios';
+
 import {
     AIChatType,
     CreateChatSessionRequest,
@@ -182,3 +183,4 @@ export const sendMessage = async (
     }
     throw new Error('Không nhận được phản hồi từ AI');
 };
+

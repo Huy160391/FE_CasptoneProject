@@ -87,21 +87,21 @@ html[data-theme="dark"] .voucher-management-page .header-bar h1,
 }
 
 // CSS Variables cho dark mode
-body[data-theme="dark"] {
-  --text-primary: #fff;
-}
+// body[data-theme="dark"] {
+//   --text-primary: #fff;
+// }
 
-html[data-theme="dark"] {
-  --text-primary: #fff;
-}
+// html[data-theme="dark"] {
+//   --text-primary: #fff;
+// }
 
-.dark-theme {
-  --text-primary: #fff;
-}
+// .dark-theme {
+//   --text-primary: #fff;
+// }
 
-.ant-app.dark {
-  --text-primary: #fff;
-}
+// .ant-app.dark {
+//   --text-primary: #fff;
+// }
 
 // Dark mode styles cho các element khác
 [data-theme="dark"] .voucher-management-page,

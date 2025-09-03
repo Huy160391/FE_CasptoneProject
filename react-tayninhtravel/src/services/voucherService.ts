@@ -96,6 +96,22 @@ class VoucherService {
         return response.data
     }
 
+    /**
+     * Lấy phần trăm giảm giá hiện tại cho khách du lịch đi tour
+     */
+    async getDiscountForVisitor(): Promise<{ discountPercent: number }> {
+        const response = await axiosInstance.get('/Cms/discount-for-visitor')
+        return response.data
+    }
+
+    /**
+     * Cập nhật phần trăm giảm giá cho khách du lịch đi tour
+     */
+    async updateDiscountForVisitor(discountPercent: number): Promise<any> {
+        const response = await axiosInstance.put('/Cms/discount-visitor', { discountPercent })
+        return response.data
+    }
+
     // Helper methods
 
     /**
@@ -225,3 +241,4 @@ class VoucherService {
 }
 
 export const voucherService = new VoucherService()
+

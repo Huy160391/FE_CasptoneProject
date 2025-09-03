@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Table, Spin, Card, Input } from 'antd';
-import { Modal, Descriptions } from 'antd';
+import { Table, Spin, Card, Input, Button, Space, Tag, Modal, message, Descriptions } from 'antd';
+import { EyeOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
 import { DatePicker } from 'antd';
 const { RangePicker } = DatePicker;
 import dayjs from 'dayjs';
@@ -40,7 +40,22 @@ const CustomerList: React.FC = () => {
                     fromDate = dateRange[0];
                     toDate = dateRange[1];
                 }
+
                 const res = await getVisitorsBuyProduct({ pageIndex, pageSize, fromDate, toDate });
+                console.log('API Response:', res?.data?.slice(0, 1)); // Log 1 item đầu để debug
+
+                function formatJoinDate(dateStr: string) {
+                    if (!dateStr) return '';
+                    try {
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return dateStr;
+                        return d.toLocaleDateString('vi-VN');
+                    } catch (error) {
+                        console.error('formatJoinDate error:', error, 'input:', dateStr);
+                        return dateStr;
+                    }
+                }
+
                 // Map dữ liệu cho bảng
                 const rows = (res.data || []).map((item: any) => ({
                     id: item.bookingId,
@@ -48,19 +63,17 @@ const CustomerList: React.FC = () => {
                     phone: item.customerPhone,
                     email: item.customerEmail,
                     tourName: item.tourName,
-                    joinDate: item.tourDate ? formatDate(item.tourDate) : '',
-                    payOsOrderCode: item.paidOrders?.[0]?.payOsOrderCode || '',
-                    paymentDate: item.paidOrders?.[0]?.createdAt ? new Date(item.paidOrders[0].createdAt).toLocaleString('vi-VN') : '',
+                    joinDate: item.tourDate ? formatJoinDate(item.tourDate) : '',
+                    payOsOrderCode: item.paidOrdersFull?.[0]?.payOsOrderCode || '',
+                    paymentDate: item.paidOrdersFull?.[0]?.createdAt ? formatDate(item.paidOrdersFull[0].createdAt) : '',
+                    // Giữ nguyên toàn bộ object để sử dụng trong columns render
+                    ...item
                 }));
 
-                function formatDate(dateStr: string) {
-                    const d = new Date(dateStr);
-                    if (isNaN(d.getTime())) return dateStr;
-                    return d.toLocaleDateString('vi-VN');
-                }
                 setData(rows);
                 setTotal(res.total || 0);
             } catch (e) {
+                console.error('fetchData error:', e);
                 setData([]);
                 setTotal(0);
             }
@@ -83,6 +96,95 @@ const CustomerList: React.FC = () => {
         const joinDate = dayjs(item.joinDate, 'DD/MM/YYYY');
         return matchText && joinDate.isSameOrAfter(dayjs(start, 'YYYY-MM-DD')) && joinDate.isSameOrBefore(dayjs(end, 'YYYY-MM-DD'));
     });
+
+    // Các hàm xử lý actions
+    const handleView = (record: any) => {
+        console.log('handleView record:', record); // Debug log
+        setSelectedOrder(record);
+        setIsModalVisible(true);
+    };
+
+    const handleMarkAsReceived = (_record: any) => {
+        Modal.confirm({
+            title: 'Xác nhận đã nhận hàng',
+            content: `Bạn có chắc chắn khách hàng đã nhận đơn hàng này?`,
+            okText: 'Xác nhận',
+            cancelText: 'Hủy',
+            okType: 'primary',
+            onOk: async () => {
+                try {
+                    // TODO: Gọi API để đánh dấu đã nhận hàng
+                    message.success('Đã đánh dấu đơn hàng là đã nhận hàng');
+                    // Refresh data nếu cần
+                } catch (error) {
+                    console.error('Error marking as received:', error);
+                    message.error('Không thể cập nhật trạng thái đơn hàng');
+                }
+            }
+        });
+    };
+
+    const handleDelete = (record: any) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Bạn có chắc chắn muốn xóa thông tin khách hàng ${record.name}?`,
+            okText: 'Xóa',
+            cancelText: 'Hủy',
+            okType: 'danger',
+            onOk: async () => {
+                try {
+                    // TODO: Gọi API để xóa
+                    message.success('Đã xóa thành công');
+                    // Refresh data
+                } catch (error) {
+                    console.error('Error deleting:', error);
+                    message.error('Không thể xóa');
+                }
+            }
+        });
+    };
+
+    // Hàm helper để format date an toàn
+    const formatDate = (dateString: string | null | undefined) => {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+            return date.toLocaleString('vi-VN');
+        } catch (error) {
+            console.error('formatDate error:', error, 'input:', dateString);
+            return 'N/A';
+        }
+    };
+
+    // Hàm helper để lấy status từ order data
+    const getOrderStatus = (record: any) => {
+        const firstOrder = record.paidOrdersFull?.[0];
+        return firstOrder?.status || 'Unknown';
+    };
+
+    const getIsChecked = (record: any) => {
+        const firstOrder = record.paidOrdersFull?.[0];
+        return firstOrder?.isChecked || false;
+    };
+
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'Pending': return 'Chờ xử lý';
+            case 'Paid': return 'Đã thanh toán';
+            case 'Cancelled': return 'Đã hủy';
+            default: return status;
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'Pending': return 'orange';
+            case 'Paid': return 'green';
+            case 'Cancelled': return 'red';
+            default: return 'default';
+        }
+    };
 
     const columns = [
         {
@@ -117,19 +219,93 @@ const CustomerList: React.FC = () => {
             key: 'paymentDate',
         },
         {
-            title: 'Action',
+            title: 'Trạng thái thanh toán',
+            key: 'paymentStatus',
+            width: 150,
+            filters: [
+                { text: 'Chờ xử lý', value: 'Pending' },
+                { text: 'Đã thanh toán', value: 'Paid' },
+                { text: 'Đã hủy', value: 'Cancelled' },
+            ],
+            onFilter: (value: any, record: any) => getOrderStatus(record) === value,
+            render: (_: any, record: any) => {
+                const status = getOrderStatus(record);
+                return (
+                    <Tag color={getStatusColor(status)}>
+                        {getStatusText(status)}
+                    </Tag>
+                );
+            },
+        },
+        {
+            title: 'Trạng thái nhận hàng',
+            key: 'deliveryStatus',
+            width: 150,
+            filters: [
+                { text: 'Đã nhận hàng', value: true },
+                { text: 'Chưa nhận hàng', value: false },
+            ],
+            onFilter: (value: any, record: any) => getIsChecked(record) === value,
+            render: (_: any, record: any) => {
+                const isChecked = getIsChecked(record);
+                return (
+                    <Tag color={isChecked ? 'green' : 'orange'}>
+                        {isChecked ? 'Đã nhận hàng' : 'Chưa nhận hàng'}
+                    </Tag>
+                );
+            },
+        },
+        {
+            title: 'Giá tiền đơn hàng',
+            key: 'orderAmount',
+            width: 150,
+            render: (_: any, record: any) => {
+                const amount = record.paidOrdersFull?.[0]?.totalAmount;
+                return amount && typeof amount === 'number'
+                    ? `${amount.toLocaleString()} ₫`
+                    : '0 ₫';
+            },
+        },
+        {
+            title: 'Thao tác',
             key: 'action',
-            render: (_: any, record: any) => (
-                <a
-                    style={{ cursor: 'pointer', color: '#1677ff' }}
-                    onClick={() => {
-                        setSelectedOrder(record);
-                        setIsModalVisible(true);
-                    }}
-                >
-                    Xem đơn hàng
-                </a>
-            ),
+            width: 200,
+            render: (_: any, record: any) => {
+                const orderStatus = getOrderStatus(record);
+                const isChecked = getIsChecked(record);
+
+                return (
+                    <Space size="small">
+                        <Button
+                            type="primary"
+                            size="small"
+                            icon={<EyeOutlined />}
+                            onClick={() => handleView(record)}
+                        >
+                            Xem
+                        </Button>
+                        {orderStatus === 'Paid' && !isChecked && (
+                            <Button
+                                size="small"
+                                type="primary"
+                                icon={<CheckOutlined />}
+                                onClick={() => handleMarkAsReceived(record)}
+                            >
+                                Đã nhận
+                            </Button>
+                        )}
+                        <Button
+                            size="small"
+                            danger
+                            icon={<CloseOutlined />}
+                            onClick={() => handleDelete(record)}
+                            disabled={isChecked}
+                        >
+                            Xóa
+                        </Button>
+                    </Space>
+                );
+            },
         },
     ];
 
@@ -193,35 +369,107 @@ const CustomerList: React.FC = () => {
                 {selectedOrder && (
                     <div className="order-detail">
                         <Descriptions title="Thông tin đơn hàng" bordered column={2}>
-                            <Descriptions.Item label="Mã đơn hàng">{selectedOrder.payOsOrderCode}</Descriptions.Item>
-                            <Descriptions.Item label="Ngày đặt">{selectedOrder.paymentDate}</Descriptions.Item>
-                            <Descriptions.Item label="Tên khách hàng">{selectedOrder.name}</Descriptions.Item>
-                            <Descriptions.Item label="Email">{selectedOrder.email}</Descriptions.Item>
-                            <Descriptions.Item label="Số điện thoại">{selectedOrder.phone}</Descriptions.Item>
+                            <Descriptions.Item label="Mã đơn hàng">
+                                {selectedOrder.paidOrdersFull?.[0]?.payOsOrderCode || 'N/A'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Ngày đặt">
+                                {formatDate(selectedOrder.paidOrdersFull?.[0]?.createdAt)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Tên khách hàng">{selectedOrder.customerName}</Descriptions.Item>
+                            <Descriptions.Item label="Email">{selectedOrder.customerEmail}</Descriptions.Item>
+                            <Descriptions.Item label="Số điện thoại">{selectedOrder.customerPhone}</Descriptions.Item>
                             <Descriptions.Item label="Tên tour">{selectedOrder.tourName}</Descriptions.Item>
-                            <Descriptions.Item label="Ngày tới">{selectedOrder.joinDate}</Descriptions.Item>
+                            <Descriptions.Item label="Ngày tới">
+                                {selectedOrder.tourDate ? (typeof selectedOrder.tourDate === 'string' ? selectedOrder.tourDate : formatDate(selectedOrder.tourDate)) : 'N/A'}
+                            </Descriptions.Item>
                             <Descriptions.Item label="Hoạt động">{selectedOrder.activity}</Descriptions.Item>
-                            <Descriptions.Item label="CheckInAtUtc">{selectedOrder.plannedCheckInAtUtc}</Descriptions.Item>
+                            <Descriptions.Item label="Voucher">
+                                {selectedOrder.paidOrdersFull?.[0]?.voucherCode || 'Không có'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Tổng tiền gốc">
+                                {(selectedOrder.paidOrdersFull?.[0]?.totalAmount && typeof selectedOrder.paidOrdersFull[0].totalAmount === 'number')
+                                    ? selectedOrder.paidOrdersFull[0].totalAmount.toLocaleString() + ' ₫'
+                                    : '0 ₫'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Giảm giá">
+                                {(selectedOrder.paidOrdersFull?.[0]?.discountAmount && typeof selectedOrder.paidOrdersFull[0].discountAmount === 'number')
+                                    ? selectedOrder.paidOrdersFull[0].discountAmount.toLocaleString() + ' ₫'
+                                    : '0 ₫'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Thành tiền">
+                                {(selectedOrder.paidOrdersFull?.[0]?.totalAmount && typeof selectedOrder.paidOrdersFull[0].totalAmount === 'number')
+                                    ? selectedOrder.paidOrdersFull[0].totalAmount.toLocaleString() + ' ₫'
+                                    : '0 ₫'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Trạng thái thanh toán">
+                                <Tag color={getStatusColor(getOrderStatus(selectedOrder))}>
+                                    {getStatusText(getOrderStatus(selectedOrder))}
+                                </Tag>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Trạng thái giao hàng">
+                                <Tag color={getIsChecked(selectedOrder) ? 'green' : 'orange'}>
+                                    {getIsChecked(selectedOrder) ? 'Đã nhận hàng' : 'Chưa nhận hàng'}
+                                </Tag>
+                            </Descriptions.Item>
+                            {selectedOrder.paidOrdersFull?.[0]?.checkedAt && (
+                                <Descriptions.Item label="Thời gian nhận hàng" span={2}>
+                                    {formatDate(selectedOrder.paidOrdersFull[0].checkedAt)}
+                                </Descriptions.Item>
+                            )}
                         </Descriptions>
+
                         <div className="order-items">
                             <h4>Sản phẩm đã đặt</h4>
-                            <ul>
-                                {(selectedOrder.products || []).map((item: any, idx: number) => (
-                                    <li key={idx}>
-                                        {item.productName} - SL: {item.quantity} - Đơn giá: {item.unitPrice?.toLocaleString()} ₫
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <div className="order-payment">
-                            <h4>Thông tin thanh toán</h4>
-                            {(selectedOrder.paidOrders || []).map((order: any, idx: number) => (
-                                <Descriptions key={idx} bordered size="small" column={2}>
-                                    <Descriptions.Item label="Mã PayOS">{order.payOsOrderCode}</Descriptions.Item>
-                                    <Descriptions.Item label="Ngày thanh toán">{order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : ''}</Descriptions.Item>
-                                    <Descriptions.Item label="Trạng thái giao hàng">{order.isChecked ? 'Đã nhận hàng' : 'Chưa nhận hàng'}</Descriptions.Item>
-                                </Descriptions>
-                            ))}
+                            <Table
+                                size="small"
+                                dataSource={selectedOrder.paidOrdersFull?.[0]?.details?.map((item: any, index: number) => {
+                                    // Đảm bảo tất cả dữ liệu đều là primitive types
+                                    const safeItem = {
+                                        key: index,
+                                        productName: item.productName || '',
+                                        quantity: Number(item.quantity) || 0,
+                                        unitPrice: Number(item.unitPrice) || 0,
+                                        total: (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0)
+                                    };
+                                    return safeItem;
+                                }) || []}
+                                columns={[
+                                    {
+                                        title: 'Sản phẩm',
+                                        dataIndex: 'productName',
+                                        key: 'productName',
+                                    },
+                                    {
+                                        title: 'Số lượng',
+                                        dataIndex: 'quantity',
+                                        key: 'quantity',
+                                    },
+                                    {
+                                        title: 'Đơn giá',
+                                        dataIndex: 'unitPrice',
+                                        key: 'unitPrice',
+                                        render: (price: number) => `${price.toLocaleString()} ₫`,
+                                    },
+                                    {
+                                        title: 'Thành tiền',
+                                        key: 'total',
+                                        render: (_: any, record: any) => `${(record.quantity * record.unitPrice).toLocaleString()} ₫`,
+                                    },
+                                ]}
+                                pagination={false}
+                                summary={() => (
+                                    <Table.Summary.Row>
+                                        <Table.Summary.Cell index={0} colSpan={3}>
+                                            <strong>Tổng cộng</strong>
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1}>
+                                            <strong>
+                                                {selectedOrder.paidOrdersFull?.[0]?.totalAmount?.toLocaleString() || '0'} ₫
+                                            </strong>
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                )}
+                            />
                         </div>
                     </div>
                 )}

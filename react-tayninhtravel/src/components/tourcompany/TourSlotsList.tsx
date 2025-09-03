@@ -270,18 +270,6 @@ const TourSlotsList: React.FC<TourSlotsListProps> = ({
             onFilter: (value: any, record: TourSlot) => record.status === value,
         },
         {
-            title: 'Tour Details',
-            dataIndex: 'tourDetailsId',
-            key: 'tourDetailsId',
-            render: (detailsId: string | null) => (
-                detailsId ? (
-                    <Tag color="blue">Đã gán</Tag>
-                ) : (
-                    <Tag color="default">Chưa gán</Tag>
-                )
-            ),
-        },
-        {
             title: 'Hoạt động',
             dataIndex: 'isActive',
             key: 'isActive',

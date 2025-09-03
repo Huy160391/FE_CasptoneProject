@@ -130,9 +130,11 @@ const ViewProductModal = ({ visible, onCancel, product }: ViewProductModalProps)
                         {product.isSale && product.salePercent ? (
                             <>
                                 <span className="price-current">
-                                    {(product.price * (1 - product.salePercent / 100)).toLocaleString()} ₫
+                                    {product.price.toLocaleString()} ₫
                                 </span>
-                                <span className="price-original">{product.price.toLocaleString()} ₫</span>
+                                <span className="price-original">
+                                    {Math.round(product.price / (1 - product.salePercent / 100)).toLocaleString()} ₫
+                                </span>
                             </>
                         ) : (
                             <span className="price-current">{product.price.toLocaleString()} ₫</span>

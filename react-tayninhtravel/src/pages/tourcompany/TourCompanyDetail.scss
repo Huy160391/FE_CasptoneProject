@@ -1,0 +1,395 @@
+$primary-bg: #f6f8fa;
+$card-bg: #fff;
+$border-radius: 16px;
+$box-shadow: 0 2px 8px #f0f1f2;
+$primary-color: #52c41a;
+$secondary-color: #1890ff;
+$warning-color: #faad14;
+$text-main: #222;
+$text-secondary: #888;
+$text-desc: #444;
+
+.tourcompany-detail-page {
+  background: $primary-bg;
+  min-height: 100vh;
+  padding-bottom: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+
+  .breadcrumb {
+    margin-bottom: 20px;
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 16px;
+
+    .loading-text {
+      color: $text-secondary;
+      font-size: 16px;
+    }
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 16px;
+    text-align: center;
+
+    .error-icon {
+      font-size: 48px;
+      color: #ff4d4f;
+    }
+
+    .error-title {
+      color: $text-main;
+      margin-bottom: 8px;
+    }
+
+    .error-message {
+      color: $text-secondary;
+      margin-bottom: 24px;
+    }
+  }
+
+  .company-header {
+    background: $primary-bg;
+    border-radius: $border-radius;
+    padding: 32px;
+    margin-bottom: 24px;
+
+    .company-header-content {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+
+      .company-avatar {
+        box-shadow: 0 2px 8px #e0e0e0;
+        background: #fff;
+      }
+
+      .company-main-info {
+        flex: 1;
+
+        .company-name {
+          margin-bottom: 8px;
+        }
+
+        .company-type-tag {
+          color: #fff;
+          background: $primary-color;
+          font-weight: 500;
+          font-size: 16px;
+          margin-bottom: 16px;
+          border-radius: 8px;
+          padding: 4px 16px;
+        }
+
+        .company-rating {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 12px;
+
+          .rating-text {
+            font-size: 16px;
+            color: #333;
+          }
+        }
+
+        .company-stats-with-share {
+          display: flex;
+          align-items: center;
+          gap: 32px;
+          margin-bottom: 8px;
+
+          .company-stats {
+            display: flex;
+            gap: 32px;
+
+            .stat-item {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              color: #666;
+
+              &.tour-count .anticon {
+                color: $secondary-color;
+                background: #e6f7ff;
+                border-radius: 50%;
+                padding: 4px;
+              }
+
+              &.join-date .anticon {
+                color: $warning-color;
+                background: #fffbe6;
+                border-radius: 50%;
+                padding: 4px;
+              }
+            }
+          }
+
+          .share-btn {
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px #e0e0e0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            border: none;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+
+            &:hover {
+              box-shadow: 0 4px 16px #b0b0b0;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .company-content {
+    .content-section {
+      background: $card-bg;
+      border-radius: $border-radius;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: $box-shadow;
+
+      &.company-info-section {
+        .section-title {
+          margin-bottom: 16px;
+        }
+
+        .company-description {
+          font-size: 16px;
+          color: $text-desc;
+          margin-bottom: 24px;
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+
+          .info-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+
+            .info-icon {
+              font-size: 22px;
+
+              &.address-icon {
+                color: $secondary-color;
+                background: #e6f7ff;
+              }
+
+              &.phone-icon {
+                color: $primary-color;
+                background: #e6fffb;
+              }
+
+              &.email-icon {
+                color: $warning-color;
+                background: #fffbe6;
+              }
+
+              &.license-icon {
+                color: $warning-color;
+                background: #fffbe6;
+              }
+
+              &.web-icon {
+                color: $secondary-color;
+                background: #e6f7ff;
+              }
+
+              border-radius: 50%;
+              padding: 8px;
+            }
+
+            .info-content {
+              .info-label {
+                font-weight: 500;
+                color: $text-secondary;
+              }
+
+              .info-value {
+                color: $text-main;
+                font-size: 15px;
+
+                &.website-link {
+                  color: $secondary-color;
+                  text-decoration: underline;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      &.tours-section {
+        .section-title {
+          margin-bottom: 16px;
+        }
+
+        .tours-loading,
+        .tours-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 24px;
+        }
+
+        .tour-skeleton {
+          border-radius: 12px;
+          box-shadow: $box-shadow;
+
+          .tour-skeleton-img {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+          }
+        }
+
+        .empty-tours {
+          text-align: center;
+          padding: 32px;
+        }
+      }
+    }
+  }
+
+  // Dark mode style for share-btn
+  .dark-mode & {
+    .company-header {
+      .company-header-content {
+        .share-btn {
+          background: #23272f;
+          color: #fff;
+          box-shadow: 0 2px 8px #181a1b;
+          &:hover {
+            box-shadow: 0 4px 16px #333;
+            background: #333;
+            color: #fff;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark mode
+.dark-mode {
+  $primary-bg: #181a1b;
+  $card-bg: #23272f;
+  $text-main: #e6e6e6;
+  $text-secondary: #b0b0b0;
+  $text-desc: #b0b0b0;
+
+  .tourcompany-detail-page {
+    background: $primary-bg;
+
+    .company-header {
+      background: $primary-bg;
+
+      .company-header-content {
+        .company-avatar {
+          background: $card-bg;
+        }
+
+        .company-main-info {
+          .company-type-tag {
+            background: $primary-color;
+            color: #fff;
+          }
+
+          .company-rating .rating-text {
+            color: $text-main;
+          }
+
+          .company-stats .stat-item {
+            color: $text-secondary;
+          }
+        }
+
+        .share-btn {
+          background: $card-bg;
+          color: #fff;
+          box-shadow: 0 2px 8px #181a1b;
+          &:hover {
+            box-shadow: 0 4px 16px #333;
+            background: #333;
+            color: #fff;
+          }
+        }
+      }
+
+      .company-stats-with-share .share-btn {
+        background: $card-bg;
+        color: #fff;
+        box-shadow: 0 2px 8px #181a1b;
+        &:hover {
+          box-shadow: 0 4px 16px #333;
+          background: #333;
+          color: #fff;
+        }
+      }
+    }
+
+    .company-content {
+      .content-section {
+        background: $card-bg;
+
+        .company-description {
+          color: $text-desc;
+        }
+
+        .info-grid .info-item .info-content .info-label {
+          color: $text-secondary;
+        }
+
+        .info-grid .info-item .info-content .info-value {
+          color: $text-main;
+        }
+
+        .info-grid .info-item .info-content .website-link {
+          color: $secondary-color;
+        }
+      }
+    }
+
+    // Breadcrumb dark mode
+    .breadcrumb {
+      .ant-breadcrumb-link {
+        color: rgba(255, 255, 255, 0.65);
+
+        a {
+          color: rgba(255, 255, 255, 0.65);
+
+          &:hover {
+            color: #1890ff;
+          }
+        }
+      }
+
+      .ant-breadcrumb-separator {
+        color: rgba(255, 255, 255, 0.45);
+      }
+    }
+  }
+}

@@ -40,12 +40,14 @@ import {
     getTourDetailsStatusLabel,
     getStatusColor
 } from '../../constants/tourTemplate';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
 
 
 const { TabPane } = Tabs;
 
 const TourDetailsManagement: React.FC = () => {
     const { token } = useAuthStore();
+    const { handleError } = useErrorHandler();
 
     // Preload wizard data when component mounts
     const { isPreloaded, templatesCount, shopsCount, guidesCount } = usePreloadWizardData();
@@ -85,7 +87,7 @@ const TourDetailsManagement: React.FC = () => {
             await loadTourDetailsList();
             await loadTemplates();
         } catch (error) {
-            message.error(handleApiError(error));
+            handleError(handleApiError(error));
         }
     };
 
@@ -119,11 +121,11 @@ const TourDetailsManagement: React.FC = () => {
                 setTotalCount(response.totalCount || 0);
             } else {
                 console.error('❌ API Error:', response.message);
-                message.error(response.message || 'Không thể tải danh sách tour details');
+                handleError(response.message || 'Không thể tải danh sách tour details');
             }
         } catch (error) {
             console.error('❌ Load TourDetails Error:', error);
-            message.error(handleApiError(error));
+            handleError(handleApiError(error));
         } finally {
             setLoading(false);
         }
@@ -163,7 +165,7 @@ const TourDetailsManagement: React.FC = () => {
             }
         } catch (error) {
             console.error('❌ Error loading templates:', error);
-            message.error(`Lỗi tải templates: ${handleApiError(error)}`);
+            handleError(`Lỗi tải templates: ${handleApiError(error)}`);
         }
     };
 
@@ -204,7 +206,7 @@ const TourDetailsManagement: React.FC = () => {
                 loadTourDetailsList();
             }
         } catch (error) {
-            message.error(handleApiError(error));
+            handleError(handleApiError(error));
         }
     };
 
@@ -232,10 +234,10 @@ const TourDetailsManagement: React.FC = () => {
                 message.success('Đã kích hoạt public cho TourDetails thành công! Khách hàng có thể booking tour này.');
                 loadTourDetailsList(); // Reload để cập nhật status
             } else {
-                message.error(response.message || 'Không thể kích hoạt public');
+                handleError(response.message || 'Không thể kích hoạt public');
             }
         } catch (error) {
-            message.error(handleApiError(error));
+            handleError(handleApiError(error));
         } finally {
             setLoading(false);
         }
@@ -309,9 +311,16 @@ const TourDetailsManagement: React.FC = () => {
         },
         {
             title: 'Template',
-            dataIndex: 'tourTemplateName',
             key: 'templateTitle',
             ellipsis: true,
+            render: (_: any, record: any) => {
+                return record.tourTemplate?.title || 'N/A';
+            },
+            sorter: (a: any, b: any) => {
+                const titleA = a.tourTemplate?.title || '';
+                const titleB = b.tourTemplate?.title || '';
+                return titleA.localeCompare(titleB);
+            },
         },
         {
             title: 'Trạng thái',
@@ -325,6 +334,11 @@ const TourDetailsManagement: React.FC = () => {
                         {getTourDetailsStatusLabel(statusEnum)}
                     </Tag>
                 );
+            },
+            sorter: (a: any, b: any) => {
+                const statusA = a.status || '';
+                const statusB = b.status || '';
+                return statusA.localeCompare(statusB);
             },
         },
         {
@@ -470,3 +484,4 @@ const TourDetailsManagement: React.FC = () => {
 };
 
 export default TourDetailsManagement;
+

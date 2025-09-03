@@ -1,4 +1,5 @@
 import axios from '@/config/axios';
+import { getErrorMessage } from '@/utils/errorHandler';
 import {
     UpdateUserPayload,
     CreateUserPayload,
@@ -77,12 +78,9 @@ export const userService = {
         return {
             id: apiUser.id,
             name: apiUser.name,
-            email: apiUser.email,
-            phone: apiUser.phoneNumber || '',
-            role: apiUser.role || '',
-            status: apiUser.isActive,
+            phoneNumber: apiUser.phoneNumber || '',
             avatar: apiUser.avatar,
-            isVerified: apiUser.isVerified,
+            isActive: apiUser.isActive,
             createdAt: apiUser.createdAt,
             updatedAt: apiUser.updatedAt
         };
@@ -196,8 +194,12 @@ export const userService = {
         try {
             const response = await axios.get('/UserTourSearch/search', { params });
             return response.data;
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            // Error already shown by axios interceptor
+            throw {
+                message: error.standardizedError?.message || getErrorMessage(error),
+                statusCode: error.standardizedError?.statusCode || 500
+            };
         }
     },
     /**
@@ -210,10 +212,9 @@ export const userService = {
         // Map application format to API format
         const apiPayload: ApiUpdateUserPayload = {
             name: userData.name,
-            email: userData.email,
-            phoneNumber: userData.phone,
-            role: userData.role,
-            status: userData.isActive // Sửa ở đây
+            phoneNumber: userData.phoneNumber,
+            avatar: userData.avatar,
+            status: userData.isActive
         };
 
         const response = await axios.put<ApiUser>(`/Cms/user/${id}`, apiPayload);
@@ -246,10 +247,9 @@ export const userService = {
         // Map application format to API format
         const apiPayload = {
             name: userData.name,
-            email: userData.email,
-            phoneNumber: userData.phone,
-            role: userData.role,
-            status: userData.isActive, // Sửa ở đây
+            phoneNumber: userData.phoneNumber,
+            avatar: userData.avatar,
+            status: userData.isActive,
             password: userData.password
         };
 
@@ -306,21 +306,11 @@ export const userService = {
                 images: Array.isArray(ticket.images) ? ticket.images : [],
                 response: ticket.response
             }));
-        } catch (error) {
-            if (error && typeof error === 'object' && 'response' in error) {
-                // Add preventDefault flag to suppress default error handling
-                (error as any).preventDefault = true;
+        } catch (error: any) {
+            // Error already shown by axios interceptor
+            console.error('Error fetching support tickets:', error);
 
-                // Log error in development only
-                if (process.env.NODE_ENV === 'development') {
-                    const axiosError = error as { response?: { status: number; data: any } };
-                    console.error(
-                        'Support tickets fetch error:',
-                        axiosError.response?.status,
-                        axiosError.response?.data
-                    );
-                }
-            }
+            // Return empty array for graceful degradation
             return [];
         }
     },
@@ -590,18 +580,14 @@ export const userService = {
      * Create a new comment on a blog post
      * @param blogId Blog post ID
      * @param content Comment content
-     * @param parentCommentId Optional parent comment ID for replies
      * @returns Promise with created comment
      */
-    createComment: async (blogId: string, content: string, parentCommentId?: string): Promise<Comment | null> => {
+    createComment: async (blogId: string, content: string): Promise<Comment | null> => {
         try {
             // Get the token from localStorage
             const token = localStorage.getItem('token');
 
-            const payload: any = { content };
-            if (parentCommentId) {
-                payload.parentCommentId = parentCommentId;
-            }
+            const payload = { content };
 
             const response = await axios.post(`/Blogger/${blogId}/comments`, payload, {
                 headers: token ? {
@@ -610,10 +596,39 @@ export const userService = {
             });
 
             return response.data;
-        } catch (error) {
-            console.error('Error creating comment:', error);
-            return null;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return null;
+    }
+    },
+
+    /**
+     * Create a reply to a comment
+     * @param blogId Blog post ID
+     * @param content Reply content
+     * @param parentCommentId Parent comment ID
+     * @returns Promise with created reply
+     */
+    createReplyComment: async (blogId: string, content: string, parentCommentId: string): Promise<Comment | null> => {
+        try {
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            const payload = { content };
+
+            const response = await axios.post(`/Blogger/${blogId}/comments/${parentCommentId}/reply`, payload, {
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`
+                } : undefined
+            });
+
+            return response.data;
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return null;
+    }
     },    /**
      * Like a comment
      * @param commentId Comment ID
@@ -629,10 +644,11 @@ export const userService = {
                 } : undefined
             });
             return response.data;
-        } catch (error) {
-            console.error('Error liking comment:', error);
-            return null;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        console.error('Service error:', error);
+        return null;
+    }
     },
 
     /**
@@ -661,10 +677,13 @@ export const userService = {
             });
 
             return response.data;
-        } catch (error) {
-            console.error('Error toggling blog reaction:', error);
-            throw error;
-        }
+        } catch (error: any) {
+        // Error already shown by axios interceptor
+        throw {
+            message: error.standardizedError?.message || getErrorMessage(error),
+            statusCode: error.standardizedError?.statusCode || 500
+        };
+    }
     },
 
     /**
@@ -777,12 +796,9 @@ export default userService;
 export type User = {
     id: string;
     name: string;
-    email: string;
-    phone: string;
-    role: string;
-    status: boolean;
+    phoneNumber: string;
     avatar?: string;
-    isVerified: boolean;
+    isActive: boolean;
     createdAt: string;
     updatedAt: string;
 };
@@ -796,9 +812,8 @@ export type GetUsersResponse = {
 
 type ApiUpdateUserPayload = {
     name?: string;
-    email?: string;
     phoneNumber?: string;
-    role?: string;
+    avatar?: string;
     status?: boolean;
 };
 
@@ -817,3 +832,4 @@ export type ApiGetUsersResponse = {
     page: number;
     pageSize: number;
 };
+

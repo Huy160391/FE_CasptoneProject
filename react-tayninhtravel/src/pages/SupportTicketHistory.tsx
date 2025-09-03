@@ -18,7 +18,7 @@ const SupportTicketHistory = ({ data, loading }: SupportTicketHistoryProps) => {
             <Card>
                 <div style={{ marginBottom: 16 }}>
                     <Title level={4}>
-                        🎧 {t('supportTicketHistory.title', 'Lịch sử yêu cầu hỗ trợ')}
+                        {t('supportTicketHistory.title', 'Lịch sử yêu cầu hỗ trợ')}
                     </Title>
                     <Text type="secondary">
                         {t('supportTicketHistory.description', 'Theo dõi các yêu cầu hỗ trợ bạn đã gửi và trạng thái xử lý')}

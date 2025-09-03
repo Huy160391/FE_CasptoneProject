@@ -1,5 +1,13 @@
 import axios from '../config/axios';
+
 import { ApiResponse } from '../types';
+
+// LocationOption interface for start/end location options
+export interface LocationOption {
+    location: string;
+    usageCount: number;
+    isPopular: boolean;
+}
 
 // TourDetail interface matching TourDetailsPage requirements
 export interface TourDetail {
@@ -13,6 +21,9 @@ export interface TourDetail {
     status: string | number; // API trả về string, nhưng components có thể convert thành number
     startLocation?: string;
     endLocation?: string;
+    // IDs for fetching related data
+    tourCompanyId?: string;
+    tourGuideId?: string;
     tourOperation?: {
         id: string;
         price: number;
@@ -21,6 +32,13 @@ export interface TourDetail {
         isActive: boolean;
         tourStartDate?: string;
         tourEndDate?: string;
+        // Guide information from API response
+        guideId?: string;
+        guideName?: string;
+        guideEmail?: string;
+        guidePhoneNumber?: string;
+        status?: string;
+        statusName?: string;
     };
     timeline?: Array<{
         id: string;
@@ -58,7 +76,36 @@ export interface TourDetail {
             email: string;
         };
     };
+    // Thông tin công ty tổ chức
+    tourCompany?: {
+        id: string;
+        name: string;
+        description?: string;
+        address?: string;
+        phoneNumber?: string;
+        email?: string;
+        website?: string;
+        logoUrl?: string;
+        businessLicense?: string;
+        rating?: number;
+        isActive: boolean;
+    };
+    // Thông tin hướng dẫn viên
+    tourGuide?: {
+        id: string;
+        name: string;
+        avatar?: string;
+        phoneNumber?: string;
+        email?: string;
+        experience?: string;
+        skills?: string[];
+        rating?: number;
+        languages?: string[];
+        isActive: boolean;
+    };
 }
+
+
 
 /**
  * Service for public TourDetails operations (no authentication required)
@@ -96,12 +143,26 @@ export class TourDetailsService {
         pageIndex?: number;
         pageSize?: number;
         includeInactive?: boolean;
+        searchTerm?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        scheduleDay?: string;
+        hasEarlyBird?: boolean;
+        startLocation?: string;
+        endLocation?: string;
     } = {}): Promise<ApiResponse<TourDetail[]>> {
-        const queryParams = {
+        const queryParams: Record<string, any> = {
             pageIndex: params.pageIndex || 0,
             pageSize: params.pageSize || 10,
             includeInactive: params.includeInactive || false
         };
+        if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+        if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice;
+        if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice;
+        if (params.scheduleDay) queryParams.scheduleDay = params.scheduleDay;
+        if (params.hasEarlyBird !== undefined) queryParams.hasEarlyBird = params.hasEarlyBird;
+        if (params.startLocation) queryParams.startLocation = params.startLocation;
+        if (params.endLocation) queryParams.endLocation = params.endLocation;
 
         const response = await axios.get(`${this.baseUrl}/paginated`, { params: queryParams });
         return response.data;
@@ -122,6 +183,24 @@ export class TourDetailsService {
         });
         return response.data;
     }
+
+    /**
+     * Get start location options
+     * @returns Promise with start location options
+     */
+    async getStartLocationOptions(): Promise<ApiResponse<LocationOption[]>> {
+        const response = await axios.get(`${this.baseUrl}/location-options/start`);
+        return response.data;
+    }
+
+    /**
+     * Get end location options
+     * @returns Promise with end location options
+     */
+    async getEndLocationOptions(): Promise<ApiResponse<LocationOption[]>> {
+        const response = await axios.get(`${this.baseUrl}/location-options/end`);
+        return response.data;
+    }
 }
 
 // Export singleton instance
@@ -129,3 +208,4 @@ export const tourDetailsService = new TourDetailsService();
 
 // Export default for convenient imports
 export default tourDetailsService;
+

@@ -10,6 +10,7 @@ import {
   Alert,
   Button,
   Card,
+  Checkbox,
   Col,
   Descriptions,
   Divider,
@@ -27,6 +28,7 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import LoginModal from "../components/auth/LoginModal";
 import { useEnhancedPayment } from "../services/enhancedPaymentService";
 import { formatCurrency } from "../services/paymentService";
@@ -60,6 +62,7 @@ interface BookingFormData {
 }
 
 const BookingPage: React.FC = () => {
+  const { t } = useTranslation();
   const { tourId } = useParams<{ tourId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -93,6 +96,9 @@ const BookingPage: React.FC = () => {
     guests: [{ guestName: "", guestEmail: "", guestPhone: "" }], // ✅ NEW
   });
 
+  // Confirmation checkbox state
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+
   // Tour slots state
   const [tourSlots, setTourSlots] = useState<TourSlotDto[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TourSlotDto | null>(null);
@@ -111,7 +117,7 @@ const BookingPage: React.FC = () => {
   useEffect(() => {
     const loadTourDetails = async () => {
       if (!tourId) {
-        setError("Không tìm thấy ID tour");
+        setError(t('booking.errors.tourIdNotFound', 'Không tìm thấy ID tour'));
         setLoading(false);
         return;
       }
@@ -142,12 +148,21 @@ const BookingPage: React.FC = () => {
             ...initialValues,
             guests: [],
           });
+
+          // Trigger initial price calculation after form is set
+          setTimeout(() => {
+            if (initialValues.numberOfGuests > 0) {
+              handleGuestCountChange({
+                numberOfGuests: initialValues.numberOfGuests,
+              });
+            }
+          }, 100);
         } else {
-          setError(response.message || "Không thể tải thông tin tour");
+          setError(response.message || t('booking.errors.loadTourDetails', 'Không thể tải thông tin tour'));
         }
       } catch (error: any) {
         console.error("Error loading tour details:", error);
-        setError(error.message || "Có lỗi xảy ra khi tải thông tin tour");
+        setError(error.message || t('booking.errors.loadTourDetailsGeneric', 'Có lỗi xảy ra khi tải thông tin tour'));
       } finally {
         setLoading(false);
       }
@@ -155,6 +170,26 @@ const BookingPage: React.FC = () => {
 
     loadTourDetails();
   }, [tourId, user, form, bookingData]);
+
+  // Auto-calculate price when both tourDetails and selectedSlot are available
+  useEffect(() => {
+    if (
+      tourDetails &&
+      selectedSlot &&
+      formValues.numberOfGuests > 0 &&
+      !calculating &&
+      !priceCalculation
+    ) {
+      console.log("Auto-triggering price calculation on component ready");
+      handleGuestCountChange({ numberOfGuests: formValues.numberOfGuests });
+    }
+  }, [
+    tourDetails,
+    selectedSlot,
+    formValues.numberOfGuests,
+    calculating,
+    priceCalculation,
+  ]);
 
   // Load tour slots
   const loadTourSlots = async (tourDetailsId: string) => {
@@ -177,6 +212,10 @@ const BookingPage: React.FC = () => {
         const availableSlots = response.data.filter((slot) => {
           const slotDate = new Date(slot.tourDate);
           const isNotPast = slotDate >= today;
+          const isInProgress = slot.status === 5 ||
+            slot.statusName?.toLowerCase().includes('inprogress') ||
+            slot.statusName?.toLowerCase().includes('đang thực hiện') ||
+            slot.statusName?.toLowerCase().includes('đang tiến hành'); // InProgress status
 
           console.log(`🔍 Slot ${slot.id} SIMPLE DEBUG:`, {
             tourDate: slot.tourDate,
@@ -187,16 +226,19 @@ const BookingPage: React.FC = () => {
             currentBookings: slot.currentBookings,
             availableSpots: slot.availableSpots,
             isNotPast: isNotPast,
-            willShow: slot.isActive && isNotPast ? "✅ SHOW" : "❌ HIDE",
+            isInProgress: isInProgress,
+            willShow: slot.isActive && isNotPast && !isInProgress ? "✅ SHOW" : "❌ HIDE",
             hideReason: !slot.isActive
               ? "not active"
               : !isNotPast
-              ? "in past"
-              : null,
+                ? "in past"
+                : isInProgress
+                  ? "in progress"
+                  : null,
           });
 
-          // ✅ SIMPLIFIED: Only filter out inactive and past slots
-          return slot.isActive && isNotPast;
+          // ✅ UPDATED: Filter out inactive, past slots, and InProgress slots
+          return slot.isActive && isNotPast && !isInProgress;
         });
 
         console.log("Available slots after filtering:", availableSlots);
@@ -205,6 +247,13 @@ const BookingPage: React.FC = () => {
         // Auto-select first available slot if only one
         if (availableSlots.length === 1) {
           setSelectedSlot(availableSlots[0]);
+          // Trigger price calculation for auto-selected slot
+          const currentValues = form.getFieldsValue();
+          if (currentValues.numberOfGuests > 0) {
+            handleGuestCountChange({
+              numberOfGuests: currentValues.numberOfGuests,
+            });
+          }
         }
 
         // Clear selected slot if it's no longer available
@@ -222,22 +271,59 @@ const BookingPage: React.FC = () => {
     }
   };
 
+  // Update availability when slot changes
+  const updateSlotAvailability = async (slot: TourSlotDto, guestCount: number = 1) => {
+    if (!slot) return;
+
+    try {
+      const availabilityResponse = await checkTourSlotCapacity(
+        slot.id,
+        guestCount,
+        token ?? undefined
+      );
+
+      if (availabilityResponse.success) {
+        console.log("Updated slot availability:", availabilityResponse.data);
+        setAvailability(availabilityResponse.data);
+      } else {
+        console.warn("Failed to check slot availability:", availabilityResponse.message);
+        // Fallback to legacy TourOperation check
+        if (tourDetails) {
+          const legacyResponse = await checkTourAvailability(
+            tourDetails.tourOperation.id,
+            guestCount,
+            token ?? undefined
+          );
+          if (legacyResponse.success) {
+            console.log("Fallback availability:", legacyResponse.data);
+            setAvailability(legacyResponse.data);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error checking slot availability:", error);
+    }
+  };
+
   // Calculate price when guest count changes
   const handleGuestCountChange = async (values: Partial<BookingFormData>) => {
     if (!tourDetails || !values.numberOfGuests || !selectedSlot) return;
 
     try {
       setCalculating(true);
-      const response = await calculateBookingPrice(
+      console.log(" - TourOperation ID:", tourDetails.tourOperation.id);
+      const response1 = await calculateBookingPrice(
         {
-          tourDetailsId: tourDetails.id,
+          tourOperationId: tourDetails.tourOperation.id, // ✅ FIXED: Pass correct ID to the service
           numberOfGuests: values.numberOfGuests,
         },
         token ?? undefined
       );
+      console.log("API response:", response1);
 
-      if (response.success && response.data) {
-        setPriceCalculation(response.data);
+      if (response1.success && response1.data) {
+        setPriceCalculation(response1.data);
+        console.log("Set priceCalculation:", response1.data);
 
         // ✅ FIXED: Check slot-specific availability instead of TourOperation
         const availabilityResponse = await checkTourSlotCapacity(
@@ -271,7 +357,7 @@ const BookingPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error("Error calculating price:", error);
-      message.error("Không thể tính giá tour");
+      message.error(t('booking.errors.cannotCalculatePrice', 'Không thể tính giá tour'));
     } finally {
       setCalculating(false);
     }
@@ -365,7 +451,7 @@ const BookingPage: React.FC = () => {
     // Validate slot selection for step 0
     if (currentStep === 0) {
       if (tourSlots.length > 0 && !selectedSlot) {
-        message.error("Vui lòng chọn ngày tour");
+        message.error(t('booking.errors.pleaseSelectDate', 'Vui lòng chọn ngày tour'));
         return;
       }
     }
@@ -373,10 +459,16 @@ const BookingPage: React.FC = () => {
     form
       .validateFields()
       .then(() => {
-        setCurrentStep(currentStep + 1);
+        const nextStep = currentStep + 1;
+        setCurrentStep(nextStep);
+
+        // Trigger price calculation when moving to confirmation step (step 2)
+        if (nextStep === 2 && selectedSlot && formValues.numberOfGuests > 0) {
+          handleGuestCountChange({ numberOfGuests: formValues.numberOfGuests });
+        }
       })
       .catch(() => {
-        message.error("Vui lòng điền đầy đủ thông tin");
+        message.error(t('booking.errors.pleaseCompleteInfo', 'Vui lòng điền đầy đủ thông tin'));
       });
   };
 
@@ -394,11 +486,33 @@ const BookingPage: React.FC = () => {
 
     if (!isAuthenticated) {
       setIsLoginModalVisible(true);
+      setSubmitting(false);
       return;
     }
 
     if (!tourDetails || !token) {
       message.error("Thông tin không đầy đủ để đặt tour");
+      setSubmitting(false);
+      return;
+    }
+
+    // Validate price calculation is available
+    if (
+      !priceCalculation ||
+      !priceCalculation.finalPrice ||
+      priceCalculation.finalPrice <= 0
+    ) {
+      message.error(
+        "Chưa có thông tin giá tour. Vui lòng thử lại sau ít phút."
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    // Validate selected slot
+    if (!selectedSlot) {
+      message.error(t('booking.errors.pleaseSelectDate'));
+      setSubmitting(false);
       return;
     }
 
@@ -495,9 +609,8 @@ const BookingPage: React.FC = () => {
             // Amount: Try multiple sources
             amount: priceCalculation?.finalPrice || 0,
 
-            description: `Tour Booking - ${
-              response.data?.bookingCode || "Individual QR System"
-            }`,
+            description: `Tour Booking - ${response.data?.bookingCode || "Individual QR System"
+              }`,
           };
 
           // Validate required fields
@@ -514,8 +627,7 @@ const BookingPage: React.FC = () => {
         } catch (enhancedError: any) {
           console.error("Enhanced payment failed:", enhancedError);
           message.error(
-            `Không thể tạo thanh toán: ${
-              enhancedError.message || "Lỗi không xác định"
+            `Không thể tạo thanh toán: ${enhancedError.message || "Lỗi không xác định"
             }`
           );
         } finally {
@@ -528,8 +640,8 @@ const BookingPage: React.FC = () => {
       console.error("Booking error:", error);
       message.error(
         error.response?.data?.message ||
-          error.message ||
-          "Có lỗi xảy ra khi đặt tour"
+        error.message ||
+        "Có lỗi xảy ra khi đặt tour"
       );
     } finally {
       setSubmitting(false);
@@ -555,13 +667,13 @@ const BookingPage: React.FC = () => {
     return (
       <div style={{ padding: "40px 20px", textAlign: "center" }}>
         <Alert
-          message="Không thể tải thông tin tour"
-          description={error || "Tour không tồn tại hoặc đã bị xóa"}
+          message={t('booking.errors.cannotLoadTour', 'Không thể tải thông tin tour')}
+          description={error || t('booking.errors.tourNotExists', 'Tour không tồn tại hoặc đã bị xóa')}
           type="error"
           showIcon
           action={
-            <Button type="primary" onClick={() => navigate("/things-to-do")}>
-              Xem tour khác
+            <Button type="primary" onClick={() => navigate("/tours")}>
+              {t('booking.viewOtherTours', 'Xem tour khác')}
             </Button>
           }
         />
@@ -571,23 +683,23 @@ const BookingPage: React.FC = () => {
 
   const steps = [
     {
-      title: "Thông tin tour",
+      title: t('booking.steps.tourInfo', 'Thông tin tour'),
       icon: <InfoCircleOutlined />,
     },
     {
-      title: "Thông tin khách hàng",
+      title: t('booking.steps.customerInfo', 'Thông tin khách hàng'),
       icon: <UserOutlined />,
     },
     {
-      title: "Xác nhận & Thanh toán",
+      title: t('booking.steps.confirmPayment', 'Xác nhận & Thanh toán'),
       icon: <CreditCardOutlined />,
     },
   ];
-
+  console.log("DEBUG priceCalculation:", priceCalculation);
   return (
     <div style={{ padding: "20px", maxWidth: 1200, margin: "0 auto" }}>
       <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
-        Đặt Tour: {tourDetails.title}
+        {t('booking.title', 'Đặt Tour')}: {tourDetails.title}
       </Title>
 
       <Steps current={currentStep} style={{ marginBottom: 32 }}>
@@ -601,31 +713,28 @@ const BookingPage: React.FC = () => {
           <Card>
             {currentStep === 0 && (
               <div>
-                <Title level={4}>Thông tin tour</Title>
+                <Title level={4}>{t('booking.tourInfo.title', 'Thông tin tour')}</Title>
                 <Descriptions column={1} bordered>
-                  <Descriptions.Item label="Tên tour">
+                  <Descriptions.Item label={t('booking.tourInfo.tourName', 'Tên tour')}>
                     {tourDetails.title}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Điểm khởi hành">
+                  <Descriptions.Item label={t('booking.tourInfo.startLocation', 'Điểm khởi hành')}>
                     {tourDetails.startLocation}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Điểm kết thúc">
+                  <Descriptions.Item label={t('booking.tourInfo.endLocation', 'Điểm kết thúc')}>
                     {tourDetails.endLocation}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Giá cơ bản">
-                    {formatCurrency(tourDetails.tourOperation.price)} / người
+                  <Descriptions.Item label={t('booking.tourInfo.basePrice', 'Giá cơ bản')}>
+                    {formatCurrency(tourDetails.tourOperation.price)} / {t('booking.common.person', 'người')}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Số chỗ tối đa">
-                    {tourDetails.tourOperation.maxGuests} người
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Đã đặt">
-                    {tourDetails.tourOperation.currentBookings} người
+                  <Descriptions.Item label={t('booking.tourInfo.maxGuests', 'Số chỗ tối đa')}>
+                    {tourDetails.tourOperation.maxGuests} {t('booking.common.person', 'người')}
                   </Descriptions.Item>
                   {/* Tour Slot Selection */}
-                  <Descriptions.Item label="Chọn ngày tour" span={2}>
+                  <Descriptions.Item label={t('booking.tourInfo.selectDate', 'Chọn ngày tour')} span={2}>
                     {slotsLoading ? (
                       <div style={{ textAlign: "center", padding: "20px" }}>
-                        <Spin /> Đang tải lịch trình...
+                        <Spin /> {t('booking.tourInfo.loadingSchedule', 'Đang tải lịch trình...')}
                       </div>
                     ) : tourSlots.length > 0 ? (
                       <div>
@@ -666,6 +775,21 @@ const BookingPage: React.FC = () => {
                                                         opacity: 0.7;
                                                     }
 
+                                                    .tour-slot.completed {
+                                                        border-color: #d9d9d9;
+                                                        background-color: #f5f5f5;
+                                                        cursor: not-allowed;
+                                                        opacity: 0.5;
+                                                        color: #bfbfbf;
+                                                    }
+
+                                                    .tour-slot.completed:hover {
+                                                        border-color: #d9d9d9;
+                                                        background-color: #f5f5f5;
+                                                        transform: none;
+                                                        box-shadow: none;
+                                                    }
+
                                                     /* Dark mode */
                                                     [data-theme="dark"] .tour-slot {
                                                         border-color: #434343;
@@ -685,6 +809,21 @@ const BookingPage: React.FC = () => {
 
                                                     [data-theme="dark"] .tour-slot.sold-out {
                                                         background-color: #2a1215;
+                                                    }
+
+                                                    [data-theme="dark"] .tour-slot.completed {
+                                                        border-color: #434343;
+                                                        background-color: #262626;
+                                                        color: #595959;
+                                                        cursor: not-allowed;
+                                                        opacity: 0.5;
+                                                    }
+
+                                                    [data-theme="dark"] .tour-slot.completed:hover {
+                                                        border-color: #434343;
+                                                        background-color: #262626;
+                                                        transform: none;
+                                                        box-shadow: none;
                                                     }
                                                 `}</style>
                         <div style={{ marginBottom: 12 }}>
@@ -729,13 +868,45 @@ const BookingPage: React.FC = () => {
                             // Ensure non-negative
                             availableSpots = Math.max(0, availableSpots);
 
-                            // ✅ FIXED: Check status properly - only FullyBooked (status 2) or Cancelled (status 3) should be disabled
+                            // ✅ FIXED: Check status properly - disable FullyBooked (status 2), Cancelled (status 3), and InProgress (status 5)
                             const isSoldOut =
                               availableSpots === 0 ||
                               slot.status === 2 ||
                               slot.status === 3;
+
+                            // Check if slot is InProgress (status 5 or by statusName)
+                            const isInProgress = slot.status === 5 ||
+                              slot.statusName?.toLowerCase().includes('inprogress') ||
+                              slot.statusName?.toLowerCase().includes('đang thực hiện') ||
+                              slot.statusName?.toLowerCase().includes('đang tiến hành');
+
+                            // Check if slot is completed - typically status 4, or check by statusName
+                            const isCompleted =
+                              slot.status === 4 ||
+                              slot.statusName?.toLowerCase().includes('hoàn thành') ||
+                              slot.statusName?.toLowerCase().includes('completed') ||
+                              slot.statusName?.toLowerCase().includes('finished');
+
                             const isLowAvailability =
                               availableSpots > 0 && availableSpots < 5;
+
+                            // Debug log for each slot being rendered
+                            console.log(`🎯 RENDERING Slot ${slot.id}:`, {
+                              tourDate: slot.tourDate,
+                              status: slot.status,
+                              statusName: slot.statusName,
+                              isInProgress: isInProgress,
+                              isCompleted: isCompleted,
+                              willHide: isCompleted || isInProgress ? "YES" : "NO"
+                            });
+
+                            // ✅ OPTION 1: Hide completed and InProgress slots entirely (current behavior)
+                            if (isCompleted || isInProgress) {
+                              return null;
+                            }
+
+                            // ✅ OPTION 2: Show completed slots but disabled (uncomment below and comment above)
+                            // Completed slots will be shown with grayed-out style and not clickable
 
                             // ✅ NEW: Special case for FullyBooked but has spots (status inconsistency)
                             // Đã xoá biến isInconsistent vì không sử dụng
@@ -743,12 +914,11 @@ const BookingPage: React.FC = () => {
                             return (
                               <div
                                 key={slot.id}
-                                className={`tour-slot ${
-                                  selectedSlot?.id === slot.id ? "selected" : ""
-                                } ${
-                                  isLowAvailability ? "low-availability" : ""
-                                } ${isSoldOut ? "sold-out" : ""}`}
-                                onClick={(e) => {
+                                className={`tour-slot ${selectedSlot?.id === slot.id ? "selected" : ""
+                                  } ${isLowAvailability ? "low-availability" : ""
+                                  } ${isSoldOut ? "sold-out" : ""
+                                  } ${isCompleted ? "completed" : ""}`}
+                                onClick={async (e) => {
                                   // ✅ FIXED: Check for disabled statuses
                                   if (slot.status === 2) {
                                     // FullyBooked
@@ -763,6 +933,23 @@ const BookingPage: React.FC = () => {
                                     // Cancelled
                                     e.preventDefault();
                                     message.warning("Slot này đã bị hủy");
+                                    return;
+                                  }
+
+                                  if (slot.status === 5 ||
+                                    slot.statusName?.toLowerCase().includes('inprogress') ||
+                                    slot.statusName?.toLowerCase().includes('đang thực hiện') ||
+                                    slot.statusName?.toLowerCase().includes('đang tiến hành')) {
+                                    // InProgress
+                                    e.preventDefault();
+                                    message.warning("Slot này đang được thực hiện, không thể đặt booking");
+                                    return;
+                                  }
+
+                                  // ✅ NEW: Check for completed slots
+                                  if (isCompleted) {
+                                    e.preventDefault();
+                                    message.warning("Slot này đã hoàn thành, không thể đặt booking");
                                     return;
                                   }
 
@@ -785,9 +972,31 @@ const BookingPage: React.FC = () => {
                                   }
 
                                   setSelectedSlot(slot);
-                                  // Recalculate pricing when slot changes
+                                  // Update availability for the new slot immediately
                                   const currentValues = form.getFieldsValue();
-                                  handleGuestCountChange(currentValues);
+                                  const guestCount = currentValues.numberOfGuests || 1;
+
+                                  // Update availability first
+                                  await updateSlotAvailability(slot, guestCount);
+
+                                  // Only recalculate pricing if we have guest count
+                                  if (currentValues.numberOfGuests > 0) {
+                                    // Just call price calculation, availability already updated
+                                    try {
+                                      const response = await calculateBookingPrice(
+                                        {
+                                          tourOperationId: tourDetails.tourOperation.id,
+                                          numberOfGuests: currentValues.numberOfGuests,
+                                        },
+                                        token ?? undefined
+                                      );
+                                      if (response.success && response.data) {
+                                        setPriceCalculation(response.data);
+                                      }
+                                    } catch (error) {
+                                      console.error("Error calculating price:", error);
+                                    }
+                                  }
                                 }}>
                                 <div style={{ textAlign: "center" }}>
                                   <div
@@ -813,8 +1022,8 @@ const BookingPage: React.FC = () => {
                                         availableSpots > 5
                                           ? "#52c41a"
                                           : availableSpots > 0
-                                          ? "#faad14"
-                                          : "#ff4d4f",
+                                            ? "#faad14"
+                                            : "#ff4d4f",
                                       fontWeight: "bold",
                                     }}>
                                     {availableSpots > 0
@@ -828,7 +1037,7 @@ const BookingPage: React.FC = () => {
                         </div>
                         {!selectedSlot && (
                           <Alert
-                            message="Vui lòng chọn ngày tour"
+                            message={t('booking.errors.pleaseSelectDate')}
                             type="warning"
                             showIcon
                             style={{ marginTop: 12 }}
@@ -838,8 +1047,8 @@ const BookingPage: React.FC = () => {
                     ) : (
                       <div>
                         <Alert
-                          message="Hiện tại chưa có lịch trình khả dụng cho tour này"
-                          description="Các tour slots có thể đã được đặt hết hoặc không có chỗ trống. Vui lòng liên hệ để biết thêm thông tin."
+                          message={t('booking.tourInfo.noScheduleAvailable')}
+                          description={t('booking.tourInfo.noScheduleDescription')}
                           type="info"
                           showIcon
                         />
@@ -860,14 +1069,14 @@ const BookingPage: React.FC = () => {
 
                 {tourDetails.description && (
                   <div style={{ marginTop: 16 }}>
-                    <Title level={5}>Mô tả tour</Title>
+                    <Title level={5}>{t('booking.tourInfo.tourDescription')}</Title>
                     <Paragraph>{tourDetails.description}</Paragraph>
                   </div>
                 )}
 
                 {tourDetails.timeline && tourDetails.timeline.length > 0 && (
                   <div style={{ marginTop: 16 }}>
-                    <Title level={5}>Lịch trình tour</Title>
+                    <Title level={5}>{t('booking.tourInfo.tourTimeline')}</Title>
                     {tourDetails.timeline
                       .sort((a, b) => a.sortOrder - b.sortOrder)
                       .map((item) => (
@@ -895,7 +1104,7 @@ const BookingPage: React.FC = () => {
 
                 <div style={{ textAlign: "right", marginTop: 24 }}>
                   <Button type="primary" onClick={handleNext}>
-                    Tiếp tục
+                    {t('booking.common.continue', 'Tiếp tục')}
                   </Button>
                 </div>
               </div>
@@ -903,7 +1112,7 @@ const BookingPage: React.FC = () => {
 
             {currentStep === 1 && (
               <div>
-                <Title level={4}>Thông tin khách hàng</Title>
+                <Title level={4}>{t('booking.customerInfo.title', 'Thông tin khách hàng')}</Title>
                 <Form
                   form={form}
                   layout="vertical"
@@ -919,11 +1128,11 @@ const BookingPage: React.FC = () => {
                   {/* NEW: Booking Type Selection */}
                   <Form.Item
                     name="bookingType"
-                    label="Loại đặt tour"
+                    label={t('booking.customerInfo.bookingType', 'Loại đặt tour')}
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng chọn loại đặt tour",
+                        message: t('booking.customerInfo.validation.selectBookingType', 'Vui lòng chọn loại đặt tour'),
                       },
                     ]}>
                     <Radio.Group>
@@ -960,13 +1169,13 @@ const BookingPage: React.FC = () => {
                     <Col xs={24} sm={12}>
                       <Form.Item
                         name="numberOfGuests"
-                        label="Số người"
+                        label={t('booking.customerInfo.numberOfGuests')}
                         rules={[
-                          { required: true, message: "Vui lòng nhập số người" },
+                          { required: true, message: t('booking.customerInfo.validation.enterNumberOfGuests') },
                           {
                             type: "number",
                             min: 1,
-                            message: "Phải có ít nhất 1 người",
+                            message: t('booking.customerInfo.validation.minGuests'),
                           },
                         ]}>
                         <InputNumber
@@ -974,7 +1183,7 @@ const BookingPage: React.FC = () => {
                           max={50}
                           style={{ width: "100%" }}
                           prefix={<TeamOutlined />}
-                          placeholder="Nhập số người"
+                          placeholder={t('booking.customerInfo.placeholders.numberOfGuests')}
                         />
                       </Form.Item>
                     </Col>
@@ -984,17 +1193,17 @@ const BookingPage: React.FC = () => {
 
                   <Form.Item
                     name="contactName"
-                    label="Tên người liên hệ"
+                    label={t('booking.customerInfo.contactName')}
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng nhập tên người liên hệ",
+                        message: t('booking.customerInfo.validation.enterContactName'),
                       },
-                      { max: 100, message: "Tên không được quá 100 ký tự" },
+                      { max: 100, message: t('booking.customerInfo.validation.maxContactNameLength') },
                     ]}>
                     <Input
                       prefix={<UserOutlined />}
-                      placeholder="Nhập tên đầy đủ"
+                      placeholder={t('booking.customerInfo.placeholders.contactName')}
                     />
                   </Form.Item>
 
@@ -1002,34 +1211,34 @@ const BookingPage: React.FC = () => {
                     <Col xs={24} sm={12}>
                       <Form.Item
                         name="contactPhone"
-                        label="Số điện thoại"
+                        label={t('booking.customerInfo.contactPhone')}
                         rules={[
                           {
                             required: true,
-                            message: "Vui lòng nhập số điện thoại",
+                            message: t('booking.customerInfo.validation.enterContactPhone'),
                           },
                           {
                             pattern: /^[0-9+\-\s()]+$/,
-                            message: "Số điện thoại không hợp lệ",
+                            message: t('booking.customerInfo.validation.invalidPhone'),
                           },
                         ]}>
                         <Input
                           prefix={<PhoneOutlined />}
-                          placeholder="0123456789"
+                          placeholder={t('booking.customerInfo.placeholders.contactPhone')}
                         />
                       </Form.Item>
                     </Col>
                     <Col xs={24} sm={12}>
                       <Form.Item
                         name="contactEmail"
-                        label="Email"
+                        label={t('booking.customerInfo.contactEmail')}
                         rules={[
-                          { required: true, message: "Vui lòng nhập email" },
-                          { type: "email", message: "Email không hợp lệ" },
+                          { required: true, message: t('booking.customerInfo.validation.enterContactEmail') },
+                          { type: "email", message: t('booking.customerInfo.validation.invalidEmail') },
                         ]}>
                         <Input
                           prefix={<MailOutlined />}
-                          placeholder="email@example.com"
+                          placeholder={t('booking.customerInfo.placeholders.contactEmail')}
                         />
                       </Form.Item>
                     </Col>
@@ -1037,10 +1246,10 @@ const BookingPage: React.FC = () => {
 
                   <Form.Item
                     name="specialRequests"
-                    label="Yêu cầu đặc biệt (tùy chọn)">
+                    label={t('booking.customerInfo.specialRequests')}>
                     <Input.TextArea
                       rows={3}
-                      placeholder="Ví dụ: Ăn chay, dị ứng thực phẩm, yêu cầu phòng riêng..."
+                      placeholder={t('booking.customerInfo.placeholders.specialRequests')}
                       maxLength={500}
                     />
                   </Form.Item>
@@ -1048,10 +1257,10 @@ const BookingPage: React.FC = () => {
                   {/* ✅ NEW: Individual guest information - Only show if individual booking type selected */}
                   {formValues.bookingType === "individual" && (
                     <>
-                      <Divider>Thông tin từng khách hàng</Divider>
+                      <Divider>{t('booking.customerInfo.individualGuestsInfo')}</Divider>
                       <Alert
-                        message="Lưu ý"
-                        description="Mỗi khách hàng sẽ nhận được mã QR riêng để check-in tại các điểm dừng chân"
+                        message={t('booking.customerInfo.guestNotice')}
+                        description={t('booking.customerInfo.guestNoticeDescription')}
                         type="info"
                         showIcon
                         style={{ marginBottom: 16 }}
@@ -1070,7 +1279,7 @@ const BookingPage: React.FC = () => {
                             key={index}
                             size="small"
                             style={{ marginBottom: 16 }}>
-                            <Title level={5}>Khách hàng {index + 1}</Title>
+                            <Title level={5}>{t('booking.customerInfo.guestNumber', { number: index + 1 })}</Title>
 
                             <Row gutter={16}>
                               <Col xs={24} sm={12}>
@@ -1180,9 +1389,9 @@ const BookingPage: React.FC = () => {
 
                 <div style={{ textAlign: "right", marginTop: 24 }}>
                   <Space>
-                    <Button onClick={handlePrev}>Quay lại</Button>
+                    <Button onClick={handlePrev}>{t('booking.common.back', 'Quay lại')}</Button>
                     <Button type="primary" onClick={handleNext}>
-                      Tiếp tục
+                      {t('booking.common.continue', 'Tiếp tục')}
                     </Button>
                   </Space>
                 </div>
@@ -1191,36 +1400,36 @@ const BookingPage: React.FC = () => {
 
             {currentStep === 2 && (
               <div>
-                <Title level={4}>Xác nhận thông tin & Thanh toán</Title>
+                <Title level={4}>{t('booking.confirmation.title', 'Xác nhận thông tin & Thanh toán')}</Title>
 
                 <Alert
-                  message="Vui lòng kiểm tra lại thông tin trước khi thanh toán"
+                  message={t('booking.confirmation.pleaseReview', 'Vui lòng kiểm tra lại thông tin trước khi thanh toán')}
                   type="info"
                   showIcon
                   style={{ marginBottom: 16 }}
                 />
 
-                <Descriptions title="Thông tin tour" column={1} bordered>
-                  <Descriptions.Item label="Tên tour">
+                <Descriptions title={t('booking.confirmation.tourInfo')} column={1} bordered>
+                  <Descriptions.Item label={t('booking.confirmation.tourName')}>
                     {tourDetails.title}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Ngày tour">
+                  <Descriptions.Item label={t('booking.confirmation.tourDate')}>
                     {selectedSlot?.formattedDateWithDay || "Chưa chọn"}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Số khách">
-                    {formValues.numberOfGuests} người
+                  <Descriptions.Item label={t('booking.confirmation.numberOfGuests')}>
+                    {formValues.numberOfGuests} {t('booking.common.person')}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Người liên hệ">
+                  <Descriptions.Item label={t('booking.confirmation.contactName')}>
                     {formValues.contactName}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Điện thoại">
+                  <Descriptions.Item label={t('booking.confirmation.contactPhone')}>
                     {formValues.contactPhone}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Email">
+                  <Descriptions.Item label={t('booking.confirmation.contactEmail')}>
                     {formValues.contactEmail}
                   </Descriptions.Item>
                   {formValues.specialRequests && (
-                    <Descriptions.Item label="Yêu cầu đặc biệt">
+                    <Descriptions.Item label={t('booking.confirmation.specialRequests')}>
                       {formValues.specialRequests}
                     </Descriptions.Item>
                   )}
@@ -1242,20 +1451,53 @@ const BookingPage: React.FC = () => {
                 {/* Payment System Selection - Hidden, always use Enhanced */}
                 {/* Enhanced Payment System is now the only option */}
 
+                {/* Confirmation checkbox */}
+                <div style={{ marginTop: 24, marginBottom: 16 }}>
+                  <Card
+                  // style={{
+                  //   backgroundColor: "var(--ant-color-bg-container, #f9f9f9)",
+                  //   border: "1px solid var(--ant-color-border, #d9d9d9)",
+                  // }}
+                  >
+                    <Checkbox
+                      checked={isTermsAccepted}
+                      onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                      style={{
+                        fontSize: "14px",
+                        lineHeight: "1.6",
+                        alignItems: "flex-start",
+                      }}>
+                      <span style={{ marginLeft: "8px" }}>
+                        <strong>Anh/chị xác nhận đã đọc và đồng ý:</strong>{" "}
+                        Khách hàng tự chịu trách nhiệm sắp xếp phương tiện di
+                        chuyển và có mặt đúng giờ tại điểm check-in theo quy
+                        định của tour. Hệ thống/tour không chịu trách nhiệm về
+                        vấn đề địa lý, khoảng cách hay việc đưa đón khách từ nơi
+                        ở đến điểm tập trung.
+                      </span>
+                    </Checkbox>
+                  </Card>
+                </div>
+
                 <div style={{ textAlign: "right", marginTop: 24 }}>
                   <Space>
-                    <Button onClick={handlePrev}>Quay lại</Button>
+                    <Button onClick={handlePrev}>{t('booking.common.back', 'Quay lại')}</Button>
                     <Button
                       type="primary"
                       size="large"
                       loading={submitting}
                       disabled={
                         submitting ||
+                        !isTermsAccepted ||
+                        !priceCalculation ||
+                        !priceCalculation.finalPrice ||
+                        priceCalculation.finalPrice <= 0 ||
+                        !selectedSlot ||
                         (availability && !availability.isAvailable)
                       }
                       onClick={handleSubmit}
                       icon={<CreditCardOutlined />}>
-                      {submitting ? "Đang xử lý..." : "Đặt tour & Thanh toán"}
+                      {submitting ? t('booking.confirmation.processing', 'Đang xử lý...') : t('booking.confirmation.bookAndPay', 'Đặt tour & Thanh toán')}
                     </Button>
                   </Space>
                 </div>
@@ -1266,7 +1508,7 @@ const BookingPage: React.FC = () => {
 
         <Col xs={24} lg={8}>
           <Card
-            title="Tóm tắt đơn hàng"
+            title={t('booking.summary.title', 'Tóm tắt đơn hàng')}
             style={{ position: "sticky", top: 20 }}>
             <img
               src={
@@ -1290,14 +1532,14 @@ const BookingPage: React.FC = () => {
               <div style={{ textAlign: "center", padding: 20 }}>
                 <Spin />
                 <Text style={{ display: "block", marginTop: 8 }}>
-                  Đang tính giá...
+                  {t('booking.summary.calculatingPrice', 'Đang tính giá...')}
                 </Text>
               </div>
             ) : priceCalculation ? (
               <div>
                 <div style={{ marginBottom: 8 }}>
                   <Text>
-                    Giá gốc ({priceCalculation.numberOfGuests} người):
+                    {t('booking.summary.originalPrice', 'Giá gốc')} ({priceCalculation.numberOfGuests} {t('booking.common.person', 'người')}):
                   </Text>
                   <Text style={{ float: "right" }}>
                     {formatCurrency(priceCalculation.totalOriginalPrice)}
@@ -1307,7 +1549,7 @@ const BookingPage: React.FC = () => {
                 {priceCalculation.discountPercent > 0 && (
                   <div style={{ marginBottom: 8 }}>
                     <Text type="success">
-                      Giảm giá ({priceCalculation.discountPercent}%):
+                      {t('booking.summary.discount', 'Giảm giá')} ({priceCalculation.discountPercent}%):
                     </Text>
                     <Text style={{ float: "right", color: "#52c41a" }}>
                       -{formatCurrency(priceCalculation.discountAmount)}
@@ -1319,7 +1561,7 @@ const BookingPage: React.FC = () => {
 
                 <div style={{ marginBottom: 16 }}>
                   <Text strong style={{ fontSize: 16 }}>
-                    Tổng cộng:
+                    {t('booking.summary.total', 'Tổng cộng')}:
                   </Text>
                   <Text
                     strong
@@ -1330,23 +1572,23 @@ const BookingPage: React.FC = () => {
 
                 {priceCalculation.isEarlyBird && (
                   <Tag color="green" style={{ marginBottom: 8 }}>
-                    🎉 Ưu đãi đặt sớm
+                    🎉 {t('booking.summary.earlyBird', 'Ưu đãi đặt sớm')}
                   </Tag>
                 )}
 
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                  Loại giá: {priceCalculation.pricingType}
+                  {t('booking.summary.priceType', 'Loại giá')}: {priceCalculation.pricingType}
                 </Text>
               </div>
             ) : (
-              <Text type="secondary">Chọn số lượng khách để xem giá</Text>
+              <Text type="secondary">{t('booking.summary.selectGuestsToSeePrice', 'Chọn số lượng khách để xem giá')}</Text>
             )}
 
             {availability && (
               <div style={{ marginTop: 16 }}>
                 <Divider />
                 <div style={{ marginBottom: 8 }}>
-                  <Text>Chỗ trống:</Text>
+                  <Text>{t('booking.summary.availableSlots', 'Chỗ trống')}:</Text>
                   <Text style={{ float: "right" }}>
                     {availability.availableSlots}/{availability.maxGuests}
                   </Text>
@@ -1367,7 +1609,7 @@ const BookingPage: React.FC = () => {
       <LoginModal
         isVisible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
-        onRegisterClick={() => {}}
+        onRegisterClick={() => { }}
         onLoginSuccess={() => {
           setIsLoginModalVisible(false);
           // Retry booking after login

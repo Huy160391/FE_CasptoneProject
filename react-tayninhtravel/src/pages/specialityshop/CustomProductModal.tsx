@@ -99,10 +99,15 @@ const CustomProductModal = ({
                     categoryKey = ENUM_TO_CATEGORY[Number(initialValues.category)] || 'souvenir';
                 }
 
+                // Tính giá gốc nếu có khuyến mãi
+                let originalPrice = initialValues.price;
+                if (initialValues.isSale && initialValues.salePercent && initialValues.salePercent > 0) {
+                    originalPrice = Math.round(initialValues.price / (1 - initialValues.salePercent / 100));
+                }
                 setFormValues({
                     name: initialValues.name,
                     description: initialValues.description || '',
-                    price: initialValues.price,
+                    price: originalPrice,
                     quantityInStock: initialValues.quantityInStock,
                     category: categoryKey.toLowerCase(),
                     isSale: initialValues.isSale || false,
@@ -160,23 +165,6 @@ const CustomProductModal = ({
             setErrors({
                 ...errors,
                 name: 'Vui lòng nhập tên sản phẩm!'
-            });
-        }
-    };
-
-    // Xử lý thay đổi input số
-    const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
-        const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-        setFormValues({
-            ...formValues,
-            [fieldName]: value
-        });
-
-        // Clear error for this field
-        if (errors[fieldName]) {
-            setErrors({
-                ...errors,
-                [fieldName]: ''
             });
         }
     };
@@ -569,15 +557,26 @@ const CustomProductModal = ({
                                 Giá (₫)
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 className={`form-control ${errors.price ? 'error' : ''}`}
                                 name="price"
-                                value={formValues.price || 0}
-                                onChange={(e) => handleNumberChange(e, 'price')}
-                                min="0"
-                                step="1000"
+                                value={formValues.price ? formValues.price.toLocaleString('vi-VN') : ''}
+                                onChange={(e) => {
+                                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                                    setFormValues({
+                                        ...formValues,
+                                        price: raw === '' ? 0 : parseInt(raw, 10)
+                                    });
+                                    if (errors.price) {
+                                        setErrors({ ...errors, price: '' });
+                                    }
+                                }}
                             />
                             {errors.price && <div className="error-message">{errors.price}</div>}
+                            <div style={{ marginTop: 6, fontSize: '13px', color: '#d4380d', fontWeight: 600, background: 'rgba(255, 229, 204, 0.7)', padding: '6px 12px', borderRadius: 6 }}>
+                                * Hãy nhớ kiểm tra lại giá đã bao gồm thuế VAT chưa nhé. <br />
+                                Chúng tôi và cơ quan thuế đều yêu cầu giá công khai của sản phẩm phải có VAT nếu thuộc diện chịu thuế.
+                            </div>
                         </div>
 
                         {/* Số lượng tồn kho */}
@@ -587,12 +586,19 @@ const CustomProductModal = ({
                                 Số lượng tồn kho
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 className={`form-control ${errors.quantityInStock ? 'error' : ''}`}
                                 name="quantityInStock"
-                                value={formValues.quantityInStock || 0}
-                                onChange={(e) => handleNumberChange(e, 'quantityInStock')}
-                                min="0"
+                                value={formValues.quantityInStock ? formValues.quantityInStock.toString() : ''}
+                                onChange={e => {
+                                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                                    let num = raw === '' ? 0 : parseInt(raw, 10);
+                                    if (num > 10000) num = 10000;
+                                    setFormValues({ ...formValues, quantityInStock: num });
+                                    if (errors.quantityInStock) setErrors({ ...errors, quantityInStock: '' });
+                                }}
+                                maxLength={5}
+                                placeholder="1-10.000"
                             />
                             {errors.quantityInStock && <div className="error-message">{errors.quantityInStock}</div>}
                         </div>
@@ -644,13 +650,19 @@ const CustomProductModal = ({
                                     Phần trăm giảm giá (%)
                                 </label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     className={`form-control ${errors.salePercent ? 'error' : ''}`}
                                     name="salePercent"
-                                    value={formValues.salePercent || 0}
-                                    onChange={(e) => handleNumberChange(e, 'salePercent')}
-                                    min="1"
-                                    max="99"
+                                    value={formValues.salePercent ? formValues.salePercent.toString() : ''}
+                                    onChange={e => {
+                                        const raw = e.target.value.replace(/[^0-9]/g, '');
+                                        let num = raw === '' ? 0 : parseInt(raw, 10);
+                                        if (num > 99) num = 99;
+                                        setFormValues({ ...formValues, salePercent: num });
+                                        if (errors.salePercent) setErrors({ ...errors, salePercent: '' });
+                                    }}
+                                    maxLength={2}
+                                    placeholder="1-99"
                                 />
                                 {errors.salePercent && <div className="error-message">{errors.salePercent}</div>}
                             </div>

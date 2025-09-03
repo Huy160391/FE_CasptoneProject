@@ -398,7 +398,7 @@ const ThingsToDoDetail = () => {
             className="breadcrumb"
             items={[
               { title: <Link to="/">{t('thingsToDoDetail.home')}</Link> },
-              { title: <Link to="/things-to-do">{t('thingsToDoDetail.activities')}</Link> },
+              { title: <Link to="/tours">{t('thingsToDoDetail.activities')}</Link> },
               { title: tour.title }
             ]}
           />

@@ -588,3 +588,33 @@ body.dark-mode {
     }
   }
 }
+
+// Dark mode styles for promotion modal
+.dark-modal {
+  .ant-modal-content {
+    background-color: #141414 !important;
+    border: 1px solid #434343;
+  }
+  
+  .ant-modal-header {
+    background-color: #141414 !important;
+    border-bottom: 1px solid #434343;
+    
+    .ant-modal-title {
+      color: #fff !important;
+    }
+  }
+  
+  .ant-modal-body {
+    background-color: #141414 !important;
+    color: #fff !important;
+  }
+  
+  .ant-modal-close {
+    color: #fff !important;
+    
+    &:hover {
+      color: #1677ff !important;
+    }
+  }
+}

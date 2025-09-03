@@ -1,4 +1,5 @@
 import axios from "../config/axios";
+
 import {
   ApiResponse,
   CreateHolidayTourTemplateRequest,
@@ -42,6 +43,63 @@ export const createHolidayTourTemplate = async (
     headers,
   });
   return response.data;
+};
+
+// Enhanced Holiday Tour creation with detailed error handling
+export const createHolidayTourTemplateEnhanced = async (
+  data: CreateHolidayTourTemplateRequest,
+  token?: string
+): Promise<ApiResponse<TourTemplate>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  try {
+    const response = await axios.post("/TourCompany/template/holiday", data, {
+      headers,
+      // Disable automatic error handling for this request
+      validateStatus: () => true, // Accept all status codes
+    });
+
+    // Always return the response data, whether success or error
+    return {
+      success: response.data.success || response.status < 400,
+      statusCode: response.status,
+      message: response.data.message || (response.status < 400 ? "Thành công" : "Có lỗi xảy ra"),
+      validationErrors: response.data.validationErrors || response.data.ValidationErrors || [],
+      fieldErrors: response.data.fieldErrors || response.data.FieldErrors || {},
+      data: response.data.data || null,
+    } as ApiResponse<TourTemplate>;
+
+  } catch (error: any) {
+    // Handle network errors
+    if (error.code === 'ECONNABORTED') {
+      return {
+        success: false,
+        statusCode: 408,
+        message: "Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.",
+        validationErrors: [],
+        fieldErrors: {},
+      } as unknown as ApiResponse<TourTemplate>;
+    }
+
+    if (error.code === 'ERR_NETWORK') {
+      return {
+        success: false,
+        statusCode: 0,
+        message: "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.",
+        validationErrors: [],
+        fieldErrors: {},
+      } as unknown as ApiResponse<TourTemplate>;
+    }
+
+    // For other errors, return generic error
+    return {
+      success: false,
+      statusCode: 500,
+      message: "Có lỗi không xác định xảy ra. Vui lòng thử lại.",
+      validationErrors: [],
+      fieldErrors: {},
+    } as unknown as ApiResponse<TourTemplate>;
+  }
 };
 
 // Lấy danh sách incidents cho tour company
@@ -427,6 +485,16 @@ export const getFeaturedTourDetails = async (
   return response.data;
 };
 
+// Lấy tour holiday
+export const getHolidayTours = async (limit = 6): Promise<ApiResponse<any>> => {
+  const response = await axios.get("/UserTourSearch/holiday", {
+    params: {
+      pageIndex: 0,
+      pageSize: limit,
+    },
+  });
+  return response.data;
+};
 // ===== SPECIALTY SHOP APIs =====
 
 // Lấy danh sách SpecialtyShops
@@ -623,4 +691,145 @@ export const manualInviteGuide = async (
     { headers }
   );
   return response.data;
+};
+
+// ===== DASHBOARD APIs =====
+
+// Lấy thống kê dashboard tổng quan cho TourCompany
+export const getDashboardStatistics = async (
+  params: {
+    year?: number;
+    month?: number;
+    compareWithPrevious?: boolean;
+  } = {},
+  token?: string
+): Promise<ApiResponse<any>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const queryParams = new URLSearchParams();
+
+  if (params.year !== undefined)
+    queryParams.append("year", params.year.toString());
+  if (params.month !== undefined)
+    queryParams.append("month", params.month.toString());
+  if (params.compareWithPrevious !== undefined)
+    queryParams.append(
+      "compareWithPrevious",
+      params.compareWithPrevious.toString()
+    );
+
+  const response = await axios.get(
+    `/TourCompany/dashboard/statistics?${queryParams.toString()}`,
+    { headers }
+  );
+  return response.data;
+};
+
+// Lấy phân tích chi tiết cho TourCompany dashboard
+export const getDetailedAnalytics = async (
+  params: {
+    year?: number;
+    month?: number;
+    tourId?: string;
+    analyticsType?: string;
+    granularity?: string;
+  } = {},
+  token?: string
+): Promise<ApiResponse<any>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const queryParams = new URLSearchParams();
+
+  if (params.year !== undefined)
+    queryParams.append("year", params.year.toString());
+  if (params.month !== undefined)
+    queryParams.append("month", params.month.toString());
+  if (params.tourId) queryParams.append("tourId", params.tourId);
+  if (params.analyticsType)
+    queryParams.append("analyticsType", params.analyticsType);
+  if (params.granularity) queryParams.append("granularity", params.granularity);
+
+  const response = await axios.get(
+    `/TourCompany/dashboard/detailed-analytics?${queryParams.toString()}`,
+    { headers }
+  );
+  return response.data;
+};
+
+// ===== TOUR COMPANY INFO API =====
+
+// Tour Company Info interface based on API response
+export interface TourCompanyInfo {
+  id: string;
+  userId: string;
+  companyName: string;
+  wallet: number;
+  revenueHold: number;
+  description?: string;
+  address?: string;
+  website?: string;
+  businessLicense?: string;
+  isActive: boolean;
+  email: string;
+  fullName: string;
+  phoneNumber: string;
+  publicTour: number;
+}
+
+/**
+ * Get tour company details by ID
+ * @param tourCompanyId - The tour company ID
+ * @param token - JWT token (optional)
+ */
+export const getTourCompanyById = async (
+  tourCompanyId: string,
+  token?: string
+): Promise<ApiResponse<TourCompanyInfo>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await axios.get(`/Cms/TourCompany/${tourCompanyId}`, { headers });
+  return response.data;
+};
+export const getRecentBookings = async (
+  pageSize: number = 10,
+  token?: string
+): Promise<ApiResponse<any[]>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await axios.get(
+    `/TourCompany/dashboard/recent-bookings?pageSize=${pageSize}`,
+    { headers }
+  );
+  return response.data;
+};
+
+// ===== INCIDENT MANAGEMENT APIs =====
+
+/**
+ * Lấy danh sách sự cố theo TourSlotId
+ */
+export const getTourSlotIncidents = async (
+  tourSlotId: string,
+  pageIndex: number = 0,
+  pageSize: number = 10,
+  token?: string
+): Promise<ApiResponse<any>> => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await axios.get(
+    `/TourCompany/tour-slot/${tourSlotId}/incidents?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+    { headers }
+  );
+  return response.data;
+};
+
+/**
+ * Lấy tổng số sự cố của một tour slot (để hiển thị badge)
+ */
+export const getTourSlotIncidentCount = async (
+  tourSlotId: string,
+  token?: string
+): Promise<number> => {
+  try {
+    const response = await getTourSlotIncidents(tourSlotId, 0, 1, token);
+    return response.data?.totalCount || 0;
+  } catch (error) {
+    console.error('Error getting incident count:', error);
+    return 0;
+  }
 };
