@@ -333,10 +333,7 @@ const TourStatusManagement: React.FC = () => {
                   type="primary"
                   style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
                   onClick={handleSkipToRevenueTransfer}
-                  disabled={
-                    !tourSlotInfo.testingActions.canTriggerRevenueTransfer ||
-                    actionLoading
-                  }
+                  disabled={actionLoading}
                   loading={actionLoading}
                   block>
                   Skip to Revenue Transfer
