@@ -1,7 +1,7 @@
-import { Row, Col, Spin, Empty, message } from 'antd'
+import { Row, Col, Spin, Empty, message, Button } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { getFeaturedTourDetails } from '../../services/tourcompanyService'
 import { checkTourAvailability } from '../../services/tourBookingService'
 import { TourDetailsStatus } from '../../types/tour'
@@ -114,7 +114,10 @@ const FeaturedTours = () => {
   if (loading) {
     return (
       <section className="featured-tours">
-        <h2>{t('home.featuredToursTitle')}</h2>
+        <div className="section-header">
+          <h2 className="section-title">{t('home.featuredToursTitle')}</h2>
+          <p className="section-subtitle">{t('home.featuredToursSubtitle')}</p>
+        </div>
         <div style={{ textAlign: 'center', padding: '50px 0' }}>
           <Spin size="large" />
         </div>
@@ -125,7 +128,10 @@ const FeaturedTours = () => {
   if (tours.length === 0) {
     return (
       <section className="featured-tours">
-        <h2>{t('home.featuredToursTitle')}</h2>
+        <div className="section-header">
+          <h2 className="section-title">{t('home.featuredToursTitle')}</h2>
+          <p className="section-subtitle">{t('home.featuredToursSubtitle')}</p>
+        </div>
         <Empty
           description="Hiện tại chưa có tour nào được công khai"
           style={{ padding: '50px 0' }}
@@ -137,7 +143,7 @@ const FeaturedTours = () => {
   return (
     <section className="featured-tours">
       <div className="section-header">
-        <h2>{t('home.featuredToursTitle')}</h2>
+        <h2 className="section-title">{t('home.featuredToursTitle')}</h2>
         <p className="section-subtitle">{t('home.featuredToursSubtitle')}</p>
       </div>
 
@@ -154,12 +160,11 @@ const FeaturedTours = () => {
       </Row>
 
       <div className="view-more">
-        <button
-          className="custom-view-more-btn"
-          onClick={() => navigate('/tours')}
-        >
-          {t('home.viewMoreTours', 'Xem thêm tour')}
-        </button>
+        <Link to="/tours">
+          <Button type="primary" size="large">
+            {t('home.viewMoreTours', 'Xem thêm tour')}
+          </Button>
+        </Link>
       </div>
 
       {/* Login Modal */}

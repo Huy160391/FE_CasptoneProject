@@ -111,7 +111,7 @@ const HolidayTours = () => {
       <section className="holiday-tours">
         <div className="container">
           <div className="section-header">
-            <h2>Tour Ngày Lễ</h2>
+            <h2 className="section-title">Tour Ngày Lễ</h2>
             <p className="section-subtitle">
               Khám phá những tour du lịch đặc biệt dành cho các ngày lễ
             </p>
@@ -129,7 +129,7 @@ const HolidayTours = () => {
       <section className="holiday-tours">
         <div className="container">
           <div className="section-header">
-            <h2>Tour Ngày Lễ</h2>
+            <h2 className="section-title">Tour Ngày Lễ</h2>
             <p className="section-subtitle">
               Khám phá những tour du lịch đặc biệt dành cho các ngày lễ
             </p>
@@ -147,7 +147,7 @@ const HolidayTours = () => {
     <section className="holiday-tours">
       <div className="container">
         <div className="section-header">
-          <h2>Tour Ngày Lễ</h2>
+          <h2 className="section-title">Tour Ngày Lễ</h2>
           <p className="section-subtitle">
             Khám phá những tour du lịch đặc biệt dành cho các ngày lễ
           </p>
@@ -178,7 +178,7 @@ const HolidayTours = () => {
       <LoginModal
         isVisible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
-        onRegisterClick={() => {}}
+        onRegisterClick={() => { }}
         onLoginSuccess={() => {
           setIsLoginModalVisible(false);
           message.success(

@@ -102,6 +102,26 @@ export const getCurrentCart = async (token: string) => {
 
 // Hàm đồng bộ giỏ hàng Zustand với server khi người dùng đăng nhập
 export const syncCartOnLogin = async (token: string) => {
+    // Kiểm tra role của user trước khi đồng bộ cart
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            // Chỉ đồng bộ cart cho user role
+            if (user.role !== 'user') {
+                console.log('Skipping cart sync for non-user role:', user.role);
+                // Clear cart cho các role khác
+                if (useCartStore.setState) {
+                    useCartStore.setState({ items: [] });
+                }
+                localStorage.removeItem('cart-storage');
+                return { items: [] };
+            }
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+        }
+    }
+
     // 1. Lấy cart từ Zustand store
     let localCart: CartItem[] = [];
     try {
