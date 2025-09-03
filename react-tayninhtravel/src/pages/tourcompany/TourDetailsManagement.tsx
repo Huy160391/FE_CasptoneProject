@@ -198,7 +198,11 @@ const TourDetailsManagement: React.FC = () => {
 
 
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: string, status?: TourDetailsStatus) => {
+        if (status === TourDetailsStatus.Public) {
+            message.error('Không thể xóa lịch trình này do đã có slots hoặc operations được assign');
+            return;
+        }
         try {
             const response = await deleteTourDetails(id, token ?? undefined);
             if (response.success) {
@@ -287,14 +291,18 @@ const TourDetailsManagement: React.FC = () => {
             icon: <DeleteOutlined />,
             label: <span style={{ color: '#ff4d4f' }}>Xóa tour</span>,
             onClick: () => {
-                // Show confirmation modal
+                const statusEnum = mapStringToStatusEnum(record.status);
+                if (statusEnum === TourDetailsStatus.Public) {
+                    message.error('Không thể xóa lịch trình này do đã có slots hoặc operations được assign');
+                    return;
+                }
                 Modal.confirm({
                     title: 'Bạn có chắc chắn muốn xóa?',
                     content: 'Hành động này không thể hoàn tác.',
                     okText: 'Có',
                     cancelText: 'Không',
                     okType: 'danger',
-                    onOk: () => handleDelete(record.id)
+                    onOk: () => handleDelete(record.id, statusEnum)
                 });
             }
         });
