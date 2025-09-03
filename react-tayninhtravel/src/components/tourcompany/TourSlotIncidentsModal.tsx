@@ -51,9 +51,14 @@ const TourSlotIncidentsModal: React.FC<TourSlotIncidentsModalProps> = ({
 
     useEffect(() => {
         if (visible && tourSlot && token) {
-            loadIncidents();
+            // Add small delay to prevent rapid API calls
+            const timer = setTimeout(() => {
+                loadIncidents();
+            }, 100);
+
+            return () => clearTimeout(timer);
         }
-    }, [visible, tourSlot, token]);
+    }, [visible, tourSlot?.id, token]); // Use tourSlot.id instead of entire object
 
     const loadIncidents = async () => {
         if (!tourSlot || !token) return;

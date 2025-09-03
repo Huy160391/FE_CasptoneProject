@@ -295,6 +295,12 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
         // Load counts for each slot (in parallel for better performance)
         const promises = slots.map(async (slot) => {
             try {
+                // Only load if we don't already have the count
+                if (incidentCounts[slot.id] !== undefined) {
+                    counts[slot.id] = incidentCounts[slot.id];
+                    return;
+                }
+
                 const response = await getTourSlotIncidents(slot.id, 0, 1, token);
                 counts[slot.id] = response.data?.totalCount || 0;
             } catch (error) {
@@ -305,8 +311,8 @@ const TourDetailsModal: React.FC<TourDetailsModalProps> = ({
 
         await Promise.all(promises);
         setIncidentCounts(counts);
-        // Reload tour details data to refresh invitations
-        loadTourDetailsData();
+        // Don't reload tour details data to avoid infinite loop
+        // loadTourDetailsData(); // REMOVED: This was causing infinite loop
         if (onUpdate) {
             onUpdate();
         }
