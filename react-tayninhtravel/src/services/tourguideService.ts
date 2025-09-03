@@ -346,7 +346,7 @@ export interface CompleteTimelineRequest {
 }
 
 export interface ReportIncidentRequest {
-  tourOperationId: string;
+  tourSlotId: string; // Required - mobile app reports by specific slot
   title: string;
   description: string;
   severity: "Low" | "Medium" | "High" | "Critical";

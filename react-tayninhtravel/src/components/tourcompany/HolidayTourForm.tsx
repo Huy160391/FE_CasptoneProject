@@ -14,19 +14,17 @@ import {
   Spin,
   Space,
   notification,
-  List,
-  Typography,
 } from "antd";
-import { PlusOutlined, CalendarOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { PlusOutlined, CalendarOutlined } from "@ant-design/icons";
 import { useAuthStore } from "../../store/useAuthStore";
 import {
   createHolidayTourTemplateEnhanced,
   handleApiError,
 } from "../../services/tourcompanyService";
+import { publicService } from "../../services/publicService";
 import {
   TourTemplateType,
   CreateHolidayTourTemplateRequest,
-  ApiResponse,
 } from "../../types/tour";
 import dayjs, { Dayjs } from "dayjs";
 import { AxiosError } from "axios";
@@ -34,7 +32,6 @@ import HolidayTourErrorDisplay from "./HolidayTourErrorDisplay";
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { Text } = Typography;
 
 interface HolidayTourFormProps {
   visible: boolean;
@@ -91,19 +88,49 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
         showDetails: false,
       });
 
+      // Đảm bảo tourDate có thời gian mặc định (7:00 AM) nếu chỉ chọn ngày
+      const tourDateTime = values.tourDate.hour() === 0 && values.tourDate.minute() === 0
+        ? values.tourDate.hour(7).minute(0).second(0) // Set 7:00 AM nếu chưa set thời gian
+        : values.tourDate;
+
       const requestData: CreateHolidayTourTemplateRequest = {
         title: values.title,
         templateType: values.templateType,
         startLocation: values.startLocation,
         endLocation: values.endLocation,
-        tourDate: values.tourDate.format("YYYY-MM-DD"),
+        tourDate: tourDateTime.format("YYYY-MM-DDTHH:mm:ss.SSSZ"), // Format datetime đầy đủ cho backend
         images: imageUrls.length > 0 ? imageUrls : [],
       };
 
-      const response = await createHolidayTourTemplateEnhanced(
-        requestData,
-        token || undefined
-      );
+      // Use the enhanced service or fallback to original with error handling
+      let response;
+      try {
+        response = await createHolidayTourTemplateEnhanced(
+          requestData,
+          token || undefined
+        );
+      } catch (importError) {
+        // Fallback if enhanced function is not available
+        console.warn("Enhanced function not available, using fallback");
+        const { createHolidayTourTemplate } = await import("../../services/tourcompanyService");
+        try {
+          response = await createHolidayTourTemplate(requestData, token || undefined);
+        } catch (apiError: any) {
+          // Handle API errors manually
+          if (apiError.response?.data) {
+            response = {
+              success: false,
+              statusCode: apiError.response.status,
+              message: apiError.response.data.message || "Có lỗi xảy ra",
+              validationErrors: apiError.response.data.validationErrors || [],
+              fieldErrors: apiError.response.data.fieldErrors || {},
+              data: null,
+            };
+          } else {
+            throw apiError;
+          }
+        }
+      }
 
       if (response.success) {
         message.success("Tạo Tour Ngày Lễ thành công!");
@@ -128,7 +155,7 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
   };
 
   // Handle backend validation errors
-  const handleBackendErrors = (response: ApiResponse<any>) => {
+  const handleBackendErrors = (response: any) => {
     const { message: errorMessage, validationErrors = [], fieldErrors = {} } = response;
 
     // Show main error message
@@ -146,11 +173,11 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
       const formErrors = Object.entries(fieldErrors).map(([backendField, errors]) => {
         const formField = mapBackendFieldToFormField(backendField);
         return {
-          name: formField,
+          name: formField as keyof HolidayTourFormData,
           errors: Array.isArray(errors) ? errors : [errors as string]
         };
       });
-      form.setFields(formErrors);
+      form.setFields(formErrors as any);
 
       // Also scroll to first error field
       const firstErrorField = formErrors[0]?.name;
@@ -256,12 +283,31 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
   };
 
   const handleImageUpload = async (file: File) => {
-    // TODO: Implement image upload logic
-    // For now, just add a placeholder URL
-    const mockUrl = `https://example.com/images/${file.name}`;
-    setImageUrls((prev) => [...prev, mockUrl]);
-    message.success("Ảnh đã được tải lên thành công");
+    try {
+      setLoading(true);
+
+      // Sử dụng API upload thật
+      const imageUrl = await publicService.uploadImage(file);
+
+      if (imageUrl) {
+        setImageUrls((prev) => [...prev, imageUrl]);
+        message.success("Ảnh đã được tải lên thành công");
+      } else {
+        message.error("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      message.error("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+
     return false; // Prevent default upload
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setImageUrls((prev) => prev.filter((_, index) => index !== indexToRemove));
+    message.success("Đã xóa ảnh");
   };
 
   return (
@@ -275,8 +321,7 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
       open={visible}
       onCancel={handleCancel}
       footer={null}
-      width={800}
-      destroyOnClose>
+      width={800}>
       <Alert
         message="Tour Ngày Lễ"
         description="Tour Ngày Lễ được tạo cho một ngày cụ thể thay vì theo lịch hàng tuần. Hệ thống sẽ tự động tạo một slot duy nhất cho ngày được chọn."
@@ -423,20 +468,63 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
           </Form.Item>
 
           <Form.Item label="Hình Ảnh Tour">
-            <Upload
-              listType="picture-card"
-              beforeUpload={handleImageUpload}
-              showUploadList={{
-                showPreviewIcon: true,
-                showRemoveIcon: true,
-              }}>
-              {imageUrls.length < 5 && (
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Tải lên</div>
+            <div>
+              {/* Hiển thị ảnh đã upload */}
+              {imageUrls.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <Row gutter={[8, 8]}>
+                    {imageUrls.map((url, index) => (
+                      <Col key={index} span={6}>
+                        <div style={{ position: 'relative', border: '1px solid #d9d9d9', borderRadius: 6, overflow: 'hidden' }}>
+                          <img
+                            src={url}
+                            alt={`Tour image ${index + 1}`}
+                            style={{ width: '100%', height: 100, objectFit: 'cover' }}
+                          />
+                          <Button
+                            type="text"
+                            danger
+                            size="small"
+                            onClick={() => handleRemoveImage(index)}
+                            style={{
+                              position: 'absolute',
+                              top: 4,
+                              right: 4,
+                              background: 'rgba(255,255,255,0.8)',
+                              minWidth: 24,
+                              height: 24
+                            }}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
                 </div>
               )}
-            </Upload>
+
+              {/* Upload button */}
+              <Upload
+                listType="picture-card"
+                beforeUpload={handleImageUpload}
+                showUploadList={false}
+                disabled={imageUrls.length >= 5}
+              >
+                {imageUrls.length < 5 && (
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Tải lên ({imageUrls.length}/5)</div>
+                  </div>
+                )}
+              </Upload>
+
+              {imageUrls.length >= 5 && (
+                <div style={{ color: '#999', fontSize: 12, marginTop: 8 }}>
+                  Đã đạt giới hạn tối đa 5 ảnh
+                </div>
+              )}
+            </div>
           </Form.Item>
 
           <div style={{ textAlign: "right", marginTop: 24 }}>

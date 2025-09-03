@@ -1366,7 +1366,6 @@
             "dashboard": "Dashboard",
             "tourTemplates": "Tour Templates",
             "tours": "Tours Management",
-            "transactions": "Transaction History",
             "reviews": "Review History",
             "revenue": "Revenue Dashboard",
             "profile": "Profile",
@@ -1576,30 +1575,7 @@
                 "cancelled": "Cancelled"
             }
         },
-        "transactions": {
-            "title": "Transaction History",
-            "searchPlaceholder": "Search by transaction ID",
-            "columns": {
-                "transactionId": "Transaction ID",
-                "customerName": "Customer Name",
-                "tourName": "Tour Name",
-                "amount": "Amount",
-                "commission": "Commission",
-                "date": "Transaction Date",
-                "status": "Status"
-            },
-            "status": {
-                "completed": "Completed",
-                "pending": "Pending",
-                "cancelled": "Cancelled"
-            },
-            "summary": {
-                "title": "Summary",
-                "totalRevenue": "Total Revenue",
-                "totalCommission": "Total Commission",
-                "totalTransactions": "Total Transactions"
-            }
-        },
+
         "reviews": {
             "title": "Review History",
             "searchPlaceholder": "Search by tour name, customer",

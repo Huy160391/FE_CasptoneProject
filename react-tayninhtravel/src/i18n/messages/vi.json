@@ -1401,7 +1401,6 @@
             "dashboard": "Dashboard",
             "tourTemplates": "Quản lý Tour Template",
             "tours": "Quản lý Tour",
-            "transactions": "Lịch sử giao dịch",
             "reviews": "Lịch sử đánh giá",
             "revenue": "Quản lý doanh thu",
             "wallet": "Quản lý ví",
@@ -1612,30 +1611,7 @@
                 "cancelled": "Đã hủy"
             }
         },
-        "transactions": {
-            "title": "Lịch sử giao dịch",
-            "searchPlaceholder": "Tìm kiếm theo mã giao dịch",
-            "columns": {
-                "transactionId": "Mã giao dịch",
-                "customerName": "Tên khách hàng",
-                "tourName": "Tên tour",
-                "amount": "Số tiền",
-                "commission": "Hoa hồng",
-                "date": "Ngày giao dịch",
-                "status": "Trạng thái"
-            },
-            "status": {
-                "completed": "Hoàn thành",
-                "pending": "Đang xử lý",
-                "cancelled": "Đã hủy"
-            },
-            "summary": {
-                "title": "Tổng kết",
-                "totalRevenue": "Tổng doanh thu",
-                "totalCommission": "Tổng hoa hồng",
-                "totalTransactions": "Tổng giao dịch"
-            }
-        },
+
         "reviews": {
             "title": "Lịch sử đánh giá",
             "searchPlaceholder": "Tìm kiếm theo tên tour, khách hàng",

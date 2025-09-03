@@ -1,14 +1,13 @@
 import React from "react";
 import { Alert, List, Typography, Button, Space, Divider } from "antd";
-import { 
-  ExclamationCircleOutlined, 
-  InfoCircleOutlined, 
+import {
+  ExclamationCircleOutlined,
+  InfoCircleOutlined,
   CalendarOutlined,
-  ClockCircleOutlined,
-  WarningOutlined 
+  WarningOutlined
 } from "@ant-design/icons";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 interface HolidayTourErrorDisplayProps {
   validationErrors?: string[];
