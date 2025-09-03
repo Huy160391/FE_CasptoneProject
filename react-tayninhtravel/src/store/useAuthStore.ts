@@ -70,6 +70,8 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         localStorage.removeItem('token')
         localStorage.removeItem('user')
+        // Đảm bảo cũng clear cart storage khi logout
+        localStorage.removeItem('cart-storage')
         set({ user: null, isAuthenticated: false, token: null, error: null })
       },
       updateUser: (userData) =>

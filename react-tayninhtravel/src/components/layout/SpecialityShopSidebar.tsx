@@ -26,8 +26,8 @@ const SpecialityShopSidebar = () => {
     const { t } = useTranslation();
     const { user, logout } = useAuthStore();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         navigate('/');
     };
 

@@ -3,6 +3,7 @@ import { Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
 import { message } from 'antd';
 import { jwtDecode } from 'jwt-decode';
+import { handleLogoutWithCartSync } from '@/utils/logoutHandler';
 
 interface JWTPayload {
     exp?: number;
@@ -20,7 +21,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     requiredRole,
     requireAuth = true
 }) => {
-    const { isAuthenticated, user, logout } = useAuthStore();
+    const { isAuthenticated, user } = useAuthStore();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -37,23 +38,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                             // Token expired
                             console.warn('Token expired in ProtectedRoute');
                             message.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-                            logout();
+                            handleLogoutWithCartSync(false);
                             navigate('/login');
                         }
                     }
                 } catch (error) {
                     console.error('Error validating token in ProtectedRoute:', error);
                     message.error('Token không hợp lệ. Vui lòng đăng nhập lại.');
-                    logout();
+                    handleLogoutWithCartSync(false);
                     navigate('/login');
                 }
             } else if (requireAuth) {
                 // No token but auth required
-                logout();
+                handleLogoutWithCartSync(false);
                 navigate('/login');
             }
         }
-    }, [isAuthenticated, requireAuth, logout, navigate]);
+    }, [isAuthenticated, requireAuth, navigate]);
 
     // Debug logging
     console.log('ProtectedRoute Debug:', {

@@ -45,14 +45,14 @@ axiosInstance.interceptors.request.use(
                         localStorage.removeItem('refreshToken');
                         localStorage.removeItem('tokenExpirationTime');
                         localStorage.removeItem('auth-storage');
-                        
+
                         // Redirect to login
-                        if (window.location.pathname !== '/login' && 
+                        if (window.location.pathname !== '/login' &&
                             window.location.pathname !== '/' &&
                             !window.location.pathname.includes('/404')) {
                             window.location.href = '/login';
                         }
-                        
+
                         // Cancel the request
                         return Promise.reject(new Error('Token expired'));
                     }
@@ -63,16 +63,16 @@ axiosInstance.interceptors.request.use(
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 localStorage.removeItem('auth-storage');
-                
-                if (window.location.pathname !== '/login' && 
+
+                if (window.location.pathname !== '/login' &&
                     window.location.pathname !== '/' &&
                     !window.location.pathname.includes('/404')) {
                     window.location.href = '/login';
                 }
-                
+
                 return Promise.reject(new Error('Invalid token'));
             }
-            
+
             config.headers.Authorization = `Bearer ${token}`;
         }
 
@@ -129,8 +129,11 @@ axiosInstance.interceptors.response.use(
         // Log error details in development
         logError(error, `API ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
 
-        // Use centralized error handler with notification
-        const errorResponse = handleApiError(error, true);
+        // Check if auto notification should be skipped
+        const skipAutoNotification = error.config?.headers?.['X-Skip-Auto-Notification'] === 'true';
+
+        // Use centralized error handler with notification (unless skipped)
+        const errorResponse = handleApiError(error, !skipAutoNotification);
 
         // Handle specific error cases that need immediate action
         if (error.response?.status === 401) {

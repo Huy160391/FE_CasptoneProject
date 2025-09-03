@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { authService } from '@/services/authService'
 import { syncCartOnLogin } from '@/services/cartService'
+import { API_BASE_URL } from '@/config/constants'
 import ForgotPasswordModal from './ForgotPasswordModal'
 import './AuthModal.scss'
 
@@ -29,6 +30,30 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true)
+
+      // Gọi API trực tiếp để lấy raw response message
+      const rawResponse = await fetch(`${API_BASE_URL}/Authentication/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password
+        })
+      });
+
+      const responseData = await rawResponse.json();
+      console.log('Raw response data:', responseData);
+
+      if (!rawResponse.ok) {
+        // Hiển thị message từ raw response
+        const errorMessage = responseData.message || 'Đăng nhập thất bại';
+        message.error(errorMessage);
+        return;
+      }
+
+      // Nếu thành công, tiếp tục với logic login bình thường
       const response = await authService.login({
         email: values.email,
         password: values.password
@@ -85,9 +110,11 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
         throw new Error('Login response invalid')
       }
     } catch (error: any) {
-      // Error message is already shown by axios interceptor
-      // Just log for debugging
       console.error('Login error:', error)
+
+      // Fallback error message
+      const errorMessage = error.message || 'Đăng nhập thất bại';
+      message.error(errorMessage);
     } finally {
       setLoading(false)
     }
@@ -148,8 +175,11 @@ const LoginModal = ({ isVisible, onClose, onRegisterClick, onLoginSuccess }: Log
                   throw new Error('Login response invalid');
                 }
               } catch (error: any) {
-                // Error message is already shown by axios interceptor
                 console.error('Google login error:', error);
+
+                // Lấy message trực tiếp từ error object cho Google login
+                const errorMessage = error.message || 'Google login failed';
+                message.error(errorMessage);
               } finally {
                 setLoading(false);
               }

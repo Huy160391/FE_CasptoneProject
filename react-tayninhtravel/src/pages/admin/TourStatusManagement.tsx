@@ -255,9 +255,9 @@ const TourStatusManagement: React.FC = () => {
                   {`${tourSlotInfo.bookings.totalGuests} / ${tourSlotInfo.tourSlot.maxGuests}`}
                 </Descriptions.Item>
                 <Descriptions.Item label="Bookings">
-                  {`Confirmed: ${tourSlotInfo.bookings.confirmed}, Pending: ${tourSlotInfo.bookings.pending}`}
+                  {`Đã xác nhận: ${tourSlotInfo.bookings.confirmed}, Chờ xử lý: ${tourSlotInfo.bookings.pending}`}
                 </Descriptions.Item>
-                <Descriptions.Item label="Doanh thu (Confirmed)">
+                <Descriptions.Item label="Doanh thu (Đã xác nhận)">{`${tourSlotInfo.bookings.totalRevenue.toLocaleString()} VNĐ`}
                   {`${tourSlotInfo.bookings.totalRevenue.toLocaleString()} VNĐ`}
                 </Descriptions.Item>
               </Descriptions>

@@ -19,9 +19,10 @@ const Home = () => {
         <TourismHighlights />
         <FeaturedTours />
         <HolidayTours />
+        <FeaturedGuides />
+
         <BlogPosts />
         <BestSellers />
-        <FeaturedGuides />
         <WhyChooseUs />
       </div>
     </div>

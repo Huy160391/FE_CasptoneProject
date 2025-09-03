@@ -32,7 +32,6 @@ import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import VoucherModal from './VoucherModal'
 import { checkoutCart } from '@/services/cartService'
-import { useEnhancedPayment } from '@/services/enhancedPaymentService'
 import './Checkout.scss'
 
 const { Title, Text } = Typography
@@ -74,7 +73,6 @@ const Checkout = () => {
     const navigate = useNavigate()
     const { items, getTotalItems, getTotalPrice } = useCartStore()
     const { isAuthenticated } = useAuthStore()
-    const { createPaymentLink } = useEnhancedPayment()
     const { isDarkMode } = useThemeStore()
 
     const [currentStep, setCurrentStep] = useState(0)
@@ -271,48 +269,55 @@ const Checkout = () => {
 
         setLoading(true)
         try {
-            // === ENHANCED PAYMENT SYSTEM (ONLY) ===
-            notification.info({
-                message: 'Sử dụng Enhanced Payment System',
-                description: 'Đang tạo thanh toán với transaction tracking...'
-            })
-
-            // First create order via legacy system to get orderId
+            // Create order via checkout API
             const res = await checkoutCart('');
+            console.log('Checkout response:', res);
 
-            if (res.orderId) {
-                // Then create enhanced payment link
+            if (res.checkoutUrl && res.orderId) {
+                // Show promotion messages if available
                 if (Array.isArray(res.promotionMessages) && res.promotionMessages.length > 0) {
                     await new Promise<void>(resolve => {
                         const modal = Modal.info({
                             title: t('checkout.promotionTitle', 'Khuyến mãi'),
                             content: (
-                                <div style={{ textAlign: 'center', fontSize: 16 }}>
+                                <div style={{
+                                    textAlign: 'center',
+                                    fontSize: 16,
+                                    color: isDarkMode ? '#fff' : '#000',
+                                    backgroundColor: isDarkMode ? '#141414' : '#fff'
+                                }}>
                                     {res.promotionMessages.join(', ')}
                                 </div>
                             ),
                             centered: true,
                             okButtonProps: { style: { display: 'none' } },
-                            onOk: () => resolve()
+                            onOk: () => resolve(),
+                            // Dark mode styling for modal
+                            style: {
+                                backgroundColor: isDarkMode ? '#141414' : '#fff'
+                            },
+                            className: isDarkMode ? 'dark-modal' : ''
                         });
                         setTimeout(() => {
                             modal.destroy();
                             resolve();
-                        }, 3000);
+                        }, 3500);
                     });
                 }
-                await createPaymentLink({
-                    orderId: res.orderId,
-                    amount: getTotalPrice(),
-                    description: `Product Order - ${res.orderId}`
+
+                // Redirect to PayOS using checkoutUrl from response
+                notification.success({
+                    message: 'Chuyển hướng đến PayOS',
+                    description: 'Đang chuyển hướng đến trang thanh toán...'
                 });
-                // createPaymentLink automatically redirects to PayOS
-                // clearCart()
+
+                window.location.href = res.checkoutUrl;
             } else {
-                throw new Error('Failed to create order');
+                throw new Error('Failed to create order or get checkout URL');
             }
 
         } catch (error) {
+            console.error('Checkout error:', error);
             notification.error({
                 message: t('checkout.orderError'),
                 description: t('checkout.orderErrorDescription')

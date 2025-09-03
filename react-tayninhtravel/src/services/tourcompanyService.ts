@@ -28,7 +28,12 @@ export const createTourTemplate = async (
   data: CreateTourTemplateRequest,
   token?: string
 ): Promise<ApiResponse<TourTemplate>> => {
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers = token
+    ? {
+      Authorization: `Bearer ${token}`,
+      'X-Skip-Auto-Notification': 'true'
+    }
+    : { 'X-Skip-Auto-Notification': 'true' };
   const response = await axios.post("/TourCompany/template", data, { headers });
   return response.data;
 };
@@ -155,7 +160,12 @@ export const updateTourTemplate = async (
   data: UpdateTourTemplateRequest,
   token?: string
 ): Promise<ApiResponse<TourTemplate>> => {
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers = token
+    ? {
+      Authorization: `Bearer ${token}`,
+      'X-Skip-Auto-Notification': 'true'
+    }
+    : { 'X-Skip-Auto-Notification': 'true' };
   const response = await axios.patch(`/TourCompany/template/${id}`, data, {
     headers,
   });

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Button, Space, Tag, Typography, Row, Col, Divider, message } from 'antd';
-import { DownloadOutlined, PrinterOutlined, ShareAltOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Card, Button, Space, Typography, Row, Col, Divider, message } from 'antd';
+import { DownloadOutlined, PrinterOutlined, ShareAltOutlined, } from '@ant-design/icons';
 import QRCode from 'qrcode.react';
 import { TourBookingGuest } from '../../types/individualQR';
 
@@ -182,12 +182,12 @@ const IndividualQRDisplay: React.FC<IndividualQRDisplayProps> = ({
               title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Text strong>{guest.guestName}</Text>
-                  <Tag
+                  {/* <Tag
                     color={guest.isCheckedIn ? 'success' : 'default'}
                     icon={guest.isCheckedIn ? <CheckCircleOutlined /> : <ClockCircleOutlined />}
                   >
                     {guest.isCheckedIn ? 'Đã check-in' : 'Chưa check-in'}
-                  </Tag>
+                  </Tag> */}
                 </div>
               }
               style={{ height: '100%' }}

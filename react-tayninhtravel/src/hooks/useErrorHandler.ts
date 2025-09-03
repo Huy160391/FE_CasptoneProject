@@ -11,7 +11,7 @@ export const useErrorHandler = () => {
    */
   const handleError = useCallback((error: any, customMessage?: string) => {
     const errorMessage = customMessage || getErrorMessage(error);
-    
+
     // Show appropriate notification based on error type
     if (error.isAuthError) {
       message.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
@@ -148,6 +148,51 @@ export const useErrorHandler = () => {
   }, []);
 
   /**
+   * Handle tour template specific errors
+   */
+  const handleTourTemplateError = useCallback((error: any) => {
+    if (error.message?.includes('Template đã tồn tại')) {
+      notification.warning({
+        message: 'Template đã tồn tại',
+        description: 'Template với tên này đã tồn tại cho thời gian đã chọn. Vui lòng chọn tên khác hoặc thời gian khác.',
+        duration: 5
+      });
+    } else if (error.message?.includes('Tháng và năm đã có template')) {
+      notification.warning({
+        message: 'Thời gian không hợp lệ',
+        description: error.message,
+        duration: 5
+      });
+    } else if (error.message?.includes('scheduleDays')) {
+      notification.error({
+        message: 'Ngày trong tuần không hợp lệ',
+        description: 'Chỉ chấp nhận Thứ 7 (6) hoặc Chủ nhật (0)',
+        duration: 5
+      });
+    } else if (error.message?.includes('templateType')) {
+      notification.error({
+        message: 'Loại tour không hợp lệ',
+        description: 'Vui lòng chọn loại tour hợp lệ (1: FreeScenic, 2: PaidAttraction)',
+        duration: 5
+      });
+    } else if (error.response?.status === 400) {
+      notification.error({
+        message: 'Dữ liệu không hợp lệ',
+        description: error.message || 'Vui lòng kiểm tra lại thông tin đã nhập',
+        duration: 5
+      });
+    } else if (error.response?.status === 409) {
+      notification.warning({
+        message: 'Xung đột dữ liệu',
+        description: error.message || 'Dữ liệu đã tồn tại hoặc có xung đột',
+        duration: 5
+      });
+    } else {
+      handleError(error);
+    }
+  }, [handleError]);
+
+  /**
    * Show warning message
    */
   const showWarning = useCallback((message: string) => {
@@ -165,6 +210,7 @@ export const useErrorHandler = () => {
     handlePaymentError,
     handleAuthError,
     handleUploadError,
+    handleTourTemplateError,
     showSuccess,
     showInfo,
     showWarning
