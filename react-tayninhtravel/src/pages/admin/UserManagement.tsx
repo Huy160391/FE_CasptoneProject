@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Input, Space, Tag, Modal, message, Spin, Form as AntForm } from 'antd'
 import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
@@ -16,6 +16,7 @@ const UserManagement = () => {
     const { isAuthenticated, user } = useAuthStore()
     const { t } = useTranslation()
     const [searchText, setSearchText] = useState('')
+    const [debouncedSearchText, setDebouncedSearchText] = useState('')
     const [isModalVisible, setIsModalVisible] = useState(false)
     const [form] = AntForm.useForm()
     const [editingUser, setEditingUser] = useState<User | null>(null)
@@ -33,48 +34,52 @@ const UserManagement = () => {
     const [isViewModalVisible, setIsViewModalVisible] = useState(false)
 
     // Tải danh sách người dùng từ API
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             setLoading(true)
             const response = await adminService.getUsers(
-                pagination.current, // API dùng 0-based index
+                pagination.current - 1, // Convert 1-based to 0-based index for API
                 pagination.pageSize,
-                searchText || undefined,
+                debouncedSearchText || undefined,
                 statusFilter !== undefined ? statusFilter : undefined // Truyền đúng kiểu boolean cho param status
             )
 
             setUsers(response.data)
-            setPagination({
-                ...pagination,
-                total: response.totalRecord ?? response.totalCount ?? 0,
-                pageSize: pagination.pageSize,
-                current: pagination.current,
-            })
+            setPagination(prev => ({
+                ...prev,
+                total: response.totalRecord ?? response.totalCount ?? 0
+            }))
         } catch (error) {
             console.error('Error fetching users:', error)
             message.error(t('admin.users.messages.error.loading'))
         } finally {
             setLoading(false)
         }
-    }
+    }, [pagination.current, pagination.pageSize, debouncedSearchText, statusFilter, t])
 
     // Gọi API khi component được mount hoặc khi các điều kiện tìm kiếm thay đổi
     useEffect(() => {
-        fetchUsers()
-    }, [pagination.current, pagination.pageSize, statusFilter, isAuthenticated, user, navigate, t])
+        if (isAuthenticated && user) {
+            fetchUsers()
+        } else {
+            navigate('/auth/login')
+        }
+    }, [fetchUsers, isAuthenticated, user, navigate])
 
     // Sử dụng debounce cho tìm kiếm để tránh gọi API quá nhiều
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (pagination.current === 1) {
-                fetchUsers()
-            } else {
-                setPagination(prev => ({ ...prev, current: 1 }))
-            }
+            setDebouncedSearchText(searchText)
         }, 500)
 
         return () => clearTimeout(timer)
     }, [searchText])
+
+    // Reset về trang 1 khi debouncedSearchText thay đổi
+    useEffect(() => {
+        if (debouncedSearchText !== searchText) return // Chỉ reset khi debounce hoàn tất
+        setPagination(prev => ({ ...prev, current: 1 }))
+    }, [debouncedSearchText])
 
     const handleTableChange = (newPagination: any, filters: any) => {
         // Chỉ xử lý pagination và filters, không xử lý sorter vì đã sort phía client
@@ -184,9 +189,11 @@ const UserManagement = () => {
                     // Thêm người dùng mới
                     await adminService.createUser({
                         name: values.name,
+                        email: values.email,
                         phoneNumber: values.phone,
+                        role: values.role,
                         avatar: undefined,
-                        isActive: values.isActive,
+                        isActive: true, // Mặc định user mới sẽ hoạt động
                         password: values.password,
                     })
                     message.success(t('admin.users.messages.success.created'))

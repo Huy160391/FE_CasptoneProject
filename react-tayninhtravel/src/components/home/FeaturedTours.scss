@@ -1,14 +1,27 @@
 .featured-guides {
   background: #fff;
-  padding: 40px 0;
+  padding: 80px 0;
   overflow: hidden;
   text-align: center;
 
-  .section-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 25px;
-    color: #333;
+  .section-header {
+    text-align: center;
+    margin-bottom: 48px;
+
+    .section-title {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #333;
+      transition: color 0.3s ease;
+    }
+
+    .section-subtitle {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 0;
+      transition: color 0.3s ease;
+    }
   }
 
   .marquee {
@@ -44,4 +57,82 @@
 @keyframes scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+.featured-tours {
+  padding: 80px 0;
+  background-color: #f5f5f5;
+  transition: background-color 0.3s ease;
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 48px;
+
+    .section-title {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #333;
+      transition: color 0.3s ease;
+    }
+
+    .section-subtitle {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 0;
+      transition: color 0.3s ease;
+    }
+  }
+
+  .view-more {
+    text-align: center;
+    margin-top: 40px;
+
+    .ant-btn {
+      background: #faf9f6;
+      color: #181828;
+      border: none;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 500;
+      padding: 12px 32px;
+      box-shadow: none;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+
+      &:hover,
+      &:focus {
+        background: #f0efeb;
+        color: #181828;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+    }
+  }
+
+  // Dark mode styles
+  body.dark-mode & {
+    background-color: inherit;
+
+    .section-header {
+      .section-title {
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .section-subtitle {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+
+    .view-more {
+      .ant-btn {
+        background: #333;
+        color: #fff;
+
+        &:hover,
+        &:focus {
+          background: #444;
+          color: #fff;
+        }
+      }
+    }
+  }
 }

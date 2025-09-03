@@ -79,12 +79,14 @@ const RegisterModal = ({ isVisible, onClose, onLoginClick }: RegisterModalProps)
                   message.success(t('common.loginSuccess'));
                   form.resetFields();
                   onClose();
-                  // Đồng bộ cart sau khi login thành công
-                  const syncedCart = await syncCartOnLogin(loginRes.token);
-                  if (syncedCart && Array.isArray(syncedCart.items)) {
-                    const { useCartStore } = await import('@/store/useCartStore');
-                    if (useCartStore?.setState) {
-                      useCartStore.setState({ items: syncedCart.items });
+                  // Chỉ đồng bộ cart cho user role
+                  if (loginRes.user.role === 'user') {
+                    const syncedCart = await syncCartOnLogin(loginRes.token);
+                    if (syncedCart && Array.isArray(syncedCart.items)) {
+                      const { useCartStore } = await import('@/store/useCartStore');
+                      if (useCartStore?.setState) {
+                        useCartStore.setState({ items: syncedCart.items });
+                      }
                     }
                   }
                   localStorage.setItem('lastLoginTime', new Date().toISOString());

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { CartItem as BaseCartItem } from '../types'
+import { useAuthStore } from './useAuthStore'
 
 export interface CartItem extends BaseCartItem {
   type: 'product' | 'tour'
@@ -17,6 +18,33 @@ interface CartState {
   getTotalPrice: () => number
   getItem: (id: string | number, type: 'product' | 'tour') => CartItem | undefined
 }
+
+// Custom storage để chỉ persist cart cho user role
+const customStorage = {
+  getItem: (name: string) => {
+    const authStore = useAuthStore.getState();
+    const user = authStore.user;
+
+    // Chỉ load cart từ localStorage nếu user có role 'user'
+    if (user && user.role === 'user') {
+      const value = localStorage.getItem(name);
+      return value ? JSON.parse(value) : null;
+    }
+    return null;
+  },
+  setItem: (name: string, value: any) => {
+    const authStore = useAuthStore.getState();
+    const user = authStore.user;
+
+    // Chỉ save cart vào localStorage nếu user có role 'user'
+    if (user && user.role === 'user') {
+      localStorage.setItem(name, JSON.stringify(value));
+    }
+  },
+  removeItem: (name: string) => {
+    localStorage.removeItem(name);
+  }
+};
 
 export const useCartStore = create<CartState>()(
   persist(
@@ -83,6 +111,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'cart-storage',
+      storage: customStorage,
     }
   )
 )

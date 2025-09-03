@@ -1,15 +1,15 @@
 import { Row, Col, Card } from 'antd'
 import { useTranslation } from 'react-i18next'
-import { 
-  CompassOutlined, 
-  ClockCircleOutlined, 
-  StarOutlined 
+import {
+  CompassOutlined,
+  ClockCircleOutlined,
+  StarOutlined
 } from '@ant-design/icons'
 import './WhyChooseUs.scss'
 
 const WhyChooseUs = () => {
   const { t } = useTranslation()
-  
+
   const features = [
     {
       id: 1,
@@ -30,11 +30,14 @@ const WhyChooseUs = () => {
       description: t('home.features.qualityService.description'),
     },
   ]
-  
+
   return (
     <section className="why-choose-us">
-      <h2>{t('home.whyChooseUs')}</h2>
-      
+      <div className="section-header">
+        <h2 className="section-title">{t('home.whyChooseUs')}</h2>
+        <p className="section-subtitle">{t('home.whyChooseUsSubtitle', 'Những lý do khiến bạn nên lựa chọn chúng tôi')}</p>
+      </div>
+
       <Row gutter={[24, 24]}>
         {features.map(feature => (
           <Col xs={24} sm={8} key={feature.id}>

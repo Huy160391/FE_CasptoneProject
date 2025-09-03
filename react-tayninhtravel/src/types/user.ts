@@ -38,6 +38,8 @@ export interface UpdateUserPayload {
 }
 
 export interface CreateUserPayload extends UpdateUserPayload {
+    email: string;
+    role: string;
     password: string;
 }
 
