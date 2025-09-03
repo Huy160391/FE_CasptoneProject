@@ -1402,7 +1402,6 @@
             "tourTemplates": "Quản lý Tour Template",
             "tours": "Quản lý Tour",
             "reviews": "Lịch sử đánh giá",
-            "revenue": "Quản lý doanh thu",
             "wallet": "Quản lý ví",
             "profile": "Thông tin cá nhân",
             "backToSite": "Về trang chủ",
@@ -1635,20 +1634,6 @@
                 "threeStars": "3 sao",
                 "twoStars": "2 sao",
                 "oneStar": "1 sao"
-            }
-        },
-        "revenue": {
-            "title": "Dashboard doanh thu",
-            "stats": {
-                "totalRevenue": "Tổng doanh thu",
-                "monthlyRevenue": "Doanh thu tháng",
-                "commission": "Hoa hồng",
-                "bookingCount": "Số lượng đặt chỗ"
-            },
-            "charts": {
-                "revenueChart": "Biểu đồ doanh thu",
-                "topTours": "Tour hàng đầu",
-                "revenueBreakdown": "Phân tích doanh thu"
             }
         },
         "common": {

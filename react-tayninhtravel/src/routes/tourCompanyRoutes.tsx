@@ -1,5 +1,4 @@
 import IncidentManagement from "@/pages/tourcompany/IncidentManagement";
-import RevenueDashboard from "@/pages/tourcompany/RevenueDashboard";
 import ReviewHistory from "@/pages/tourcompany/ReviewHistory";
 import TourCompanyDashboard from "@/pages/tourcompany/TourCompanyDashboard";
 import TourCompanyProfile from "@/pages/tourcompany/TourCompanyProfile";
@@ -33,10 +32,6 @@ export const tourCompanyRoutes: RouteObject[] = [
       {
         path: "reviews",
         element: <ReviewHistory />,
-      },
-      {
-        path: "revenue",
-        element: <RevenueDashboard />,
       },
       {
         path: "analytics",

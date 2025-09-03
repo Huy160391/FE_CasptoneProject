@@ -99,6 +99,16 @@ const TourSlotIncidentsModal: React.FC<TourSlotIncidentsModalProps> = ({
         }
     };
 
+    const formatDate = (dateString: string | undefined): string => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleString('vi-VN');
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'N/A';
+        }
+    };
+
     const handleClose = () => {
         setIncidents([]);
         onClose();
@@ -164,7 +174,7 @@ const TourSlotIncidentsModal: React.FC<TourSlotIncidentsModalProps> = ({
                                     <Row gutter={16} style={{ marginTop: 8 }}>
                                         <Col span={12}>
                                             <small style={{ color: '#666' }}>
-                                                <strong>Thời gian báo cáo:</strong> {new Date(incident.reportedAt || incident.createdAt).toLocaleString('vi-VN')}
+                                                <strong>Thời gian báo cáo:</strong> {formatDate(incident.reportedAt || incident.createdAt)}
                                             </small>
                                         </Col>
                                         <Col span={12}>

@@ -2,22 +2,22 @@
 
 ## 🐛 **Vấn đề**
 
-Frontend đang gửi `tourDate` dưới dạng date-only format:
+Frontend đang gửi `tourDate` dưới dạng datetime format:
 ```json
 {
   "title": "stttttttttttttring",
   "startLocation": "ttttttt",
   "endLocation": "ttttttttt",
   "templateType": "FreeScenic",
-  "tourDate": "2025-11-02",  // ❌ Chỉ có ngày, thiếu thời gian
+  "tourDate": "2025-11-02T07:00:00.000+07:00",  // ❌ Datetime đầy đủ, nhưng backend chỉ cần DateOnly
   "images": []
 }
 ```
 
-Backend cần datetime format đầy đủ:
+Backend chỉ cần DateOnly format:
 ```json
 {
-  "tourDate": "2025-11-06T07:00:00.000+07:00"  // ✅ Datetime đầy đủ
+  "tourDate": "2025-11-06"  // ✅ Chỉ ngày
 }
 ```
 
@@ -32,12 +32,8 @@ tourDate: values.tourDate.format("YYYY-MM-DD")  // ❌ Chỉ ngày
 
 **Sau (đúng):**
 ```typescript
-// Đảm bảo tourDate có thời gian mặc định (7:00 AM) nếu chỉ chọn ngày
-const tourDateTime = values.tourDate.hour() === 0 && values.tourDate.minute() === 0 
-  ? values.tourDate.hour(7).minute(0).second(0) // Set 7:00 AM nếu chưa set thời gian
-  : values.tourDate;
-
-tourDate: tourDateTime.format("YYYY-MM-DDTHH:mm:ss.SSSZ") // ✅ Datetime đầy đủ
+// Backend chỉ cần DateOnly, không cần thời gian
+tourDate: values.tourDate.format("YYYY-MM-DD") // ✅ Chỉ ngày
 ```
 
 ### 2. **Cập nhật Type Definition**
@@ -50,16 +46,15 @@ export interface CreateHolidayTourTemplateRequest {
     startLocation: string;
     endLocation: string;
     templateType: TourTemplateType;
-    tourDate: string; // Format: YYYY-MM-DDTHH:mm:ss.SSSZ (ISO datetime)
+    tourDate: string; // Format: YYYY-MM-DD (DateOnly for backend)
     images: string[];
 }
 ```
 
-### 3. **Logic Xử Lý Thời Gian**
+### 3. **Logic Xử Lý Ngày**
 
-- **Nếu người dùng chỉ chọn ngày:** Tự động set thời gian mặc định là 07:00:00
-- **Nếu người dùng chọn cả ngày và giờ:** Giữ nguyên thời gian đã chọn
-- **Format cuối cùng:** `YYYY-MM-DDTHH:mm:ss.SSSZ` (ISO 8601 với timezone)
+- **Backend chỉ cần DateOnly:** Không cần thời gian, chỉ cần ngày
+- **Format cuối cùng:** `YYYY-MM-DD` (DateOnly format)
 
 ## 🧪 **Test Component**
 
@@ -74,18 +69,16 @@ import HolidayTourDateTest from './components/tourcompany/HolidayTourDateTest';
 ```json
 {
   "title": "Test Holiday Tour",
-  "startLocation": "TP.HCM", 
+  "startLocation": "TP.HCM",
   "endLocation": "Tây Ninh",
   "templateType": "FreeScenic",
-  "tourDate": "2025-11-06T07:00:00.000+07:00",  // ✅ Datetime đầy đủ
+  "tourDate": "2025-11-06",  // ✅ Chỉ ngày
   "images": []
 }
 ```
 
-### **Các Format Được Hỗ Trợ:**
-- `2025-11-06T07:00:00.000+07:00` - Với timezone
-- `2025-11-06T07:00:00.000Z` - UTC
-- `2025-11-06T07:00:00` - Local time
+### **Format Được Hỗ Trợ:**
+- `2025-11-06` - DateOnly format cho backend
 
 ## 🔧 **Files Đã Sửa**
 
@@ -98,12 +91,12 @@ import HolidayTourDateTest from './components/tourcompany/HolidayTourDateTest';
 1. **Mở Holiday Tour Form**
 2. **Chọn ngày trong tương lai**
 3. **Submit form**
-4. **Kiểm tra Network tab:** Request body sẽ có `tourDate` với format datetime đầy đủ
+4. **Kiểm tra Network tab:** Request body sẽ có `tourDate` với format DateOnly
 
 ### **Expected Result:**
 ```json
 {
-  "tourDate": "2025-11-06T07:00:00.000+07:00"
+  "tourDate": "2025-11-06"
 }
 ```
 

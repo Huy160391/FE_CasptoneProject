@@ -1367,7 +1367,6 @@
             "tourTemplates": "Tour Templates",
             "tours": "Tours Management",
             "reviews": "Review History",
-            "revenue": "Revenue Dashboard",
             "profile": "Profile",
             "backToSite": "Back to Site",
             "logout": "Logout"
@@ -1599,20 +1598,6 @@
                 "threeStars": "3 Stars",
                 "twoStars": "2 Stars",
                 "oneStar": "1 Star"
-            }
-        },
-        "revenue": {
-            "title": "Revenue Dashboard",
-            "stats": {
-                "totalRevenue": "Total Revenue",
-                "monthlyRevenue": "Monthly Revenue",
-                "commission": "Commission",
-                "bookingCount": "Booking Count"
-            },
-            "charts": {
-                "revenueChart": "Revenue Chart",
-                "topTours": "Top Tours",
-                "revenueBreakdown": "Revenue Breakdown"
             }
         },
         "common": {
