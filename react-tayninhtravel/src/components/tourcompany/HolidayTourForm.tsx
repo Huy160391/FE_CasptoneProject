@@ -13,7 +13,6 @@ import {
   Alert,
   Spin,
   Space,
-  notification,
 } from "antd";
 import { PlusOutlined, CalendarOutlined } from "@ant-design/icons";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -28,7 +27,7 @@ import {
 } from "../../types/tour";
 import dayjs, { Dayjs } from "dayjs";
 import { AxiosError } from "axios";
-import HolidayTourErrorDisplay from "./HolidayTourErrorDisplay";
+
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -99,7 +98,11 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
       };
 
       // Debug logging để kiểm tra request data
-      console.log("Holiday Tour Template Request Data:", JSON.stringify(requestData, null, 2));
+      console.log("=== HOLIDAY TOUR TEMPLATE DEBUG ===");
+      console.log("Selected Date:", values.tourDate.format("YYYY-MM-DD HH:mm:ss"));
+      console.log("Formatted tourDate:", values.tourDate.format("YYYY-MM-DD"));
+      console.log("Request Data:", JSON.stringify(requestData, null, 2));
+      console.log("=== END DEBUG ===");
 
       // Use the enhanced service or fallback to original with error handling
       let response;
@@ -155,10 +158,10 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
 
   // Handle backend validation errors
   const handleBackendErrors = (response: any) => {
-    const { message: errorMessage, validationErrors = [], fieldErrors = {} } = response;
+    const { validationErrors = [], fieldErrors = {} } = response;
 
-    // Show main error message
-    message.error(errorMessage || "Có lỗi xảy ra khi tạo Tour Ngày Lễ");
+    // Skip showing main error message to avoid ugly UI
+    // message.error(errorMessage || "Có lỗi xảy ra khi tạo Tour Ngày Lễ");
 
     // Update error state
     setErrorState({
@@ -190,14 +193,9 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
       }
     }
 
-    // Show detailed notification for validation errors
+    // Show simple notification for validation errors
     if (validationErrors.length > 0 || Object.keys(fieldErrors).length > 0) {
-      notification.error({
-        message: "Lỗi Validation Holiday Tour",
-        description: "Vui lòng kiểm tra thông tin theo hướng dẫn bên dưới",
-        duration: 10,
-        placement: "topRight",
-      });
+      message.warning("Vui lòng kiểm tra lại thông tin đã nhập");
     }
   };
 
@@ -224,12 +222,7 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
     onCancel();
   };
 
-  const handleToggleErrorDetails = () => {
-    setErrorState(prev => ({
-      ...prev,
-      showDetails: !prev.showDetails,
-    }));
-  };
+
 
   const handleDismissErrors = () => {
     setErrorState({
@@ -309,6 +302,43 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
     message.success("Đã xóa ảnh");
   };
 
+  const testHolidayTourTemplate = async () => {
+    const values = await form.validateFields();
+    const testData = {
+      title: values.title,
+      templateType: values.templateType,
+      startLocation: values.startLocation,
+      endLocation: values.endLocation,
+      tourDate: values.tourDate.format("YYYY-MM-DD"),
+      images: [],
+    };
+
+    console.log("Testing Holiday Tour Template with data:", testData);
+
+    try {
+      const { token } = useAuthStore.getState();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch("/api/TourCompany/template/holiday/test", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(testData),
+      });
+
+      const result = await response.json();
+      console.log("Test response:", result);
+      message.info("Check console for test results");
+    } catch (error) {
+      console.error("Test error:", error);
+      message.error("Test failed - check console");
+    }
+  };
+
   return (
     <Modal
       title={
@@ -329,14 +359,18 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
         style={{ marginBottom: 24 }}
       />
 
-      {/* Holiday Tour Error Display */}
-      <HolidayTourErrorDisplay
-        validationErrors={errorState.validationErrors}
-        fieldErrors={errorState.fieldErrors}
-        showDetails={errorState.showDetails}
-        onToggleDetails={handleToggleErrorDetails}
-        onDismiss={handleDismissErrors}
-      />
+      {/* Holiday Tour Error Display - Simplified */}
+      {(errorState.validationErrors.length > 0 || Object.keys(errorState.fieldErrors).length > 0) && (
+        <Alert
+          message="Vui lòng kiểm tra lại thông tin"
+          description="Có một số lỗi validation. Vui lòng xem thông báo bên dưới các trường để biết chi tiết."
+          type="warning"
+          showIcon
+          closable
+          onClose={handleDismissErrors}
+          style={{ marginBottom: 16 }}
+        />
+      )}
 
       <Spin spinning={loading}>
         <Form
@@ -529,6 +563,9 @@ const HolidayTourForm: React.FC<HolidayTourFormProps> = ({
           <div style={{ textAlign: "right", marginTop: 24 }}>
             <Space>
               <Button onClick={handleCancel}>Hủy</Button>
+              <Button onClick={testHolidayTourTemplate} disabled={loading}>
+                Test API
+              </Button>
               <Button type="primary" htmlType="submit" loading={loading}>
                 Tạo Template Tour Ngày Lễ
               </Button>

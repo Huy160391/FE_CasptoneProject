@@ -24,12 +24,17 @@ export const transformRequestData = (data: any): any => {
             if (value instanceof Date) {
                 transformed[key] = toVietnamISOString(value);
             } else if (typeof value === 'string' && isDateString(value)) {
-                // Convert date strings to Vietnam timezone
-                const date = new Date(value);
-                if (!isNaN(date.getTime())) {
-                    transformed[key] = toVietnamISOString(date);
-                } else {
+                // Skip transformation for tourDate field (DateOnly for backend)
+                if (key === 'tourDate') {
                     transformed[key] = value;
+                } else {
+                    // Convert date strings to Vietnam timezone
+                    const date = new Date(value);
+                    if (!isNaN(date.getTime())) {
+                        transformed[key] = toVietnamISOString(date);
+                    } else {
+                        transformed[key] = value;
+                    }
                 }
             } else if (typeof value === 'object' && value !== null) {
                 transformed[key] = transformRequestData(value);
@@ -57,12 +62,17 @@ export const transformResponseData = (data: any): any => {
         const transformed: any = {};
         for (const [key, value] of Object.entries(data)) {
             if (typeof value === 'string' && isDateString(value)) {
-                // Convert date strings to Vietnam timezone Date objects
-                const date = new Date(value);
-                if (!isNaN(date.getTime())) {
-                    transformed[key] = toVietnamTime(date);
-                } else {
+                // Skip transformation for tourDate field (DateOnly from backend)
+                if (key === 'tourDate') {
                     transformed[key] = value;
+                } else {
+                    // Convert date strings to Vietnam timezone Date objects
+                    const date = new Date(value);
+                    if (!isNaN(date.getTime())) {
+                        transformed[key] = toVietnamTime(date);
+                    } else {
+                        transformed[key] = value;
+                    }
                 }
             } else if (typeof value === 'object' && value !== null) {
                 transformed[key] = transformResponseData(value);
