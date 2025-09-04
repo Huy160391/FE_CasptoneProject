@@ -29,9 +29,9 @@ import {
     ProductOrderInfo,
     BookingPaymentInfo
 } from '../../services/paymentService';
-import { clearCartAfterPayment } from '../../services/cartService';
 import { EnhancedPaymentService } from '../../services/enhancedPaymentService';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useCartStore } from '../../store/useCartStore';
 import { getPaymentErrorMessage } from '../../utils/retryUtils';
 
 const { Text } = Typography;
@@ -53,6 +53,7 @@ const UnifiedPaymentSuccess: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthStore();
+    const { clearCart } = useCartStore();
 
     // Retry configuration
     const maxRetries = 3;
@@ -169,8 +170,9 @@ const UnifiedPaymentSuccess: React.FC = () => {
                 }
 
                 if (response.success) {
-                    // Clear cart cả local và server khi thanh toán thành công
-                    await clearCartAfterPayment();
+                    // Clear cart local sau khi thanh toán thành công (không gọi API)
+                    clearCart();
+                    console.log('Payment processed successfully');
                 } else {
                     setError(response.message || 'Có lỗi xảy ra khi xử lý thanh toán');
                 }
