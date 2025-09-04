@@ -145,7 +145,7 @@ const Support = () => {
       <div className="hero-section">
         <div className="hero-content">
           <Title level={1}>{t('support.title')}</Title>
-          <Paragraph>{t('support.subtitle')}</Paragraph>
+          <p>{t('support.subtitle')}</p>
         </div>
       </div>
 
